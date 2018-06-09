@@ -74,3 +74,7 @@ end
 # field :input_organ_code,           type: String                   # => 0-1 建档医疗机构组织机构代码                                                                                             
 # field :input_organ_name,           type: String                   # => 0-1 建档医疗机构组织名称                                                                                             
 # field :input_name,                 type: String                   # => 0-1 建档者姓名                                                                                       
+field :photo,                        type: String                   # => 0-1 头像字段
+rails generate migration AddPhotoToPerson photo:string
+
+
