@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   ########### admin ##########
   namespace :admin do
     resources :home
+    resources :organizations
   end
   ########### admin ##########
   ############################

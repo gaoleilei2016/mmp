@@ -177,6 +177,7 @@
         when "ims/home"
           dir_name = "/ims/home/templates"
         else
+          p '~~~~~~~~~~ application.html.erb'
           raise "未处理的 controller_path : #{params[:path]} => ApplicationController#templates"
         end
       %>
@@ -227,6 +228,7 @@
           codesystem_data_sex:[],
           common_data_new_bumber:["DAY", "WEEK", "MONTH", "YEAR", "NEVER"],
           common_data_application_exec_status:[{code:"",display:'所有'},{code:'A',display:'未执行'},{code:'E',display:'已执行'}],
+          common_data_org_type_code:[{code:'1',display:'医院'},{code:'2',display:'药房'}],
           pickerOptions:{
             shortcuts: [{
               text: '今天',
