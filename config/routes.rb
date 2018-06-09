@@ -22,6 +22,7 @@ Rails.application.routes.draw do
   ########### hospital ##########
   namespace :hospital do
     resources :home
+    resources :encounters  # 就诊管理、统计
   end
   ########### hospital ##########
   ############################

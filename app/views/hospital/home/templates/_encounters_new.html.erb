@@ -1,0 +1,177 @@
+<style type="text/css">
+</style>
+<template>
+	<!-- 新建接诊页面 -->
+	<div id="encounters_new_div">
+		患者信息<br/>
+		------<br/>
+		诊断<br/>
+		------<br/>
+		取药点<br/>
+		<el-collapse v-model="activeCollapse">
+		  <el-collapse-item name="patientinfo1">
+		    <template slot="title">
+		    	<el-tooltip content="搜索患者" placement="right">
+		      	<span class="fa fa-lg fa-search fa-fw text-primary" style="cursor: pointer;" @click.stop="toggleSidebar"></span>&#12288;
+		      </el-tooltip>
+		      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[姓名]</b>&#12288;
+		      <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
+		      <span v-if="encounter.age">{{ encounter.age }}岁</span>
+		    </template>
+		    <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="100px">
+		    	<el-row>
+			    	<el-col :span="8">
+			    		<el-form-item
+						    label="姓名"
+						    prop="name">
+						    <el-input v-model="encounter.name" auto-complete="off"></el-input>
+						  </el-form-item>
+
+						  <el-form-item
+						    label="性别"
+						    prop="gender">
+						  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择">
+							    <el-option
+							      v-for="item in ($parent.common_data_genders||[])"
+							      :key="item.code"
+							      :label="item.display"
+							      :value="item">
+							    </el-option>
+							  </el-select>
+							  <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>
+						  </el-form-item>
+
+						  <el-form-item
+						    label="年龄"
+						    prop="age">
+						    <el-input type="age" v-model.number="encounter.age" auto-complete="off" @change="judgeAge">
+						    	<span slot="suffix">岁</span>
+						    </el-input>
+						  </el-form-item>
+
+						  <el-form-item
+						    label="出生日期"
+						    prop="birth_date">
+						    <el-date-picker
+						      v-model="encounter.birth_date"
+						      type="date"
+						      style="width: 100%"
+						      placeholder="选择日期">
+						    </el-date-picker>
+						  </el-form-item>
+						</el-col>
+						<el-col :span="8">
+							<el-form-item
+						    label="身份证号码"
+						    prop="iden">
+						    <el-input v-model="encounter.iden"></el-input>
+						  </el-form-item>
+						  <el-form-item
+						    label="电话"
+						    prop="phone">
+						    <el-input v-model.number="encounter.phone"></el-input>
+						  </el-form-item>
+						</el-col>
+
+						<el-col :span="24">
+						  <el-form-item>
+						    <el-button type="primary" @click="submitForm('encounterForm')">提交</el-button>
+						    <el-button @click="resetForm('encounterForm')">重置</el-button>
+						  </el-form-item>
+						</el-col>
+					</el-row>
+				</el-form>
+		    <el-collapse-item>
+			    <template slot="title">
+			      更多
+			    </template>
+			    <div>这里有更多内容</div>
+			  </el-collapse-item>
+		  </el-collapse-item>
+		</el-collapse>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data: function(){
+		return {
+			activeCollapse: "patientinfo1",
+			encounter: {}, // 
+			encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
+			rules: {
+				name: [
+		      { required: true, message: '姓名不能为空'},
+		    ],
+				gender: [
+		      { required: true, message: '性别不能为空'},
+		    ],
+		    age: [
+		      { required: true, message: '年龄不能为空'},
+		      { type: 'number', message: '年龄必须为数字值'}
+		    ],
+		    birth_date: [
+		    	{ required: false, message: '出生日期不能为空'},
+		    ],
+		    phone: [
+		    	{ pattern: /^1[34578]\d{9}$/, message: '电话号码格式不正确'}
+		    ],
+		    iden: [
+		    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
+		    ],
+			}
+		}
+	},
+	watch: {
+	},
+	mounted: function () {
+		this.$nextTick(function(){
+			this.init();
+		})
+	},
+	methods: {
+		init: function() {
+			console.log(this.$parent.common_data_genders)
+			console.log(this.genders)
+		},
+		submitForm: function (formName) {
+      this.$refs[formName].validate( function (valid) {
+        if (valid) {
+          alert('submit!');
+        } else {
+          console.log('error submit!!');
+          return false;
+        }
+      });
+    },
+    resetForm: function (formName) {
+      this.$refs[formName].resetFields();
+    },
+    // 判断年龄，如果小于14要求出生日期、监护人必填
+    judgeAge: function (val) {
+    	var _this = this;
+    	_this.$message({
+        message: "请输入具体的出生日期、监护人姓名。",
+        type: 'warning'
+      });
+    	_this.rules["birth_date"][0]["required"] = true;
+    },
+		// 侧边搜索患者栏目
+		toggleSidebar: function () {
+			console.log("搜索患者侧边栏")
+		},
+		// 判断性别，根据性别显示图标
+  	judgeGender: function (gender) {
+  		if(!gender){ gender = ""; }
+      var html = '';
+  		if(gender.indexOf('男')>-1){
+  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+  		}else if(gender.indexOf('女')>-1){
+  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+  		}else{
+  			html = '<i class="text-muted fa fa-lg fa-fw fa-male"></i>'
+  		}
+  		return html;
+	  },
+	}
+}
+</script>

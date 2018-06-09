@@ -3,7 +3,7 @@
   <head>
     <title>医药管理平台</title>
     <link rel="icon" href="/assets/admin/TM.ico" />
-    <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
+    <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/vue/vue-resource","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
     <%= stylesheet_link_tag "/assets/plugins/vue/element-ui-240","/assets/plugins/fontawesome/font-awesome.min","/assets/plugins/vue/display" %>
     <%= javascript_include_tag  %>
     <%= csrf_meta_tags %>
@@ -227,6 +227,7 @@
           codesystem_data_sex:[],
           common_data_new_bumber:["DAY", "WEEK", "MONTH", "YEAR", "NEVER"],
           common_data_application_exec_status:[{code:"",display:'所有'},{code:'A',display:'未执行'},{code:'E',display:'已执行'}],
+          common_data_genders:[{code:"1",display:'男'},{code:'2',display:'女'}],
           pickerOptions:{
             shortcuts: [{
               text: '今天',
