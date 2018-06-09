@@ -26,7 +26,26 @@ class Hospital::EncountersController < ApplicationController
   # GET /hospital/encounters/new.json
   def new
     @encounter = Hospital::Encounter.new
-
+    res = {
+      name: "",  # 姓名
+      gender: {code: "", display: ""},  # 性别
+      age: "",  # 年龄
+      birth_date: "",  # 出生日期
+      iden: "",  # 身份证号码
+      phone: "",  # 电话
+      address: "",  # 住址
+      occupation: {code: "", display: ""},  # 职业
+      contact_name: "",  # 联系人
+      nation: {code: "", display: ""},  # 民族
+      marriage: {code: "", display: ""},  # 婚姻
+      unit_name: "",  # 工作单位（学校）
+      diagnoses: [{ code: "", display: ""}],  # 诊断
+      allergens: [],  # 过敏
+      blood: {code: "", display: ""},  # 血型
+      height: "",  # 身高cm
+      weight: "",  # 体重kg
+      location: {id: "", display: ""}, # 取药点
+    }
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: {flag: true, info:"", data: @encounter} }

@@ -3,170 +3,44 @@
 <template>
 	<!-- 新建接诊页面 -->
 	<div id="encounters_new_div">
-		患者信息<br/>
-		------<br/>
-		诊断<br/>
-		------<br/>
-		取药点<br/>
-		<el-collapse v-model="activeCollapse">
-		  <el-collapse-item name="patientinfo1">
-		    <template slot="title">
-		    	<el-tooltip content="搜索患者" placement="right">
-		      	<span class="fa fa-lg fa-search fa-fw text-primary" style="cursor: pointer;" @click.stop="toggleSidebar"></span>&#12288;
-		      </el-tooltip>
-		      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[姓名]</b>&#12288;
-		      <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
-		      <span v-if="encounter.age">{{ encounter.age }}岁</span>
-		    </template>
-		    <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="100px">
-		    	<el-row>
-			    	<el-col :span="8">
-			    		<el-form-item
-						    label="姓名"
-						    prop="name">
-						    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user"></el-input>
-						  </el-form-item>
-						  <el-form-item
-						    label="性别"
-						    prop="gender">
-						  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择">
-							    <el-option
-							      v-for="item in ($parent.common_data_genders||[])"
-							      :key="item.code"
-							      :label="item.display"
-							      :value="item">
-							    </el-option>
-							  </el-select>
-							  <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>
-						  </el-form-item>
-						  <el-form-item
-						    label="年龄"
-						    prop="age">
-						    <el-input type="age" v-model.number="encounter.age" auto-complete="off" @change="judgeAge">
-						    	<span slot="suffix">岁</span>
-						    </el-input>
-						  </el-form-item>
-						  <div v-if="showAllPatInfo">
-						  	<el-form-item
-							    label="民族"
-							    prop="nation">
-							    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;">
-								    <el-option
-								      v-for="item in ($parent.common_data_nations||[])"
-								      :key="item.code"
-								      :label="item.display"
-								      :value="item">
-								    </el-option>
-								  </el-select>
-							  </el-form-item>
-						  </div>
-						</el-col>
-						<el-col :span="8">
-						  <el-form-item
-						    label="出生日期"
-						    prop="birth_date">
-						    <el-date-picker
-						      v-model="encounter.birth_date"
-						      type="date"
-						      style="width: 100%"
-						      placeholder="选择日期">
-						    </el-date-picker>
-						  </el-form-item>
-							<el-form-item
-						    label="身份证号码"
-						    prop="iden">
-						    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o"></el-input>
-						  </el-form-item>
-						  <el-form-item
-						    label="电话"
-						    prop="phone">
-						    <el-input v-model.number="encounter.phone" prefix-icon="fa fa-phone"></el-input>
-						  </el-form-item>
-						  <div v-if="showAllPatInfo">
-						  	<el-form-item
-							    label="婚姻"
-							    prop="marriage">
-							    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;">
-								    <el-option
-								      v-for="item in ($parent.common_data_marriages||[])"
-								      :key="item.code"
-								      :label="item.display"
-								      :value="item">
-								    </el-option>
-								  </el-select>
-							  </el-form-item>
-						  </div>
-						</el-col>
-						<el-col :span="8">
-						  <el-form-item
-						    label="住址"
-						    prop="address">
-						    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline"></el-input>
-						  </el-form-item>
-						  <el-form-item
-						    label="职业"
-						    prop="occupation">
-						    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;">
-							    <el-option
-							      v-for="item in ($parent.common_data_occupations||[])"
-							      :key="item.code"
-							      :label="item.display"
-							      :value="item">
-							    </el-option>
-							  </el-select>
-						  </el-form-item>
-						  <el-form-item
-						    :label="encounter.age < 14 ? '监护人' : '联系人'"
-						    prop="contact_name">
-						    <el-input v-model="encounter.contact_name"></el-input>
-						  </el-form-item>
-						  <div v-if="showAllPatInfo">
-							  <el-form-item
-							    label="工作单位"
-							    prop="unit_name">
-							    <el-input v-model="encounter.unit_name"></el-input>
-							  </el-form-item>
-						  </div>
-						</el-col>
-						<hr/>
-						<!-- 医疗信息，诊断，血型，身高，体重，bmi -->
-						<el-col v-for="(item, index) in (encounter.diagnoses||[])" :span="8">
-							<el-form-item 
-								:prop="'diagnose.' + index + '.display'"
-								:label="index==0 ? '诊断' : '第 '+(index+1)+' 诊断'"
-								:rules="[{ required: true, message: '请输入诊断', trigger: 'blur, change' }]">
-								<el-autocomplete size="mini" :name="'diagnose'+index" v-model="item.display" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDiagnosis" :debounce="300" style="width: 100%;" @focus="focusDiagnosisInputIndex=index">
-									<i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="encounter.diagnoses[index]={code: '', display: ''}"></i>
-									<template slot-scope="props">
-										<el-col :span="10">{{props.item.id}}</el-col>
-										<el-col :span="14">{{props.item.name}}</el-col>
-									</template>
-								</el-autocomplete>
-							</el-form-item>
-						</el-col>
-
-						<el-col :span="24">
-							<br/>
-						  <el-form-item>
-						    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
-						    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
-						    <el-button type="primary" @click="submitForm('encounterForm')">提交</el-button>
-						    <el-button @click="resetForm('encounterForm')">重置</el-button>
-						  </el-form-item>
-						</el-col>
-					</el-row>
-				</el-form>
-		  </el-collapse-item>
-		</el-collapse>
+		<!-- 患者基本信息部分 -->
+		<%= render "hospital/home/render/encounters_info" %>
+		<!-- 主业务区域 -->
+		<el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
+      <el-tab-pane label="历史记录" name="histories">历史记录</el-tab-pane>
+      <el-tab-pane label="药品" name="orders">
+      	
+      </el-tab-pane>
+      <el-tab-pane label="处方列表" name="prescriptions">处方列表</el-tab-pane>
+    </el-tabs>
 	</div>
 </template>
 <script type="text/javascript">
 window.current_template_obj = {
 	data: function(){
 		return {
+			locations: [], // 选择药房
 			activeCollapse: "patientinfo1",
+			activeTab: "orders",
 			encounter: {
-				diagnoses: [{ code: "", display: ""}],
+				name: "",  // 姓名
+	      gender: {code: "", display: ""},  // 性别
+	      age: "",  // 年龄
+	      birth_date: "",  // 出生日期
+	      iden: "",  // 身份证号码
+	      phone: "",  // 电话
+	      address: "",  // 住址
+	      occupation: {code: "", display: ""},  // 职业
+	      contact_name: "",  // 联系人
+	      nation: {code: "", display: ""},  // 民族
+	      marriage: {code: "", display: ""},  // 婚姻
+	      unit_name: "",  // 工作单位（学校）
+	      diagnoses: [{ code: "", display: ""}],  // 诊断
+	      allergens: [],  // 过敏
+	      blood: {code: "", display: ""},  // 血型
+	      height: "",  // 身高cm
+	      weight: "",  // 体重kg
+	      location: {id: "", display: ""}, // 取药点
 			}, // 
 			encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
 			rules: {
@@ -193,11 +67,21 @@ window.current_template_obj = {
 		    	{ required: false, message: '监护人不能为空'},
 		    ],
 			},
-			showAllPatInfo: true, // 显示所有的可填数据
+			showAllPatInfo: false, // 显示所有的可填数据
 			focusDiagnosisInputIndex: 0, // 聚焦第几个诊断
+			inputTagValue: "", // 过敏源录入
+			inputTagVisible: false, // 是否显示过敏源录入框
 		}
 	},
 	watch: {
+	},
+	computed: {
+    bmi: function () {
+    	var weight = parseFloat(this.encounter.weight||0),
+    	    height = parseFloat(this.encounter.height||0)/100,
+    	    bmi = height>0 ? parseFloat(weight/Math.pow(height,2)).toFixed(2) : 0;
+      return bmi
+    }
 	},
 	mounted: function () {
 		this.$nextTick(function(){
@@ -209,9 +93,15 @@ window.current_template_obj = {
 			var _this = this;
 			console.log(this.$parent.common_data_genders)
 			console.log(this.genders)
-			// if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
-			// 	_this.encounter.diagnoses = [{ code: "", display: "", site: "" }]; // 诊断
-			// }
+
+			Vue.resource('/hospital/encounters/new.json').get().then( function (response) {
+        var res = response.data;
+        if(res.flag) {
+        	// 获取科室、医生姓名等
+        }
+      }, function  (response) {
+        _this.$message.error('获取就诊基础数据失败，请联系管理员。');
+      })
 		},
 		submitForm: function (formName) {
       this.$refs[formName].validate( function (valid) {
@@ -256,6 +146,7 @@ window.current_template_obj = {
   		}
   		return html;
 	  },
+	  /* 诊断操作 ----start */ 
 	  // 查询诊断
   	querySearchDiagnoseAsync: function(queryString, cb) {
 			var _this = this;
@@ -271,9 +162,55 @@ window.current_template_obj = {
 		handleSelectDiagnosis: function(item) {
 			var _this = this;
 			var index = _this.focusDiagnosisInputIndex
-	    _this.medrecord.diagnose[index].code = item.id;
-	    _this.medrecord.diagnose[index].display = item.name;
+	    _this.encounter.diagnoses[index].code = item.id;
+	    _this.encounter.diagnoses[index].display = item.name;
 		},
+		// 增加诊断
+  	addDiagnosis: function () {
+  		var _this = this, isAdd = true;
+  		$.each(_this.encounter.diagnoses||[], function(k, v){
+  			if(!v.display){ 
+  				isAdd = false;
+  				_this.$message({
+	          message: '诊断不能为空。',
+	          type: 'warning'
+	        });
+  				$('input[name="diagnose'+k+'"]').focus();
+  			}
+  		})
+  		if(isAdd){
+  			_this.encounter.diagnoses.push({ code: "", display: ""});
+  			_this.$nextTick(function(){
+    			var index = _this.encounter.diagnoses.length-1;
+    			setTimeout(function(){$('input[name="diagnose'+index+'"]').focus();}, 0);
+  			})
+  		}
+  	},
+  	/* 诊断操作  ----end */
+  	/* 过敏信息操作  --- start */ 
+  	handleCloseTag: function (tag) {
+      this.encounter.allergens.splice(this.encounter.allergens.indexOf(tag), 1);
+    },
+    showTagInput: function () {
+      this.inputTagVisible = true;
+      this.$nextTick(function() {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
+    },
+    handleTagInputConfirm: function () {
+      var inputTagValue = this.inputTagValue;
+      if (inputTagValue) {
+        this.encounter.allergens.push(inputTagValue);
+      }
+      this.inputTagVisible = false;
+      this.inputTagValue = '';
+    },
+    /* 过敏信息操作  --- end */ 
+
+    // 切换主业务区域tab
+    handleTabClick: function (tab, event) {
+
+    }
 	}
 }
 </script>
