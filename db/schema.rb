@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180609090551) do
+ActiveRecord::Schema.define(version: 20180610022750) do
 
   create_table "admin_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "type_code"
@@ -35,6 +35,136 @@ ActiveRecord::Schema.define(version: 20180609090551) do
     t.string "period_end"
     t.string "status"
     t.integer "master_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "dictdata", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "ii_root", limit: 30, comment: "机构代码(查询包含空,和具体机构信息)"
+    t.string "oid", limit: 30, comment: "字典识别码"
+    t.string "code", limit: 30, null: false, comment: "编码"
+    t.string "name", limit: 100, null: false, comment: "名称"
+    t.integer "ordid", comment: "排序号(记得排序先让此列为首要排序)"
+    t.string "py", limit: 50, comment: "拼音码"
+    t.string "wb", limit: 50, comment: "五笔码"
+    t.string "status", limit: 1, default: "N", comment: "状态(N: '新建'   A: '活动'   T: '停用')"
+    t.index ["ii_root", "oid"], name: "idx_dict_iiroot"
+    t.index ["name", "ordid", "py", "wb"], name: "idx_dict_names"
+    t.index ["oid"], name: "idx_dict_oid"
+  end
+
+  create_table "dictdisease", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "疾病字典表" do |t|
+    t.string "codetype", limit: 6, comment: "代码类别(9:ICD9,10:ICD10)"
+    t.string "ICD10", limit: 20, null: false, comment: "ICD10，放弃"
+    t.string "ICD9", limit: 20, comment: "ICD9,ICD码"
+    t.string "name", limit: 100, null: false, comment: "疾病名称"
+    t.decimal "kind", precision: 18, comment: "疾病类别（用于临床医生站）"
+    t.string "py", limit: 50, null: false, comment: "输入码"
+    t.string "wb", limit: 50
+    t.string "tjbm", limit: 10, comment: "其它统计码，目前是病案统计吗"
+    t.string "fjbm", limit: 10, comment: "附加编码"
+    t.decimal "sexlimit", precision: 1, default: "0", comment: "性别限制(0不限 1限男 2限女)"
+    t.string "remarks", limit: 100, comment: "备注信息"
+    t.index ["ICD10"], name: "ICD_idx", unique: true
+    t.index ["name", "py", "wb"], name: "ICD_name"
+  end
+
+  create_table "dictmedicine", primary_key: ["serialno", "ecode", "effect_code"], force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "药品字典表" do |t|
+    t.decimal "serialno", precision: 10, null: false, comment: "药品序号"
+    t.string "ecode", limit: 20, null: false, comment: "易用码"
+    t.string "effect_code", limit: 20, null: false, comment: "药品功效编码"
+    t.string "name", limit: 120, comment: "通用名称"
+    t.string "common_name", limit: 120, comment: "商品名称"
+    t.string "alias_name", limit: 80, null: false, comment: "首选别名"
+    t.string "py", limit: 60, null: false, comment: "通用名拼音码"
+    t.string "wb", limit: 60, comment: "通用名五笔码"
+    t.string "common_py", limit: 60, comment: "商品名拼音码"
+    t.string "common_wb", limit: 60, comment: "商品名五笔码"
+    t.string "alias_py", limit: 40, comment: "别名拼音码"
+    t.string "alias_wb", limit: 40, comment: "别名五笔码"
+    t.string "spec", limit: 20, comment: "规格"
+    t.string "formul_code", limit: 8, comment: "剂型代码"
+    t.string "formul_name", limit: 20, comment: "剂型名称"
+    t.string "usedescribe", limit: 80, comment: "用法用量描述"
+    t.string "measure_unit", limit: 30, comment: "最小计量单位"
+    t.decimal "measure_val", precision: 10, comment: "最小计量值"
+    t.string "purch_unit", limit: 30, comment: "采购单位"
+    t.string "unit", limit: 30, comment: "销售单位"
+    t.decimal "mul", precision: 10, comment: "倍率"
+    t.decimal "purch_price", precision: 10, comment: "采购价格"
+    t.decimal "price", precision: 10, comment: "销售价格"
+    t.string "kindcode", limit: 4, comment: "药品分类"
+    t.string "kindname", limit: 20, comment: "分类名称"
+    t.string "licensenum", limit: 30, comment: "批准文号"
+    t.string "bar_code", limit: 30, comment: "条形码"
+    t.string "produce_code", limit: 8, comment: "厂家编码"
+    t.string "produce_name", limit: 60, comment: "厂家名称"
+    t.text "instruction", comment: "说明书"
+    t.string "bxkind", limit: 20, comment: "报销类型"
+    t.binary "picture", comment: "药品图片"
+    t.string "status", limit: 1, default: "A", comment: "状态"
+    t.timestamp "created_at", default: -> { "CURRENT_TIMESTAMP" }, comment: "建立时间"
+    t.timestamp "updated_at", comment: "最后修改时间"
+    t.string "coperator", limit: 20, comment: "建立人"
+    t.string "uoperator", limit: 20, comment: "最后修改人员"
+  end
+
+  create_table "hospital_diagnoses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "code"
+    t.string "string"
+    t.string "display"
+    t.string "system"
+    t.string "status"
+    t.string "rank"
+    t.string "integer"
+    t.string "encounter_id"
+    t.string "doctor_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "hospital_encounters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "iden"
+    t.string "string"
+    t.string "name"
+    t.string "name_jp"
+    t.string "name_wb"
+    t.datetime "birth_date"
+    t.string "age"
+    t.string "integer"
+    t.string "gender_code"
+    t.string "gender_display"
+    t.string "occupation_code"
+    t.string "occupation_display"
+    t.string "phone"
+    t.string "address"
+    t.string "unit_name"
+    t.string "ua_address"
+    t.string "unit_phone"
+    t.string "contact_name"
+    t.string "contact_phone"
+    t.string "hospital_oid"
+    t.string "hospital_name"
+    t.string "patient_domain_code"
+    t.string "patient_domain_display"
+    t.string "outpatient_no"
+    t.string "inpatient_no"
+    t.string "started_at"
+    t.string "datetime"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "hospital_irritabilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "code"
+    t.string "string"
+    t.string "display"
+    t.string "system"
+    t.string "status"
+    t.string "period_start"
+    t.string "datetime"
+    t.string "data_entry_id"
+    t.string "person_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -82,6 +212,7 @@ ActiveRecord::Schema.define(version: 20180609090551) do
     t.string "input_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "photo"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -98,6 +229,10 @@ ActiveRecord::Schema.define(version: 20180609090551) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.string "name"
+    t.string "jianpin"
+    t.string "type_code"
+    t.string "organization_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
