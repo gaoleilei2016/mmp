@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   ########### admin ##########
   namespace :admin do
     resources :home
+    resources :organizations
   end
   ########### admin ##########
   ############################
@@ -23,6 +24,8 @@ Rails.application.routes.draw do
   namespace :hospital do
     resources :home
     resources :encounters  # 就诊管理、统计
+    resources :orders      # 药品
+    resources :prescriptions      # 处方
   end
   ########### hospital ##########
   ############################

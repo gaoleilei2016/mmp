@@ -1,0 +1,84 @@
+<style type="text/css"></style>
+<template>
+	<el-container style="padding-top: 14px;">
+		<el-aside style="width: 280px;text-align: center;border: 1px solid #ddd;">
+			<el-form size="small" ref="form" label-width="80px" style="">
+				<div class="header_dark" style="margin-bottom: 10px;">单项解析</div>
+				<div style="margin-bottom: 10px;">
+					<a class="el-button el-button--primary el-button--small" href="/clis/data/organizations/csv_download?type=单项"><span>下载单项导入模板</span></a>
+				</div>
+				<div style="margin-bottom: 10px;">
+					<el-upload :show-file-list="true" :data="add_params" class="upload-demo" :on-success="on_success" :on-error="on_error" action="/clis/data/organizations/csv_upload">
+						<el-button size="small" type="default">点击上传</el-button>
+					</el-upload>
+				</div>
+				<div class="header_dark" style="margin-bottom: 10px;">组合解析</div>
+				<div style="margin-bottom: 10px;">
+					<a class="el-button el-button--primary el-button--small" href="javascript:current_app.$message('组合项目请手工录入');"><span>下载组合导入模板</span></a>
+					<!-- <a class="el-button el-button--primary el-button--small" href="/clis/data/organizations/csv_download?type=组合"><span>下载组合导入模板</span></a> -->
+				</div>
+				<div style="margin-bottom: 10px;">
+					<el-upload :show-file-list="true" :data="add_params2" class="upload-demo" :on-success="on_success" :on-error="on_error" action="/clis/data/organizations/csv_upload">
+						<el-button disabled size="small" type="default">点击上传</el-button>
+					</el-upload>
+				</div>
+			</el-form>
+		</el-aside>
+		<el-main style="margin-left: 14px;padding: 0;border: 1px solid #ddd;">
+			<div class="header_dark">
+				上传结果
+			</div>
+			<el-table height="'100%'" style="height: calc( 100% - 35px )" :data="tableData" size="mini">
+				<el-table-column label="科室" prop="ids.dep_name"></el-table-column>
+				<el-table-column label="编号" prop="code.code"></el-table-column>
+				<el-table-column label="名称">
+					<template slot-scope="scope">
+						{{scope.row.name.legal.given}}
+						<span v-if="scope.row.name.legal.search">({{scope.row.name.legal.search.jianpin}})</span>
+					</template>
+				</el-table-column>
+				<el-table-column label="价格" prop="price"></el-table-column>
+				<el-table-column label="单位" prop="unit"></el-table-column>
+				<el-table-column label="参考值">
+					<template slot-scope="scope">
+						<div v-if="scope.row.reference_range&&(scope.row.reference_range.low||scope.row.reference_range.high)">
+							{{scope.row.reference_range.low}} ~ {{scope.row.reference_range.high}}
+						</div>
+					</template>
+				</el-table-column>
+				<el-table-column label="样本类型" prop="specimen_type.display_name"></el-table-column>
+				<!-- <el-table-column label="备注" prop="guide_text"></el-table-column> -->
+			</el-table>
+		</el-main>
+	</el-container>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+			add_params:{
+				'authenticity_token': $('meta[name="csrf-token"]').attr('content'),
+				type:"单项",
+			},
+			add_params2:{
+				'authenticity_token': $('meta[name="csrf-token"]').attr('content'),
+				type:"组合",
+			},
+			tableData:[],
+		}
+	},
+	methods:{
+		on_success:function(json) {
+			// console.log('-------- on_success ---------',json,this,this.add_params)
+			if (json.flag) {
+				this.tableData = json.organizations;
+			}
+			this.$message({
+				message:json.info,
+				type:json.flag ? 'success' : 'warning'
+			})
+		},
+		on_error:error_fun,
+	}
+}
+</script>
