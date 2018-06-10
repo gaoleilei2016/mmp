@@ -35,6 +35,6 @@ Rails.application.routes.draw do
   ############################
 
   ########### hujun_start ##########
-  match '/users/positions/baidu', to: 'position#baidu', via: [:get]
+  match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
   ########### hujun_end   ##########
 end

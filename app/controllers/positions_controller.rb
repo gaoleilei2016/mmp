@@ -1,6 +1,6 @@
 #necoding: utf-8
 
-class PositionController < ApplicationController
+class PositionsController < ApplicationController
 
   layout false
   
