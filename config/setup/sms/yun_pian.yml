@@ -1,0 +1,20 @@
+#encoding: utf-8
+
+defaults: &defaults
+  usable: true
+  name: 云片网短信
+  apikey: a3fa59da493d67ed21969c98953d285a
+  appsecret: 9e2nn
+  mchid: JSON
+  pay_key: utf-8
+  domain_name: http://huaxi.tenmind.com
+  awesome_setting: <%= "#{Rails.root}/config/setup/pay/apiclient_cert.p12" %>
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

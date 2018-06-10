@@ -33,4 +33,8 @@ Rails.application.routes.draw do
   end
   ########### ims ##########
   ############################
+
+  ########### hujun_start ##########
+  match '/users/positions/baidu', to: 'position#baidu', via: [:get]
+  ########### hujun_end   ##########
 end
