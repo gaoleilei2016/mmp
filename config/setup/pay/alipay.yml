@@ -3,7 +3,7 @@
 defaults: &defaults
   usable: true
   name: 贵州腾迈华希医疗
-  app_id: 1234
+  app_id: 2018060860325957
   format: JSON
   charset: utf-8
   sign_type: RSA2
