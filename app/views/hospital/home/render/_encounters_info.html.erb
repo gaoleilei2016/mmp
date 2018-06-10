@@ -1,4 +1,4 @@
-<el-collapse v-model="activeCollapse">
+<el-collapse class="patient-info" v-model="activeCollapse">
   <el-collapse-item name="patientinfo1">
     <template slot="title">
     	<el-tooltip content="搜索患者" placement="right">
@@ -125,7 +125,7 @@
 				<el-col :span="12">
 					<el-form-item 
 						:key="diagnose.code"
-						:prop="'diagnoses.' + index + '.value'"
+						:prop="'diagnoses.' + index + '.display'"
 						:label="index==0 ? '诊断' : '第 '+(index+1)+' 诊断'"
 						:rules="[{ required: true, message: '请输入诊断', trigger: 'blur, change' }]">
 						<el-autocomplete size="mini" :name="'diagnose'+index" v-model="diagnose.display" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDiagnosis" :debounce="300" style="width: 100%;" @focus="focusDiagnosisInputIndex=index">
@@ -240,15 +240,15 @@
 					  </el-select>
 				  </el-form-item>
 				</el-col>
-			</el-row>
-				<el-col :span="24">
+				<el-col :span="12" style="text-align: right;">
 				  <el-form-item>
 				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
 				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
-				    <el-button type="primary" @click="submitForm('encounterForm')">提交</el-button>
+				    <el-button type="primary" @click="submitForm('encounterForm')" ref="saveencounter"><i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>保存</el-button>
 				    <el-button @click="resetForm('encounterForm')">重置</el-button>
 				  </el-form-item>
 				</el-col>
+			</el-row>
 		</el-form>
   </el-collapse-item>
 </el-collapse>

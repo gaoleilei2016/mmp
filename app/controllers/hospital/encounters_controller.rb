@@ -60,6 +60,7 @@ class Hospital::EncountersController < ApplicationController
 	# POST
   # /hospital/encounters
 	def create
+    p "==========create", params
 		@encounter = Hospital::Encounter.new(params[:encounter])
 
     respond_to do |format|
@@ -76,7 +77,7 @@ class Hospital::EncountersController < ApplicationController
 	# PUT
   # PUT /hospital/encounters/:id
   def update
-
+    p "==========update", params
     respond_to do |format|
       if @encounter.update_attributes(params[:encounter])
         format.html { redirect_to @encounter, notice: 'encounter was successfully updated.' }
