@@ -1,0 +1,354 @@
+<style type="text/css">
+  * {
+    padding: 0;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+  body{
+    font-family: Helvetica Neue,Helvetica,PingFang SC,Hiragino Sans GB,Microsoft YaHei,SimSun,sans-serif;
+  }
+  /* 顶部导航样式重写 */
+  #_h_menus_div .el-menu--horizontal,.el-menu--horizontal .el-menu-item,.el-menu--horizontal .el-submenu .el-submenu__title{
+    height: 40px;
+    line-height: 40px;
+  }
+  #_h_menus_div .el-menu--horizontal .el-submenu>.el-menu{
+    top:45px;
+  }
+  #_h_menus_div .layout-header-nav img{
+    float: left;
+    vertical-align: top;
+    height: 24px;
+    margin: 8px 6px 0 18px;
+  }
+  #_h_menus_div .fa-fw{
+    margin-right: 4px;
+  }
+  #_h_menus_div .nav-right{
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    top: 0;
+    line-height: 40px;
+    padding-right: 10px;
+  }
+  #_h_menus_div .el-menu--horizontal{
+    background: #f8f8f8;
+  }
+  #_h_menus_div .el-menu--horizontal .el-menu-item:focus, .el-menu--horizontal .el-menu-item:hover{
+    background-color: #ecf5ff;
+  }
+  #_h_menus_div .el-menu--horizontal .el-submenu .el-submenu__title:hover{
+    background-color: #ecf5ff;
+  }
+  .el-menu-item, .el-submenu__title{
+    padding: 0 10px;
+  }
+  ._h_right_menus .el-dropdown-menu__item{
+    padding: 0;
+  }
+  ._h_right_menus .el-dropdown-menu__item a{
+    display: block;
+    padding: 0 20px;
+    height: 100%;
+  }
+  /*#_h_menus_div .el-menu--horizontal{
+    line-height: initial;
+  }
+  #_h_menus_div .el-menu--horizontal .el-submenu .el-submenu__title, #_h_menus_div .el-menu--horizontal > .el-menu-item{
+    line-height: initial;
+    padding: 10px 10px 0 10px;
+  }
+  #_h_menus_div .portal_img_wrapper{
+    padding: 10px 18px 0;
+    float: left;
+  }
+  #_h_menus_div .portal_img_wrapper img{
+    height: 40px;
+  }
+  #_h_menus_div .fa-title{
+    font-size: 24px;
+    display: block;
+    width: initial;
+  }
+  #_h_menus_div .nav-right{
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    top: 0;
+    line-height: 60px;
+    padding-right: 10px;
+  }
+  #_h_menus_div .el-tabs--card>.el-tabs__header .el-tabs__item.is-active{
+    border-radius: 0;
+  }
+  #_h_menus_div .el-tabs--card>.el-tabs__header .el-tabs__nav{
+    border-radius: 0;
+  }*/
+  #_h_menus_div .el-tabs--card>.el-tabs__header{
+    margin: 4px 0 0 0;
+  }
+  #_h_menus_div .el-tabs__item{
+    height: 30px;
+    line-height: 30px;
+  }
+  #_h_menus_div .el-tabs__nav-next,#_h_menus_div .el-tabs__nav-prev{
+    line-height: 30px;
+  }
+  html,body{
+    height: 100%;
+    overflow: hidden;
+  }
+  body > .container{
+    /*padding: 80px 0px 46px;*/
+    padding: 48px 0px 46px;
+  }
+  .fa-fw{
+    width: 16px;
+    text-align: center;
+  }
+  /*.el-input{
+    max-width: 300px;
+  }*/
+  hr{
+    margin: 20px 0;
+  }
+  #home_template a{
+    color: #26a2ff;
+  }
+  .fade-enter-active, .fade-leave-active{
+    transition: opacity .2s;
+  }
+  .fade-enter, .fade-leave-active{
+    opacity: 0;
+  }
+  .header_tab_refresh_btn{
+    display: none;
+  }
+  .el-tabs__item.is-active .header_tab_refresh_btn{
+    display: initial;
+  }
+
+  template{
+    display: none;
+  }
+  [v-cloak] {
+    display: none;
+  }
+</style>
+<div>
+  <div id="_h_menus_div" style="position: fixed;left: 0;right: 0;top: 0;z-index: 9;background: #fff;">
+
+    <div class="layout-header-nav">
+      <el-menu :unique-opened="true" ref="elmenu" mode="horizontal" @select="handleHeaderMenuSelect"><!--  menu-trigger="click" -->
+        <a class="portal_img_wrapper" :href="header_menus.portal.path"><img :src="header_menus.portal.image"></a>
+        <template v-for="menu in header_menus.headers">
+          <el-submenu v-if="menu.childs&&menu.childs.length" :index="menu.code"><!--  :show-timeout="0" :hide-timeout="300" -->
+            <template slot="title"><i class="fa fa-fw fa-title" :class="menu.icon"></i>{{menu.caption}}</template>
+            <el-menu-item v-for="c_menu in menu.childs" class="header_menu_items" :class="c_menu.style_css" :data-target="c_menu.style_css" :data-caption="c_menu.caption" :data-path="c_menu.path" :data-code="c_menu.code"  :index="c_menu.code" :key="c_menu.code"><i class="fa fa-fw" :class="c_menu.icon"></i> {{c_menu.caption}}</el-menu-item>
+          </el-submenu>
+          <el-menu-item v-else class="header_menu_items" :class="menu.style_css" :data-target="menu.style_css" :data-caption="menu.caption" :data-path="menu.path" :data-code="menu.code" :index="menu.code"><i class="fa fa-fw fa-title" :class="menu.icon"></i>{{menu.caption}}</el-menu-item>
+        </template>
+      </el-menu>
+    </div>
+
+    <div class="nav-right">
+      <el-dropdown trigger="click">
+        <span class="el-dropdown-link">
+          您好，<%= current_user.try(:login) %>
+          <i class="el-icon-caret-bottom el-icon--right"></i>
+        </span>
+        <el-dropdown-menu slot="dropdown" class="_h_right_menus">
+          <el-dropdown-item><a href="/users"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item>
+          <el-dropdown-item><a href='/users?opetator=resetpw'><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
+          <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <a href="/" style=""><i class="fa fa-home"></i></a>
+    </div>
+
+    <!-- <el-tabs v-model="header_selected_tab" type="card" @tab-remove="removeTab" @tab-click="handleTabClick">
+      <el-tab-pane v-cloak v-for="(item, index) in editableTabs2" :closable="item.path!='#/home'" :key="item.path" :name="item.path" :label="item.label"><span slot="label">{{item.label}} <i class="fa fa-refresh header_tab_refresh_btn" onclick="router.push('/refresh');event.stopPropagation();"></i></span></el-tab-pane>
+    </el-tabs> -->
+
+  </div>
+
+  <nav style="position: fixed;left: 0;right: 0;bottom: 0;z-index: 9;background-color:#FAF8F8;line-height: 40px;border-top: 1px solid #e0e4ed;">
+    <p style="text-align:center;color: #999;font-family: Tahoma, Geneva, sans-serif;font-size: 12px;">
+      ©<%= Time.now.year %> <a href="http://www.tenmind.com/">Tenmind</a> 贵州腾迈信息技术有限公司
+    </p>
+  </nav>
+</div>
+<script type="text/javascript">
+  const header_vue = new Vue({
+    el:"#_h_menus_div",
+    data:{
+      common_data_c_departments:[],
+      sele_dep_id:'',
+      sele_dep_name:'',
+      dialogVisible:false,
+      tabIndex:1,
+      header_menus:{portal:{},headers:[]},
+      editableTabs2:[{
+        label: '首页',
+        icon: 'fa-home',
+        path: '#/home'
+      }],
+      header_selected_tab:'#/home',
+    },
+    methods:{
+      init_menus:function(){
+        var _this = this;
+        $.ajax({
+          url:'/application/menus?path=<%= controller_path %>',
+          success:function(data){
+            _this.header_menus = (data.menus||{portal:{},headers:[]});
+            _this.$nextTick(function() {
+              var other_flag = true;
+              $(".header_menu_items").each(function(i,v){
+                if( $(v).attr('data-path').indexOf(location.hash)>-1 ){
+                  other_flag = false;
+                  $(v).click();
+                }
+              })
+              if(other_flag){
+                _this.load_location_hash_router(location.hash);
+              }
+            })
+          }
+        })
+      },
+      // ajax 动态加载 router 并且增加 tab
+      // window.apps.header_and_footer.load_location_hash_router( location.hash )
+      // 加载非菜单指向的路由对照
+      load_location_hash_router:function(hash) {
+        switch( hash ){
+          case "#/home":
+            break;
+          case "#/organizations/daoru":
+            this.dynamic_add_router_and_tab({path:'#/organizations/daoru',caption:'项目导入',target:'organizations_daoru'});
+            break;
+          default:
+            // router.push('/')
+            this.$message({
+              message:"未找到的路径："+hash,
+              type:"warning",
+              showClose: true,
+              duration: 0
+            })
+        }
+      },
+      // ajax 动态加载 router 并且增加 tab
+      // window.apps.header_and_footer.dynamic_add_router_and_tab({
+      //   path:'#/project/daoru',
+      //   caption:'项目导入',     // tab 的显示标题
+      //   target:'project_daoru', // 后台 html.erb 的文件名
+      //   add_tab_flag:留空时默认增加标签
+      // })
+      dynamic_add_router_and_tab:function(obj) {
+        var path = obj.path;
+        var caption = obj.caption;
+        var target = obj.target;
+        var add_tab_flag = obj.add_tab_flag;
+
+        window.location = path;
+        if (add_tab_flag!=false) {
+          this.addTab({label:caption,path:path,icon:''});
+        }
+        path = path.match(/\#(.*)/)&&(path.match(/\#(.*)/)[1]);
+        if (path) {
+          var rnames = router.options.addRoutes&&router.options.addRoutes.map(function(v) { return v.name; })||[];
+          // console.log(rnames)
+          // console.log(rnames.indexOf(target));
+          if (rnames.indexOf(target)<0) {
+            current_app.loading = true;
+            $.ajax({
+              url:'/application/templates?template_name='+target+'&path=<%= controller_path %>',
+              success:function(html) {
+                window.current_template_obj = null;
+                var tmp = $('<div><div>');
+                tmp.html(html);
+                $(tmp).find("script").appendTo("body");
+                $(tmp).find("style").appendTo("body");
+                if ($(tmp).find("template").length) {
+                  tmp=$(tmp).find("template").html();
+                }else{
+                  tmp=$(tmp).html();
+                }
+                // console.log(target,path)
+                var _vue = Vue.extend( $.extend(window.current_template_obj,{template:tmp}) );
+                router.addRoutes( [{name:target,path:path,component:_vue}] );
+                router.options.addRoutes||(router.options.addRoutes=[]);
+                router.options.addRoutes.push({name:target,path:path});
+              },
+              complete:function() {
+                current_app.loading = false;
+              },
+              error:error_fun
+            })
+          }
+        }else{
+          current_app.$message("错误的path："+path);
+        }
+
+      },
+      handleHeaderMenuSelect:function(index, indexPath) {
+        var _this = this;
+        if (index) {
+          var menu = $(".header_menu_items[data-code='"+index+"']");
+          if(menu.length){
+            var path = menu.attr('data-path');
+            var caption = menu.attr('data-caption');
+            var target = menu.attr('data-target');
+
+            _this.dynamic_add_router_and_tab({path:path,caption:caption,target:target});
+
+          }
+        }
+      },
+      addTab:function(obj) {
+        var _this = this;
+        var tabs = _this.editableTabs2;
+        var addPath = obj.path;
+        var had_flag = false;
+        tabs.forEach(function(tab, index){
+          if (tab.path == addPath) {
+            had_flag = true;
+          }
+        });
+        if (!had_flag) {
+          _this.editableTabs2.push(obj);
+        }
+        _this.header_selected_tab = addPath;
+      },
+      removeTab:function(targetName) {
+        var tabs = this.editableTabs2;
+        var activeName = this.header_selected_tab;
+        if (activeName == targetName) {
+          tabs.forEach(function(tab, index){
+            if (tab.path == targetName) {
+              var nextTab = tabs[index + 1] || tabs[index - 1];
+              if (nextTab) {
+                activeName = nextTab.path;
+                location.href = nextTab.path;
+              }
+            }
+          });
+        }
+        this.header_selected_tab = activeName;
+        this.editableTabs2 = tabs.filter(function(tab){ return tab.path != targetName });
+      },
+      handleTabClick:function(tab, event) {
+        this.$refs.elmenu.activeIndex = '';
+        location.href = tab.name;
+      }
+    },
+    mounted:function(){
+      window.apps||(window.apps = {});
+      window.apps.header_and_footer = this;
+      this.init_menus();
+    }
+  })
+</script>
