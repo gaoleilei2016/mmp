@@ -3,7 +3,7 @@
 class Hospital::PrescriptionsController < ApplicationController
 	before_action :set_prescription, only: [:show, :edit, :update, :destroy]
 	# GET
-  # /hospital/encounters
+  # /hospital/prescriptions
 	def index
 		@prescriptions = Hospital::Prescription.all rescue []
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180610022750) do
+ActiveRecord::Schema.define(version: 20180610103824) do
 
   create_table "admin_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "type_code"
@@ -53,6 +53,13 @@ ActiveRecord::Schema.define(version: 20180610022750) do
     t.index ["oid"], name: "idx_dict_oid"
   end
 
+  create_table "dictdatagroup", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "oid", limit: 30, comment: "字典识别码"
+    t.string "name", limit: 100, null: false, comment: "名称"
+    t.text "remark", comment: "备注"
+    t.index ["oid"], name: "idx_dictgp_oid", unique: true
+  end
+
   create_table "dictdisease", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "疾病字典表" do |t|
     t.string "codetype", limit: 6, comment: "代码类别(9:ICD9,10:ICD10)"
     t.string "ICD10", limit: 20, null: false, comment: "ICD10，放弃"
@@ -69,13 +76,12 @@ ActiveRecord::Schema.define(version: 20180610022750) do
     t.index ["name", "py", "wb"], name: "ICD_name"
   end
 
-  create_table "dictmedicine", primary_key: ["serialno", "ecode", "effect_code"], force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "药品字典表" do |t|
-    t.decimal "serialno", precision: 10, null: false, comment: "药品序号"
-    t.string "ecode", limit: 20, null: false, comment: "易用码"
-    t.string "effect_code", limit: 20, null: false, comment: "药品功效编码"
-    t.string "name", limit: 120, comment: "通用名称"
+  create_table "dictmedicine", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "药品字典表" do |t|
+    t.string "ecode", limit: 20, comment: "易用码"
+    t.string "effect_code", limit: 20, comment: "药品功效编码"
+    t.string "name", limit: 120, null: false, comment: "通用名称"
     t.string "common_name", limit: 120, comment: "商品名称"
-    t.string "alias_name", limit: 80, null: false, comment: "首选别名"
+    t.string "alias_name", limit: 80, comment: "首选别名"
     t.string "py", limit: 60, null: false, comment: "通用名拼音码"
     t.string "wb", limit: 60, comment: "通用名五笔码"
     t.string "common_py", limit: 60, comment: "商品名拼音码"
@@ -111,12 +117,10 @@ ActiveRecord::Schema.define(version: 20180610022750) do
 
   create_table "hospital_diagnoses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "code"
-    t.string "string"
     t.string "display"
     t.string "system"
     t.string "status"
     t.string "rank"
-    t.string "integer"
     t.string "encounter_id"
     t.string "doctor_id"
     t.datetime "created_at", null: false
@@ -125,13 +129,11 @@ ActiveRecord::Schema.define(version: 20180610022750) do
 
   create_table "hospital_encounters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "iden"
-    t.string "string"
     t.string "name"
     t.string "name_jp"
     t.string "name_wb"
     t.datetime "birth_date"
-    t.string "age"
-    t.string "integer"
+    t.integer "age", unsigned: true
     t.string "gender_code"
     t.string "gender_display"
     t.string "occupation_code"
@@ -150,14 +152,21 @@ ActiveRecord::Schema.define(version: 20180610022750) do
     t.string "outpatient_no"
     t.string "inpatient_no"
     t.string "started_at"
-    t.string "datetime"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "nation_code"
+    t.string "nation_display"
+    t.string "blood_code"
+    t.string "blood_display"
+    t.integer "drugstore_location_id"
+    t.string "marriage_code"
+    t.string "marriage_display"
+    t.string "height"
+    t.string "weight"
   end
 
   create_table "hospital_irritabilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "code"
-    t.string "string"
     t.string "display"
     t.string "system"
     t.string "status"
@@ -233,7 +242,10 @@ ActiveRecord::Schema.define(version: 20180610022750) do
     t.string "jianpin"
     t.string "type_code"
     t.string "organization_id"
+    t.string "sex"
+    t.string "birth"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 

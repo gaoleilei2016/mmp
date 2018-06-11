@@ -1,20 +1,20 @@
 #encoding:utf-8
-#药品
-class Hospital::OrdersController < ApplicationController
+#历史记录
+class Hospital::HistoriesController < ApplicationController
 	before_action :set_order, only: [:show, :edit, :update, :destroy]
 	# GET
-  # /hospital/orders
+  # /hospital/histories
 	def index
-		@orders = Hospital::Order.all rescue []
+		@histories = Hospital::Encounter.all rescue []
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"", data: @orders} }
+      format.json { render json: {flag: true, info:"", data: @histories} }
     end
 	end
 
 	# GET
-  # /hospital/orders/:id
+  # /hospital/histories/:id
 	def show
 		respond_to do |format|
       format.html # show.html.erb
@@ -23,12 +23,10 @@ class Hospital::OrdersController < ApplicationController
 	end
 
 	# GET
-  # GET /hospital/orders/new.json
+  # GET /hospital/histories/new.json
   def new
-    @order = Hospital::Order.new
-    res = {
-      title: "",  # 药品名
-    }
+    @order = Hospital::Encounter.new
+   
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: {flag: true, info:"", data: @order} }
@@ -36,14 +34,14 @@ class Hospital::OrdersController < ApplicationController
   end
 
 	# GET
-  # /hospital/orders/:id/edit
+  # /hospital/histories/:id/edit
 	def edit
 	end
 
 	# POST
-  # /hospital/orders
+  # /hospital/histories
 	def create
-		@order = Hospital::Order.new(params[:order])
+		@order = Hospital::Encounter.new(params[:order])
 
     respond_to do |format|
       if @order.save
@@ -57,7 +55,7 @@ class Hospital::OrdersController < ApplicationController
 	end
 
 	# PUT
-  # PUT /hospital/orders/:id
+  # PUT /hospital/histories/:id
   def update
 
     respond_to do |format|
@@ -72,12 +70,12 @@ class Hospital::OrdersController < ApplicationController
   end
 
 	# DELETE
-  # /hospital/orders/:id
+  # /hospital/histories/:id
 	def destroy
 		@order.destroy
 
     respond_to do |format|
-      format.html { redirect_to orders_url }
+      format.html { redirect_to histories_url }
       format.json { head :no_content }
     end
 	end
@@ -85,6 +83,6 @@ class Hospital::OrdersController < ApplicationController
 	private
     # Use callbacks to share common setup or constraints between actions.
     def set_order
-      @order = Hospital::Order.find(params[:id])
+      @order = Hospital::Encounter.find(params[:id])
     end
 end

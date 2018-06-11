@@ -30,6 +30,17 @@ Rails.application.routes.draw do
   ########### hospital ##########
   ############################
 
+
+  ############################
+  ########### dict ##########
+  namespace :dict do
+    resources :diseases  # 诊断字典
+    resources :medications #药品字典
+  end
+  ########### dict ##########
+  ############################
+
+
   ############################
   ########### ims ##########
   namespace :ims do
