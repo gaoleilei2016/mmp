@@ -95,19 +95,19 @@
 <br/>
 <el-table
 	:data="orders"
-	  style="width: 100%">
+	 style="width: 100%">
   <el-table-column
-    align="title"
+    prop="title"
     min-width="250"
     label="名称">
   </el-table-column>
   <el-table-column
-    align="specification"
+    prop="specification"
     min-width="70"
     label="规格">
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="单次数量">
     <template slot-scope="scope">
@@ -115,7 +115,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="单次剂量">
     <template slot-scope="scope">
@@ -123,7 +123,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="途径">
     <template slot-scope="scope">
@@ -131,7 +131,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="频次">
     <template slot-scope="scope">
@@ -139,7 +139,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="疗程">
     <template slot-scope="scope">
@@ -147,7 +147,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="总量">
     <template slot-scope="scope">
@@ -155,7 +155,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    align=""
+    prop=""
     min-width="100"
     label="单价">
     <template slot-scope="scope">
@@ -163,9 +163,9 @@
     </template>
   </el-table-column>
   <el-table-column
-    align="title"
-    min-width="250"
-    label="名称">
+    prop="note"
+    min-width="200"
+    label="备注">
   </el-table-column>
   <el-table-column
     prop="status"
@@ -177,7 +177,6 @@
     	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
     	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
     	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
-    	<el-tag size="mini" type="danger" v-if="scope.row.status=='R'">结果</el-tag>
     </template>
   </el-table-column>
   <el-table-column
@@ -185,8 +184,8 @@
     label=""
     width="130">
     <template slot-scope="scope">
-      <el-button type="text" size="mini"><i class="fa fa-fw fa-lg fa-edit-o"></i></el-button>
-      <el-button type="text" size="mini"><i class="fa fa-fw fa-lg fa-trash-o text-danger"></i></el-button>
+      <el-button type="text" size="mini" @click="editOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-edit-o"></i></el-button>
+      <el-button type="text" size="mini" @click="deleteOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-trash-o text-danger"></i></el-button>
     </template>
   </el-table-column>
 </el-table>

@@ -89,19 +89,7 @@ window.current_template_obj = {
 			prescriptions: [],
 			/* 药品 --- start */ 
 			orders: [],
-			order: {
-				serialno: "",
-				title: "", // 名称
-				specification: "", // 规格
-				single_qty: {value: "", unit: ""}, // 单次数量
-				dose: {value: "", unit: ""}, // 单次剂量
-				route: {code: "", display: ""}, // 途径
-				frequency: {code: "", display: ""}, // 频次
-				course_of_treatment: {value: "", unit: "天"}, // 疗程
-				total_quantity: "", // 总量
-				unit: "", // 单位
-				note: "", // 备注
-			},
+			order: {},
 			drugs: [],
 			/* 药品 --- end */ 
 
@@ -472,7 +460,7 @@ window.current_template_obj = {
 	        }
 	      });
 	    },
-	    // encounter保存成功之后的处理
+	    // 医嘱保存成功之后的处理
 	    handleOrderReturn: function (response, btn) {
 	    	btn.removeAttr("disabled").find(".fa").hide();
 	    	var res = response.data;
