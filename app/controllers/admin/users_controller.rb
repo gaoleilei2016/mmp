@@ -1,0 +1,39 @@
+class Admin::UsersController < ApplicationController
+	skip_before_action :verify_authenticity_token
+	def index
+		# p '~~~~~~~~~ users index ',params
+		users = ::User.where(:type_code=>params[:type_code].present? ? [params[:type_code]] : [nil,'','1','2']).where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+		render json:{rows:users,total:users.total_count}
+	end
+	def show
+		user = ::User.find(params[:id])
+		render json:{flag:true,user:user}
+	end
+	def create
+		user_data = JSON.parse(params[:user].to_json)
+		# p '~~~~~~~~~ users create',user_data
+		user = ::User.new(user_data)
+		if user.save
+			render json:{flag:true,info:"操作成功"}
+		else
+			render json:{flag:false,info:"#{user.errors.messages}"}
+		end
+	end
+	def update
+		user_data = JSON.parse(params[:user].to_json)
+		# p '~~~~~~~~~ users update',user_data
+		user = ::User.find(params[:id])
+		if user.update_attributes(user_data)
+			render json:{flag:true,info:"操作成功"}
+		else
+			render json:{flag:false,info:"#{user.errors.messages}"}
+		end
+	end
+	def destroy
+		# p '~~~~~~~~~ users destroy',params
+		params[:ids].each{|id|
+			::User.find(id).destroy
+		}
+		render json:{flag:true,info:"操作成功"}
+	end
+end

@@ -9,10 +9,6 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def index
-		p '~~~~~~~~~~ index'
-		render layout:false
-	end
 	def menus
 		# p '~~~~~~~~~ menus ',params[:path]
 		case params[:path]
