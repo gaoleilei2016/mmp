@@ -1,8 +1,8 @@
 class Person < ApplicationRecord
 
-	belongs_to :user,                   :class_name => '::User',                        :foreign_key => 'user_id'
+	belongs_to :user,                   :class_name => '::User',                        :foreign_key => 'user_id', optional: true
 	has_many :encounters,				:class_name => '::Hospital::Encounter',			:foreign_key => 'person_id'
-	# has_many :irritabilities
+	has_many :irritabilities,           :class_name => '::Hospital::Irritability',      :foreign_key => 'person_id'
 end
 
 
