@@ -10,6 +10,9 @@ end
 gem 'rails', '~> 5.1.6'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
+gem 'therubyracer'
+
+
 gem 'mysql2', '>= 0.3.18', '< 0.5'
 gem 'devise'
 # Use Puma as the app server
