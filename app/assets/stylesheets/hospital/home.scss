@@ -10,6 +10,10 @@ $brand-info:    #5bc0de;
 $brand-warning: #f0ad4e;
 $brand-danger:  #d9534f;
 
+$bg-purple-dark: #99a9bf;
+$bg-purple: #d3dce6;
+$bg-purple-light: #e5e9f2;
+
 .text-muted {
 	color: $gray-light;
 }
@@ -31,7 +35,7 @@ $brand-danger:  #d9534f;
 
 #encounters_new_div {
 	.el-collapse.patient-info {
-		margin-bottom: 1em;
+		margin-bottom: 10px;
 		border: 1px solid #ddd;
 		.el-collapse-item__arrow {
 			line-height: 36px;
@@ -42,6 +46,7 @@ $brand-danger:  #d9534f;
 			height: 36px;
 			line-height: 36px;
 			padding-left: 10px; 
+			padding-right: 10px; 
 		}
 		.el-collapse-item__wrap {
 			padding-top: 10px;
@@ -51,7 +56,7 @@ $brand-danger:  #d9534f;
 			padding-bottom: 0;
 		}
 		.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
-			margin-bottom: 10px !important;
+			margin-bottom: 12.5px !important;
 		}
 		.has-append-btn {
 			text-align: center;		
@@ -67,4 +72,52 @@ $brand-danger:  #d9534f;
 			margin-left: 10px;
 		}
 	}
+
+	#pane-orders {
+		.el-form--label-top .el-form-item__label {
+			padding: 0 ;
+			line-height: 20px;
+		}
+		.el-input-group__append {
+			padding: 0 7.5px;
+		}
+		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
+			background-color: #FAF8F8;
+		}
+		thead > tr > th {
+			background-color: $bg-purple-light;
+			padding: 5px 0;
+			vertical-align: middle;
+		}
+		tbody > tr > td {
+			padding: 5px 0;
+			vertical-align: middle;
+		}
+	}
+}
+// 药品下拉框
+.order-autocomplete {
+	width: 600px !important;
+	.drug-field {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		display: inline-block;
+		&.name {
+			width: 250px;
+		}
+		&.spec {
+			width: 80px;
+		}
+		&.formul {
+			width: 50px;
+		}
+		&.price {
+			width: 50px;
+		}
+		&.produce {
+			width: 100px;
+		}
+	}
+
 }

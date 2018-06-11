@@ -26,6 +26,7 @@ Rails.application.routes.draw do
     resources :encounters  # 就诊管理、统计
     resources :orders      # 药品
     resources :prescriptions      # 处方
+    resources :histories      # 历史列表
   end
   ########### hospital ##########
   ############################

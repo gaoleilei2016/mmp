@@ -10,6 +10,8 @@
       <el-tab-pane label="历史记录" name="histories">历史记录</el-tab-pane>
       <el-tab-pane label="药品" name="orders">
       	<!-- 开药之前提示先保存患者基本信息 -->
+      	<%= render "hospital/home/render/encounters_orders" %>
+
       </el-tab-pane>
       <el-tab-pane label="处方列表" name="prescriptions">处方列表</el-tab-pane>
     </el-tabs>
@@ -19,16 +21,17 @@
 window.current_template_obj = {
 	data: function(){
 		return {
-			locations: [], // 选择药房
+			/* 患者基本信息  ----- start */ 
+			locations: [{id:1,display:"一树药业"},{id:2,display:"舒普玛药房"}], // 选择药房
 			activeCollapse: "patientinfo1",
-			activeTab: "orders",
+			// 就诊模型结构
 			encounter: {
 				name: "",  // 姓名
 	      gender: {code: "", display: ""},  // 性别
 	      age: "",  // 年龄
 	      birth_date: "",  // 出生日期
 	      iden: "",  // 身份证号码
-	      phone: "",  // 电话
+	      phone: "",  // 手机号码
 	      address: "",  // 住址
 	      occupation: {code: "", display: ""},  // 职业
 	      contact_name: "",  // 联系人
@@ -40,9 +43,10 @@ window.current_template_obj = {
 	      blood: {code: "", display: ""},  // 血型
 	      height: "",  // 身高cm
 	      weight: "",  // 体重kg
-	      location: {id: "", display: ""}, // 取药点
+	      drugstore_location: {id: "", display: ""}, // 取药点
 			}, // 
 			encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
+			// encounter就诊信息验证规则
 			rules: {
 				name: [
 		      { required: true, message: '姓名不能为空'},
@@ -58,7 +62,7 @@ window.current_template_obj = {
 		    	{ required: false, message: '出生日期不能为空'},
 		    ],
 		    phone: [
-		    	{ pattern: /^1[34578]\d{9}$/, message: '电话号码格式不正确'}
+		    	{ pattern: /^1[34578]\d{9}$/, message: '手机号码格式不正确'}
 		    ],
 		    iden: [
 		    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
@@ -67,10 +71,41 @@ window.current_template_obj = {
 		    	{ required: false, message: '监护人不能为空'},
 		    ],
 			},
+			birthPickerOptions: {
+				disabledDate(time) {
+          return time.getTime() > Date.now();
+        },
+			},
 			showAllPatInfo: false, // 显示所有的可填数据
 			focusDiagnosisInputIndex: 0, // 聚焦第几个诊断
 			inputTagValue: "", // 过敏源录入
 			inputTagVisible: false, // 是否显示过敏源录入框
+			/* 患者基本信息  ----- end */ 
+
+			/* 主业务  ----- start */ 
+			activeTab: "orders",
+			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+			histories: [],
+			prescriptions: [],
+			/* 药品 --- start */ 
+			orders: [],
+			order: {
+				serialno: "",
+				title: "", // 名称
+				specification: "", // 规格
+				single_qty: {value: "", unit: ""}, // 单次数量
+				dose: {value: "", unit: ""}, // 单次剂量
+				route: {code: "", display: ""}, // 途径
+				frequency: {code: "", display: ""}, // 频次
+				course_of_treatment: {value: "", unit: "天"}, // 疗程
+				total_quantity: "", // 总量
+				unit: "", // 单位
+				note: "", // 备注
+			},
+			drugs: [],
+			/* 药品 --- end */ 
+
+			/* 主业务  ----- end */ 
 		}
 	},
 	watch: {
@@ -89,162 +124,365 @@ window.current_template_obj = {
 		})
 	},
 	methods: {
-		init: function() {
-			var _this = this;
-			console.log(this.$parent.common_data_genders)
-			console.log(this.genders)
+		/* 公共方法  ---- start */ 
+			init: function() {
+				var _this = this;
 
-			Vue.resource('/hospital/encounters/new.json').get().then( function (response) {
-        var res = response.data;
-        if(res.flag) {
-        	// 获取科室、医生姓名等
-        }
-      }, function  (response) {
-        _this.$message.error('获取就诊基础数据失败，请联系管理员。');
-      })
-		},
-		// 提交encounter信息
-		submitForm: function (formName) {
-			var _this = this;
-      _this.$refs[formName].validate( function (valid) {
-        if (valid) {
-          // 判断是否有id，有id的话，就是编辑，没有id为新建
-          var btn = $(_this.$refs["saveencounter"].$el);
-          btn.attr("disabled", "disabled").find(".fa").show();
-          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter: _this.encounter};
-          if(!_this.encounter.id) {
-          	_this.encountersResource.save(json).then( function(response) {
-          		_this.handleEncounterReturn(response, btn);
-          	}, function(response) {
-          		btn.removeAttr("disabled").find(".fa").hide();
-          		_this.$message.error("创建就诊信息失败，请联系管理员。");
-          	})
-          } else {
-          	_this.encountersResource.update({id: _this.encounter.id}, json).then( function(response) {
-          		_this.handleEncounterReturn(response, btn);
-          	}, function(response) {
-          		btn.removeAttr("disabled").find(".fa").hide();
-          		_this.$message.error("更新就诊信息失败，请联系管理员。");
-          	})
-          }
-        } else {
-          _this.$message({
-	          message: '请按照规范录入数据。',
-	          type: 'warning'
-	        });
-          return false;
-        }
-      });
-    },
-    // encounter保存成功之后的处理
-    handleEncounterReturn: function (response, btn) {
-    	btn.removeAttr("disabled").find(".fa").hide();
-    	var res = response.data;
-    	this.encounter = res.data;
-    	this.$message({
-        message: "就诊信息保存成功。",
-        type: 'success'
-      });
-    },
-    // 重置encounter表单
-    resetForm: function (formName) {
-      this.$refs[formName].resetFields();
-    },
-    // 判断年龄，如果小于14要求出生日期、监护人必填
-    judgeAge: function (val) {
-    	var _this = this, flag = false;
-    	if(val < 14) {
-	    	_this.$message({
-	        message: "请输入具体的出生日期、监护人姓名。",
-	        type: 'warning'
-	      });
-	      flag = true;
-    	}
-    	_this.rules["birth_date"][0]["required"] = flag;
-    	_this.rules["contact_name"][0]["required"] = flag;
-    },
-		// 侧边搜索患者栏目
-		toggleSidebar: function () {
-			console.log("搜索患者侧边栏")
-		},
-		// 判断性别，根据性别显示图标
-  	judgeGender: function (gender) {
-  		if(!gender){ gender = ""; }
-      var html = '';
-  		if(gender.indexOf('男')>-1){
-  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
-  		}else if(gender.indexOf('女')>-1){
-  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
-  		}else{
-  			html = '<i class="text-muted fa fa-lg fa-fw fa-male"></i>'
-  		}
-  		return html;
-	  },
-	  /* 诊断操作 ----start */ 
-	  // 查询诊断
-  	querySearchDiagnoseAsync: function(queryString, cb) {
-			var _this = this;
-			Vue.resource('http://192.168.2.18:3000/voc/search_table_names.json').get({oid: _this.diagnoseOid, target: "CodeSystem", search: queryString}).then(function(response) {
-		    if (response.data) {
-					cb(response.data);
+
+			},
+			// 聚焦下一个
+	  	focusNext: function (now, next) {
+	  		var _this = this;
+	  		var _now = _this.$refs[now],
+	  				_next = _this.$refs[next];
+	  		console.log(now,next)
+	  		console.log(_now,_next)
+	  		if(_now instanceof Array) { _now = _now[0]; }
+	  		if(_next instanceof Array) { _next = _next[0]; }
+				// el-select需要使用blur方法让下拉列表关闭
+				if(next=="encgender"){
+					_this.encounter.gender = _this.$parent.common_data_genders[0];
 				}
-		  },function() {
+				if(_now.$el.className.indexOf("el-select")>-1) {
+					_now.blur();
+				}
+				// 聚焦保存按钮， 草药添加按钮
+	  		if(next.indexOf("save")>-1) {
+	  			_next.$el.focus();
+	  		} else if (now=="ordtitle") { // 如果是第一个搜索框，判断是否有数据之后，再跳转下一个
+	  			if(!_this.order.serialno) {
+	  				_this.$message({
+		          message: '请选择药品。',
+		          type: 'warning'
+		        });
+	  			} else {
+	  				_next.focus();
+	  			}
+	  		} else {
+	  			// 聚焦下一个输入框
+					_next.focus();
+				}
+	  	},
+			// 侧边搜索患者栏目
+			toggleSidebar: function () {
+				console.log("搜索患者侧边栏")
+			},
+  	/* 公共方法  ---- end */ 
 
-		  })
-		},
-		// 选择诊断
-		handleSelectDiagnosis: function(item) {
-			var _this = this;
-			var index = _this.focusDiagnosisInputIndex
-	    _this.encounter.diagnoses[index].code = item.id;
-	    _this.encounter.diagnoses[index].display = item.name;
-		},
-		// 增加诊断
-  	addDiagnosis: function () {
-  		var _this = this, isAdd = true;
-  		$.each(_this.encounter.diagnoses||[], function(k, v){
-  			if(!v.display){ 
-  				isAdd = false;
-  				_this.$message({
-	          message: '诊断不能为空。',
-	          type: 'warning'
-	        });
-  				$('input[name="diagnose'+k+'"]').focus();
-  			}
-  		})
-  		if(isAdd){
-  			_this.encounter.diagnoses.push({ code: "", display: ""});
-  			_this.$nextTick(function(){
-    			var index = _this.encounter.diagnoses.length-1;
-    			setTimeout(function(){$('input[name="diagnose'+index+'"]').focus();}, 0);
-  			})
-  		}
-  	},
+  	/* encounter相关操作  ---- start */
+			// 提交encounter信息
+			submitEncounterForm: function (formName) {
+				var _this = this;
+	      _this.$refs[formName].validate( function (valid) {
+	        if (valid) {
+	          // 判断是否有id，有id的话，就是编辑，没有id为新建
+	          var btn = $(_this.$refs["encsave"].$el);
+	          btn.attr("disabled", "disabled").find(".fa").show();
+	          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter: _this.encounter};
+	          if(!_this.encounter.id) {
+	          	_this.encountersResource.save(json).then( function(response) {
+	          		_this.handleEncounterReturn(response, btn);
+	          	}, function(response) {
+	          		btn.removeAttr("disabled").find(".fa").hide();
+	          		_this.$message.error("创建就诊信息失败，请联系管理员。");
+	          	})
+	          } else {
+	          	_this.encountersResource.update({id: _this.encounter.id}, json).then( function(response) {
+	          		_this.handleEncounterReturn(response, btn);
+	          	}, function(response) {
+	          		btn.removeAttr("disabled").find(".fa").hide();
+	          		_this.$message.error("更新就诊信息失败，请联系管理员。");
+	          	})
+	          }
+	        } else {
+	          _this.$message({
+		          message: '请按照规范录入数据。',
+		          type: 'warning'
+		        });
+	          return false;
+	        }
+	      });
+	    },
+	    // encounter保存成功之后的处理
+	    handleEncounterReturn: function (response, btn) {
+	    	btn.removeAttr("disabled").find(".fa").hide();
+	    	var res = response.data;
+	    	this.encounter = res.data;
+	    	this.$message({
+	        message: "就诊信息保存成功。",
+	        type: 'success'
+	      });
+	    },
+	    // 重置encounter表单
+	    resetEncounterForm: function (formName) {
+	      this.$refs[formName].resetFields();
+	    },
+	    // 判断年龄，如果小于14要求出生日期、监护人必填
+	    judgeAge: function (val) {
+	    	var _this = this, flag = false;
+	    	if(val < 14) {
+		    	_this.$message({
+		        message: "患者小于14岁，请输入具体的出生日期、监护人姓名。",
+		        type: 'warning'
+		      });
+		      flag = true;
+	    	}
+	    	_this.rules["birth_date"][0]["required"] = flag;
+	    	_this.rules["contact_name"][0]["required"] = flag;
+	    },
+			// 判断性别，根据性别显示图标
+	  	judgeGender: function (gender) {
+	  		if(!gender){ gender = ""; }
+	      var html = '';
+	  		if(gender.indexOf('男')>-1){
+	  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+	  		}else if(gender.indexOf('女')>-1){
+	  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+	  		}else{
+	  			html = '<i class="text-muted fa fa-lg fa-fw fa-male"></i>'
+	  		}
+	  		return html;
+		  },
+		  /* 
+			* 根据出生日期计算年龄
+			* 参数： birthday: 出生日期(YYYY-MM-DD)
+			* 返回： 年龄
+			*/
+		  getDecilAgeByBirthday: function (birthday) {
+		  	try{ 
+					var birth = new Date(birthday).getTime(),
+					    now = new Date().getTime();
+					var age = (now-birth)/1000/60/60/24/365;
+					// age = parseFloat(age).toFixed(2);
+					age = Math.floor(age);
+					this.encounter.age = age;
+			  }catch(e){ 
+			  	this.encounter.age = age;
+	  		} 
+		  },
+		  /* 
+			* 根据身份证号码，运算出出生日期
+			* 参数： idCard: 身份证号码 String
+			* 返回： birthday: 出生日期(YYYY-MM-DD) String
+			*/
+			getBirthdayFromIdCard: function (idCard) {
+			  var birthday = "";
+			  if(idCard != null && idCard != ""){
+			    if(idCard.length == 15){
+			      birthday = "19"+idCard.substr(6,6);
+			    } else if(idCard.length == 18){
+			      birthday = idCard.substr(6,8);
+			    }
+			    birthday = birthday.replace(/(.{4})(.{2})/,"$1-$2-");
+			  }
+			  this.encounter.birth_date = birthday;
+			  this.getDecilAgeByBirthday(birthday);
+			},
+		/* encounter相关操作  ---- end */
+
+	  /* 诊断操作 ----start */ 
+		  // 查询诊断
+	  	querySearchDiagnoseAsync: function(queryString, cb) {
+				var _this = this;
+				Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+			    var res = response.data;
+			    if (res.flag) {
+						cb(res.data);
+						// 设置下拉选择的第一项为高亮
+						var el = _this.$refs["encdiagnose"];
+						console.log('-----el',el)
+						if(el) {
+							el[_this.focusDiagnosisInputIndex].highlightedIndex = 0;
+						}
+					}
+			  },function() {
+			  	_this.$message.error("获取诊断列表失败，请联系管理员。");
+			  })
+			},
+			// 选择诊断
+			handleSelectDiagnosis: function(item) {
+				var _this = this;
+				var index = _this.focusDiagnosisInputIndex;
+		    _this.encounter.diagnoses[index].code = item.code;
+		    _this.encounter.diagnoses[index].display = item.display;
+		    _this.focusNext('encdiagnose', 'enclocation');
+			},
+			// 增加诊断
+	  	addDiagnosis: function () {
+	  		var _this = this, isAdd = true;
+	  		$.each(_this.encounter.diagnoses||[], function(k, v){
+	  			if(!v.display){ 
+	  				isAdd = false;
+	  				_this.$message({
+		          message: '诊断不能为空。',
+		          type: 'warning'
+		        });
+	  				$('input[name="diagnose'+k+'"]').focus();
+	  			}
+	  		})
+	  		if(isAdd){
+	  			_this.encounter.diagnoses.push({ code: "", display: ""});
+	  			_this.$nextTick(function(){
+	    			var index = _this.encounter.diagnoses.length-1;
+	    			setTimeout(function(){$('input[name="diagnose'+index+'"]').focus();}, 0);
+	  			})
+	  		}
+	  	},
   	/* 诊断操作  ----end */
+
   	/* 过敏信息操作  --- start */ 
-  	handleCloseTag: function (tag) {
-      this.encounter.allergens.splice(this.encounter.allergens.indexOf(tag), 1);
-    },
-    showTagInput: function () {
-      this.inputTagVisible = true;
-      this.$nextTick(function() {
-        this.$refs.saveTagInput.$refs.input.focus();
-      });
-    },
-    handleTagInputConfirm: function () {
-      var inputTagValue = this.inputTagValue;
-      if (inputTagValue) {
-        this.encounter.allergens.push(inputTagValue);
-      }
-      this.inputTagVisible = false;
-      this.inputTagValue = '';
-    },
+	  	handleCloseTag: function (tag) {
+	      this.encounter.allergens.splice(this.encounter.allergens.indexOf(tag), 1);
+	    },
+	    showTagInput: function () {
+	      this.inputTagVisible = true;
+	      this.$nextTick(function() {
+	        this.$refs.saveTagInput.$refs.input.focus();
+	      });
+	    },
+	    handleTagInputConfirm: function () {
+	      var inputTagValue = this.inputTagValue;
+	      if (inputTagValue) {
+	        this.encounter.allergens.push(inputTagValue);
+	      }
+	      this.inputTagVisible = false;
+	      this.inputTagValue = '';
+	    },
     /* 过敏信息操作  --- end */ 
 
     // 切换主业务区域tab
     handleTabClick: function (tab, event) {
+    	console.log(tab)
+    },
 
-    }
+    /* 药品操作 --- start */
+    	// 搜索药品
+    	searchDrugs: function (queryString, cb) {
+    		var _this = this;
+    		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
+			    var res = response.data;
+			    if (res.flag) {
+			    	var drugs = res.data;
+						cb(drugs);
+						// 设置下拉选择的第一项为高亮
+						var el = _this.$refs["ordtitle"];
+						if(el) {
+							el.highlightedIndex = 0;
+						}
+					}
+			  },function() {
+			  	_this.$message.error("获取药品列表失败，请联系管理员。");
+			  })
+    	},
+    	// 选择某个药品
+    	selectDrug: function (item) {
+    		var _this = this, drug = item;
+    		_this.order = {
+    			serialno: drug.serialno, // drug药品序列号
+    			title: drug.name, // drug药品序列号
+    			name: drug.name,
+    			specification: drug.spec, // 规格
+    			unit: drug.unit, // 单位
+    			price: drug.price, // 价格
+    			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
+    			single_qty: {value: 1, unit: drug.unit}, // 单次数量
+    			route: _this.$parent.common_data_routes[0],// 频次
+    			frequency: _this.$parent.common_data_frequencys[0],// 频次
+    			course_of_treatment: {value: "", unit: "天"},  // 疗程
+    			total_quantity: 1, // 总量
+    			measure_val: drug.measure_val,  // 最小单位的值
+    		}
+    		_this.focusNext('ordtitle', 'ordsingleqty');
+    	},
+    	// 单次数量、单次剂量、频次、疗程改变，计算总量
+	  	calculateQuantity: function (field) {
+	  		var _this = this;
+	  		// 药品将检测单次数量、单次剂量的改变
+	  		var minUnit = _this.order.measure_val;
+	  		if(minUnit) {
+	  			if (field=="dose") {
+	  				_this.order.single_qty.value = parseFloat((parseFloat(_this.order[field].value) / parseFloat(minUnit)).toFixed(2));
+	  			}
+	  			if (field=="single_qty") {
+	  				_this.order.dose.value = parseFloat((parseFloat(_this.order[field].value) * parseFloat(minUnit)).toFixed(2));
+	  			}
+	  		}
+	  	},
+	    submitOrderForm: function (formName) {
+				var _this = this;
+	      _this.$refs[formName].validate( function (valid) {
+	        if (valid) {
+	        	if(!_this.order.serialno || !_this.order.title) {
+	        		_this.$message({
+			          message: '请选择药品。',
+			          type: 'warning'
+			        });
+			        _this.$ref["ordtitle"].focus();
+			        return false;
+	        	}
+	        	if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
+	        		_this.$message({
+			          message: '请填写药品的单次数量。',
+			          type: 'warning'
+			        });
+			        _this.$ref["ordsingleqty"].focus();
+			        return false;
+	        	}
+	        	if(!(_this.order.dose&&_this.order.dose.value)) {
+	        		_this.$message({
+			          message: '请填写药品的单次剂量。',
+			          type: 'warning'
+			        });
+			        _this.$ref["orddose"].focus();
+			        return false;
+	        	}
+	        	if(!_this.order.total_quantity) {
+	        		_this.$message({
+			          message: '请填写药品的总量。',
+			          type: 'warning'
+			        });
+			        _this.$ref["ordtotalquantity"].focus();
+			        return false;
+	        	}
+	          // 判断是否有id，有id的话，就是编辑，没有id为新建
+	          var btn = $(_this.$refs["saveorder"].$el);
+	          btn.attr("disabled", "disabled").find(".fa").show();
+	          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order};
+	          if(!_this.order.id) {
+	          	_this.ordersResource.save(json).then( function(response) {
+	          		_this.handleOrderReturn(response, btn);
+	          	}, function(response) {
+	          		btn.removeAttr("disabled").find(".fa").hide();
+	          		_this.$message.error("创建药品失败，请联系管理员。");
+	          	})
+	          } else {
+	          	_this.ordersResource.update({id: _this.order.id}, json).then( function(response) {
+	          		_this.handleOrderReturn(response, btn);
+	          	}, function(response) {
+	          		btn.removeAttr("disabled").find(".fa").hide();
+	          		_this.$message.error("更新药品失败，请联系管理员。");
+	          	})
+	          }
+	        } else {
+	          _this.$message({
+		          message: '请按照规范录入数据。',
+		          type: 'warning'
+		        });
+	          return false;
+	        }
+	      });
+	    },
+	    // encounter保存成功之后的处理
+	    handleOrderReturn: function (response, btn) {
+	    	btn.removeAttr("disabled").find(".fa").hide();
+	    	var res = response.data;
+	    	this.orders.push(res.data);
+	    	this.$message({
+	        message: "药品保存成功。",
+	        type: 'success'
+	      });
+	    },
+    /* 药品操作 --- end */
 	}
 }
 </script>
