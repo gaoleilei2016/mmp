@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   resources :interfaces do
     collection do
       get :get_pharmacy
+      get :get_dicts
+      get :get_addrs
+      get :get_medicine_by_name
     end
   end
   ############################
@@ -38,9 +41,23 @@ Rails.application.routes.draw do
   namespace :hospital do
     resources :home
     resources :encounters  # 就诊管理、统计
+    resources :orders      # 药品
+    resources :prescriptions      # 处方
+    resources :histories      # 历史列表
   end
   ########### hospital ##########
   ############################
+
+
+  ############################
+  ########### dict ##########
+  namespace :dict do
+    resources :diseases  # 诊断字典
+    resources :medications #药品字典
+  end
+  ########### dict ##########
+  ############################
+
 
   ############################
   ########### ims ##########
