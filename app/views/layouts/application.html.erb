@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>医药管理平台</title>
+    <title>腾迈智医</title>
     <link rel="icon" href="/assets/admin/TM.ico" />
     <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/vue/vue-resource","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
     <%= stylesheet_link_tag "/assets/plugins/vue/element-ui-240","/assets/plugins/fontawesome/font-awesome.min","/assets/plugins/vue/display" %>
@@ -157,6 +157,9 @@
       .el-pagination .el-input__inner{
         line-height: initial;
       }
+      .el-pagination--small .el-select .el-input .el-input__inner{
+        height: 23px;
+      }
     </style>
     <%= render '/layouts/header_and_footer' %>
     <div class="container">
@@ -205,7 +208,7 @@
       const refresh = Vue.extend({
         template: '<div></div>',
         beforeRouteEnter:function(to, from, next){
-          current_app.$message('目前由于架构所限，将刷新所有组件分页！')
+          // current_app.$message('目前由于架构所限，将刷新所有组件分页！')
           next(function(){
             router.push(from.path)
           })

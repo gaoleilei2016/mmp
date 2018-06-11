@@ -7,23 +7,32 @@ class Users::SessionsController < Devise::SessionsController
 
   # GET /resource/sign_in
   def new
-    # p '~~~~~~~~~~~',current_user
-    super
+    str = request.user_agent
+    if str.include?('Mobile')
+      render "/devise/sessions/new2.html.erb",layout:"customer"
+    else
+      super
+    end
   end
 
   # POST /resource/sign_in
   def create
     if current_user
-      case current_user.login
-      when "cg"
+      if current_user.login=="admin"
         path = "/admin/home"
-      when "cg1"
-        path = "/hospital/home"
-      when "cg2"
-        path = "/ims/home"
+      else
+        case current_user.type_code
+        when "1"
+          path = "/hospital/home"
+        when "2"
+          path = "/ims/home"
+        else
+          path = "/"
+        end
       end
       return redirect_to path
     else
+      flash[:login] = params[:user][:login] rescue nil
       super
     end
   end
