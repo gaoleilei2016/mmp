@@ -1,0 +1,191 @@
+<el-form size="mini" label-position="top" label-width="80px" :model="order" ref="orderForm">
+	<el-row :gutter="5">
+		<el-col :span="5">
+		  <el-form-item label="名称">
+			  <el-autocomplete
+				  v-model="order.name"
+				  :fetch-suggestions="searchDrugs"
+				  placeholder="药品名/简拼/五笔/编号"
+				  @select="selectDrug"
+				  style="width: 100%;"
+				  popper-class="order-autocomplete"
+				  ref="ordtitle"
+				>
+					<i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="order={}"></i>
+					<template slot-scope="props">
+						<span class="drug-field name">{{ props.item.name }}</span>
+						<span class="drug-field spec">{{ props.item.spec }}</span>
+						<span class="drug-field formul">{{ props.item.formul_name }}</span>
+						<span class="drug-field price">{{ props.item.price }}/{{ props.item.unit }}</span>
+						<span class="drug-field produce">{{ props.item.produce_name }}</span>
+					</template>
+				</el-autocomplete>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="规格">
+		    <el-input v-model="order.specification" readonly></el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="单次数量">
+		    <el-input v-model.number="order.single_qty&&order.single_qty.value" @change="calculateQuantity('single_qty')" ref="ordsingleqty" @keydown.enter.stop.native="focusNext('ordsingleqty', 'orddose')">
+		    	<template slot="append">{{ order.single_qty&&order.single_qty.unit }}</template>
+		    </el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="单次剂量">
+		    <el-input v-model.number="order.dose&&order.dose.value" @change="calculateQuantity('dose')" ref="orddose" @keydown.enter.stop.native="focusNext('orddose', 'ordroute')">
+		    	<template slot="append">{{ order.dose&&order.dose.unit }}</template>
+		    </el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="途径">
+		    <el-select v-model="order.route" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordroute" @keydown.enter.stop.native="focusNext('ordroute', 'ordfrequency')" filterable>
+			    <el-option
+			      v-for="item in ($parent.common_data_routes||[])"
+			      :key="item.code"
+			      :label="item.display"
+			      :value="item">
+			    </el-option>
+			  </el-select>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="频次">
+		  	<el-select v-model="order.frequency" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordfrequency" @keydown.enter.stop.native="focusNext('ordfrequency', 'ordcourseoftreatment')" filterable>
+			    <el-option
+			      v-for="item in ($parent.common_data_frequencys||[])"
+			      :key="item.code"
+			      :label="item.display"
+			      :value="item">
+			    </el-option>
+			  </el-select>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="疗程">
+		    <el-input v-model.number="order.course_of_treatment&&order.course_of_treatment.value" ref="ordcourseoftreatment" @keydown.enter.stop.native="focusNext('ordcourseoftreatment', 'ordtotalquantity')">
+		    	<template slot="append">{{ order.course_of_treatment&&order.course_of_treatment.unit }}</template>
+		    </el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="2">
+		  <el-form-item label="总量">
+		    <el-input v-model="order.total_quantity" ref="ordtotalquantity" @keydown.enter.stop.native="focusNext('ordtotalquantity', 'ordnote')">
+		    	<template slot="append">{{ order.unit }}</template>
+		    </el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="4">
+		  <el-form-item label="备注">
+		    <el-input v-model="order.note" ref="ordnote" @keydown.enter.stop.native="focusNext('ordnote', 'saveorder')"></el-input>
+		  </el-form-item>
+		</el-col>
+		<el-col :span="1" style="padding-top: 20px;">
+			<el-button size="mini" type="primary" @click="submitOrderForm('orderForm')" ref="saveorder" style="padding-left: 0; padding-right: 0; width: 100%;" plain>
+	    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
+	    	添加
+	    </el-button>
+		</el-col>
+	</el-row>
+</el-form>
+<br/>
+<el-table
+	:data="orders"
+	 style="width: 100%">
+  <el-table-column
+    prop="title"
+    min-width="250"
+    label="名称">
+  </el-table-column>
+  <el-table-column
+    prop="specification"
+    min-width="70"
+    label="规格">
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="单次数量">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="单次剂量">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="途径">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.route">{{scope.row.route.code}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="频次">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.frequency">{{scope.row.frequency.display}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="疗程">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="总量">
+    <template slot-scope="scope">
+    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop=""
+    min-width="100"
+    label="单价">
+    <template slot-scope="scope">
+    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop="note"
+    min-width="200"
+    label="备注">
+  </el-table-column>
+  <el-table-column
+    prop="status"
+    align="center"
+    width="80"
+    label="状态">
+    <template slot-scope="scope">
+    	<el-tag size="mini" v-if="scope.row.status=='N'">新建</el-tag>
+    	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
+    	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
+    	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
+    </template>
+  </el-table-column>
+  <el-table-column
+    fixed="right"
+    label=""
+    width="130">
+    <template slot-scope="scope">
+      <el-button type="text" size="mini" @click="editOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-edit-o"></i></el-button>
+      <el-button type="text" size="mini" @click="deleteOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-trash-o text-danger"></i></el-button>
+    </template>
+  </el-table-column>
+</el-table>
