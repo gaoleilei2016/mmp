@@ -30,7 +30,7 @@
 				<el-button size="small" type="primary" @click="add_organization">增加</el-button>
 				<el-button size="small" type="danger" @click="delete_organization">删除</el-button>
 			</el-button-group>
-			<el-button style="float: right; margin-right: 10px;" size="small" type="default" @click="$parent.load_location_hash_router('#/organizations/daoru')">导入</el-button>
+			<el-button disabled style="float: right; margin-right: 10px;" size="small" type="default" @click="$parent.load_location_hash_router('#/organizations/daoru')">导入</el-button>
 			<!-- <el-button-group style="float: right; margin-right: 10px;">
 			</el-button-group> -->
 		</div>
@@ -45,9 +45,10 @@
 			</el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="名称" prop="name"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="创建时间" prop="created_at" width="140"></el-table-column>
 		</el-table>
 		<el-pagination background ref="pg_data_table" :page-size="10" @size-change="get_organizations" @current-change="get_organizations" layout="total, sizes, prev, pager, next, jumper" :total="pg_data_table_total"></el-pagination>
-		<el-dialog :title="seleced_organization.name" :visible.sync="dialogVisible" width="80%" top="62px">
+		<el-dialog @open="get_users" :title="seleced_organization.name" :visible.sync="dialogVisible" width="80%" top="62px">
 			<el-form size="small" id="organizations_index_form" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="">
 				<el-tabs type="border-card">
 					<el-tab-pane label="基本信息">
@@ -63,6 +64,47 @@
 						<el-form-item label="简拼" prop="jianpin">
 							<el-input ref="jianpin_input" v-model="ruleForm.jianpin"></el-input>
 						</el-form-item>
+					</el-tab-pane>
+					<el-tab-pane label="管理员">
+						<el-row>
+							<el-col :span="13" style="padding-right: 6px;">
+								<el-table ref="data_table2" class="table_header_dark" size="mini" border :data="tableData2">
+									<el-table-column label="id" prop="id"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+									<el-table-column label="" width="40px">
+										<template slot-scope="scope">
+											<i class="fa fa-fw fa-lg fa-trash-o" style="cursor: pointer;" @click="remove_organization_of_z(scope.row)"></i>
+										</template>
+									</el-table-column>
+								</el-table>
+							</el-col>
+							<el-col :span="11" style="border: 1px solid #ddd;">
+								<div class="header_dark">
+									项目列表
+									<div class="vertical_bottom" style="position: absolute;right: 7px;top: 7px;">
+										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
+											<input v-model="searchInputValue" @keyup="get_timeout_users" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
+											<span class="el-input__prefix" @click="get_users"><i class="el-icon-search el-input__icon"></i></span>
+											<span class="el-input__suffix" @click="searchInputValue='';get_users;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+										</div>
+									</div>
+								</div>
+								<el-table id="dialog_right_table" ref="data_table3" @row-click="right_copyto_left" v-loading="dialog_table_loading" class="table_header_dark" size="mini" border :data="tableData3">
+									<el-table-column label="id" prop="id">
+										<template slot-scope="scope">
+											{{scope.row.id}}
+											<div class="hide dialog_right_tr_id" :data-id="scope.row.id"></div>
+										</template>
+									</el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+								</el-table>
+								<el-pagination small background ref="pg_data_table3" :page-size="10" @size-change="get_users" @current-change="get_users" layout="sizes, prev, pager, next" :total="pg_data_table_total3"></el-pagination>
+							</el-col>
+						</el-row>
 					</el-tab-pane>
 				</el-tabs>
 			</el-form>
@@ -93,6 +135,7 @@ window.current_template_obj = {
 			tableData: [],
 			tableData2: [],
 			tableData3: [],
+			selected_user_id: '',
 			input_search_str: '',
 			ajax_search_str: '',
 			searchInputValue:'',
@@ -106,43 +149,85 @@ window.current_template_obj = {
 		}
 	},
 	methods:{
-		// 同步 dialog 项目表格的变色行
-		sync_success_tr:function() {
+		get_timeout_users:function (e,type) {
 			var _this = this;
-			var selected_ids = (_this.tableData31||[]).map(function(item) {
-				return item.id;
-			});
-			$('#dialog2_right_table tr').removeClass("selected-success");
-			$(".dialog2_right_tr_id").each(function(i,v) {
-				if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
-					$(v).parents("tr").addClass("selected-success");
-				}
-			});
-		},
-		re_organization:function(row,e) {
-			var _this = this;
-			var index = _this.tableData31.indexOf(row);
-			if (index>-1) {
-				_this.tableData31.splice(index,1);
-				_this.sync_success_tr();
-			}
-		},
-		// 选择仪器
-		right_copyto_left2:function(row, event, column) {
-			var _this = this;
-			var tr = $(event.target).is('tr') ? $(event.target) : $(event.target).parents('tr');
-			var selected_ids = _this.tableData31.map(function(item) {
-				return item.id;
-			});
-			var index = $.inArray( row.id, selected_ids );
-			if (index>-1) {
-				$(tr).removeClass("selected-success");
-				this.tableData31.splice(index,1);
+			clearTimeout(_this.timer);
+			if (e.keyCode==13) {
+				_this.get_users(type);
 			}else{
-				$(tr).addClass("selected-success");
-				this.tableData31.push(row);
+				_this.timer = setTimeout(function(){
+					_this.get_users(type);
+				},_this.$parent.auto_search_timeout_value);
 			}
 		},
+		get_users:function(){
+			var _this = this;
+			_this.$nextTick(function() {
+				_this.dialog_table_loading = false;
+				var pagination = _this.$refs.pg_data_table3;
+				var page = pagination.internalCurrentPage;
+				var per = pagination.internalPageSize;
+				$.ajax({
+					url:'/admin/users.json?page='+page+'&per='+per+'&search='+(_this.searchInputValue||''),
+					success:function(json){
+						_this.tableData3 = json.rows;
+						_this.pg_data_table_total3 = json.total;
+						setTimeout(function() {
+							var selected_ids = _this.tableData2.map(function(item) {
+								return item.id+'';
+							});
+							$('#dialog_right_table tr').removeClass("selected-success");
+							$(".dialog_right_tr_id").each(function(i,v) {
+								if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
+									$(v).parents("tr").addClass("selected-success");
+								}
+							});
+						})
+					},
+					complete:function(){
+						_this.dialog_table_loading = false;
+					},
+					error:error_fun
+				})
+			})
+		},
+		// // 同步 dialog 项目表格的变色行
+		// sync_success_tr:function() {
+		// 	var _this = this;
+		// 	var selected_ids = (_this.tableData31||[]).map(function(item) {
+		// 		return item.id;
+		// 	});
+		// 	$('#dialog2_right_table tr').removeClass("selected-success");
+		// 	$(".dialog2_right_tr_id").each(function(i,v) {
+		// 		if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
+		// 			$(v).parents("tr").addClass("selected-success");
+		// 		}
+		// 	});
+		// },
+		// re_organization:function(row,e) {
+		// 	var _this = this;
+		// 	var index = _this.tableData31.indexOf(row);
+		// 	if (index>-1) {
+		// 		_this.tableData31.splice(index,1);
+		// 		_this.sync_success_tr();
+		// 	}
+		// },
+		// 选择仪器
+		// right_copyto_left2:function(row, event, column) {
+		// 	var _this = this;
+		// 	var tr = $(event.target).is('tr') ? $(event.target) : $(event.target).parents('tr');
+		// 	var selected_ids = _this.tableData31.map(function(item) {
+		// 		return item.id;
+		// 	});
+		// 	var index = $.inArray( row.id, selected_ids );
+		// 	if (index>-1) {
+		// 		$(tr).removeClass("selected-success");
+		// 		this.tableData31.splice(index,1);
+		// 	}else{
+		// 		$(tr).addClass("selected-success");
+		// 		this.tableData31.push(row);
+		// 	}
+		// },
 		remove_organization_of_z:function(row) {
 			var tr = $('[data-id="'+row.id+'"]').parents('tr');
 			if (tr) {
@@ -175,9 +260,9 @@ window.current_template_obj = {
 		},
 		add_organization:function() {
 			this.resetForm();
-			if (this.selected_type_code) {
-				this.ruleForm.located_entity_id = this.selected_type_code;
-			}
+			// if (this.selected_type_code) {
+			// 	this.ruleForm.located_entity_id = this.selected_type_code;
+			// }
 			this.seleced_organization = {save_method:'POST',form_type:1,name:"新增单项",code:""};
 			this.dialogVisible = true;
 		},
@@ -186,14 +271,14 @@ window.current_template_obj = {
 			current_app.loading = true;
 			$.ajax({
 				url:"/admin/organizations/"+row.id+".json",
-				// data:{id:row.id},
 				success:function(json) {
+					_this.resetForm();
 					_this.seleced_organization = {id:row.id,save_method:'PUT',form_type:row.code_system,name:json.organization.name,code:json.organization.code};
 					_this.ruleForm = json.organization;
-						_this.tableData31 = json.organization.z_machines||[];
-						_this.$nextTick(function() {
-							_this.get_organizations('dialog');
-						})
+					_this.tableData2 = json.users||[];
+					// _this.$nextTick(function() {
+					// 	_this.get_users();
+					// })
 					_this.dialogVisible = true;
 				},
 				complete:function() {
@@ -259,13 +344,9 @@ window.current_template_obj = {
 							dataType:'json',
 							data:{
 								organization:_this.ruleForm,
-								type:_this.seleced_organization.form_type==1 ? 'single' : 'package',
-								organization_ids:_this.seleced_organization.form_type==1 ? null : _this.tableData2.map(function(item) {
+								user_ids: _this.tableData2.map(function(item) {
 									return item.id;
 								}),
-								// machine_ids:_this.seleced_organization.form_type==1 ? null : _this.tableData31.map(function(item) {
-								// 	return item.id;
-								// }),
 							},
 							success:function(json){
 								// _this.resetForm('ruleForm');
@@ -304,18 +385,18 @@ window.current_template_obj = {
 			// 	_this.$refs.ruleForm.resetFields();
 			// })
 		},
-		get_timeout_organizations:function (e,type) {
+		get_timeout_organizations:function (e) {
 			var _this = this;
 			clearTimeout(_this.timer);
 			if (e.keyCode==13) {
-				_this.get_organizations(type);
+				_this.get_organizations();
 			}else{
 				_this.timer = setTimeout(function(){
-					_this.get_organizations(type);
+					_this.get_organizations();
 				},_this.$parent.auto_search_timeout_value);
 			}
 		},
-		get_organizations:function(type){
+		get_organizations:function(){
 			var _this = this;
 
 			_this.table_loading = true;
@@ -338,10 +419,12 @@ window.current_template_obj = {
 			})
 		},
 	},
+	activated:function() {
+		this.get_organizations();
+	},
 	mounted:function(){
 		window.apps.organizations_index = this;
 		this.defaultForm = _.cloneDeep(this.ruleForm);
-		this.get_organizations();
 	}
 }
 </script>

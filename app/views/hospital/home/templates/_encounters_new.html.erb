@@ -62,6 +62,7 @@ window.current_template_obj = {
 		    	{ required: false, message: '出生日期不能为空'},
 		    ],
 		    phone: [
+		    	{ required: true, message: '手机号码不能为空'},
 		    	{ pattern: /^1[34578]\d{9}$/, message: '手机号码格式不正确'}
 		    ],
 		    iden: [
@@ -89,20 +90,9 @@ window.current_template_obj = {
 			prescriptions: [],
 			/* 药品 --- start */ 
 			orders: [],
-			order: {
-				serialno: "",
-				title: "", // 名称
-				specification: "", // 规格
-				single_qty: {value: "", unit: ""}, // 单次数量
-				dose: {value: "", unit: ""}, // 单次剂量
-				route: {code: "", display: ""}, // 途径
-				frequency: {code: "", display: ""}, // 频次
-				course_of_treatment: {value: "", unit: "天"}, // 疗程
-				total_quantity: "", // 总量
-				unit: "", // 单位
-				note: "", // 备注
-			},
+			order: {},
 			drugs: [],
+			editIndex: -1, // 正在编辑的医嘱序号
 			/* 药品 --- end */ 
 
 			/* 主业务  ----- end */ 
@@ -128,7 +118,15 @@ window.current_template_obj = {
 			init: function() {
 				var _this = this;
 
-
+				// Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
+			 //    var res = response.data;
+			 //    _this.locations = [];
+			 //    (res.rows||[]).forEach(function (item, index) {
+			 //    	_this.locations.push({id: item.id, display: item.name});
+			 //    })
+			 //  },function() {
+			 //  	_this.$message.error("获取药房失败，请联系管理员。");
+			 //  })
 			},
 			// 聚焦下一个
 	  	focusNext: function (now, next) {
@@ -377,6 +375,13 @@ window.current_template_obj = {
     	// 选择某个药品
     	selectDrug: function (item) {
     		var _this = this, drug = item;
+    		if(!_this.encounter.id) {
+    			_this.$message({
+	          message: '请先保存就诊信息。',
+	          type: 'warning'
+	        });
+    			return false;
+    		}
     		_this.order = {
     			serialno: drug.serialno, // drug药品序列号
     			title: drug.name, // drug药品序列号
@@ -391,6 +396,7 @@ window.current_template_obj = {
     			course_of_treatment: {value: "", unit: "天"},  // 疗程
     			total_quantity: 1, // 总量
     			measure_val: drug.measure_val,  // 最小单位的值
+    			encounter_id: _this.encounter.id, // 就诊模型id
     		}
     		_this.focusNext('ordtitle', 'ordsingleqty');
     	},
@@ -408,6 +414,7 @@ window.current_template_obj = {
 	  			}
 	  		}
 	  	},
+	  	// 保存药品
 	    submitOrderForm: function (formName) {
 				var _this = this;
 	      _this.$refs[formName].validate( function (valid) {
@@ -472,15 +479,48 @@ window.current_template_obj = {
 	        }
 	      });
 	    },
-	    // encounter保存成功之后的处理
+	    // 编辑药品
+	    editOrder: function (index, row) {
+	    	this.editIndex = index;
+	    	this.order = row;
+	    },
+	    // 医嘱保存成功之后的处理
 	    handleOrderReturn: function (response, btn) {
+	    	this.order = {};
 	    	btn.removeAttr("disabled").find(".fa").hide();
 	    	var res = response.data;
-	    	this.orders.push(res.data);
+	    	if(!this.order.id) {
+	    		this.orders.push(res.data);
+	    	} else {
+	    		this.orders.splice(this.editIndex, 1); // 修改已经编辑的数据
+		      this.orders.splice(this.editIndex, 0, res.data); // 修改已经编辑的数据
+	    	}
 	    	this.$message({
 	        message: "药品保存成功。",
 	        type: 'success'
 	      });
+	    },
+	    // 删除医嘱
+	    deleteOrder: function (index, row, evet) {
+	    	var _this = this, $target = $(event.target);
+	    	// current_app.loading = true;
+	    	$target.addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
+	    	_this.ordersResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+      		var res = response.data;
+      		$target.removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+      		if(res.flag) {
+      			_this.$message({
+		          message: res.info,
+		          type: 'warning'
+		        });
+		        _this.orders.splice(index, 1);
+      		}else{
+      			_this.$message.error(res.info);
+      		}
+      	}, function(response) {
+      		$target.removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+      		_this.$message.error("删除药品失败，请联系管理员。");
+      	})
 	    },
     /* 药品操作 --- end */
 	}

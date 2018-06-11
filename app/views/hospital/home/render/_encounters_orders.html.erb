@@ -65,21 +65,30 @@
 			  </el-select>
 		  </el-form-item>
 		</el-col>
-		<el-col :span="2">
+		<el-col :span="5">
+		<el-col :span="8">
 		  <el-form-item label="疗程">
 		    <el-input v-model.number="order.course_of_treatment&&order.course_of_treatment.value" ref="ordcourseoftreatment" @keydown.enter.stop.native="focusNext('ordcourseoftreatment', 'ordtotalquantity')">
 		    	<template slot="append">{{ order.course_of_treatment&&order.course_of_treatment.unit }}</template>
 		    </el-input>
 		  </el-form-item>
 		</el-col>
-		<el-col :span="2">
+		<el-col :span="8">
 		  <el-form-item label="总量">
 		    <el-input v-model="order.total_quantity" ref="ordtotalquantity" @keydown.enter.stop.native="focusNext('ordtotalquantity', 'ordnote')">
 		    	<template slot="append">{{ order.unit }}</template>
 		    </el-input>
 		  </el-form-item>
 		</el-col>
-		<el-col :span="4">
+		<el-col :span="8">
+		  <el-form-item label="单价">
+		    <el-input v-model="order.price" readonly>
+		    	<template slot="append">元</template>
+		    </el-input>
+		  </el-form-item>
+		</el-col>
+		</el-col>
+		<el-col :span="3">
 		  <el-form-item label="备注">
 		    <el-input v-model="order.note" ref="ordnote" @keydown.enter.stop.native="focusNext('ordnote', 'saveorder')"></el-input>
 		  </el-form-item>
@@ -95,89 +104,81 @@
 <br/>
 <el-table
 	:data="orders"
-	  style="width: 100%">
+	 style="width: 100%">
   <el-table-column
-    align="title"
+    prop="title"
     min-width="250"
     label="名称">
   </el-table-column>
   <el-table-column
-    align="specification"
-    min-width="70"
+    prop="specification"
+    min-width="50"
     label="规格">
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="80"
     label="单次数量">
     <template slot-scope="scope">
     	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="80"
     label="单次剂量">
     <template slot-scope="scope">
     	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="50"
     label="途径">
     <template slot-scope="scope">
     	<span v-if="scope.row.route">{{scope.row.route.code}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="80"
     label="频次">
     <template slot-scope="scope">
     	<span v-if="scope.row.frequency">{{scope.row.frequency.display}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="50"
     label="疗程">
     <template slot-scope="scope">
     	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="60"
     label="总量">
     <template slot-scope="scope">
     	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align=""
-    min-width="100"
+    min-width="60"
     label="单价">
     <template slot-scope="scope">
     	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
     </template>
   </el-table-column>
   <el-table-column
-    align="title"
-    min-width="250"
-    label="名称">
+    prop="note"
+    min-width="100"
+    label="备注">
   </el-table-column>
   <el-table-column
     prop="status"
     align="center"
-    width="80"
+    min-width="80"
     label="状态">
     <template slot-scope="scope">
     	<el-tag size="mini" v-if="scope.row.status=='N'">新建</el-tag>
     	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
     	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
     	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
-    	<el-tag size="mini" type="danger" v-if="scope.row.status=='R'">结果</el-tag>
     </template>
   </el-table-column>
   <el-table-column
@@ -185,8 +186,8 @@
     label=""
     width="130">
     <template slot-scope="scope">
-      <el-button type="text" size="mini"><i class="fa fa-fw fa-lg fa-edit-o"></i></el-button>
-      <el-button type="text" size="mini"><i class="fa fa-fw fa-lg fa-trash-o text-danger"></i></el-button>
+      <el-button type="text" size="mini" @click="editOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-edit-o"></i></el-button>
+      <el-button type="text" size="mini" @click="deleteOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-trash-o text-danger"></i></el-button>
     </template>
   </el-table-column>
 </el-table>
