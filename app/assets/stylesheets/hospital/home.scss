@@ -81,6 +81,10 @@ $bg-purple-light: #e5e9f2;
 		.el-input-group__append {
 			padding: 0 7.5px;
 		}
+		.el-form-item__content > .el-input--mini > input[type="text"] {
+			padding-left: 5px; 
+			padding-right: 5px; 
+		}
 		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
 			background-color: #FAF8F8;
 		}
