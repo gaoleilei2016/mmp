@@ -77,25 +77,26 @@
     <div id="main_content">
       <transition name="el-zoom-in-top">
         <el-form v-show="showFlag" action="/users/sign_in" method="post" style="width: 360px;position: absolute;left: calc( 50% - 180px );top: calc( 50% - 200px );">
-          <h1 style="text-align: center;padding: 0 0 40px 0;font-size: 40px; font-family: 微软雅黑;font-weight: 500;">腾迈智医</h1>
+          <h1 style="text-align: center;padding: 0 0 40px 0;font-size: 40px; font-family: 微软雅黑;font-weight: 500;">医药管理平台</h1>
           <div style="background: #fff;padding: 30px;border-radius: 6px;box-shadow: 0 0 15px #fff;background: rgba(221, 236, 255, 0.7);">
             <h3 style="margin-bottom: 10px;">
               <img src="/assets/admin/TM.png" style="width: 40px;">
               <span style="margin-left: 10px;">用户登录</span>
             </h3>
-            <el-input placeholder="用户名" name="user[login]">
+            <el-input placeholder="用户名" name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
               <template slot="prepend"><i class="fa fa-user fa-lg fa-fw" style="color:#636363;"></i></template>
             </el-input>
-            <el-input type="password" placeholder="密　码" name="user[password]" style="margin-top: 10px;">
+            <el-input type="password" placeholder="密　码" name="user[password]" style="margin-top: 10px;" autocomplete="off">
               <template slot="prepend"><i class="fa fa-lock fa-lg fa-fw" style="color:#636363;"></i></template>
             </el-input>
             <div style="margin-top: 10px;text-align: right;">
               <el-checkbox :label="1" name="user[remember_me]" style="float: left;line-height: 40px;">记住我</el-checkbox>
               <el-button type="primary" native-type="submit">登 陆</el-button>
-              <a href="/users/sign_up" class="el-button"><span>注 册</span></a>
+              <a href="/users/sign_up" class="el-button" onclick="current_app.$message('暂未提供自主注册方式，请联系管理员');return false;"><span>注 册</span></a>
             </div>
             <div style="margin-top: 10px;text-align: right;">
-              <a href="/users/password/new">忘记密码？</a>
+              <a style="float: left;" href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;">商户入驻</a>
+              <a href="/users/password/new" onclick="current_app.$message('暂未提供密码找回方式，请联系管理员找回');return false;">忘记密码</a>
             </div>
           </div>
         </el-form>
