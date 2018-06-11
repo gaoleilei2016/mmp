@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   resources :interfaces do
     collection do
       get :get_pharmacy
+      get :get_dicts
+      get :get_addrs
+      get :get_medicine_by_name
     end
   end
   ############################
