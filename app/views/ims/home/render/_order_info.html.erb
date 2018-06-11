@@ -1,0 +1,84 @@
+<div class="prescription_content" v-for="(info,index) in detail">
+	<div class="prescription_form_title separate">
+		<div class="receipt_drug_label">
+				<h3 v-if="info.header.status == 'P'">未发药</h3>
+				<h3 v-else-if="info.header.status == 'E'">已发药</h3>
+				<h3 v-else-if="info.header.status == 'C'">已退药</h3>
+				<h3 v-else></h3>
+		</div>
+		<input type="hidden" id="prescription_id" v-bind:value="info.header.id">
+		<h3>
+			<b class="prescription_source_type"><%= current_user.try(:org_name)%></b><br>
+			<b>门诊订单</b>
+		</h3>
+
+		<!-- 药物分类 普通处方、麻醉药品和第一类精神药品处方、第二类精神药品处方、毒性药品处方、放射性药品处方-->
+		<span class="prescription_reg_style">{{info.header.type_display}}</span>
+  	<div class="el-row" style="font-size:15px; overflow:hidden; padding:6px;">
+	  	<div class="el-col-12 prescription_code text-left"><b style="color:red;opacity:0.7;">NO.<span>{{info.header.return_drug ? info.header.ori_code : info.header.code}}</span></b></div>
+	  	<div class="el-col-12 invoice_no text-right">发票号:&nbsp;&nbsp;<span>{{info.header.invoice_no}}</span></div>
+  	</div>					
+	</div>
+
+	<div class="prescription_basic_info separate">
+  	<div class="el-row">
+			<div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{info.header.patient_name}}</span></div>
+			<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{info.header.patient_gender_name}}</span></div>
+			<div class="el-col el-col-10 text-left patient_age" style="word-break:keep-all;">年龄:<span style="font-weight:bold;">{{info.header.patient_age}}</span></div>
+  	</div>
+
+  	<div class="el-row">
+			<div class="el-col el-col-14 text-left">病历号:<span>{{info.header.encounter_ii}}</span></div>
+			<div class="el-col el-col-10 text-left patient_nature">医疗类别: <span>{{info.header.patient_nature}}</span></div>					
+  	</div>
+
+  	<div class="el-row">
+			<div class="el-col el-col-14 text-left patient_addr biller_loc_name">科室/地址:{{info.header.biller_loc_name}}</div>
+			<div class="el-col el-col-10 text-left billing_at">开单时间: <span>{{format_time(info.header.billing_at)}}</span></div>				
+  	</div>
+
+  	<div class="el-row">
+  		<div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{fix_diagnoses(info.header.diagnoses)}}</span></div>
+	   	<div class="el-col-10 text-left patient_iden">身份证: <span>{{info.header.patient_iden}}</span></div>
+  	</div>
+	</div>
+
+	<div class="prescription_item_info separate">
+		<div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R</div>
+		<div class="item_list" v-for="(line,index) in info.lines">
+			<div class="el-row" style="margin-left:1px;"> 
+				<div class="text el-col-14 text-left">{{line.text}}</div>
+				<div class="total_quantity el-col-5 text-right">{{line.total_quantity}}</div>
+				<div class="unit el-col-5 text-center">{{line.unit}}</div>
+			</div>
+	  </div>
+	  <div class="text-right" style="padding-right:8px;" v-if="info.header.reason_code_name == '中草药'">小计：{{format_price(info.header.total_amount/info.header.repeat_number)}} × {{info.header.repeat_number}}副</div>
+    <div class="el-row" style="text-align:center;position:relative;margin-left:1px;">（以下为空白）</div>
+	</div>
+
+	<div class="prescription_footer">
+		<div class="el-row" style="margin:0;">
+			<div class="el-col-6 author_name">医师: <span>{{info.header.author_name}}</span></div>
+			<div class="el-col-6 auditor_name">审核/配方: {{info.header.auditor_name}}<span class="audit_at">{{format_time(info.header.audit_at)}}</span></div>
+
+			<div class="el-col-6 checker_name" style="" v-if="info.header.status === 'C'">核对/退药: {{info.header.return_drug_opter_name}}<span class="check_at">{{format_time(info.header.return_drug_opt_at)}}</span></div>
+			<div class="el-col-6 checker_name" style="" v-else>核对/发药: {{info.header.delivery_name}}<span class="check_at">{{format_time(info.header.delivery_at)}}</span></div>
+
+			<div class="el-col-6 total_amount">金额: <span>{{format_price(info.header.total_amount)}}</span></div>
+		</div>
+
+		<div class="btns_right_bottom"> 
+			<span v-if="info.header.status === 'H' ">
+				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="refuse_order(info.header.id)">拒绝</button>
+				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="check_order(info.header.id)">审核</button>
+			</span>
+			<span v-if="info.header.status === 'P' ">
+			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.header.id)">发药</button>
+			</span>
+			<span v-if="info.header.status === 'E'&&info.header.delivery_status == 'E' ">
+				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="return_order(info.header.id)">退药</button>
+			</span>
+		</div>
+	</div>
+
+</div>

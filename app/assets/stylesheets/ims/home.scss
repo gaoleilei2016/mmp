@@ -1,0 +1,94 @@
+$header_margin : 12px;
+
+#prescription_header{
+	border-bottom:1px solid #ddd;
+	height:calc(80px - $header_margin);
+	margin-bottom: $header_margin;
+}
+
+.list_fun_panel{border:1px solid #ddd; text-align: center; padding:8px;}
+.list_fun_panel.active{background:#C5E2FF !important;}
+.list_fun_panel:hover{background:#ecf0f1;}
+
+.text-left{text-align: left;}
+.text-right{text-align: right;}
+.separate{
+	border-bottom:1px solid #ddd;
+}
+.prescription_form_title > h3{
+	margin-top:20px;margin-bottom:15px;
+}
+.receipt_drug_label > h3{
+	font-size: 24px;margin:0;
+}
+
+.prescription_list{
+	border:1px solid #ddd;
+	border-top:none;
+	padding-top:2px;
+
+	p {
+		padding: 7px;
+		border-bottom:1px dashed #ddd;
+		height:29px;
+		white-space: nowrap;
+	}
+	p:hover {
+		background:#ecf0f1;
+	}
+	p.active{
+		background:#C5E2FF !important;
+	}
+}
+
+.prescription_content{
+	position: relative;
+	height: 100%;
+	border: 1px solid #ddd;
+	overflow: auto;
+	padding:8px;
+
+	.receipt_drug_label{
+		position:absolute;  
+		left:-24px; 
+		top:28px;
+		width:133px;
+		color:red;
+		font-family:华文隶书;
+		opacity:0.6;
+		transform:rotate(-47deg);
+	}
+
+	.prescription_form_title{
+		text-align: center;
+	}
+
+	.btns_right_bottom{
+		position:absolute;
+		right:5px;
+		bottom:0px;width:100%;
+	  button{
+			float: right;
+			margin-right: 4px;
+			margin-bottom: 8px;
+	  }
+	}
+}
+
+
+.prescription_item_info{
+	overflow-x:hidden;
+	overflow-y:auto;
+	height:calc(100% - 300px);
+
+	.item_list{
+		padding-left: 12px;
+		line-height: 23px;
+	}
+}
+
+.prescription_basic_info{
+	padding-top:8px;
+	padding-bottom:8px;
+	line-height:27px;
+}
