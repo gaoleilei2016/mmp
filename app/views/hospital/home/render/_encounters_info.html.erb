@@ -1,0 +1,261 @@
+<el-collapse class="patient-info" v-model="activeCollapse">
+  <el-collapse-item name="patientinfo1">
+    <template slot="title">
+    	<el-tooltip content="搜索患者" placement="right">
+      	<span class="fa fa-lg fa-search fa-fw text-primary" style="cursor: pointer;" @click.stop="toggleSidebar"></span>&#12288;
+      </el-tooltip>
+      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[ 姓名 ]</b>&#12288;
+      <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
+      <span v-if="encounter.age">{{ encounter.age }}岁</span>
+    </template>
+    <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="100px">
+    	<el-row>
+	    	<el-col :span="6">
+	    		<el-form-item
+				    label="姓名"
+				    prop="name">
+				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')"></el-input>
+				  </el-form-item>
+				  <el-form-item
+				    label="性别"
+				    prop="gender">
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
+					    <el-option
+					      v-for="item in ($parent.common_data_genders||[])"
+					      :key="item.code"
+					      :label="item.display"
+					      :value="item">
+					    </el-option>
+					  </el-select>
+					  <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>
+				  </el-form-item>
+				  <el-form-item
+				    label="年龄"
+				    prop="age">
+				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encdiagnose')">
+				    	<span slot="suffix">岁</span>
+				    </el-input>
+				  </el-form-item>
+				  <div v-if="showAllPatInfo">
+				  	<el-form-item
+					    label="民族"
+					    prop="nation">
+					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;">
+						    <el-option
+						      v-for="item in ($parent.common_data_nations||[])"
+						      :key="item.code"
+						      :label="item.display"
+						      :value="item">
+						    </el-option>
+						  </el-select>
+					  </el-form-item>
+				  </div>
+				</el-col>
+				<el-col :span="8">
+				  <el-form-item
+				    label="出生日期"
+				    prop="birth_date">
+				    <el-date-picker
+				      v-model="encounter.birth_date"
+				      type="date"
+				      style="width: 100%"
+				      @change="getDecilAgeByBirthday"
+				      :picker-options="birthPickerOptions"
+				      placeholder="选择日期">
+				    </el-date-picker>
+				  </el-form-item>
+					<el-form-item
+				    label="身份证号码"
+				    @change="getBirthdayFromIdCard"
+				    prop="iden">
+				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o"></el-input>
+				  </el-form-item>
+				  <el-form-item
+				    label="手机号码"
+				    prop="phone">
+				    <el-input v-model.number="encounter.phone" prefix-icon="fa fa-phone"></el-input>
+				  </el-form-item>
+				  <div v-if="showAllPatInfo">
+				  	<el-form-item
+					    label="婚姻"
+					    prop="marriage">
+					    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;">
+						    <el-option
+						      v-for="item in ($parent.common_data_marriages||[])"
+						      :key="item.code"
+						      :label="item.display"
+						      :value="item">
+						    </el-option>
+						  </el-select>
+					  </el-form-item>
+				  </div>
+				</el-col>
+				<el-col :span="10">
+				  <el-form-item
+				    label="住址"
+				    prop="address">
+				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline"></el-input>
+				  </el-form-item>
+				  <el-form-item
+				    label="职业"
+				    prop="occupation">
+				    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;">
+					    <el-option
+					      v-for="item in ($parent.common_data_occupations||[])"
+					      :key="item.code"
+					      :label="item.display"
+					      :value="item">
+					    </el-option>
+					  </el-select>
+				  </el-form-item>
+				  <el-form-item
+				    :label="encounter.age < 14 ? '监护人' : '联系人'"
+				    prop="contact_name">
+				    <el-input v-model="encounter.contact_name"></el-input>
+				  </el-form-item>
+				  <div v-if="showAllPatInfo">
+					  <el-form-item
+					    label="工作单位"
+					    prop="unit_name">
+					    <el-input v-model="encounter.unit_name"></el-input>
+					  </el-form-item>
+				  </div>
+				</el-col>
+			</el-row>
+			<hr class="info-divider"/>
+			<el-row v-for="(diagnose, index) in (encounter.diagnoses||[])">
+				<!-- 医疗信息，诊断，血型，身高，体重，bmi -->
+				<el-col :span="12">
+					<el-form-item 
+						:key="diagnose.code"
+						:prop="'diagnoses.' + index + '.display'"
+						:label="index==0 ? '诊断' : '第 '+(index+1)+' 诊断'"
+						:rules="[{ required: true, message: '请输入诊断', trigger: 'blur, change' }]">
+						<el-autocomplete size="mini" :name="'diagnose'+index" v-model="diagnose.display" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDiagnosis" :debounce="300" style="width: 100%;" @focus="focusDiagnosisInputIndex=index" ref="encdiagnose">
+							<i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="encounter.diagnoses[index]={code: '', display: ''}"></i>
+							<template slot-scope="props">
+								<el-col :span="10">{{props.item.code}}</el-col>
+								<el-col :span="14">{{props.item.display}}</el-col>
+							</template>
+						</el-autocomplete>
+					</el-form-item>
+				</el-col>
+				<el-col :span="2" class="has-append-btn">
+					<el-tooltip v-if="index>0" effect="dark" content="删除此诊断" placement="right">
+			      <i class="el-icon-remove-outline text-danger" @click="encounter.diagnoses.splice(index, 1)"></i>
+			    </el-tooltip>
+	      	<el-tooltip v-else effect="dark" content="增加其他诊断" placement="right">
+			      <i class="el-icon-circle-plus-outline text-primary" @click="addDiagnosis()"></i>
+			    </el-tooltip>
+				</el-col>
+			</el-row>
+			<el-row v-if="showAllPatInfo">
+				<el-col :span="24">
+					<!-- 过敏信息 -->
+					<el-form-item label="过敏信息">
+						<el-tag
+						  :key="tag"
+						  v-for="tag in encounter.allergens"
+						  size="medium"
+						  closable
+						  :disable-transitions="false"
+						  @close="handleCloseTag(tag)">
+						  {{tag}}
+						</el-tag>
+						<el-input
+						  class="input-new-tag"
+						  v-if="inputTagVisible"
+						  v-model="inputTagValue"
+						  ref="saveTagInput"
+						  style="width: 100px;"
+						  @keyup.enter.native="handleTagInputConfirm"
+						  @blur="handleTagInputConfirm">
+						</el-input>
+						<el-button v-else class="button-new-tag" @click="showTagInput">+ 添加过敏</el-button>
+					</el-form-item>
+				</el-col>
+				<el-col :span="6">
+					<el-form-item
+				    label="血型"
+				    prop="blood">
+				    <el-select v-model="encounter.blood" value-key="code" placeholder="请选择" style="width: 100%;">
+					    <el-option
+					      v-for="item in ($parent.common_data_bloods||[])"
+					      :key="item.code"
+					      :label="item.display"
+					      :value="item">
+					    </el-option>
+					  </el-select>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="6">
+					<el-form-item
+				    label="身高"
+				    prop="height">
+				    <el-input v-model="encounter.height"><template slot="append">cm</template></el-input>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="6">
+					<el-form-item
+				    label="体重"
+				    prop="weight">
+				    <el-input v-model="encounter.weight"><template slot="append">kg</template></el-input>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="6">
+					<el-form-item
+				    label="BMI"
+				    prop="bmi"
+				    v-popover:popoverbmi>
+				    <el-input :value="bmi" placeholder="根据身高和体重自动计算" title="体质指数（BMI）= 体重（kg）÷身高^2（m）" disabled>
+				    	<template slot="append">&nbsp;<i class="fa fa-question"></i>&nbsp;</template>
+				    </el-input>
+				    <el-popover
+              ref="popoverbmi"
+              placement="top"
+              width="300"
+              trigger="click">
+              <h4>成人的BMI数值</h4><hr/>
+              <p class='text-primary'>体质指数(BMI) = 体重(kg)÷身高^2(m)</p>
+              <p>过轻：低于18.5</p>
+              <p>正常：18.5-24.99</p>
+              <p>过重：25-28</p>
+              <p>肥胖：28-32</p>
+              <p>非常肥胖：高于32</p>
+            </el-popover>
+				  </el-form-item>
+				</el-col>
+			</el-row>
+			<!-- 取药点 -->
+			<hr class="info-divider"/>
+			<el-row>
+				<el-col :span="12">
+					<el-form-item
+				    label="取药点"
+				    prop="drugstore_location">
+				    <el-select v-model="encounter.drugstore_location" value-key="id" placeholder="选择药房" style="width: 100%;" ref="enclocation" @keydown.enter.stop.native="focusNext('enclocation', 'encsave')" clearable>
+					    <el-option
+					      v-for="item in locations"
+					      :key="item.id"
+					      :label="item.display"
+					      :value="item">
+					    </el-option>
+					  </el-select>
+				  </el-form-item>
+				</el-col>
+				<el-col :span="12" style="text-align: right;">
+				  <el-form-item>
+				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
+				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
+				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave" plain>
+				    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
+				    	<template v-if="!encounter.id">保存</template>
+				    	<template v-else>更新</template>
+				    </el-button>
+				    <el-button @click="resetEncounterForm('encounterForm')">重置</el-button>
+				  </el-form-item>
+				</el-col>
+			</el-row>
+		</el-form>
+  </el-collapse-item>
+</el-collapse>
