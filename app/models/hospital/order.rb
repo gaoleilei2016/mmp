@@ -3,6 +3,8 @@ class Hospital::Order < ApplicationRecord
 	belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id', optional: true
 	# has_one :dict_medication, class_name: '::Dict::Medication', foreign_key: 'order_id' 
 
+	belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
+
 	# order_type 医嘱类型 1 药品医嘱
 
 	def dict_medication
@@ -11,6 +13,7 @@ class Hospital::Order < ApplicationRecord
 
 	def to_web_front
 		ret = {
+			id: self.id,
 			serialno: self.serialno,
 			title: self.title,
 			specification: self.specification,

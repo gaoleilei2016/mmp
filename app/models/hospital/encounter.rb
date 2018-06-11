@@ -4,6 +4,7 @@ class Hospital::Encounter < ApplicationRecord
 	belongs_to :person, class_name: '::Person', foreign_key: 'person_id', optional: true
 	belongs_to :drugstore_location, class_name: '::Admin::Organization', foreign_key: 'drugstore_location_id', optional: true
 	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'encounter_id'
+	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'encounter_id'
 
 	#1:  如果有person_id就直接取到person
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人

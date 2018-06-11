@@ -5,8 +5,8 @@ class Hospital::OrdersController < ApplicationController
 	# GET
   # /hospital/orders
 	def index
-		@orders = Hospital::Order.all rescue []
-
+		# @orders = Hospital::Order.all rescue []
+    @orders = Hospital::Order.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @orders} }
@@ -18,7 +18,7 @@ class Hospital::OrdersController < ApplicationController
 	def show
 		respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {flag: true, info:"", data: @order} }
+      format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
     end
 	end
 
@@ -43,7 +43,7 @@ class Hospital::OrdersController < ApplicationController
 	# POST
   # /hospital/orders
 	def create
-    p "Hospital::OrdersController",params
+    p "Hospital::OrdersController create",params
 		@order = Hospital::Order.new(format_order_create_args)
 
     respond_to do |format|
@@ -52,7 +52,7 @@ class Hospital::OrdersController < ApplicationController
         format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
       else
         format.html { render action: "new" }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
+        format.json { render json: {flag: false , info: @order.errors} }
       end
     end
 	end
@@ -60,25 +60,33 @@ class Hospital::OrdersController < ApplicationController
 	# PUT
   # PUT /hospital/orders/:id
   def update
+    p "Hospital::OrdersController update",params
     respond_to do |format|
-      if @order.update_attributes(params[:order])
+      if @order.update_attributes(format_order_update_args)
         format.html { redirect_to @order, notice: 'order was successfully updated.' }
-        format.json { render json: {flag: true, info:"", data: @order} }
+        format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
       else
         format.html { render action: "edit" }
-        format.json { render json: @order.errors, status: :unprocessable_entity }
+        format.json { render json: {flag: false , info: @order.errors} }
       end
     end
   end
 
 	# DELETE
   # /hospital/orders/:id
-	def destroy
-		@order.destroy
-
+  #只提供json格式
+  def destroy
+    p "Hospital::OrdersController destroy",params
     respond_to do |format|
-      format.html { redirect_to orders_url }
-      format.json { head :no_content }
+      if @order.status == "N" # 新建状态的可以删除
+        if @order.destroy
+          format.json { render json: {flag: true, info: "删除成功"}  }
+        else
+          format.json { render json: {flag: false, info: "删除失败 #{@order.errors.messages.values}"}  }
+        end
+      else
+        format.json { render json: {flag: false, info: "删除失败 不是新建状态"}  }
+      end
     end
 	end
 
@@ -116,11 +124,11 @@ class Hospital::OrdersController < ApplicationController
         order_type: 1, # 默认保存1 是药品医嘱
         encounter_id: args[:encounter_id],
       }
-      p ret
       return ret
     end
 
     def format_order_update_args
+      args = order_params
       ret = {
         serialno: args[:serialno],
         title: args[:title],

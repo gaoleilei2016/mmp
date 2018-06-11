@@ -5,14 +5,14 @@ class Hospital::EncountersController < ApplicationController
 	# GET
   # /hospital/encounters
 	def index
-		@encounters = Hospital::Encounter.all rescue []
+		@encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @encounters} }
     end
 	end
-
+  
 	# GET
   # /hospital/encounters/:id
 	def show
