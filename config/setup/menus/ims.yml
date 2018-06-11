@@ -2,7 +2,7 @@ portal:
   code: 'PORTAL.IMS'  
   caption: 'XXX'
   path: '/ims/home#/'
-  image: '/assets/index/basic/MMM.png'
+  image: '/assets/index/doctor.png'
   sequence: '99.2'
 headers:
   - code: 'IMS.A21'
