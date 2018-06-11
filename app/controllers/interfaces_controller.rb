@@ -12,7 +12,7 @@ class InterfacesController < ApplicationController
 	############ xixu ############
 	def get_dicts
 		p '~~~~~~~~~~~~~~~',params[:oid]
-		ret = ::User.find_by_sql("select dictdata.name  from dictdata where dictdata .oid='#{params[:oid]}'")
+		ret = ::User.find_by_sql("select  dictdata.code ,dictdata.name  from dictdata where dictdata .oid='#{params[:oid]}'")
 		render json:{rows:ret,total:ret.count}
 	end
 	############ xixu ############
