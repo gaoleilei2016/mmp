@@ -15,14 +15,13 @@ class InterfacesController < ApplicationController
 		ret = ::User.find_by_sql("select  dictdata.code ,dictdata.name  from dictdata where dictdata .oid='#{params[:oid]}'")
 		render json:{rows:ret,total:ret.count}
 	end
-	############ xixu ############
-	#############################
+	
 
 
 
 	def get_addrs
 		p '~~~~~~~~~~~~~~~',params[:code]
-		ret = ::User.find_by_sql("select dictdata.name  from dictdata where dictdata .oid='#{params[:code]}'")
+		ret = ::User.find_by_sql("select  a.*  from dictarea a  where  ('#{params[:code]}'='' and a.supcode is null) or ('#{params[:code]}'<>'' and a.supcode='#{params[:code]}')")
 		render json:{rows:ret,total:ret.count}
 	end
 
@@ -34,5 +33,7 @@ def get_medicine_by_name
 		render json:{rows:ret,total:ret.count}
 	end
 
+    ############ xixu ############
+	#############################
 
 end
