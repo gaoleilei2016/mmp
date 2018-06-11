@@ -30,6 +30,13 @@ Rails.application.routes.draw do
   ########### ims ##########
   namespace :ims do
     resources :home
+    resources :orders do #药品订单
+      collection do
+        get :get_orders
+        get :get_order
+        get :oprate_order
+      end
+    end
   end
   ########### ims ##########
   ############################
