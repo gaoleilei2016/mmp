@@ -7,7 +7,12 @@ class Admin::OrganizationsController < ApplicationController
 	end
 	def show
 		org = ::Admin::Organization.find(params[:id])
-		render json:{flag:true,organization:org,users:org.users}
+		if org.type_code=='1'
+			organizations = org.pharmacy_link.map{|l|l.pharmacy}.compact
+		else
+			organizations = org.hospital_link.map{|l|l.hospital}.compact
+		end
+		render json:{flag:true,organization:org,users:org.users,organizations:organizations}
 	end
 	def create
 		org_data = JSON.parse(params[:organization].to_json)
@@ -16,6 +21,15 @@ class Admin::OrganizationsController < ApplicationController
 		if org.save
 			org.users = User.where(:id=>params[:user_ids])
 			org.save
+			(params[:organization_ids]||[]).each{|o_id|
+				if org.type_code=='1'
+					org.pharmacy_link.create(pharmacy_id:o_id)
+				else
+					org.hospital_link.create(hospital_id:o_id)
+				end
+			}
+			# org.organizations = ::Admin::Organization.where(:id=>params[:organization_ids])
+			# org.save
 			render json:{flag:true,info:"操作成功"}
 		else
 			render json:{flag:false,info:"#{org.errors.messages}"}
@@ -28,6 +42,19 @@ class Admin::OrganizationsController < ApplicationController
 		if org.update_attributes(org_data)
 			org.users = User.where(:id=>params[:user_ids])
 			org.save
+			if org.type_code=='1'
+				org.pharmacy_link.each{|x| x.destroy}
+				(params[:organization_ids]||[]).each{|o_id|
+					org.pharmacy_link.create(pharmacy_id:o_id)
+				}
+			else
+				org.hospital_link.each{|x| x.destroy}
+				(params[:organization_ids]||[]).each{|o_id|
+					org.hospital_link.create(hospital_id:o_id)
+				}
+			end
+			# org.organizations = ::Admin::Organization.where(:id=>params[:organization_ids])
+			# org.save
 			render json:{flag:true,info:"操作成功"}
 		else
 			render json:{flag:false,info:"#{org.errors.messages}"}

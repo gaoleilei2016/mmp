@@ -10,13 +10,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def new
     build_resource
     yield resource if block_given?
+    render "/devise/registrations/new2.html.erb",layout:"customer"
     
-    str = request.user_agent
-    if str.include?('Mobile')
-      render "/devise/registrations/new2.html.erb",layout:"customer"
-    else
-      respond_with resource
-    end
+    # str = request.user_agent
+    # if str.include?('Mobile')
+    # else
+    #   respond_with resource,layout:"customer"
+    # end
 
   end
 
