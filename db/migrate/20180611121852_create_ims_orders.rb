@@ -1,6 +1,8 @@
 class CreateImsOrders < ActiveRecord::Migration[5.1]
   def change
     create_table :ims_orders do |t|
+      t.string :org_ii
+      t.string :org_name
       t.string :source_org_ii
       t.string :source_org_name
       t.string :target_org_ii
