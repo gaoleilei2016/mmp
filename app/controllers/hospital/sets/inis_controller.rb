@@ -3,14 +3,19 @@ class Hospital::Sets::InisController < ApplicationController
 	# GET
   # /hospital/sets/inis
 	def index
-		# @inis = Hospital::Sets::Ini.all rescue []
-    @inis = Hospital::Sets::Ini.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
+    @inis = Hospital::Sets::Ini.all rescue []
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @inis} }
     end
 	end
 
+  # GET
+  # /hospital/sets/inis/cur_org_ini
+  def cur_org_ini
+    p "Hospital::Sets::InisController cur_org_ini", params
+    @ini = Hospital::Sets::Ini.get_org_ini(current_user).to_web_front
+  end
 	# GET
   # /hospital/sets/inis/:id
 	def show
@@ -92,5 +97,18 @@ class Hospital::Sets::InisController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_ini
       @ini = Hospital::Sets::Ini.find(params[:id])
+    end
+
+    def ini_params
+      params[:ini]
+    end
+
+    def format_ini_update_args
+      ret = {
+        enable_print_pres: params[:enable_print_pres],
+        uoperator_id: current_user.id,
+        print_pres_html: params[:print_pres_html]
+      }
+      return ret
     end
 end
