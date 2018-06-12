@@ -1,0 +1,68 @@
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</button>
+	<h1 class="mui-title">确认订单</h1>
+</header>
+<div class="mui-content">
+	<ul class="mui-table-view mui-table-view-chevron">
+		<li class="mui-table-view-cell" style="padding: 11px 15px;">
+			<div style="margin-bottom: 10px;">
+				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="border: 1px solid #ddd;border-radius: 50%;">
+				<div class="mui-media-body">
+					药房
+					<p class="mui-ellipsis">400m</p>
+				</div>
+			</div>
+			<ul class="mui-table-view" style="margin-bottom: 15px;">
+				<li class="mui-table-view-cell mui-media">
+					<div href="javascript:;" class="">
+						<img class="mui-media-object mui-pull-left" src="/assets/admin/TM.png">
+						<div class="mui-media-body">
+							药品1
+							<p class="mui-ellipsis">
+								数量：2
+								<span style="float: right;">￥12.00</span>
+							</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</li>
+	</ul>
+	<ul id="" class="mui-table-view mui-table-view-chevron">
+		<li class="mui-table-view-cell mui-media">
+			<a href="javascript:mui.toast('开发中');" class="mui-navigate-right">
+				<div class="mui-media-body">
+					支付方式
+					<span class='mui-pull-right' style="color: #999;">在线支付</span>
+					<!-- <span class='mui-pull-right' style="color: red;">-5 元</span> -->
+				</div>
+			</a>
+		</li>
+	</ul>
+	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
+		<form class="mui-input-group" action="/users/create_item" method="post">
+			<input type="hidden" name="appid" value="<%= params[:appid] %>">
+			<input type="hidden" name="code" value="<%= params[:code] %>">
+		</form>
+		<a href="javascript:$('form').submit();" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
+		<div style="overflow: hidden;padding-right: 10px;text-align: right;">共<span style="color: red;">1</span>件，总金额 <span style="color: red;">￥75.00</span></div>
+	</div>
+</div>
+<script type="text/javascript" src="/assets/users/vue.min.js"></script>
+<script type="text/javascript">
+
+	// new Vue({
+	// 	el:"#person_info_box",
+	// 	data:function() {
+	// 		return {
+	// 			person:{
+	// 				name:"<%= @user.name rescue '未知姓名' %>",
+	// 				phone:"<%= @user.phone rescue '未知电话' %>",
+	// 			},
+	// 		}
+	// 	}
+	// })
+
+</script>

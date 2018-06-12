@@ -147,20 +147,6 @@
 			.mui-ios .mui-navbar .mui-bar .mui-title {
 				position: static;
 			}
-			/*问题反馈在setting页面单独的css*/
-			#feedback .mui-popover{
-				position: fixed;
-			}
-			#feedback .mui-table-view:last-child {
-			    margin-bottom: 0px;
-			}
-			#feedback .mui-table-view:first-child {
-			    margin-top: 0px;
-			}
-			/*问题反馈在setting页面单独的css==end*/
-			#feedback .mui-icon {
-				font-size: 20px;
-			}
 			input::-webkit-input-placeholder { /* WebKit browsers */
 				color:#e5e5e5;font-size:16px;
 			}
@@ -174,7 +160,6 @@
 				color:#e5e5e5;font-size:16px;
 			}
 		</style>
-		<link rel="stylesheet" type="text/css" href="/assets/plugins/mui/feedback.css" />
 
 		<!--页面主结构开始-->
 		<div id="app" class="mui-views">
@@ -198,31 +183,48 @@
 			<div class="mui-page-content">
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
-						<a href="#account">
+						<p style="margin: 12px 0 8px 12px;">您想去哪取药</p>
+						<a id="click_to_account" href="#account">
 							<div class="mui-indexed-list-search mui-input-row mui-search">
-								<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="" data-input-clear="1" data-input-search="1" style="background: #fff;">
+								<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="" data-input-clear="1" data-input-search="1" style="background: #fff;margin: 0;">
 								<span class="mui-icon mui-icon-clear mui-hidden"></span>
 								<span class="mui-placeholder"><span class="mui-icon mui-icon-search"></span><span>搜索药房</span></span>
 							</div>
 						</a>
-						<ul class="mui-table-view mui-table-view-chevron">
-							<li class="mui-table-view-cell">
-								<a href="#about">
+						<p style="margin: 30px 0 8px 12px;">距离当前最近</p>
+						<ul class="mui-table-view mui-table-view-chevron" style="margin: 0">
+							<li class="mui-table-view-cell" style="padding: 11px 15px;">
+								<div>
 									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="border: 1px solid #ddd;border-radius: 50%;">
 									<div class="mui-media-body">
 										药房
 										<p class="mui-ellipsis">400m</p>
 									</div>
-								</a>
-							</li>
-							<li class="mui-table-view-cell hide">
-								<a href="javascript:;" id="async_weixin_info">同步微信个人信息</a><!-- 第一次注册的用户自动点击同步 -->
-							</li>
-							<!-- <li class="mui-table-view-cell">
-								<a href="https://goldensmarthome.azurewebsites.net/tempDownload/HCare_Inhouse_ALL_2017_test.html">高登 IOS-APP 更新入口</a>
-							</li> -->
-							<li class="mui-table-view-cell hide">
-								<a href="javascript:;" onclick="push_gaodeng();">上传到高登</a>
+									<div>
+										<ul class="mui-table-view" style="margin-bottom: 15px;">
+											<li class="mui-table-view-cell mui-media">
+												<div href="javascript:;" class="">
+													<img class="mui-media-object mui-pull-left" src="/assets/admin/TM.png">
+													<div class="mui-media-body">
+														药品1
+														<p class="mui-ellipsis">
+															数量：2
+															<span style="float: right;">￥12.00</span>
+														</p>
+													</div>
+												</div>
+											</li>
+										</ul>
+									</div>
+									<div style="line-height: 33px;">
+										共计2件　　合计：<span style="color: #FF376F;">￥24.00</span>
+										<a href="/customer/portal/settlement" class="mui-btn mui-btn-primary" style="float: right;">结算</a>
+									</div>
+								</div>
+								<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+									<i class="fa fa-map-marker" style="font-size: 20px;"></i>
+									<p style="font-size: 8px;">查看位置</p>
+								</div>
 							</li>
 						</ul>
 					</div>
@@ -236,130 +238,18 @@
 				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 					<span class="mui-icon mui-icon-left-nav"></span>
 				</button>
-				<input class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;" placeholder="街道名称、药店名称">
+				<input type="text" class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;width: calc( 100% - 60px );" placeholder="街道名称、药店名称">
 				<i class="fa fa-map-marker mui-pull-right" style="padding-top: 12px;"></i>
 			</div>
 			<div class="mui-page-content">
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
-						<ul class="mui-table-view">
-							<li class="mui-table-view-cell">
-								<a id="head" class="mui-navigate-right">头像
-								<span class="mui-pull-right head">
-									<img class="head-img mui-action-preview" id="head-img1" src="<%= session[:user]["headimgurl"] rescue nil %>"/>
-								</span>
-							</a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>姓名<span class="mui-pull-right"><%= session[:user]["name"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>账号<span class="mui-pull-right"><%= session[:user]["login"] rescue '未知' %></span></a>
-							</li>
-						</ul>
-						<ul class="mui-table-view">
-							<li class="mui-table-view-cell">
-								<a>性别<span class="mui-pull-right"><%= session[:user]["sex"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>出生日期<span class="mui-pull-right"><%= session[:user]["birth"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>身高<span class="mui-pull-right"><%= session[:user]["height"] rescue '未知' %></span></a>
-							</li>
-							<!-- <li class="mui-table-view-cell">
-								<a>体重<span class="mui-pull-right"><%#= session[:user]["weight"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>地址<span class="mui-pull-right"><%#= session[:user]["address"] rescue '未知' %></span></a>
-							</li> -->
-						</ul>
 					</div>
 				</div>
-			</div>
-		</div>
-
-		<div id="about" class="mui-page">
-			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-				<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
-					<span class="mui-icon mui-icon-left-nav"></span>设置
-				</button>
-				<h1 class="mui-center mui-title">健康云</h1>
-			</div>
-			<div class="mui-page-content">
-				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll">
-						<ul class="mui-table-view">
-							<li class="mui-table-view-cell">
-								<a id="tel" class="mui-navigate-right">客服电话</a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a id="feedback-btn" href="#feedback" class="mui-navigate-right">问题反馈</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div id="feedback" class="mui-page feedback">
-			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-					<span class="mui-icon mui-icon-left-nav"></span>健康云
-				</button>
-				<button onclick="mui.toast('敬请期待');return false;" id="submit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right">发送</button>
-				<h1 class="mui-center mui-title">问题反馈</h1>
-			</div>
-			<div class="mui-page-content">
-				<div class="mui-content-padded">
-					<div class="mui-inline">问题和意见</div>
-					<a class="mui-pull-right mui-inline" href="#fast_message_popover">
-						<span>快捷输入</span>
-						<span class="mui-icon mui-icon-arrowdown"></span>
-					</a>
-					<!--快捷输入具体内容，开发者可自己替换常用语-->
-					<div id="fast_message_popover" class="mui-popover">
-						<div class="mui-popover-arrow"></div>
-						<div class="mui-scroll-wrapper">
-							<div class="mui-scroll">
-								<ul class="mui-table-view">
-									<!--仅流应用环境下显示-->
-									<li class="mui-table-view-cell stream">
-										<a href="#">桌面快捷方式创建失败</a>
-									</li>
-									<li class="mui-table-view-cell"><a href="#">界面显示错乱</a></li>
-									<li class="mui-table-view-cell"><a href="#">启动缓慢，卡出翔了</a></li>
-									<li class="mui-table-view-cell"><a href="#">偶发性崩溃</a></li>
-									<li class="mui-table-view-cell"><a href="#">UI无法直视，丑哭了</a></li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="row mui-input-row">
-					<textarea id='question' class="mui-input-clear question" placeholder="请详细描述你的问题和意见..."></textarea>
-				</div>
-				<!-- <p>图片(选填,提供问题截图,总大小10M以下)</p>
-				<div id='image-list' class="row image-list"></div> -->
-				<p>QQ/邮箱</p>
-				<div class="mui-input-row">
-					<input id='contact' type="text" class="mui-input-clear contact" placeholder="(选填,方便我们联系你 )" />
-				</div>
-				<div class="mui-content-padded">
-					<div class="mui-inline">应用评分</div>
-					<div class="icons mui-inline" style="margin-left: 6px;">
-						<i data-index="1" class="mui-icon mui-icon-star"></i>
-						<i data-index="2" class="mui-icon mui-icon-star"></i>
-						<i data-index="3" class="mui-icon mui-icon-star"></i>
-						<i data-index="4" class="mui-icon mui-icon-star"></i>
-						<i data-index="5" class="mui-icon mui-icon-star"></i>
-					</div>
-				</div><br />
 			</div>
 		</div>
 
 	<script src="/assets/plugins/mui/mui.view.js "></script>
-	<script src='/assets/plugins/mui/feedback.js'></script>
 	<script>
 		function push_gaodeng() {
 			$("#loading").show();
@@ -406,6 +296,11 @@
 				error:error_fun
 			})
 		})
+		// $("#click_to_account").on('tap',function(e) {
+		// 	// console.log( "@@@@@@@@@@@@@@@" );
+		// 	// alert($(".autofocus").length)
+		// 	$(".autofocus").focus();
+		// })
 		// 第一次登陆的用户提示同步微信数据
 		<% if flash[:async_weixin] %>
 		$("#async_weixin_info").trigger("tap");
@@ -440,10 +335,10 @@
 		});
 
 		var view = viewApi.view;
-		(function($) {
+		(function(mui) {
 			//处理view的后退与webview后退
-			var oldBack = $.back;
-			$.back = function() {
+			var oldBack = mui.back;
+			mui.back = function() {
 				if (viewApi.canBack()) { //如果view可以后退，则执行view的后退
 					viewApi.back();
 				} else { //执行webview后退
@@ -456,10 +351,7 @@
 				//				console.log(e.detail.page.id + ' beforeShow');
 			});
 			view.addEventListener('pageShow', function(e) {
-				$(".autofocus").focus()
-				setTimeout(function() {
-					$(".autofocus").focus()
-				},2000)
+				$(".autofocus").focus();
 				//				console.log(e.detail.page.id + ' show');
 			});
 			view.addEventListener('pageBeforeBack', function(e) {
