@@ -63,6 +63,12 @@ Rails.application.routes.draw do
   ########### ims ##########
   namespace :ims do
     resources :home
+    resources :orders
+    resources :interfaces do
+      collection do
+        
+      end
+    end
   end
   ########### ims ##########
   ############################
