@@ -80,11 +80,11 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.destroy
+		@prescription.update_attributes(:status=>"O")
 
     respond_to do |format|
       format.html { redirect_to prescriptions_url }
-      format.json { head :no_content }
+      format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
     end
 	end
 

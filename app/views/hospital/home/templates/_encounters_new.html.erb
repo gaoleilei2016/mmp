@@ -21,7 +21,7 @@
 			    		<el-form-item
 						    label="诊断">
 						    <el-checkbox-group v-model="prescription.diagnoses">
-							    <el-checkbox v-for="dia in (encounter.diagnoses||[])" :label="dia.display"></el-checkbox>
+							    <el-checkbox v-for="(dia,index) in (encounter.diagnoses||[])" :label="dia.display" :key="index"></el-checkbox>
 							  </el-checkbox-group>
 						  </el-form-item>
 						</el-col>
@@ -126,7 +126,7 @@
 				</el-table>
 			  <span slot="footer" class="dialog-footer">
 			    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
-			    <el-button size="mini" @click="generatePrescription" type="primary"><i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>确 定</el-button>
+			    <el-button size="mini" @click="generatePrescription" type="primary">确 定<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
 			  </span>
 			</el-dialog>
   	</div>
@@ -152,7 +152,7 @@ window.current_template_obj = {
 		return {
 			/* 基础设置 --- start */ 
 				ini: {
-					enable_print_pres: true, // 是否允许打印处方
+					enable_print_pres: true, // 启用打印处方功能
 					print_pres_html: "", // 处方打印样式
 				},
 			/* 基础设置 --- end */ 
@@ -257,6 +257,8 @@ window.current_template_obj = {
     }
 	},
 	mounted: function () {
+		// console.log测试用
+		// apps.encounters_new = this;
 		this.$nextTick(function(){
 			this.init();
 		})
@@ -265,7 +267,7 @@ window.current_template_obj = {
 		/* 公共方法  ---- start */ 
 			init: function() {
 				var _this = this;
-
+				_this.$refs["encname"].focus();
 				// Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
 			 //    var res = response.data;
 			 //    _this.locations = [];
@@ -392,10 +394,14 @@ window.current_template_obj = {
 	        message: "就诊信息保存成功。",
 	        type: 'success'
 	      });
+// 聚焦医嘱搜索框
+	      this.$refs["ordtitle"].focus();
 	    },
 	    // 重置encounter表单
 	    resetEncounterForm: function (formName) {
-	      this.$refs[formName].resetFields();
+	      // this.$refs[formName].resetFields();
+	      // 重置页面
+	      router.push('/refresh');
 	    },
 	    // 判断年龄，如果小于14要求出生日期、监护人必填
 	    judgeAge: function (val) {
@@ -556,12 +562,14 @@ window.current_template_obj = {
     			var res = response.data;
     			if(res.flag) {
     				_this.orders = res.data;
+    				// 默认勾选新建医嘱
+		      	_this.defaultCheckNewOrder();
     			}
     		}, function (response) {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
     		})
     	},
-    	// 搜索药品
+    	// 搜索药品，查询药品
     	searchDrugs: function (queryString, cb) {
     		var _this = this;
     		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
@@ -702,9 +710,27 @@ window.current_template_obj = {
 		        message: "药品保存成功。",
 		        type: 'success'
 		      });
+		      // 默认勾选新建医嘱
+		      this.defaultCheckNewOrder();
+		      // 聚焦医嘱搜索框
+		      this.$refs["ordtitle"].focus();
 	    	} else {
 	    		this.$message.error(res.info);
 	    	}
+	    },
+	    // 默认勾选新建状态的医嘱
+	    defaultCheckNewOrder: function () {
+	    	var _this = this;
+	    	_this.$nextTick(function(){
+		    	(_this.orders||[]).forEach(function (item, index) {
+	    			console.log('----------',item.status)
+		    		if(item.status=="N") {
+		    			_this.$refs["ordersTable"].toggleRowSelection(item);
+		    		} else {
+		    			_this.$refs["ordersTable"].clearSelection();
+		    		}
+		    	})
+				})
 	    },
 	    // 编辑药品
 	    editOrder: function (index, row) {
@@ -726,6 +752,8 @@ window.current_template_obj = {
 		          type: 'warning'
 		        });
 		        _this.orders.splice(index, 1);
+		        // 默认勾选新建医嘱
+		      	_this.defaultCheckNewOrder();
       		}else{
       			_this.$message.error(res.info);
       		}
@@ -806,6 +834,7 @@ window.current_template_obj = {
 		          message: "生成处方成功，请在处方列表中查看。",
 		          type: 'success'
 		        });
+		        _this.getOrders();
       		} else {
 						_this.$message.error(res.info);
       		}
@@ -866,11 +895,63 @@ window.current_template_obj = {
     	},
     	// 复制处方
 			copyPrescription: function (index, row) {
-
+				var _this = this,
+						btn = $(event.target);
+				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【复制】此处方到本次就诊？', '复制', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then( function () {
+        	btn.attr("disabled", "disabled").find(".fa").show();
+					_this.$http.post('/hospital/prescriptions/copy', {id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	          btn.removeAttr("disabled").find(".fa").hide();
+	          var res = response.data;
+	          if(res.flag) {
+	      			_this.$message({
+			          message: res.info,
+			          type: 'success'
+			        });
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	        }, function() {
+	          btn.removeAttr("disabled").find(".fa").hide();
+	          _this.$message.error("后台出错，复制处方失败。请联系管理员");
+	        });
+					
+	      }).catch( function () {
+        	// 取消作废
+        });
 			},
-			// 删除处方
+			// 作废处方
 			deletePrescription: function (index, row) {
-
+				var _this = this,
+						btn = $(event.target);
+				_this.$confirm('是否确定【作废】此处方？', '作废', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then( function () {
+					btn.attr("disabled", "disabled").find(".fa").show();
+					_this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	      		var res = response.data;
+	      		btn.removeAttr("disabled").find(".fa").hide();
+	      		if(res.flag) {
+	      			_this.$message({
+			          message: res.info,
+			          type: 'success'
+			        });
+			        row.status = res.data.status;
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	      	}, function(response) {
+	      		btn.removeAttr("disabled").find(".fa").hide();
+	      		_this.$message.error("生成处方失败，请联系管理员。");
+	      	})
+	      }).catch( function () {
+        	// 取消作废
+        });
 			},
     /* 处方操作 --- end */
 	}
