@@ -17,6 +17,9 @@ $bg-purple-light: #e5e9f2;
 .text-muted {
 	color: $gray-light;
 }
+.text-muted-light {
+	color: #999;
+}
 .text-primary {
 	color: $brand-primary;
 }
@@ -71,6 +74,15 @@ $bg-purple-light: #e5e9f2;
 			border-top: 1px solid #faf8f8;
 			margin-left: 10px;
 		}
+		.search-enc-input {
+			width: 120px;
+			input {
+				border-radius: 15px;
+				border: 1px solid #409eff;
+				transition: .3s linear;
+			}
+			&.addlarge { width: 300px; }
+		}
 	}
 
 	#pane-orders {
@@ -80,6 +92,10 @@ $bg-purple-light: #e5e9f2;
 		}
 		.el-input-group__append {
 			padding: 0 7.5px;
+		}
+		.el-form-item__content > .el-input--mini > input[type="text"] {
+			padding-left: 5px; 
+			padding-right: 5px; 
 		}
 		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
 			background-color: #FAF8F8;
@@ -92,6 +108,22 @@ $bg-purple-light: #e5e9f2;
 		tbody > tr > td {
 			padding: 5px 0;
 			vertical-align: middle;
+		}
+		.orders-table {
+			.inactive-row {
+				color: #999;
+				>td:nth-child(1) > .cell {
+					visibility: hidden;
+				}
+			}
+		}
+	}
+	.encounters-table {
+		table {
+			.el-button {
+				padding-left: 7.5px;
+				padding-right: 7.5px;
+			}
 		}
 	}
 }
@@ -120,4 +152,31 @@ $bg-purple-light: #e5e9f2;
 		}
 	}
 
+}
+
+// 缩小行距
+.thin-row {
+	thead > tr > th {
+		padding: 10px 0;
+		vertical-align: middle;
+	}
+	tbody > tr > td {
+		padding: 10px 0;
+		vertical-align: middle;
+	}
+}
+// 更小的行距
+.thiner-row {
+	thead > tr > th {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+	tbody > tr > td {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+}
+// 表头背景颜色
+.bg-purple-light-thead > th {
+	background-color: $bg-purple-light;
 }
