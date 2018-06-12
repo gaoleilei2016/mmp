@@ -27,7 +27,7 @@ class Orders::Order < ApplicationRecord
 	class << self
 		#attrs = { target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号', user_id:'用户id',details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
 		#订单生成创建
-		def create_order attrs = {}
+		def create_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			order_code = get_order_code
 			order = self.create(
@@ -37,7 +37,7 @@ class Orders::Order < ApplicationRecord
 				 source_org_name: attrs[:source_org_name],
 				 order_code: order_code,
 				 user_id: attrs[:user_id],
-				 status:'N'
+				 status: 'N'
 		 		)
 			attrs[:details].each do |detail|
 				net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
@@ -45,15 +45,33 @@ class Orders::Order < ApplicationRecord
 			end
 			order
 		end	
-
+		#更新订单信息
+		def update_order(attrs = {})
+			attrs = attrs.deep_symbolize_keys
+			order = self.where(:order_code=>attrs.delete(:order_code).to_s).last||self.where(:id=>attrs.delete(:order_id).to_s).last
+			return {ret_code:'-1',info:'未找到需要更新的处方信息！'} unless order
+			order.update_attributes(attrs)
+			{ret_code:'0',info:'更新成功'} 
+		end
+		#更新订单明细信息
+		def update_order_detail(attrs = {})
+			attrs = attrs.deep_symbolize_keys
+			detail = self.where(:id=>attrs.delete(:detail_id).to_s).last
+			return {ret_code:'-1',info:'未找到需要更新的处方信息！'} unless detail
+			detail.update_attributes(attrs)
+			{ret_code:'0',info:'更新成功'} 
+		end
 		private
 		##获取订单号，私有调用
 		def get_order_code
 			t = Time.now
 			y = t.year.to_s[2,2]
 			d = t.yday
-			"#{y}#{d}#{t.object_id}"
+			code = "#{y}#{d}#{t.object_id}"
+			while Orders::Order.where(order_code:code).last
+				code = get_order_code
+			end
+			code
 		end
 	end #内方法
 end
- # target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号', quantity:'数量', net_amt:'', status:'', title:'', describe:'',

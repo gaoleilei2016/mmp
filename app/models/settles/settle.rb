@@ -17,4 +17,10 @@ class Settles::Settle < ApplicationRecord
 #  status VARCHAR(4) NOT NULL,
 #  PRIMARY KEY ( id )
 #  )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+	class << self
+		def settle_save
+			
+		end
+	end
 end
