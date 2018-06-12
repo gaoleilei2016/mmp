@@ -100,7 +100,7 @@
     <div class="mui-content" id="vue_form">
       <form id='login-form' class="mui-input-group" action="/users/sign_in" method="post">
         <div class="mui-input-row">
-          <input type="text" name="phone" class="mui-input-clear mui-input" placeholder="请输入手机号" value="<%= flash[:phone] %>">
+          <input id="phone_input" type="text" name="phone" class="mui-input-clear mui-input" placeholder="请输入手机号" value="<%= flash[:phone] %>">
         </div>
         <div class="mui-input-row">
           <input type="text" name="confirm_code" class="mui-input-clear mui-input" placeholder="请输入验证码">
@@ -118,20 +118,24 @@
   // }
   document.getElementById("get_yanzhengma").addEventListener("tap",function(e) {
     // console.log('xxx')
-    if ($("#get_yanzhengma").hasClass("show_time_line")) {
-    }else{
-      $("#get_yanzhengma").addClass("show_time_line");
-      var sec = 60;
-      $("#get_yanzhengma .time").text(sec);
-      var timer = setInterval(function() {
-        console.log('11111111')
-        sec -= 1;
-        if (sec == -1) {
-          clearInterval(timer);
-          $("#get_yanzhengma").removeClass("show_time_line");
-        }
+    if ( /^\w{11}$/.test($("#phone_input").val()) ) {
+      if ($("#get_yanzhengma").hasClass("show_time_line")) {
+      }else{
+        $("#get_yanzhengma").addClass("show_time_line");
+        var sec = 60;
         $("#get_yanzhengma .time").text(sec);
-      },1000)
+        var timer = setInterval(function() {
+          // console.log('11111111')
+          sec -= 1;
+          if (sec == -1) {
+            clearInterval(timer);
+            $("#get_yanzhengma").removeClass("show_time_line");
+          }
+          $("#get_yanzhengma .time").text(sec);
+        },1000)
+      }
+    }else{
+      mui.toast("请输入11位的手机号码");
     }
   })
   // new Vue({
