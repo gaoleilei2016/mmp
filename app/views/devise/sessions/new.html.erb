@@ -92,7 +92,7 @@
             <div style="margin-top: 10px;text-align: right;">
               <el-checkbox :label="1" name="user[remember_me]" style="float: left;line-height: 40px;">记住我</el-checkbox>
               <el-button type="primary" native-type="submit">登 陆</el-button>
-              <a href="/users/sign_up" class="el-button" onclick="current_app.$message('暂未提供自主注册方式，请联系管理员');return false;"><span>注 册</span></a>
+              <a href="/users/sign_up" class="el-button"><span>注 册</span></a><!--  onclick="current_app.$message('暂未提供自主注册方式，请联系管理员');return false;" -->
             </div>
             <div style="margin-top: 10px;text-align: right;">
               <a style="float: left;" href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;">商户入驻</a>

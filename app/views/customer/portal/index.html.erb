@@ -22,6 +22,10 @@
 				top: 46px;
 				height: auto;
 			}
+			.mui-scroll-wrapper {
+				bottom: 50px;
+				overflow: auto;
+			}
 			.mui-scroll-wrapper, .mui-scroll {
 				background-color: #efeff4;
 			}
@@ -183,23 +187,23 @@
 			<!--页面主内容区开始-->
 			<div class="mui-page-content">
 				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll">
+					<div class="mui-scroll" id="vue_data">
 						<p style="margin: 12px 0 8px 12px;">您想去哪取药</p>
 						<a id="click_to_account" href="#account">
-							<div class="mui-indexed-list-search mui-input-row mui-search">
+							<div class="mui-indexed-list-search mui-input-row mui-search" style="margin: 6px; border: 1px solid #ddd; border-radius: 8px;">
 								<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="" data-input-clear="1" data-input-search="1" style="background: #fff;margin: 0;">
 								<span class="mui-icon mui-icon-clear mui-hidden"></span>
 								<span class="mui-placeholder"><span class="mui-icon mui-icon-search"></span><span>搜索药房</span></span>
 							</div>
 						</a>
 						<p style="margin: 30px 0 8px 12px;">距离当前最近</p>
-						<ul class="mui-table-view mui-table-view-chevron" style="margin: 0">
+						<ul class="mui-table-view mui-table-view-chevron" style="margin: 8px;" v-for="item in prescriptions">
 							<li class="mui-table-view-cell" style="padding: 11px 15px;">
 								<div>
 									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="border: 1px solid #ddd;border-radius: 50%;">
 									<div class="mui-media-body">
-										药房
-										<p class="mui-ellipsis">400m</p>
+										???
+										<p class="mui-ellipsis">???m</p>
 									</div>
 								</div>
 								<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
@@ -214,7 +218,7 @@
 												药品1
 												<p class="mui-ellipsis">
 													数量：2
-													<span style="float: right;">￥12.00</span>
+													<span style="float: right;">单价：￥12.00</span>
 												</p>
 											</div>
 										</div>
@@ -250,60 +254,35 @@
 
 	<script src="/assets/plugins/mui/mui.view.js "></script>
 	<script>
-		function push_gaodeng() {
-			$("#loading").show();
-			$.ajax({
-				url:'/users/push_gaodeng.json',
-				type:'post',
-				data:{
-					api:'new_user',
-				},
-				success:function(json){
-					mui.toast(json.msg,{duration:3000});
-					// if (!json.error) {
-						alert(json.msg);
-						location.reload();
-					// }
-				},
-				complete:function() {
-					$("#loading").hide();
-				},
-				error:error_fun
-			})
-		}
-		$("#async_weixin_info").on('tap',function(e) {
-			mui.toast("正在同步微信个人信息",{duration:12000});
-			$("#loading").show();
-			$.ajax({
-				url:'/users/wechat_info.json',
-				type:'post',
-				success:function(json) {
-					alert(json.msg);
-					if (json.error==false) {
-						// mui.toast(json.msg);
-						<% if flash[:async_weixin] %>
-						location.href='/users/qrcode'
-						<% else %>
-						location.reload();
-						<% end -%>
-					}else{
-					}
-				},
-				complete:function() {
-					$("#loading").hide();
-				},
-				error:error_fun
-			})
+		new Vue({
+			el:"#vue_data",
+			data:{
+				prescriptions:[],
+			},
+			methods:{
+				get_prescriptions:function() {
+					var _this = this;
+					$("#loading").show();
+					$.ajax({
+						url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+						success:function(json) {
+							if (json.flag) {
+								_this.prescriptions = json.data;
+							}else{
+								_this.$message(json.info);
+							}
+						},
+						complete:function() {
+							$("#loading").hide();
+						},
+						error:error_fun
+					})
+				}
+			},
+			mounted:function() {
+				this.get_prescriptions();
+			}
 		})
-		// $("#click_to_account").on('tap',function(e) {
-		// 	// console.log( "@@@@@@@@@@@@@@@" );
-		// 	// alert($(".autofocus").length)
-		// 	$(".autofocus").focus();
-		// })
-		// 第一次登陆的用户提示同步微信数据
-		<% if flash[:async_weixin] %>
-		$("#async_weixin_info").trigger("tap");
-		<% end -%>
 		// 
 		<% if flash[:notice].present? %>
 		mui.toast("<%= flash[:notice] rescue nil %>",{duration:8000});
@@ -315,23 +294,6 @@
 		});
 		//初始化单页的区域滚动
 		mui('.mui-scroll-wrapper').scroll();
-
-		setTimeout(function () {
-			// defaultImg();
-			setTimeout(function() {
-				initImgPreview();
-			}, 300);
-		},500);
-
-		//客服电话
-		document.getElementById("tel").addEventListener('tap', function() {
-			if(mui.os.plus){
-				plus.device.dial("85282580");
-			}else{
-				location.href = 'tel:85282580';
-			}
-			
-		});
 
 		var view = viewApi.view;
 		(function(mui) {
@@ -360,66 +322,6 @@
 				//				console.log(e.detail.page.id + ' back');
 			});
 		})(mui);
-
-		// function defaultImg() {
-		// 	if(mui.os.plus){
-		// 		plus.io.resolveLocalFileSystemURL("_doc/head.jpg", function(entry) {
-		// 			var s = entry.fullPath + "?version=" + new Date().getTime();;
-		// 			document.getElementById("head-img").src = s;
-		// 			document.getElementById("head-img1").src = s;
-		// 		}, function(e) {
-		// 			document.getElementById("head-img").src = '/assets/TM.png';
-		// 			document.getElementById("head-img1").src = '/assets/TM.png';
-		// 		})
-		// 	}else{
-		// 		document.getElementById("head-img").src = '/assets/TM.png';
-		// 		document.getElementById("head-img1").src = '/assets/TM.png';
-		// 	}
-			
-		// }
-		// document.getElementById("head-img1").addEventListener('tap', function(e) {
-		// 	e.stopPropagation();
-		// });
-
-		function initImgPreview() {
-			var imgs = document.querySelectorAll("img.mui-action-preview");
-			imgs = mui.slice.call(imgs);
-			if (imgs && imgs.length > 0) {
-				var slider = document.createElement("div");
-				slider.setAttribute("id", "__mui-imageview__");
-				slider.classList.add("mui-slider");
-				slider.classList.add("mui-fullscreen");
-				slider.style.display = "none";
-				slider.addEventListener("tap", function() {
-					slider.style.display = "none";
-				});
-				slider.addEventListener("touchmove", function(event) {
-					event.preventDefault();
-				})
-				var slider_group = document.createElement("div");
-				slider_group.setAttribute("id", "__mui-imageview__group");
-				slider_group.classList.add("mui-slider-group");
-				imgs.forEach(function(value, index, array) {
-					//给图片添加点击事件，触发预览显示；
-					value.addEventListener('tap', function() {
-						slider.style.display = "block";
-						_slider.refresh();
-						_slider.gotoItem(index, 0);
-					})
-					var item = document.createElement("div");
-					item.classList.add("mui-slider-item");
-					var a = document.createElement("a");
-					var img = document.createElement("img");
-					img.setAttribute("src", value.src);
-					a.appendChild(img)
-					item.appendChild(a);
-					slider_group.appendChild(item);
-				});
-				slider.appendChild(slider_group);
-				document.body.appendChild(slider);
-				var _slider = mui(slider).slider();
-			}
-		}
 		
 	</script>
 
