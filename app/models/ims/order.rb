@@ -29,7 +29,7 @@ class Ims::Order < ApplicationRecord
     		self.where(query)
       rescue Exception => e
         print e.message rescue "  e.messag----"
-        print "laaaaaaaaaaaaaaaaaaaa 发药 出错: " + e.backtrace.join("\n")
+        print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
         result = {flag:false,:info=>"药房系统出错。"}
       end
   	end
@@ -50,9 +50,15 @@ class Ims::Order < ApplicationRecord
   		begin
   			args = args.deep_symbolize_key
   			patient_order_id = args.delete :id
-  			
+  			self_sym = self.new.attribute_names.map(&:to_sym)
+  			args.keep_if {|k,v| self_sym.include?(k)}
+  			args[:patient_order_id] = patient_order_id
+  			self.create(args)
+  			{flag:true,:info=>"订单的接收成功。"}
   		rescue Exception => e
-  			
+  			print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 订单的接收 出错: " + e.backtrace.join("\n")
+        {flag:false,:info=>"药房系统出错。"}
   		end
   	end
 

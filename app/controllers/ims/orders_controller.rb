@@ -1,10 +1,10 @@
 class Ims::OrdersController < ApplicationController
-  before_action :set_ims_order, only: [:show, :edit, :update, :destroy]
+  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order]
 
   # GET /ims/orders
   # GET /ims/orders.json
   def index
-    @ims_orders = Ims::Order.all
+    @ims_orders = Ims::Order.order_search params
   end
 
   # GET /ims/orders/1
@@ -60,6 +60,19 @@ class Ims::OrdersController < ApplicationController
       format.json { head :no_content }
     end
   end
+
+  # 订单发药
+  def dispensing_order
+    @reslut = @ims_order.dispensing_order
+    render json:@reslut.to_json
+  end
+
+  # 订单退药
+  def return_order
+    @reslut = @ims_order.return_order
+    render json:@reslut.to_json
+  end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.

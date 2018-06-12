@@ -6,25 +6,18 @@ class Ims::InterfacesController < Admin::User::SessionsController
 
   #
   def common_interface
-    resources = RestClient::Resource.new "http://#{::Admin::User.ip(:cmc)}/interfaces/get_session_data.json?session_id="+params[:session_id].to_s #'http://199.199.199.233:3000/hr/hr_interfaces/organizations.json'
+    resources = RestClient::Resource.new "http://#{localhost}/interfaces/get_session_data.json?session_id="+params[:session_id].to_s #'http://199.199.199.233:3000/hr/hr_interfaces/organizations.json'
     json = JSON.parse(resources.get) 
     render json:json
   end
 
-  # 订单
+  # 订单接收
   def receive_order
     response.headers['Access-Control-Allow-Origin'] = '*'
-    departments = RestClient::Resource.new "http://#{::Admin::User.ip(:cmc)}/hr/hr_interfaces/departments.json?org_ii="+current_user.org_ii #'http://199.199.199.233:3000/hr/hr_interfaces/organizations.json'
-    deps = JSON.parse(departments.get) 
-    Erp::Setting::Department.create_departments deps,current_user.org_ii
-    # if json['flag']
-    #   depInfo = json['data'].deep_symbolize_keys!
-    #   p depInfo
-    #   redirect_to params[:path].present? ? params[:path] : "/"
-    # else
-    #   render json:json
-    # end
-    render json:{flag:true,info:"获取成功！"}
+    # departments = RestClient::Resource.new "http://#{localhost}/hr/hr_interfaces/departments.json?org_ii="+current_user.org_ii #'http://199.199.199.233:3000/hr/hr_interfaces/organizations.json'
+    p params
+    received = Ims::Order.receive_order params
+    render json:received.to_json
   end
   
 end
