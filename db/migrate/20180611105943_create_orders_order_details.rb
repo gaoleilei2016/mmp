@@ -10,6 +10,7 @@ class CreateOrdersOrderDetails < ActiveRecord::Migration[5.1]
       t.string :dosage
       t.float :price
       t.float :net_amt
+      t.string :persecipt_id
       t.string :img_path
 
       t.timestamps
