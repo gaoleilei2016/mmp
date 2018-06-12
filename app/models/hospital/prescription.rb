@@ -33,21 +33,94 @@ class ::Hospital::Prescription < ApplicationRecord
 	end
 
 	def to_web_front
-		ret = {
-			id: self.id,
-			organization_id: self.organization_id,
-			status: self.status,
-			note: self.note,
-			code: self.code,
-			bill_id: self.bill_id,
-			confidentiality: self.confidentiality,
-			doctor_id: self.doctor_id,
-			encounter_id: self.encounter_id,
-			effective_start: self.effective_start,
-			effective_end: self.effective_end,
-			diagnoses: self.diagnoses,
-			orders: self.orders
+		# 患者信息
+		cur_encounter = self.encounter
+		patient_info = {
+			# 姓名
+			name: cur_encounter.name,
+			# 性别
+			gender: {
+			  code: cur_encounter.gender_code, 
+			  display: cur_encounter.gender_display
+			},
+			# 年龄
+			age: cur_encounter.age,
+			# 出生日期
+			birth_date: cur_encounter.birth_date,
+			# 身份证号
+			iden: cur_encounter.iden,
+			# 职业
+			occupation:{
+			  code: cur_encounter.occupation_code,
+			  display: cur_encounter.occupation_display
+			},
+			# 电话
+			phone: cur_encounter.phone,
+			# 地址
+			address: cur_encounter.address,
 		}
+		# 机构信息
+		cur_org = self.organization
+		organization_info = {
+			# 处方开单机构
+			org:{
+				id: cur_org.id,
+				display: cur_org.name
+			}
+		}
+		# 就诊信息
+		cur_doctor = self.doctor
+		encounter_info = {
+			# 就诊号
+			patient_no: cur_encounter.outpatient_no,
+			# 就诊医生
+			author: {
+				id: cur_doctor.id,
+				display: cur_doctor.name
+			},
+			# 就诊科室
+			encounter_loc: {
+				id: '',
+				display: ''
+			}
+		}
+
+		# 处方信息
+		prescription_info = {
+			# 处方id 
+			id: self.id,
+			# 处方号
+			prescription_no: self.prescription_no || Time.now.to_i,
+			# 处方状态
+			status: self.status,
+			# 处方备注
+			note: self.note,
+			# 处方类型 精一等
+			type: {
+				code: self.type_code,
+				display: self.type_display
+			},
+			# 账单id
+			bill_id: self.bill_id,
+			# 处方权限
+			confidentiality: {
+				code: self.confidentiality_code,
+				display: self.confidentiality_display
+			},
+			# 有效期开始
+			effective_start: self.effective_start,
+			# 有效期截止
+			effective_end: self.effective_end,
+			# 该处方对应的诊断
+			diagnoses: self.diagnoses,
+			# 该处方对应的医嘱
+			orders: self.orders.map { |e| e.to_web_front  },
+			price: self.orders.map{|e| e.price }.reduce(:+),
+			specialmark: self.specialmark,
+			created_at: self.created_at,
+			updated_at: self.updated_at
+		}
+		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(prescription_info)
 		return ret
 	end
 

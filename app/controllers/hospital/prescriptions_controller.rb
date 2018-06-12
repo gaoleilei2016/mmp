@@ -6,7 +6,7 @@ class Hospital::PrescriptionsController < ApplicationController
   # /hospital/prescriptions
 	def index
 		@prescriptions = Hospital::Prescription.all rescue []
-
+    @prescriptions = @prescriptions.map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @prescriptions} }
@@ -95,22 +95,24 @@ class Hospital::PrescriptionsController < ApplicationController
     end
 
     def prescription_params
-      params
+      params[:prescription]
     end
 
     def format_prescription_create_args
       args = prescription_params
       cur_orders = ::Hospital::Order.find(args[:ids])
-      cur_encounter = ::Hospital::Encounter.find(args[:encounter_id])
+      cur_encounter = ::Hospital::Encounter.find(params[:encounter_id])
       cur_org = current_user.organization
       diagnoses_args = args[:diagnoses]
       prescription = {
         organization_id: cur_org.id,
         status: "N",
         note: args[:note],
-        code: args[:code],
+        type_code: "1",
+        type_display: "普通处方",
         bill_id: nil,
-        confidentiality: args[:confidentiality],
+        confidentiality_code: "0",
+        confidentiality_display: "医院",
         doctor_id: current_user.id,
         encounter_id: cur_encounter.id,
         effective_start: Time.now,

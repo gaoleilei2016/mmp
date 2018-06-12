@@ -40,7 +40,12 @@ Rails.application.routes.draw do
   ########### hospital ##########
   namespace :hospital do
     resources :home
-    resources :encounters  # 就诊管理、统计
+    # 就诊管理、统计
+    resources :encounters do 
+      member do
+        get :all_prescriptions
+      end
+    end
     resources :orders      # 药品
     resources :prescriptions      # 处方
     resources :histories      # 历史列表
