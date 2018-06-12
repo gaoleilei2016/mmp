@@ -105,6 +105,7 @@
 <el-table
 	:data="orders"
 	class="orders-table"
+	ref="ordersTable"
 	:row-class-name="judgeOrderRow"
 	@selection-change="handleOrdersSelectionChange"
 	style="width: 100%">
