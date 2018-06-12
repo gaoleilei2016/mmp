@@ -16,6 +16,7 @@
       <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[ 姓名 ]</b>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
+      <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
       <span v-if="!activeCollapse || activeCollapse.length==0">
       	<i class="fa fa-fw fa-lg fa-phone text-muted-light"></i>{{encounter.phone}}&#12288;
       	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>

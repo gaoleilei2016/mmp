@@ -1,0 +1,119 @@
+<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
+<el-dialog
+	title="生成处方"
+  :visible.sync="showSendPresDialog"
+  width="90%">
+	<el-form size="mini" :rules="prescriptionRules" :model="prescription" ref="prescriptionForm" label-width="100px">
+  	<el-row>
+			<el-col :span="12">
+    		<el-form-item
+			    label="诊断">
+			    <el-checkbox-group v-model="prescription.diagnoses">
+				    <el-checkbox v-for="(dia,index) in (encounter.diagnoses||[])" :label="dia.display" :key="index"></el-checkbox>
+				  </el-checkbox-group>
+			  </el-form-item>
+			</el-col>
+			<el-col :span="6">
+    		<el-form-item
+			    label="类型">
+			    <el-select v-model="prescription.type" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+				    <el-option
+				      v-for="item in ($parent.common_data_prescription_types||[])"
+				      :key="item.code"
+				      :label="item.display"
+				      :value="item">
+				    </el-option>
+				  </el-select>
+			  </el-form-item>
+			</el-col>
+			<el-col :span="6">
+    		<el-form-item
+			    label="">
+			    <el-checkbox v-model="prescription.specialmark">特殊门诊处方标记</el-checkbox>
+			  </el-form-item>
+			</el-col>
+		</el-row>
+	</el-form>
+	<br/>
+  <el-table
+		:data="sendOrders"
+		class="thin-row"
+		header-row-class-name="bg-purple-light-thead"
+		style="width: 100%">
+	  <el-table-column
+	    min-width="20"
+	    label="#">
+	    <template slot-scope="scope">
+	      {{ scope.$index + 1 }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    prop="title"
+	    min-width="250"
+	    label="名称">
+	  </el-table-column>
+	  <el-table-column
+	    prop="specification"
+	    min-width="70"
+	    label="规格">
+	  </el-table-column>
+	  <el-table-column
+	    min-width="80"
+	    label="单次数量">
+	    <template slot-scope="scope">
+	    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="80"
+	    label="单次剂量">
+	    <template slot-scope="scope">
+	    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="50"
+	    label="途径">
+	    <template slot-scope="scope">
+	    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="80"
+	    label="频次">
+	    <template slot-scope="scope">
+	    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="50"
+	    label="疗程">
+	    <template slot-scope="scope">
+	    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="60"
+	    label="总量">
+	    <template slot-scope="scope">
+	    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="80"
+	    label="单价">
+	    <template slot-scope="scope">
+	    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    prop="note"
+	    min-width="100"
+	    label="备注">
+	  </el-table-column>
+	</el-table>
+  <span slot="footer" class="dialog-footer">
+    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
+    <el-button size="mini" @click="generatePrescription" type="primary">确 定<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+  </span>
+</el-dialog>

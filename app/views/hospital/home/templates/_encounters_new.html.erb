@@ -8,130 +8,16 @@
 		<!-- 主业务区域 -->
   	<div class="float-right-btns" style="position: relative;">
   		<div style="position: absolute; top: 5px; right: 0; z-index: 999;">
-  			<el-button size="mini" type="primary" @click="openPrescriptionModal"><i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>生成处方</el-button>
+  			<!-- 历史就诊tab -->
+  			<!-- 药品tab显示模板和生成处方按钮 -->
+  			<el-button size="mini" v-if="activeTab=='orders'" @click="openFavoriteModal">模板</el-button>
+  			<el-button size="mini" v-if="activeTab=='orders'" type="primary" @click="openPrescriptionModal">生成处方</el-button>
+  			<!-- 处方Tab -->
   		</div>
-  		<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
-			<el-dialog
-				title="生成处方"
-			  :visible.sync="showSendPresDialog"
-			  width="90%">
-				<el-form size="mini" :rules="prescriptionRules" :model="prescription" ref="prescriptionForm" label-width="100px">
-			  	<el-row>
-						<el-col :span="12">
-			    		<el-form-item
-						    label="诊断">
-						    <el-checkbox-group v-model="prescription.diagnoses">
-							    <el-checkbox v-for="(dia,index) in (encounter.diagnoses||[])" :label="dia.display" :key="index"></el-checkbox>
-							  </el-checkbox-group>
-						  </el-form-item>
-						</el-col>
-						<el-col :span="6">
-			    		<el-form-item
-						    label="类型">
-						    <el-select v-model="prescription.type" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
-							    <el-option
-							      v-for="item in ($parent.common_data_prescription_types||[])"
-							      :key="item.code"
-							      :label="item.display"
-							      :value="item">
-							    </el-option>
-							  </el-select>
-						  </el-form-item>
-						</el-col>
-						<el-col :span="6">
-			    		<el-form-item
-						    label="">
-						    <el-checkbox v-model="prescription.specialmark">特殊门诊处方标记</el-checkbox>
-						  </el-form-item>
-						</el-col>
-					</el-row>
-				</el-form>
-				<br/>
-			  <el-table
-					:data="sendOrders"
-					class="thin-row"
-					header-row-class-name="bg-purple-light-thead"
-					style="width: 100%">
-				  <el-table-column
-				    min-width="20"
-				    label="#">
-				    <template slot-scope="scope">
-				      {{ scope.$index + 1 }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="title"
-				    min-width="250"
-				    label="名称">
-				  </el-table-column>
-				  <el-table-column
-				    prop="specification"
-				    min-width="70"
-				    label="规格">
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单次数量">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单次剂量">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="50"
-				    label="途径">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="频次">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="50"
-				    label="疗程">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="60"
-				    label="总量">
-				    <template slot-scope="scope">
-				    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单价">
-				    <template slot-scope="scope">
-				    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="note"
-				    min-width="100"
-				    label="备注">
-				  </el-table-column>
-				</el-table>
-			  <span slot="footer" class="dialog-footer">
-			    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
-			    <el-button size="mini" @click="generatePrescription" type="primary">确 定<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
-			  </span>
-			</el-dialog>
+			
   	</div>
 		<el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
-      <el-tab-pane label="历史记录" name="histories">历史记录</el-tab-pane>
+      <el-tab-pane label="历史就诊" name="histories">历史就诊</el-tab-pane>
       <el-tab-pane label="药品" name="orders">
       	<!-- 开药之前提示先保存患者基本信息 -->
       	<%= render "hospital/home/render/encounters_orders" %>
@@ -143,7 +29,8 @@
 				
       </el-tab-pane>
     </el-tabs>
-
+  	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
+  	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
 	</div>
 </template>
 <script type="text/javascript">
@@ -277,6 +164,12 @@ window.current_template_obj = {
 			 //  },function() {
 			 //  	_this.$message.error("获取药房失败，请联系管理员。");
 			 //  })
+			 // 获取基础设置内容
+			 Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+			 	console.log('-------------res',response)
+			 },function() {
+			  	_this.$message.error("获取初始值失败，请联系管理员。");
+			  })
 			},
 			// 聚焦下一个
 	  	focusNext: function (now, next) {
@@ -394,7 +287,7 @@ window.current_template_obj = {
 	        message: "就诊信息保存成功。",
 	        type: 'success'
 	      });
-// 聚焦医嘱搜索框
+				// 聚焦医嘱搜索框
 	      this.$refs["ordtitle"].focus();
 	    },
 	    // 重置encounter表单
@@ -774,6 +667,10 @@ window.current_template_obj = {
       	} else {
       		return "inactive-row";
       	}
+      },
+      // 打开模板弹出框，使用模板，创建模板
+      openFavoriteModal: function () {
+
       },
     /* 药品操作 --- end */
 
