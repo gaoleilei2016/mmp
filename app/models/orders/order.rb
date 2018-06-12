@@ -16,7 +16,10 @@ class Orders::Order < ApplicationRecord
 #  source_org_name VARCHAR(32) NOT NULL '来源机构名称',
 #  order_code VARCHAR(32) NOT NULL '订单号',
 #  user_id VARCHAR(32) NOT NULL '用户id',
+#  person_id varchar(32)  NULL 'personid',
+#  doctor varchar(32)  NULL '开单医生',
 #  shipping_name varchar(20)  NULL '物流名称',
+#  shipping_code varchar(20)  NULL '物流单号',
 #  shipping_code varchar(20)  NULL '物流单号',
 #  payment_type float NOT NULL '支付类型,1.在线支付,2.货到付款',
 #  status VARCHAR(4) NOT NULL '未付款,已付款,未发货,已发货,交易成功,交易关闭',
@@ -41,7 +44,9 @@ class Orders::Order < ApplicationRecord
 				 source_org_ii: attrs[:source_org_ii],
 				 source_org_name: attrs[:source_org_name],
 				 order_code: order_code,
+				 doctor: attrs[:doctor],
 				 user_id: attrs[:user_id],
+				 user_id: attrs[:person_id],
 				 status: 'N'
 		 		)
 			Relation::OrdersAndPrescription.create(prescript_id:attrs[:prescript_id] ,order_id:order.id.to_s)
@@ -84,7 +89,7 @@ class Orders::Order < ApplicationRecord
 			y = t.year.to_s[2,2]
 			d = t.yday
 			code = "#{y}#{d}#{t.object_id}"
-			while Orders::Order.where(order_code:code).last
+			while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 				code = get_order_code
 			end
 			code
