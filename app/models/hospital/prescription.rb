@@ -32,7 +32,10 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+
+
 	def to_web_front
+		self.reload
 		# 患者信息
 		cur_encounter = self.encounter
 		patient_info = {
@@ -124,7 +127,24 @@ class ::Hospital::Prescription < ApplicationRecord
 		return ret
 	end
 
+	def send_to_check
+		self.reload
+		# 审核成功 自动审核
+		flag = true
+		cur_encounter = self.encounter
+		cur_org = self.organization
+		cur_doctor = self.doctor
+		price = self.orders.map{|e| e.price }.reduce(:+)
+		total_fee = [price.to_s ,"元"].join(" ")
+		#发送短信息
+		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
+		args = {type: :take_medic, name: cur_encounter.name, number: self.prescription_no || Time.now.to_i, total_fee: total_fee,number1: '1111', url: 'http连接', phone: cur_encounter.phone}
+		p args
+		Sms::Data.send_phone(args)
+	end
+
 	class<<self
+
 	end
 
 end

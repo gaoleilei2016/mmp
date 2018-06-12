@@ -51,7 +51,12 @@ Rails.application.routes.draw do
       end
     end
     resources :orders      # 药品
-    resources :prescriptions      # 处方
+    # 处方
+    resources :prescriptions do
+      collection do
+        get :get_prescriptions_by_phone
+      end
+    end
     resources :histories      # 历史列表
   end
   ########### hospital ##########

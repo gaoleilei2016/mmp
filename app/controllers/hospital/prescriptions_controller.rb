@@ -53,6 +53,8 @@ class Hospital::PrescriptionsController < ApplicationController
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
         p "link_orders save"
+        # 发送处方消息
+        @prescription.send_to_check()
         format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
         format.json { render json: {flag: true, info:"", data: @prescription.to_web_front} }
       else
@@ -87,6 +89,17 @@ class Hospital::PrescriptionsController < ApplicationController
       format.json { head :no_content }
     end
 	end
+
+  # GET
+  # /hospital/prescriptions/get_prescriptions_by_phone
+  def get_prescriptions_by_phone
+    p "get_prescriptions_by_phone", params
+    cur_phone = params[:phone]
+    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+    p cur_phone
+    @prescriptions = ::Hospital::Interface.get_prescription(cur_phone).map { |e| e.to_web_front  }
+    render json: {flag: true, info: "success", data: @prescriptions}
+  end
 
 	private
     # Use callbacks to share common setup or constraints between actions.
