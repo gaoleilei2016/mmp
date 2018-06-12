@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180612021211) do
+ActiveRecord::Schema.define(version: 20180612072906) do
+
+  create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "pharmacy_id"
+    t.string "hospital_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "admin_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "type_code"
@@ -18,7 +25,7 @@ ActiveRecord::Schema.define(version: 20180612021211) do
     t.string "jianpin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "yaofang_type"
+    t.boolean "yaofang_type"
   end
 
   create_table "admin_organizations_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -79,7 +86,7 @@ ActiveRecord::Schema.define(version: 20180612021211) do
 
   create_table "dictdisease", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "疾病字典表" do |t|
     t.string "codetype", limit: 6, comment: "代码类别(9:ICD9,10:ICD10)"
-    t.string "ICD10", limit: 20, null: false, comment: "ICD10，放弃"
+    t.string "ICD10", limit: 20, null: false, comment: "ICD10编码"
     t.string "ICD9", limit: 20, comment: "ICD9,ICD码"
     t.string "name", limit: 100, null: false, comment: "疾病名称"
     t.decimal "kind", precision: 18, comment: "疾病类别（用于临床医生站）"
@@ -130,6 +137,12 @@ ActiveRecord::Schema.define(version: 20180612021211) do
     t.timestamp "updated_at", comment: "最后修改时间"
     t.string "coperator", limit: 20, comment: "建立人"
     t.string "uoperator", limit: 20, comment: "最后修改人员"
+  end
+
+  create_table "health_cloud_ws_sys", primary_key: "sid", id: :integer, unsigned: true, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "company", limit: 50
+    t.string "strprgid", limit: 50, null: false
+    t.string "strprgpws", limit: 50, null: false
   end
 
   create_table "hospital_diagnoses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -240,6 +253,16 @@ ActiveRecord::Schema.define(version: 20180612021211) do
     t.string "type_display", comment: "处分类型名称"
     t.string "confidentiality_display", comment: " 权限描述"
     t.string "prescription_no", comment: "处方号"
+    t.boolean "specialmark", default: false, comment: "特殊处方标记"
+  end
+
+  create_table "hospital_sets_inis", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.boolean "enable_print_pres"
+    t.integer "uoperator_id"
+    t.text "print_pres_html"
+    t.integer "org_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "ims_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -260,6 +283,16 @@ ActiveRecord::Schema.define(version: 20180612021211) do
     t.string "ori_id", comment: "原单id（退药的情况）"
     t.string "ori_code", comment: "原单单号（退药情况）"
     t.boolean "this_returned", default: false, comment: "该单是否已退"
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
+  end
+
+  create_table "ims_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "org_ii", comment: "组织机构代码"
+    t.string "org_name", collation: "utf8_german2_ci", comment: "组织机构名称"
+    t.integer "returned_at", comment: "退药时间天数"
+    t.integer "payment_Expired", comment: "付费未取药过期天数"
+    t.integer "unpaid_expired", comment: "未支付订单过期天数"
     t.datetime "created_at", null: false, comment: "创建时间"
     t.datetime "updated_at", null: false, comment: "更新时间"
   end

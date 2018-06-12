@@ -2,7 +2,14 @@ class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
 	def get_pharmacy
-		orgs = ::Admin::Organization.where(:type_code=>'2')
+		org = current_user.organization
+		raise "无机构的用户" unless org
+		raise "非医院的用户" unless org.type_code=='1'
+		if org.yaofang_type
+			orgs = org.pharmacy_link.map{|x| x.pharmacy}.compact
+		else
+			orgs = ::Admin::Organization.where(:type_code=>'2')
+		end
 		render json:{rows:orgs,total:orgs.count}
 	end
 	############ zyz ############

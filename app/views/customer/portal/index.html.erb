@@ -1,1 +1,425 @@
-portal
+
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.mui-views,
+			.mui-view,
+			.mui-pages,
+			.mui-page,
+			.mui-page-content {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				height: 100%;
+				background-color: #efeff4;
+			}
+			.mui-pages {
+				top: 46px;
+				height: auto;
+			}
+			.mui-scroll-wrapper, .mui-scroll {
+				background-color: #efeff4;
+			}
+			.mui-scroll {
+				padding-bottom: 50px;
+			}
+			.mui-page.mui-transitioning {
+				-webkit-transition: -webkit-transform 300ms ease;
+				transition: transform 300ms ease;
+			}
+			.mui-page-left {
+				-webkit-transform: translate3d(0, 0, 0);
+				transform: translate3d(0, 0, 0);
+			}
+			.mui-ios .mui-page-left {
+				-webkit-transform: translate3d(-20%, 0, 0);
+				transform: translate3d(-20%, 0, 0);
+			}
+			.mui-navbar {
+				position: fixed;
+				right: 0;
+				left: 0;
+				z-index: 10;
+				height: 44px;
+				background-color: #f7f7f8;
+			}
+			.mui-navbar .mui-bar {
+				position: absolute;
+				background: transparent;
+				text-align: center;
+			}
+			.mui-android .mui-navbar-inner.mui-navbar-left {
+				opacity: 0;
+			}
+			.mui-ios .mui-navbar-left .mui-left,
+			.mui-ios .mui-navbar-left .mui-center,
+			.mui-ios .mui-navbar-left .mui-right {
+				opacity: 0;
+			}
+			.mui-navbar .mui-btn-nav {
+				-webkit-transition: none;
+				transition: none;
+				-webkit-transition-duration: .0s;
+				transition-duration: .0s;
+			}
+			.mui-navbar .mui-bar .mui-title {
+				display: inline-block;
+				width: auto;
+			}
+			.mui-page-shadow {
+				position: absolute;
+				right: 100%;
+				top: 0;
+				width: 16px;
+				height: 100%;
+				z-index: -1;
+				content: '';
+			}
+			.mui-page-shadow {
+				background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, .01) 50%, rgba(0, 0, 0, .2) 100%);
+				background: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, .01) 50%, rgba(0, 0, 0, .2) 100%);
+			}
+			.mui-navbar-inner.mui-transitioning,
+			.mui-navbar-inner .mui-transitioning {
+				-webkit-transition: opacity 300ms ease, -webkit-transform 300ms ease;
+				transition: opacity 300ms ease, transform 300ms ease;
+			}
+			.mui-page {
+				display: none;
+			}
+			.mui-pages .mui-page {
+				display: block;
+			}
+			.mui-page .mui-table-view:first-child {
+				margin-top: 15px;
+			}
+			.mui-page .mui-table-view:last-child {
+				margin-bottom: 30px;
+			}
+			.mui-table-view {
+				margin-top: 20px;
+			}
+			
+			.mui-table-view span.mui-pull-right {
+				color: #999;
+			}
+			.mui-table-view-divider {
+				background-color: #efeff4;
+				font-size: 14px;
+			}
+			.mui-table-view-divider:before,
+			.mui-table-view-divider:after {
+				height: 0;
+			}
+			.head {
+				height: 40px;
+			}
+			#head {
+				line-height: 40px;
+			}
+			.head-img {
+				width: 40px;
+				height: 40px;
+			}
+			#head-img1 {
+				position: absolute;
+				bottom: 10px;
+				right: 40px;
+				width: 40px;
+				height: 40px;
+			}
+			.update {
+				font-style: normal;
+				color: #999999;
+				margin-right: -25px;
+				font-size: 15px
+			}
+			.mui-fullscreen {
+				position: fixed;
+				z-index: 20;
+				background-color: #000;
+			}
+			.mui-ios .mui-navbar .mui-bar .mui-title {
+				position: static;
+			}
+			input::-webkit-input-placeholder { /* WebKit browsers */
+				color:#e5e5e5;font-size:16px;
+			}
+			input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+				color:#e5e5e5;font-size:16px;
+			}
+			input::-moz-placeholder { /* Mozilla Firefox 19+ */
+				color:#e5e5e5;font-size:16px;
+			}
+			input:-ms-input-placeholder { /* Internet Explorer 10+ */
+				color:#e5e5e5;font-size:16px;
+			}
+		</style>
+
+		<!--页面主结构开始-->
+		<div id="app" class="mui-views">
+			<div class="mui-view">
+				<div class="mui-navbar">
+				</div>
+				<div class="mui-pages">
+				</div>
+			</div>
+		</div>
+		<!--页面主结构结束-->
+		<!--单页面开始-->
+		<div id="setting" class="mui-page">
+			<!--页面标题栏开始-->
+			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+				<h1 class="mui-center mui-title mui-pull-left">医药管理平台</h1>
+				<!-- <span>医药管理平台</span> -->
+				<i class="fa fa-qrcode mui-pull-right" style="font-size: 40px;padding-top: 4px;"></i>
+			</div>
+			<!--页面标题栏结束-->
+			<!--页面主内容区开始-->
+			<div class="mui-page-content">
+				<div class="mui-scroll-wrapper">
+					<div class="mui-scroll">
+						<p style="margin: 12px 0 8px 12px;">您想去哪取药</p>
+						<a id="click_to_account" href="#account">
+							<div class="mui-indexed-list-search mui-input-row mui-search">
+								<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="" data-input-clear="1" data-input-search="1" style="background: #fff;margin: 0;">
+								<span class="mui-icon mui-icon-clear mui-hidden"></span>
+								<span class="mui-placeholder"><span class="mui-icon mui-icon-search"></span><span>搜索药房</span></span>
+							</div>
+						</a>
+						<p style="margin: 30px 0 8px 12px;">距离当前最近</p>
+						<ul class="mui-table-view mui-table-view-chevron" style="margin: 0">
+							<li class="mui-table-view-cell" style="padding: 11px 15px;">
+								<div>
+									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="border: 1px solid #ddd;border-radius: 50%;">
+									<div class="mui-media-body">
+										药房
+										<p class="mui-ellipsis">400m</p>
+									</div>
+								</div>
+								<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+									<i class="fa fa-map-marker" style="font-size: 20px;"></i>
+									<p style="font-size: 8px;">查看位置</p>
+								</div>
+								<ul class="mui-table-view" style="margin: 15px 0;">
+									<li class="mui-table-view-cell mui-media">
+										<div href="javascript:;" class="">
+											<img class="mui-media-object mui-pull-left" src="/assets/admin/TM.png">
+											<div class="mui-media-body">
+												药品1
+												<p class="mui-ellipsis">
+													数量：2
+													<span style="float: right;">￥12.00</span>
+												</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+								<div style="line-height: 33px;">
+									共计2件　　合计：<span style="color: #FF376F;">￥24.00</span>
+									<a href="/customer/portal/settlement" class="mui-btn mui-btn-primary" style="float: right;">结算</a>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!--页面主内容区结束-->
+		</div>
+		<!--单页面结束-->
+		<div id="account" class="mui-page">
+			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+					<span class="mui-icon mui-icon-left-nav"></span>
+				</button>
+				<input type="text" class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;width: calc( 100% - 60px );" placeholder="街道名称、药店名称">
+				<i class="fa fa-map-marker mui-pull-right" style="padding-top: 12px;"></i>
+			</div>
+			<div class="mui-page-content">
+				<div class="mui-scroll-wrapper">
+					<div class="mui-scroll">
+					</div>
+				</div>
+			</div>
+		</div>
+
+	<script src="/assets/plugins/mui/mui.view.js "></script>
+	<script>
+		function push_gaodeng() {
+			$("#loading").show();
+			$.ajax({
+				url:'/users/push_gaodeng.json',
+				type:'post',
+				data:{
+					api:'new_user',
+				},
+				success:function(json){
+					mui.toast(json.msg,{duration:3000});
+					// if (!json.error) {
+						alert(json.msg);
+						location.reload();
+					// }
+				},
+				complete:function() {
+					$("#loading").hide();
+				},
+				error:error_fun
+			})
+		}
+		$("#async_weixin_info").on('tap',function(e) {
+			mui.toast("正在同步微信个人信息",{duration:12000});
+			$("#loading").show();
+			$.ajax({
+				url:'/users/wechat_info.json',
+				type:'post',
+				success:function(json) {
+					alert(json.msg);
+					if (json.error==false) {
+						// mui.toast(json.msg);
+						<% if flash[:async_weixin] %>
+						location.href='/users/qrcode'
+						<% else %>
+						location.reload();
+						<% end -%>
+					}else{
+					}
+				},
+				complete:function() {
+					$("#loading").hide();
+				},
+				error:error_fun
+			})
+		})
+		// $("#click_to_account").on('tap',function(e) {
+		// 	// console.log( "@@@@@@@@@@@@@@@" );
+		// 	// alert($(".autofocus").length)
+		// 	$(".autofocus").focus();
+		// })
+		// 第一次登陆的用户提示同步微信数据
+		<% if flash[:async_weixin] %>
+		$("#async_weixin_info").trigger("tap");
+		<% end -%>
+		// 
+		<% if flash[:notice].present? %>
+		mui.toast("<%= flash[:notice] rescue nil %>",{duration:8000});
+		<% end -%>
+		mui.init();
+		//初始化单页view
+		var viewApi = mui('#app').view({
+			defaultPage: '#setting'
+		});
+		//初始化单页的区域滚动
+		mui('.mui-scroll-wrapper').scroll();
+
+		setTimeout(function () {
+			// defaultImg();
+			setTimeout(function() {
+				initImgPreview();
+			}, 300);
+		},500);
+
+		//客服电话
+		document.getElementById("tel").addEventListener('tap', function() {
+			if(mui.os.plus){
+				plus.device.dial("85282580");
+			}else{
+				location.href = 'tel:85282580';
+			}
+			
+		});
+
+		var view = viewApi.view;
+		(function(mui) {
+			//处理view的后退与webview后退
+			var oldBack = mui.back;
+			mui.back = function() {
+				if (viewApi.canBack()) { //如果view可以后退，则执行view的后退
+					viewApi.back();
+				} else { //执行webview后退
+					oldBack();
+				}
+			};
+			//监听页面切换事件方案1,通过view元素监听所有页面切换事件，目前提供pageBeforeShow|pageShow|pageBeforeBack|pageBack四种事件(before事件为动画开始前触发)
+			//第一个参数为事件名称，第二个参数为事件回调，其中e.detail.page为当前页面的html对象
+			view.addEventListener('pageBeforeShow', function(e) {
+				//				console.log(e.detail.page.id + ' beforeShow');
+			});
+			view.addEventListener('pageShow', function(e) {
+				$(".autofocus").focus();
+				//				console.log(e.detail.page.id + ' show');
+			});
+			view.addEventListener('pageBeforeBack', function(e) {
+				//				console.log(e.detail.page.id + ' beforeBack');
+			});
+			view.addEventListener('pageBack', function(e) {
+				//				console.log(e.detail.page.id + ' back');
+			});
+		})(mui);
+
+		// function defaultImg() {
+		// 	if(mui.os.plus){
+		// 		plus.io.resolveLocalFileSystemURL("_doc/head.jpg", function(entry) {
+		// 			var s = entry.fullPath + "?version=" + new Date().getTime();;
+		// 			document.getElementById("head-img").src = s;
+		// 			document.getElementById("head-img1").src = s;
+		// 		}, function(e) {
+		// 			document.getElementById("head-img").src = '/assets/TM.png';
+		// 			document.getElementById("head-img1").src = '/assets/TM.png';
+		// 		})
+		// 	}else{
+		// 		document.getElementById("head-img").src = '/assets/TM.png';
+		// 		document.getElementById("head-img1").src = '/assets/TM.png';
+		// 	}
+			
+		// }
+		// document.getElementById("head-img1").addEventListener('tap', function(e) {
+		// 	e.stopPropagation();
+		// });
+
+		function initImgPreview() {
+			var imgs = document.querySelectorAll("img.mui-action-preview");
+			imgs = mui.slice.call(imgs);
+			if (imgs && imgs.length > 0) {
+				var slider = document.createElement("div");
+				slider.setAttribute("id", "__mui-imageview__");
+				slider.classList.add("mui-slider");
+				slider.classList.add("mui-fullscreen");
+				slider.style.display = "none";
+				slider.addEventListener("tap", function() {
+					slider.style.display = "none";
+				});
+				slider.addEventListener("touchmove", function(event) {
+					event.preventDefault();
+				})
+				var slider_group = document.createElement("div");
+				slider_group.setAttribute("id", "__mui-imageview__group");
+				slider_group.classList.add("mui-slider-group");
+				imgs.forEach(function(value, index, array) {
+					//给图片添加点击事件，触发预览显示；
+					value.addEventListener('tap', function() {
+						slider.style.display = "block";
+						_slider.refresh();
+						_slider.gotoItem(index, 0);
+					})
+					var item = document.createElement("div");
+					item.classList.add("mui-slider-item");
+					var a = document.createElement("a");
+					var img = document.createElement("img");
+					img.setAttribute("src", value.src);
+					a.appendChild(img)
+					item.appendChild(a);
+					slider_group.appendChild(item);
+				});
+				slider.appendChild(slider_group);
+				document.body.appendChild(slider);
+				var _slider = mui(slider).slider();
+			}
+		}
+		
+	</script>
+
