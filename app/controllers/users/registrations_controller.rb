@@ -15,7 +15,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if str.include?('Mobile')
       render "/devise/registrations/new2.html.erb",layout:"customer"
     else
-      respond_with resource
+      respond_with resource,layout:"customer"
     end
 
   end

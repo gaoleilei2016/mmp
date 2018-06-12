@@ -1,18 +1,18 @@
 #encoding:utf-8
 #接诊管理、统计
 class Hospital::EncountersController < ApplicationController
-	before_action :set_encounter, only: [:show, :edit, :update, :destroy]
+	before_action :set_encounter, only: [:show, :edit, :update, :destroy, :all_prescriptions]
 	# GET
   # /hospital/encounters
 	def index
-		@encounters = Hospital::Encounter.all rescue []
+		@encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
 
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @encounters} }
     end
 	end
-
+  
 	# GET
   # /hospital/encounters/:id
 	def show
@@ -95,6 +95,16 @@ class Hospital::EncountersController < ApplicationController
         format.html { render action: "edit" }
         format.json { render json: @encounter.errors, status: :unprocessable_entity }
       end
+    end
+  end
+
+  # GET
+  # /hospital/encounters/:id/all_prescriptions
+  def all_prescriptions
+    @prescriptions = @encounter.prescriptions.map { |e| e.to_web_front }
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: {flag: true, info:"", data: @prescriptions} }
     end
   end
 

@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     :passwords => "users/passwords",
   }
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  root to:"customer/home#index"
+  root to:"customer/portal#index"
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
@@ -44,7 +44,12 @@ Rails.application.routes.draw do
   ########### hospital ##########
   namespace :hospital do
     resources :home
-    resources :encounters  # 就诊管理、统计
+    # 就诊管理、统计
+    resources :encounters do 
+      member do
+        get :all_prescriptions
+      end
+    end
     resources :orders      # 药品
     resources :prescriptions      # 处方
     resources :histories      # 历史列表

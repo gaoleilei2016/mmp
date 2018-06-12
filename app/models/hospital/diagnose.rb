@@ -2,6 +2,7 @@ class Hospital::Diagnose < ApplicationRecord
 
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id', optional: true
 	belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id', optional: true
+	belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
 
 
 		class<<self

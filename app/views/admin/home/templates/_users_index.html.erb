@@ -44,7 +44,7 @@
 				</template>
 			</el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="机构" prop="organization_id" width="100"></el-table-column>
-			<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="手机号" prop="login"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="邮箱" prop="email"></el-table-column>
@@ -56,7 +56,7 @@
 				<el-tabs type="border-card">
 				<!-- <el-tabs type="border-card" v-if="seleced_project.form_type==2" key="2" @tab-click="$parent.element_tab_table_bug([$refs.data_table2,$refs.data_table3])"> -->
 					<el-tab-pane label="基本信息">
-						<el-form-item label="登录名" prop="login">
+						<el-form-item label="手机号" prop="login">
 							<el-input v-model="ruleForm.login"></el-input>
 						</el-form-item>
 						<div class="clear"></div>
