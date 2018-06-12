@@ -1,0 +1,20 @@
+#encoding: utf-8
+
+defaults: &defaults
+  usable: true
+  name: 贵州腾迈华希医疗
+  appid: wx123
+  appsecret: 9e2nn
+  mchid: JSON
+  pay_key: utf-8
+  domain_name: http://huaxi.tenmind.com
+  awesome_setting: <%= "#{Rails.root}/config/setup/pay/apiclient_cert.p12" %>
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
