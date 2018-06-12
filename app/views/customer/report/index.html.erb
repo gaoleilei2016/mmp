@@ -68,7 +68,7 @@
 
 			<div>
 				<!-- <div class="white_bg_bar"><span>健康得分：</span><span style="color: #00c2ff;">90</span></div> -->
-				<div id="chart_div_leida" style="height: 240px;"></div>
+				<!-- <div id="chart_div_leida" style="height: 240px;"></div> -->
 
 				<ul class="mui-table-view mui-grid-view mui-grid-9" style="background: #fff;">
 					<router-link :to="{name:'ws_ecg_heart'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
@@ -318,40 +318,40 @@
 		},
 		mounted:function() {
 			var _this = this;
-			$('#chart_div_leida').highcharts({
-				chart: {
-					polar: true,
-					type: 'area'
-				},
-				title: {
-					text: '',
-				},
-				pane: {
-					size: '80%'
-				},
-				xAxis: {
-					categories: ['运动', '情绪压力', '体重体脂', '体温',
-					'血压', '血糖'],
-					tickmarkPlacement: 'on',
-					lineWidth: 0
-				},
-				yAxis: {
-					gridLineInterpolation: 'polygon',
-					lineWidth: 0,
-					min: 0,
-					max: 100
-				},
-				legend: false,
-				tooltip: {
-					shared: true,
-					pointFormat: '<span style="color:{series.color}">得分: <b>{point.y:,.0f}</b><br/>'
-				},
-				series: [{
-					name: '健康状况概览',
-					data: [46, 51, 0, 55, 48, 54],
-					pointPlacement: 'on'
-				}]
-			});
+			// $('#chart_div_leida').highcharts({
+			// 	chart: {
+			// 		polar: true,
+			// 		type: 'area'
+			// 	},
+			// 	title: {
+			// 		text: '',
+			// 	},
+			// 	pane: {
+			// 		size: '80%'
+			// 	},
+			// 	xAxis: {
+			// 		categories: ['运动', '情绪压力', '体重体脂', '体温',
+			// 		'血压', '血糖'],
+			// 		tickmarkPlacement: 'on',
+			// 		lineWidth: 0
+			// 	},
+			// 	yAxis: {
+			// 		gridLineInterpolation: 'polygon',
+			// 		lineWidth: 0,
+			// 		min: 0,
+			// 		max: 100
+			// 	},
+			// 	legend: false,
+			// 	tooltip: {
+			// 		shared: true,
+			// 		pointFormat: '<span style="color:{series.color}">得分: <b>{point.y:,.0f}</b><br/>'
+			// 	},
+			// 	series: [{
+			// 		name: '健康状况概览',
+			// 		data: [46, 51, 0, 55, 48, 54],
+			// 		pointPlacement: 'on'
+			// 	}]
+			// });
 			$.ajax({
 				url:'/users/weight_advise.json',
 				success:function(json) {

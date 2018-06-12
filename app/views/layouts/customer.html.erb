@@ -61,7 +61,7 @@
 		</div>
 		<% unless [["users/sessions",'new'],["users/sessions",'sign_up'],["users/registrations",'new'],["users/registrations",'create']].index([controller_path,action_name]) %>
 		<nav class="mui-bar mui-bar-tab ">
-			<a class="mui-tab-item" href="javascript:;" data-url="/customer/portal">
+			<a class="mui-tab-item users_home" href="javascript:;" data-url="/customer/portal">
 				<span class="mui-icon fa fa-home"></span>
 				<span class="mui-tab-label">首页</span>
 			</a>
@@ -69,13 +69,12 @@
 				<span class="mui-icon fa fa-area-chart"></span>
 				<span class="mui-tab-label">健康</span>
 			</a>
-			<a class="mui-tab-item users_home" href="javascript:;" data-url="/customer/home">
+			<a class="mui-tab-item" href="javascript:;" data-url="/customer/home">
 				<span class="mui-icon fa fa-user-o"><span class="mui-badge" style="padding: 4px;"></span></span>
 				<span class="mui-tab-label">我的</span>
 			</a>
 		</nav>
 		<script type="text/javascript">
-			console.log( '111111111111' );
 			// 底部导航 当前变色
 			if (location.pathname=='/') {
 				$(".mui-tab-item.users_home").addClass("mui-active");
@@ -87,7 +86,6 @@
 				})
 			}
 			$(".mui-tab-item").on('tap',function(e) {
-			console.log( '22222222' );
 				if ($(this).attr("data-url")) {
 					location = $(this).attr("data-url");
 				}
