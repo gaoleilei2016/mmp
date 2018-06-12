@@ -79,15 +79,26 @@ class Ims::Order < ApplicationRecord
   	def receive_order args={}
   		begin
   			args = args.deep_symbolize_key
-  			order = args[:order_code]
-  			
-
-
-
-  			patient_order_id = args.delete :id
-  			self_sym = self.new.attribute_names.map(&:to_sym)
-  			args.keep_if {|k,v| self_sym.include?(k)}
-  			args[:patient_order_id] = patient_order_id
+  			order_code = args[:order_code]
+  			order = Orders::Order.where(order_code:order_code).last
+  			return {flag:true,:info=>"订单的接收失败。"} if order.blank?
+  			search_name = ""
+  			total_amount = order.details.sum(:net_amt)
+  			self.create{{
+  				:org_ii => order.target_org_ii,
+					:org_name => order.target_org_name,
+					:source_org_ii => order.source_org_ii, 
+					:source_org_name => order.source_org_name, 
+					:target_org_ii => order.target_org_ii, 
+					:target_org_name => order.target_org_name, 
+					:patient_order_id => order.id.to_s,
+					:order_code => order.order_code,
+					:patient_name => '',
+					:repeat_number => (order.quantity||1),
+					:total_amount => total_amount,
+					:search_name => search_name,
+					:this_returned => false,
+  				}}
   			self.create(args)
   			{flag:true,:info=>"订单的接收成功。"}
   		rescue Exception => e

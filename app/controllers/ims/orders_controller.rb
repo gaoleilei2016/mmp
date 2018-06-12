@@ -1,5 +1,4 @@
 class Ims::OrdersController < ApplicationController
-<<<<<<< HEAD
   before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order]
 
   # GET /ims/orders
@@ -72,6 +71,12 @@ class Ims::OrdersController < ApplicationController
   def return_order
     @reslut = @ims_order.return_order
     render json:@reslut.to_json
+  end
+
+  # 获取已发送到该药店的订单
+  def get_orders
+  	@data = Ims::Order.order_search params
+    render json:@data.to_json
   end
 
 
