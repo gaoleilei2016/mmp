@@ -43,6 +43,13 @@ Rails.application.routes.draw do
   ############################
   ########### hospital ##########
   namespace :hospital do
+    namespace :sets do
+      resources :inis do
+        collection do
+          get :cur_org_ini
+        end
+      end
+    end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
