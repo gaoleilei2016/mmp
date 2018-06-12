@@ -1,0 +1,102 @@
+<%= form_with(model: ims_order, local: true) do |form| %>
+  <% if ims_order.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ims_order.errors.count, "error") %> prohibited this ims_order from being saved:</h2>
+
+      <ul>
+      <% ims_order.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :source_org_ii %>
+    <%= form.text_field :source_org_ii, id: :ims_order_source_org_ii %>
+  </div>
+
+  <div class="field">
+    <%= form.label :source_org_name %>
+    <%= form.text_field :source_org_name, id: :ims_order_source_org_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :target_org_ii %>
+    <%= form.text_field :target_org_ii, id: :ims_order_target_org_ii %>
+  </div>
+
+  <div class="field">
+    <%= form.label :target_org_name %>
+    <%= form.text_field :target_org_name, id: :ims_order_target_org_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :patient_order_id %>
+    <%= form.text_field :patient_order_id, id: :ims_order_patient_order_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :order_code %>
+    <%= form.text_field :order_code, id: :ims_order_order_code %>
+  </div>
+
+  <div class="field">
+    <%= form.label :patient_name %>
+    <%= form.text_field :patient_name, id: :ims_order_patient_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :repeat_number %>
+    <%= form.text_field :repeat_number, id: :ims_order_repeat_number %>
+  </div>
+
+  <div class="field">
+    <%= form.label :total_amount %>
+    <%= form.text_field :total_amount, id: :ims_order_total_amount %>
+  </div>
+
+  <div class="field">
+    <%= form.label :search_name %>
+    <%= form.text_field :search_name, id: :ims_order_search_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :note %>
+    <%= form.text_field :note, id: :ims_order_note %>
+  </div>
+
+  <div class="field">
+    <%= form.label :operater %>
+    <%= form.text_field :operater, id: :ims_order_operater %>
+  </div>
+
+  <div class="field">
+    <%= form.label :operat_at %>
+    <%= form.datetime_select :operat_at, id: :ims_order_operat_at %>
+  </div>
+
+  <div class="field">
+    <%= form.label :ori_id %>
+    <%= form.text_field :ori_id, id: :ims_order_ori_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :ori_code %>
+    <%= form.text_field :ori_code, id: :ims_order_ori_code %>
+  </div>
+
+  <div class="field">
+    <%= form.label :created_at %>
+    <%= form.datetime_select :created_at, id: :ims_order_created_at %>
+  </div>
+
+  <div class="field">
+    <%= form.label :updated_at %>
+    <%= form.datetime_select :updated_at, id: :ims_order_updated_at %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

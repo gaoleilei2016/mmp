@@ -1,0 +1,59 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Ims Orders</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Source org ii</th>
+      <th>Source org name</th>
+      <th>Target org ii</th>
+      <th>Target org name</th>
+      <th>Patient order</th>
+      <th>Order code</th>
+      <th>Patient name</th>
+      <th>Repeat number</th>
+      <th>Total amount</th>
+      <th>Search name</th>
+      <th>Note</th>
+      <th>Operater</th>
+      <th>Operat at</th>
+      <th>Ori</th>
+      <th>Ori code</th>
+      <th>Created at</th>
+      <th>Updated at</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @ims_orders.each do |ims_order| %>
+      <tr>
+        <td><%= ims_order.source_org_ii %></td>
+        <td><%= ims_order.source_org_name %></td>
+        <td><%= ims_order.target_org_ii %></td>
+        <td><%= ims_order.target_org_name %></td>
+        <td><%= ims_order.patient_order_id %></td>
+        <td><%= ims_order.order_code %></td>
+        <td><%= ims_order.patient_name %></td>
+        <td><%= ims_order.repeat_number %></td>
+        <td><%= ims_order.total_amount %></td>
+        <td><%= ims_order.search_name %></td>
+        <td><%= ims_order.note %></td>
+        <td><%= ims_order.operater %></td>
+        <td><%= ims_order.operat_at %></td>
+        <td><%= ims_order.ori_id %></td>
+        <td><%= ims_order.ori_code %></td>
+        <td><%= ims_order.created_at %></td>
+        <td><%= ims_order.updated_at %></td>
+        <td><%= link_to 'Show', ims_order %></td>
+        <td><%= link_to 'Edit', edit_ims_order_path(ims_order) %></td>
+        <td><%= link_to 'Destroy', ims_order, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Ims Order', new_ims_order_path %>
