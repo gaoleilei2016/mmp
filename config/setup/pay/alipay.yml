@@ -4,11 +4,13 @@ defaults: &defaults
   usable: true
   name: 贵州腾迈华希医疗
   app_id: 2018060860325957
+  url: https://openapi.alipay.com/gateway.do
+  api_name: alipay.trade.wap.pay
   format: JSON
   charset: utf-8
   sign_type: RSA2
   version: 1.0
-  notify_url: http://huaxi.tenmind.com
+  notify_url: http://mmp.tenmind.com
   awesome_setting: <%= "Did you know 5 + 5 = #{5 + 5}?" %>
 
 development:
