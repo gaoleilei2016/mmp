@@ -1,6 +1,7 @@
 class Orders::Order < ApplicationRecord
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
-	belongs_to :user, class_name: '::User', foreign_key: 'user_id'
+	# has_many :perscripts, class_name: '', foreign_key: 'order_id'
+	belongs_to :user, class_name: '::User', foreign_key: 'order_id'
 
 # CREATE TABLE Order(
 #  id INT NOT NULL AUTO_INCREMENT,
@@ -25,7 +26,8 @@ class Orders::Order < ApplicationRecord
 # rails generate model Orders::Order payment_at:time end_time:time close_time:time target_org_ii:string target_org_name:string source_org_ii:string source_org_name:string order_code:string user_id:string shipping_name:string shipping_code:string payment_type:float status:string
 
 	class << self
-		#attrs = { target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号', user_id:'用户id',details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
+		#attrs = { target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号',perscript_id:'处方id', user_id:'用户id',
+		#details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
 		#订单生成创建
 		def create_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
@@ -39,6 +41,7 @@ class Orders::Order < ApplicationRecord
 				 user_id: attrs[:user_id],
 				 status: 'N'
 		 		)
+			Relation::OrdersAndPrescription.create(prescript_id:attrs[:prescript_id] ,order_id:order.id.to_s)
 			attrs[:details].each do |detail|
 				net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 				Orders::OrderDetail.create(detail.merge({order_id:order.id,net_amt:net_amt}))

@@ -15,6 +15,7 @@ class Orders::OrderDetail < ApplicationRecord
 #  dosage varchar(32) NULL COMMENT '剂型',
 #  price float(32) NOT NULL COMMENT '单价',
 #  net_amt float(32) NOT NULL COMMENT '总价',
+#  prescript_id varchar(32) NOT NULL COMMENT '处方id',
 #  img_path varchar(6000) NULL COMMENT '图标',
 #  PRIMARY KEY ( id )
 #  )
