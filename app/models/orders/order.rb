@@ -24,10 +24,14 @@ class Orders::Order < ApplicationRecord
 #  )
 
 # rails generate model Orders::Order payment_at:time end_time:time close_time:time target_org_ii:string target_org_name:string source_org_ii:string source_org_name:string order_code:string user_id:string shipping_name:string shipping_code:string payment_type:float status:string
+	#订单金额
+	def net_amt
+		details.sum(:net_amt)
+	end
 
 	class << self
 		#attrs = { target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号',perscript_id:'处方id', user_id:'用户id',details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
-		#订单生成创建
+		#订单生成创建（一个订单内容对应一张处方）
 		def create_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			order_code = get_order_code
@@ -47,6 +51,9 @@ class Orders::Order < ApplicationRecord
 			end
 			order
 		end	
+
+		#获取订单生成数据
+		def
 		#更新订单信息
 		def update_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
@@ -62,6 +69,13 @@ class Orders::Order < ApplicationRecord
 			return {ret_code:'-1',info:'未找到需要更新的处方信息！'} unless detail
 			detail.update_attributes(attrs)
 			{ret_code:'0',info:'更新成功'} 
+		end
+
+		#作废订单明细
+		def remove_order_detail(attrs = {})
+			attrs = attrs.deep_symbolize_keys
+			detail = ::Orders::OrderDetail.where(:id=>attrs.delete(:detail_id).to_s).last
+			detail.order.update_attributes("status"=>'C')
 		end
 		private
 		##获取订单号，私有调用
