@@ -44,7 +44,12 @@ Rails.application.routes.draw do
   ########### hospital ##########
   namespace :hospital do
     resources :home
-    resources :encounters  # 就诊管理、统计
+    # 就诊管理、统计
+    resources :encounters do 
+      member do
+        get :all_prescriptions
+      end
+    end
     resources :orders      # 药品
     resources :prescriptions      # 处方
     resources :histories      # 历史列表
@@ -70,4 +75,8 @@ Rails.application.routes.draw do
   end
   ########### ims ##########
   ############################
+
+  ########### hujun_start ##########
+  match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
+  ########### hujun_end   ##########
 end
