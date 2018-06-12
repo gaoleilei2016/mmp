@@ -3,14 +3,20 @@ class InterfacesController < ApplicationController
 	############ zyz ############
 	def get_pharmacy
 		org = current_user.organization
-		raise "无机构的用户" unless org
-		raise "非医院的用户" unless org.type_code=='1'
-		if org.yaofang_type
-			orgs = org.pharmacy_link.map{|x| x.pharmacy}.compact
+		if org
+			raise "非医院的用户" unless org.type_code=='1'
+			# 医院用户选择合作药房
+			if org.yaofang_type
+				orgs = org.pharmacy_link.map{|x| x.pharmacy}.compact
+			else
+				orgs = ::Admin::Organization.where(:type_code=>'2')
+			end
+			render json:{rows:orgs,total:orgs.count}
 		else
-			orgs = ::Admin::Organization.where(:type_code=>'2')
+			# 客户选择常用药房
+			orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+			render json:{rows:orgs,total:orgs.total_count}
 		end
-		render json:{rows:orgs,total:orgs.count}
 	end
 	############ zyz ############
 	#############################

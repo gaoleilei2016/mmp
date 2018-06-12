@@ -30,7 +30,7 @@
 				background-color: #efeff4;
 			}
 			.mui-scroll {
-				padding-bottom: 50px;
+				/*padding-bottom: 50px;*/
 			}
 			.mui-page.mui-transitioning {
 				-webkit-transition: -webkit-transform 300ms ease;
@@ -163,6 +163,9 @@
 			input:-ms-input-placeholder { /* Internet Explorer 10+ */
 				color:#e5e5e5;font-size:16px;
 			}
+			#order_items + ul{
+				margin-top: 8px !important;
+			}
 		</style>
 
 		<!--页面主结构开始-->
@@ -196,11 +199,12 @@
 								<span class="mui-placeholder"><span class="mui-icon mui-icon-search"></span><span>搜索药房</span></span>
 							</div>
 						</a>
-						<p style="margin: 30px 0 8px 12px;">距离当前最近</p>
-						<ul class="mui-table-view mui-table-view-chevron" style="margin: 8px;" v-for="item in prescriptions">
-							<li class="mui-table-view-cell" style="padding: 11px 15px;">
+						<p id="order_items" style="margin: 30px 0 8px 12px;">距离当前最近</p>
+						<ul class="mui-table-view mui-table-view-chevron" style="margin: 8px;margin-top: 36px;" v-for="item in prescriptions">
+							<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+								<p style="position: absolute;top: -24px;right: 10px;">{{item.org.display}}</p>
 								<div>
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="border: 1px solid #ddd;border-radius: 50%;">
+									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="/*border: 1px solid #ddd;border-radius: 50%;*/">
 									<div class="mui-media-body">
 										???
 										<p class="mui-ellipsis">???m</p>
@@ -211,21 +215,21 @@
 									<p style="font-size: 8px;">查看位置</p>
 								</div>
 								<ul class="mui-table-view" style="margin: 15px 0;">
-									<li class="mui-table-view-cell mui-media">
+									<li class="mui-table-view-cell mui-media" v-for="drug in item.orders">
 										<div href="javascript:;" class="">
-											<img class="mui-media-object mui-pull-left" src="/assets/admin/TM.png">
+											<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
 											<div class="mui-media-body">
-												药品1
+												{{drug.title}}
 												<p class="mui-ellipsis">
-													数量：2
-													<span style="float: right;">单价：￥12.00</span>
+													数量：{{drug.total_quantity}} {{drug.unit}}
+													<span style="float: right;">单价：￥{{drug.price}}</span>
 												</p>
 											</div>
 										</div>
 									</li>
 								</ul>
 								<div style="line-height: 33px;">
-									共计2件　　合计：<span style="color: #FF376F;">￥24.00</span>
+									共<span style="color: #FF376F;">{{get_count_of_item(item)}}</span>件　　合计：<span style="color: #FF376F;">￥{{item.price}}</span>
 									<a href="/customer/portal/settlement" class="mui-btn mui-btn-primary" style="float: right;">结算</a>
 								</div>
 							</li>
@@ -260,6 +264,13 @@
 				prescriptions:[],
 			},
 			methods:{
+				get_count_of_item:function(item) {
+					var count = 0;
+					$(item.orders).each(function(i,drug) {
+						count += parseInt(drug.total_quantity);
+					})
+					return count;
+				},
 				get_prescriptions:function() {
 					var _this = this;
 					$("#loading").show();

@@ -43,6 +43,13 @@ Rails.application.routes.draw do
   ############################
   ########### hospital ##########
   namespace :hospital do
+    namespace :sets do
+      resources :inis do
+        collection do
+          get :cur_org_ini
+        end
+      end
+    end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
@@ -51,7 +58,15 @@ Rails.application.routes.draw do
       end
     end
     resources :orders      # 药品
-    resources :prescriptions      # 处方
+    # 处方
+    resources :prescriptions do
+      collection do
+        get :get_prescriptions_by_phone
+      end
+      member do
+        post :set_drug_store
+      end
+    end
     resources :histories      # 历史列表
   end
   ########### hospital ##########

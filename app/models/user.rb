@@ -6,6 +6,7 @@ class User < ApplicationRecord
 	validates_uniqueness_of :login
 	devise :database_authenticatable, :registerable,
 	:recoverable, :rememberable, :trackable, :validatable
+	# :pharmacy_id 客户的常用药房id
 	# def initialize opt=nil
 	# 	super opt
 	# end

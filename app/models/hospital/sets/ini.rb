@@ -3,6 +3,20 @@ class ::Hospital::Sets::Ini < ApplicationRecord
 	belongs_to :organization, class_name: 'Admin::Organization', foreign_key: 'org_id'
 
 
+	def to_web_front
+		self.reload
+		ret = {
+			id: self.id,
+			enable_print_pres: self.enable_print_pres,
+			uoperator_id: self.uoperator_id,
+			print_pres_html: self.print_pres_html,
+			org_id: self.org_id,
+			created_at: self.created_at,
+			updated_at: self.updated_at
+		}
+		return ret
+	end
+
 	class<<self
 		def get_org_ini(cur_user)
 			cur_org = cur_user.organization

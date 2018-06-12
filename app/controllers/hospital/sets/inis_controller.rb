@@ -3,14 +3,20 @@ class Hospital::Sets::InisController < ApplicationController
 	# GET
   # /hospital/sets/inis
 	def index
-		# @inis = Hospital::Sets::Ini.all rescue []
-    @inis = Hospital::Sets::Ini.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
+    @inis = Hospital::Sets::Ini.all rescue []
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @inis} }
     end
 	end
 
+  # GET
+  # /hospital/sets/inis/cur_org_ini
+  def cur_org_ini
+    p "Hospital::Sets::InisController cur_org_ini", params
+    @ini = Hospital::Sets::Ini.get_org_ini(current_user)
+    render json: {flag: true, info:"", data: @ini.to_web_front}
+  end
 	# GET
   # /hospital/sets/inis/:id
 	def show
@@ -61,7 +67,6 @@ class Hospital::Sets::InisController < ApplicationController
     p "Hospital::Sets::InisController update",params
     respond_to do |format|
       if @ini.update_attributes(format_ini_update_args)
-        format.html { redirect_to @ini, notice: 'ini was successfully updated.' }
         format.json { render json: {flag: true, info:"", data: @ini.to_web_front} }
       else
         format.html { render action: "edit" }
@@ -92,5 +97,19 @@ class Hospital::Sets::InisController < ApplicationController
     # Use callbacks to share common setup or constraints between actions.
     def set_ini
       @ini = Hospital::Sets::Ini.find(params[:id])
+    end
+
+    def ini_params
+      params[:ini]
+    end
+
+    def format_ini_update_args
+      ini_args = ini_params
+      ret = {
+        enable_print_pres: ini_args[:enable_print_pres],
+        uoperator_id: current_user.id,
+        print_pres_html: ini_args[:print_pres_html]
+      }
+      return ret
     end
 end

@@ -98,12 +98,18 @@
       <h1 class="mui-title">注册</h1>
     </header>
     <div class="mui-content" id="vue_form">
-      <form id='login-form' class="mui-input-group" action="/users/sign_in" method="post">
+      <form id='login-form' class="mui-input-group" action="/users" method="post">
         <div class="mui-input-row">
-          <input type="text" name="phone" class="mui-input-clear mui-input" placeholder="请输入手机号" value="<%= flash[:phone] %>">
+          <input id="phone_input" type="text" name="phone" class="mui-input-clear mui-input" placeholder="请输入手机号" value="<%= flash[:phone] %>">
         </div>
         <div class="mui-input-row">
-          <input type="text" name="confirm_code" class="mui-input-clear mui-input" placeholder="请输入验证码">
+          <%= rucaptcha_input_tag(class: 'form-control', placeholder: '请输入验证码') %>
+          <div style="height: 40px;position: absolute;right: 0;top: 0;">
+            <%= rucaptcha_image_tag(alt: 'Captcha',style:"height: 100%;") %>
+          </div>
+        </div>
+        <div class="mui-input-row">
+          <input type="text" name="confirm_code" class="mui-input-clear mui-input" placeholder="短信验证码">
           <div id="get_yanzhengma" style="">获取验证码<span class="time_line">(<span class="time"></span>秒)</span></div>
         </div>
       </form>
@@ -112,26 +118,29 @@
       </div>
     </div>
 <script type="text/javascript">
-  // function setSecond(sec) {
-  //   $("#get_yanzhengma .time").text(sec);
-  //   setTimeout()
-  // }
+  <% unless resource.errors.messages.empty? %>
+  mui.toast("<%= resource.errors.messages rescue nil %>",{duration:8000});
+  <% end -%>
   document.getElementById("get_yanzhengma").addEventListener("tap",function(e) {
     // console.log('xxx')
-    if ($("#get_yanzhengma").hasClass("show_time_line")) {
-    }else{
-      $("#get_yanzhengma").addClass("show_time_line");
-      var sec = 60;
-      $("#get_yanzhengma .time").text(sec);
-      var timer = setInterval(function() {
-        console.log('11111111')
-        sec -= 1;
-        if (sec == -1) {
-          clearInterval(timer);
-          $("#get_yanzhengma").removeClass("show_time_line");
-        }
+    if ( /^\w{11}$/.test($("#phone_input").val()) ) {
+      if ($("#get_yanzhengma").hasClass("show_time_line")) {
+      }else{
+        $("#get_yanzhengma").addClass("show_time_line");
+        var sec = 60;
         $("#get_yanzhengma .time").text(sec);
-      },1000)
+        var timer = setInterval(function() {
+          // console.log('11111111')
+          sec -= 1;
+          if (sec == -1) {
+            clearInterval(timer);
+            $("#get_yanzhengma").removeClass("show_time_line");
+          }
+          $("#get_yanzhengma .time").text(sec);
+        },1000)
+      }
+    }else{
+      mui.toast("请输入11位的手机号码");
     }
   })
   // new Vue({
