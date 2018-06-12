@@ -5,6 +5,7 @@ class ::Hospital::Sets::Ini < ApplicationRecord
 
 	def to_web_front
 		ret = {
+			id: self.id,
 			enable_print_pres: self.enable_print_pres,
 			uoperator_id: self.uoperator_id,
 			print_pres_html: self.print_pres_html,

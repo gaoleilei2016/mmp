@@ -4,8 +4,9 @@ class ::Hospital::Prescription < ApplicationRecord
 	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'prescription_id'
 	belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id'
 	has_many :diagnoses, class_name: '::Hospital::Diagnose', foreign_key: 'prescription_id'
-	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id'
+	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
+	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
 	# belongs_to :bill, class_name: '::'
 
 
@@ -87,6 +88,13 @@ class ::Hospital::Prescription < ApplicationRecord
 				display: ''
 			}
 		}
+		# 药房信息
+		drug_store_info = {
+			drug_store: {
+				id: self.drug_store&.id,
+				display: self.drug_store&.name
+			}
+		}
 
 		# 处方信息
 		prescription_info = {
@@ -123,7 +131,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			created_at: self.created_at,
 			updated_at: self.updated_at
 		}
-		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(prescription_info)
+		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
 	end
 

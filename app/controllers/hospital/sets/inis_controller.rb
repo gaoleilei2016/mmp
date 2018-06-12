@@ -98,4 +98,17 @@ class Hospital::Sets::InisController < ApplicationController
     def set_ini
       @ini = Hospital::Sets::Ini.find(params[:id])
     end
+
+    def ini_params
+      params[:ini]
+    end
+
+    def format_ini_update_args
+      ret = {
+        enable_print_pres: params[:enable_print_pres],
+        uoperator_id: current_user.id,
+        print_pres_html: params[:print_pres_html]
+      }
+      return ret
+    end
 end

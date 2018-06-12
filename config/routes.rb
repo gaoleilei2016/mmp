@@ -63,6 +63,9 @@ Rails.application.routes.draw do
       collection do
         get :get_prescriptions_by_phone
       end
+      member do
+        post :set_drug_store
+      end
     end
     resources :histories      # 历史列表
   end
