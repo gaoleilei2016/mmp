@@ -1,8 +1,78 @@
 #encoding: utf-8
 
-class Pay::Alipay < ApplicationRecord
-  # api_name: '接口名称'
+require 'alipay'
 
+class Pay::Alipay < ApplicationRecord
+  # cost_name,out_trade_no,total_fee,title,return_url,
+  class << self
+    # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
+    #   total_fee:'支付金额单位元(String)'}
+    def payment(args)
+      write_log_return({state: :start, msg: '支付宝付款开始'})
+      return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alipay.usable
+      payment = new(args)
+      return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless payment.save
+      payment.get_payment_url
+    end
+
+    def write_log_return(msg)
+      PayAndSmsLog.info("#{args[:state]}----#{args[:msg]}----#{args[:desc]}", {file_name: 'alipay'})
+      args
+    end
+  end
+
+  def get_payment_url
+    begin
+      client = Alipay::Client.new(
+          url: ali.url,
+          app_id: ali.app_id,
+          app_private_key: read_the_file(ali.private_key_root),
+          alipay_public_key: read_the_file(ali.public_key_root)
+        )
+      payment_url = client.page_execute_url(
+        method: ali.api_name,
+        return_url: get_return_url,
+        notify_url: ali.notify_url,
+        biz_content: {
+          out_trade_no: out_trade_no,
+          product_code: ali.product_code,
+          total_amount: total_fee,
+          subject: title,
+          quit_url: get_return_url
+        }.to_json(ascii_only: true),
+        timestamp: current_time
+      )
+      return self.class.write_log_return({ state: :succ, msg: '请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https://mclient.alipay.com')
+      self.class.write_log_return({state: :fail, msg: '支付失败', desc: payment_url})
+    rescue Exception => e
+      self.class.write_log_return({state: :fail, msg: "支付错误", desc: e.message})
+    end
+  end
+
+  private
+
+  def get_return_url
+    return return_url if return_url && !return_url.empty?
+    ali.return_url
+  end
+
+  def current_time
+    Time.now.strftime("%Y-%m-%d %H:%M:%S")
+  end
+
+  def ali
+    Set::Alipay
+  end
+
+  def base_set
+    {product_code: ali.product_code, quit_url: ali.notify_url}
+  end
+
+  def read_the_file(file_root)
+    File.read(file_root)
+  end
+
+  #----------------------------
   # rsa签名，文本内容和私钥路径
   def rsa_sign(data,private_key_path)
     private_key = File.read(private_key_path)
@@ -61,10 +131,6 @@ class Pay::Alipay < ApplicationRecord
       notify_url: 'http://mmp.tenmind.com/pay/alipay',
       biz_content: ''
     }
-  end
-
-  def current_time
-    Time.now.strftime("%Y-%m-%d %H:%M:%S")
   end
 
   def body
