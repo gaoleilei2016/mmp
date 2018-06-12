@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     :passwords => "users/passwords",
   }
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  root to:"customer/home#index"
+  root to:"customer/portal#index"
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
