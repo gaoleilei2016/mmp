@@ -158,11 +158,14 @@
       <el-dropdown trigger="click">
         <span class="el-dropdown-link">
           您好，<%= current_user.try(:login) %>
+          <% if current_user.organization %>
+          ，<%= current_user.organization.name %>
+          <% end %>
           <i class="el-icon-caret-bottom el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown" class="_h_right_menus">
-          <el-dropdown-item><a href="/users"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item>
-          <el-dropdown-item><a href='/users?opetator=resetpw'><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
+          <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item>
+          <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
           <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -227,8 +230,8 @@
         switch( hash ){
           case "#/home":
             break;
-          case "#/projects/daoru":
-            this.dynamic_add_router_and_tab({path:'#/projects/daoru',caption:'项目导入',target:'projects_daoru'});
+          case "#/organizations/daoru":
+            this.dynamic_add_router_and_tab({path:'#/organizations/daoru',caption:'项目导入',target:'organizations_daoru'});
             break;
           default:
             // router.push('/')

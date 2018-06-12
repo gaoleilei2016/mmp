@@ -1,0 +1,123 @@
+$gray-darker:  lighten(#000, 13.5%); // #222
+$gray-dark:    lighten(#000, 20%);   // #333
+$gray:         lighten(#000, 33.5%); // #555
+$gray-light:   lighten(#000, 46.7%); // #777
+$gray-lighter: lighten(#000, 93.5%); // #eee
+
+$brand-primary: darken(#428bca, 6.5%); // #337ab7
+$brand-success: #5cb85c;
+$brand-info:    #5bc0de;
+$brand-warning: #f0ad4e;
+$brand-danger:  #d9534f;
+
+$bg-purple-dark: #99a9bf;
+$bg-purple: #d3dce6;
+$bg-purple-light: #e5e9f2;
+
+.text-muted {
+	color: $gray-light;
+}
+.text-primary {
+	color: $brand-primary;
+}
+.text-success {
+	color: $brand-success;
+}
+.text-info {
+	color: $brand-info;
+}
+.text-warning {
+	color: $brand-warning;
+}
+.text-danger {
+	color: $brand-danger;
+}
+
+#encounters_new_div {
+	.el-collapse.patient-info {
+		margin-bottom: 10px;
+		border: 1px solid #ddd;
+		.el-collapse-item__arrow {
+			line-height: 36px;
+		}
+		.el-collapse-item__header {
+			border-bottom: 1px solid #ddd;
+			background-color: #f5f5f5;
+			height: 36px;
+			line-height: 36px;
+			padding-left: 10px; 
+			padding-right: 10px; 
+		}
+		.el-collapse-item__wrap {
+			padding-top: 10px;
+    	padding-right: 10px;
+		}
+		.el-collapse-item__content {
+			padding-bottom: 0;
+		}
+		.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
+			margin-bottom: 12.5px !important;
+		}
+		.has-append-btn {
+			text-align: center;		
+			padding-top: 5px;
+			.el-icon-edit, .el-icon-circle-plus-outline, .el-icon-remove-outline {
+		    font-size: 20px;
+		    cursor: pointer;
+			}
+		}
+		hr.info-divider {
+			margin: 0 0 5px 0;
+			border-top: 1px solid #faf8f8;
+			margin-left: 10px;
+		}
+	}
+
+	#pane-orders {
+		.el-form--label-top .el-form-item__label {
+			padding: 0 ;
+			line-height: 20px;
+		}
+		.el-input-group__append {
+			padding: 0 7.5px;
+		}
+		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
+			background-color: #FAF8F8;
+		}
+		thead > tr > th {
+			background-color: $bg-purple-light;
+			padding: 5px 0;
+			vertical-align: middle;
+		}
+		tbody > tr > td {
+			padding: 5px 0;
+			vertical-align: middle;
+		}
+	}
+}
+// 药品下拉框
+.order-autocomplete {
+	width: 600px !important;
+	.drug-field {
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		display: inline-block;
+		&.name {
+			width: 250px;
+		}
+		&.spec {
+			width: 80px;
+		}
+		&.formul {
+			width: 50px;
+		}
+		&.price {
+			width: 50px;
+		}
+		&.produce {
+			width: 100px;
+		}
+	}
+
+}

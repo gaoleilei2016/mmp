@@ -9,10 +9,8 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def index
-	end
 	def menus
-		p '~~~~~~~~~ menus ',params[:path]
+		# p '~~~~~~~~~ menus ',params[:path]
 		case params[:path]
 		when "admin/home"
 			file_name = "admin"
@@ -27,7 +25,7 @@ class ApplicationController < ActionController::Base
 		render json:{menus:yml}
 	end
 	def templates
-		p '~~~~~~~~~ templates ',params[:path]
+		# p '~~~~~~~~~ templates ',params[:path]
 		case params[:path]
 		when "admin/home"
 			dir_name = "/admin/home/templates"

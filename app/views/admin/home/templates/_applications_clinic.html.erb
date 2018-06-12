@@ -1,0 +1,100 @@
+<style>
+	#applications_clinic_div pre{
+		line-height: 1.8;
+		font-family: Menlo,Monaco,Consolas,Courier,monospace;
+		font-size: 12px;
+		padding: 18px 24px;
+		background-color: #fafafa;
+		border: 1px solid #eaeefb;
+		margin-bottom: 25px;
+		border-radius: 4px;
+		-webkit-font-smoothing: auto;
+	}
+	#applications_clinic_div .title{
+		font-size: 20px;
+		font-weight: bold;
+	}
+</style>
+<template>
+<div id="applications_clinic_div">
+<pre>
+<span class="title">1.1</span>
+========================== 获取lis可化验项目 ===========================
+GET  /clis/interfaces/projects_tree.json
+返回 json 如下：（共3个层级，第一级为科室，第二级为分类，第三级为具体可开具组合）
+{
+	tree:[
+		{ label:'检验科',children:[
+			{ label:'生化系列',children:[
+				{ id:'5a7577d5dcbdef8b74000005',label:'血生化全套',jianpin:'XSHQT',price:300 }
+			] }
+		] }
+	]
+}
+
+<span class="title">1.2</span>.1
+================= his 内部 门诊 / 住院 开单接口 =================
+POST  /clis/interfaces/i_registration.json
+表单参数如下：（带*号为必填项）
+
+{
+	apply:{
+		encounter_id: "就诊id",                         // *
+		pat_type: { code: "01",display: "门诊" },       // * （ 01门诊 02住院 03体检 ）
+		project_ids: ["开具的组合id"],                  // *
+		purpose: "检查目的",
+		summary: "病历摘要",
+	}
+}
+
+返回 json 如下：
+{ flag:true, info:"开单成功", application:{ _id: 申请单完整信息 } }
+
+<span class="title">1.2</span>.2
+================= 开单成功后获取申请单 html 打印格式 =================
+get /clis/interfaces/get_reg_print?id=5afbe673bcdee4dc5d0000bb
+使用 1.2.1 中返回的 application._id
+
+<span class="title">1.3</span>
+=============================== 获取化验单上机记录 =================================
+get  /clis/interfaces/get_registration.json?id=_id
+使用 1.2 中返回的 _id 查询化验单
+返回 json 如下：
+{ application:{ 化验单 }, projects:[ 化验项目 ], specimens:[ 血液标本 ], reports:[ 上机记录 ] }
+
+<span class="title">1.4</span>
+=============================== 获取上机记录的化验报告 html 打印格式 =================================
+
+get  /clis/interfaces/get_report.json?id=_id  # 常规化验报告 / 微生物化验报告
+使用 1.3 中返回的 上机记录_id 查询化验报告的 json
+返回 json 如下：
+{ report:{ 标本信息 }, projects:[ 标本项目 ], application:[ 化验单 ] }
+
+get  /clis/interfaces/get_report?id=_id
+使用 1.3 中返回的 上机记录_id 查询化验报告的 html 打印格式
+
+<span class="title">1.5</span>
+=============================== 化验单作废接口 =================================
+post  /clis/interfaces/k_registration.json?apid=_id
+使用 1.2 中返回的 _id 作废化验单
+返回 json 如下：
+{ flag:false, info:'已收费的不能作废,请联系检验科审核退费' }
+{ flag:true, info:'作废成功' }
+
+</pre>
+</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+		}
+	},
+	methods:{
+	},
+	mounted:function(){
+	},
+	activated:function() {
+	}
+}
+</script>

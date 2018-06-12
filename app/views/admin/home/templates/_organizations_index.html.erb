@@ -1,0 +1,430 @@
+<style type="text/css">
+	#organizations_index_form .el-form-item{
+		width: 50%;
+		float: left;
+	}
+	#organizations_index_form .reference_div{
+		float: left;
+		width: 70px;
+		text-align: center;
+	}
+	#organizations_index_form .reference_div input{
+		border: 1px solid #dcdfe6;
+		width: 100%;
+		padding: 4px;
+	}
+</style>
+<template>
+	<div id="organizations_index_right_div" class="">
+		<div style="margin-bottom: 6px;">
+			<div class="el-input el-input--small el-input--prefix el-input--suffix" style="width: 160px;">
+				<input v-model="searchTableInputValue" @keyup="get_timeout_organizations" autocomplete="off" placeholder="项目名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
+				<span class="el-input__prefix" @click="get_organizations"><i class="el-icon-search el-input__icon"></i></span>
+				<span class="el-input__suffix" @click="searchTableInputValue='';get_organizations();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+			</div>
+			<el-select size="small" v-model="selected_type_code" @change="get_organizations" clearable placeholder="类型">
+				<el-option label="所有" value=""></el-option>
+				<el-option v-for="item in $parent.common_data_org_type_code" :key="item.code" :label="item.display" :value="item.code"></el-option>
+			</el-select>
+			<el-button-group style="float: right;">
+				<el-button size="small" type="primary" @click="add_organization">增加</el-button>
+				<el-button size="small" type="danger" @click="delete_organization">删除</el-button>
+			</el-button-group>
+			<el-button disabled style="float: right; margin-right: 10px;" size="small" type="default" @click="$parent.load_location_hash_router('#/organizations/daoru')">导入</el-button>
+			<!-- <el-button-group style="float: right; margin-right: 10px;">
+			</el-button-group> -->
+		</div>
+		<el-table height="'100%'" style="height: calc( 100% - 32px - 6px - 32px );" class="table_header_dark" size="mini" ref="data_table" border :data="tableData" @row-dblclick="edit_organization" @cell-click="cell_click_user" v-loading="table_loading">
+			<el-table-column type="selection"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="id" prop="id" width="100"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="类型" prop="type_code" width="100">
+				<template slot-scope="scope">
+					<div v-if="scope.row.type_code=='1'">医院</div>
+					<div v-if="scope.row.type_code=='2'">药房</div>
+				</template>
+			</el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="名称" prop="name"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="创建时间" prop="created_at" width="140"></el-table-column>
+		</el-table>
+		<el-pagination background ref="pg_data_table" :page-size="10" @size-change="get_organizations" @current-change="get_organizations" layout="total, sizes, prev, pager, next, jumper" :total="pg_data_table_total"></el-pagination>
+		<el-dialog @open="get_users" :title="seleced_organization.name" :visible.sync="dialogVisible" width="80%" top="62px">
+			<el-form size="small" id="organizations_index_form" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="">
+				<el-tabs type="border-card">
+					<el-tab-pane label="基本信息">
+						<el-form-item label="类型" prop="type_code">
+							<el-select v-model="ruleForm.type_code" style="max-width: 200px;">
+								<el-option v-for="item in $parent.common_data_org_type_code" :key="item.code" :label="item.display" :value="item.code"></el-option>
+							</el-select>
+						</el-form-item>
+						<div class="clear"></div>
+						<el-form-item label="名称" prop="name">
+							<el-input @change="$parent.get_jianpin(ruleForm.name,ruleForm.jianpin)" v-model="ruleForm.name"></el-input>
+						</el-form-item>
+						<el-form-item label="简拼" prop="jianpin">
+							<el-input ref="jianpin_input" v-model="ruleForm.jianpin"></el-input>
+						</el-form-item>
+					</el-tab-pane>
+					<el-tab-pane label="管理员">
+						<el-row>
+							<el-col :span="13" style="padding-right: 6px;">
+								<el-table ref="data_table2" class="table_header_dark" size="mini" border :data="tableData2">
+									<el-table-column label="id" prop="id"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+									<el-table-column label="" width="40px">
+										<template slot-scope="scope">
+											<i class="fa fa-fw fa-lg fa-trash-o" style="cursor: pointer;" @click="remove_organization_of_z(scope.row)"></i>
+										</template>
+									</el-table-column>
+								</el-table>
+							</el-col>
+							<el-col :span="11" style="border: 1px solid #ddd;">
+								<div class="header_dark">
+									项目列表
+									<div class="vertical_bottom" style="position: absolute;right: 7px;top: 7px;">
+										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
+											<input v-model="searchInputValue" @keyup="get_timeout_users" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
+											<span class="el-input__prefix" @click="get_users"><i class="el-icon-search el-input__icon"></i></span>
+											<span class="el-input__suffix" @click="searchInputValue='';get_users;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+										</div>
+									</div>
+								</div>
+								<el-table id="dialog_right_table" ref="data_table3" @row-click="right_copyto_left" v-loading="dialog_table_loading" class="table_header_dark" size="mini" border :data="tableData3">
+									<el-table-column label="id" prop="id">
+										<template slot-scope="scope">
+											{{scope.row.id}}
+											<div class="hide dialog_right_tr_id" :data-id="scope.row.id"></div>
+										</template>
+									</el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
+									<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+								</el-table>
+								<el-pagination small background ref="pg_data_table3" :page-size="10" @size-change="get_users" @current-change="get_users" layout="sizes, prev, pager, next" :total="pg_data_table_total3"></el-pagination>
+							</el-col>
+						</el-row>
+					</el-tab-pane>
+				</el-tabs>
+			</el-form>
+			<span slot="footer" class="dialog-footer">
+				<el-button size="small" type="primary" @click="submitForm('ruleForm')">保 存</el-button>
+				<el-button size="small" type="default" @click="dialogVisible = false">关 闭</el-button>
+			</span>
+		</el-dialog>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+			tableData31:[],
+			dialog2_table_loading:false,
+			tableData32:[],
+			pg_data_table_total32:0,
+			searchTableInputValue32:'',
+			dialogVisible:false,
+			seleced_organization:{},
+			pg_data_table_total:0,
+			pg_data_table_total3:0,
+			table_loading:false,
+			dialog_table_loading:false,
+			searchTableInputValue:'',
+			selected_type_code:'',
+			tableData: [],
+			tableData2: [],
+			tableData3: [],
+			selected_user_id: '',
+			input_search_str: '',
+			ajax_search_str: '',
+			searchInputValue:'',
+			ruleForm: {},
+			defaultForm:null,
+			rules: {
+				"type_code": [{ required: true, message: '类型不能为空', trigger: 'change' }],
+				'name': [{ required: true, message: '请输入名称', trigger: 'change' }],
+				'jianpin': [{ required: true, message: '请输入简码', trigger: 'change' }],
+			},
+		}
+	},
+	methods:{
+		get_timeout_users:function (e,type) {
+			var _this = this;
+			clearTimeout(_this.timer);
+			if (e.keyCode==13) {
+				_this.get_users(type);
+			}else{
+				_this.timer = setTimeout(function(){
+					_this.get_users(type);
+				},_this.$parent.auto_search_timeout_value);
+			}
+		},
+		get_users:function(){
+			var _this = this;
+			_this.$nextTick(function() {
+				_this.dialog_table_loading = false;
+				var pagination = _this.$refs.pg_data_table3;
+				var page = pagination.internalCurrentPage;
+				var per = pagination.internalPageSize;
+				$.ajax({
+					url:'/admin/users.json?page='+page+'&per='+per+'&search='+(_this.searchInputValue||''),
+					success:function(json){
+						_this.tableData3 = json.rows;
+						_this.pg_data_table_total3 = json.total;
+						setTimeout(function() {
+							var selected_ids = _this.tableData2.map(function(item) {
+								return item.id+'';
+							});
+							$('#dialog_right_table tr').removeClass("selected-success");
+							$(".dialog_right_tr_id").each(function(i,v) {
+								if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
+									$(v).parents("tr").addClass("selected-success");
+								}
+							});
+						})
+					},
+					complete:function(){
+						_this.dialog_table_loading = false;
+					},
+					error:error_fun
+				})
+			})
+		},
+		// // 同步 dialog 项目表格的变色行
+		// sync_success_tr:function() {
+		// 	var _this = this;
+		// 	var selected_ids = (_this.tableData31||[]).map(function(item) {
+		// 		return item.id;
+		// 	});
+		// 	$('#dialog2_right_table tr').removeClass("selected-success");
+		// 	$(".dialog2_right_tr_id").each(function(i,v) {
+		// 		if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
+		// 			$(v).parents("tr").addClass("selected-success");
+		// 		}
+		// 	});
+		// },
+		// re_organization:function(row,e) {
+		// 	var _this = this;
+		// 	var index = _this.tableData31.indexOf(row);
+		// 	if (index>-1) {
+		// 		_this.tableData31.splice(index,1);
+		// 		_this.sync_success_tr();
+		// 	}
+		// },
+		// 选择仪器
+		// right_copyto_left2:function(row, event, column) {
+		// 	var _this = this;
+		// 	var tr = $(event.target).is('tr') ? $(event.target) : $(event.target).parents('tr');
+		// 	var selected_ids = _this.tableData31.map(function(item) {
+		// 		return item.id;
+		// 	});
+		// 	var index = $.inArray( row.id, selected_ids );
+		// 	if (index>-1) {
+		// 		$(tr).removeClass("selected-success");
+		// 		this.tableData31.splice(index,1);
+		// 	}else{
+		// 		$(tr).addClass("selected-success");
+		// 		this.tableData31.push(row);
+		// 	}
+		// },
+		remove_organization_of_z:function(row) {
+			var tr = $('[data-id="'+row.id+'"]').parents('tr');
+			if (tr) {
+				$(tr).removeClass("selected-success");
+			}
+			var index = $.inArray( row, this.tableData2 );
+			this.tableData2.splice(index,1);
+		},
+		// 组合 form页面 选择项目
+		right_copyto_left:function(row, event, column) {
+			var _this = this;
+			var tr = $(event.target).is('tr') ? $(event.target) : $(event.target).parents('tr');
+			var selected_ids = _this.tableData2.map(function(item) {
+				return item.id;
+			});
+			var index = $.inArray( row.id, selected_ids );
+			if (index>-1) {
+				$(tr).removeClass("selected-success");
+				this.tableData2.splice(index,1);
+			}else{
+				$(tr).addClass("selected-success");
+				this.tableData2.push(row);
+			}
+		},
+		cell_click_user:function(row, column, cell, event) {
+			if ($(cell).hasClass("el-table-column--selection")) {
+			}else{
+				this.$refs.data_table.toggleRowSelection(row);
+			}
+		},
+		add_organization:function() {
+			this.resetForm();
+			// if (this.selected_type_code) {
+			// 	this.ruleForm.located_entity_id = this.selected_type_code;
+			// }
+			this.seleced_organization = {save_method:'POST',form_type:1,name:"新增单项",code:""};
+			this.dialogVisible = true;
+		},
+		edit_organization:function(row) {
+			var _this = this;
+			current_app.loading = true;
+			$.ajax({
+				url:"/admin/organizations/"+row.id+".json",
+				success:function(json) {
+					_this.resetForm();
+					_this.seleced_organization = {id:row.id,save_method:'PUT',form_type:row.code_system,name:json.organization.name,code:json.organization.code};
+					_this.ruleForm = json.organization;
+					_this.tableData2 = json.users||[];
+					// _this.$nextTick(function() {
+					// 	_this.get_users();
+					// })
+					_this.dialogVisible = true;
+				},
+				complete:function() {
+					current_app.loading = false;
+				},
+				error:error_fun
+			})
+		},
+		delete_organization:function() {
+			var _this = this;
+			var ids = [],names = [];
+			_this.$refs.data_table.selection.map(function(value) {
+				ids.push( value.id );
+				names.push( value.name );
+			})
+			if (ids.length) {
+				_this.$confirm("将要删除 <span class='text-danger'>"+names+'</span> ，此操作不可回退, 是否继续?', '提示', {
+					dangerouslyUseHTMLString: true,
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(function(){
+					current_app.loading = true;
+					$.ajax({
+						url:'/admin/organizations/destroy',
+						type:'delete',
+						data:{ids:ids},
+						success:function(json) {
+							_this.$message({
+								message:json.info,
+								type: json.flag ? 'success' : 'warning'
+							});
+							_this.get_organizations();
+						},
+						complete:function(){
+							current_app.loading = false;
+						},
+						error:error_fun
+					})
+				}).catch(function(){
+					_this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			}else{
+				_this.$message({
+					type: 'info',
+					message: '未选中行'
+				});
+			}
+		},
+		submitForm:function(formName) {
+			var _this = this;
+			_this.$refs[formName].validate(function(valid){
+				if (valid) {
+					var method = _this.seleced_organization.save_method;
+					if (method) {
+						current_app.loading = true;
+						$.ajax({
+							type:method,
+							url:method=='POST' ? '/admin/organizations' : '/admin/organizations/'+_this.seleced_organization.id,
+							dataType:'json',
+							data:{
+								organization:_this.ruleForm,
+								user_ids: _this.tableData2.map(function(item) {
+									return item.id;
+								}),
+							},
+							success:function(json){
+								// _this.resetForm('ruleForm');
+								_this.$message({
+									message:json.info,
+									type: json.flag ? 'success' : 'warning'
+								})
+								if (json.flag) {
+									_this.dialogVisible = false;
+									_this.get_organizations();
+								}
+							},
+							complete:function(){
+								current_app.loading = false;
+							},
+							error:error_fun
+						})
+					}else{
+						current_app.$message("错误的 form - method："+method);
+					}
+				} else {
+					current_app.$message("基本信息未通过验证！")
+					return false;
+				}
+			});
+		},
+		resetForm:function(formName) {
+			var _this = this;
+			this.ruleForm = _.cloneDeep(this.defaultForm);
+			this.tableData2 = [];
+			this.tableData31 = [];
+			_this.$nextTick(function() {
+				_this.$refs.ruleForm.clearValidate();
+			})
+			// setTimeout(function() {
+			// 	_this.$refs.ruleForm.resetFields();
+			// })
+		},
+		get_timeout_organizations:function (e) {
+			var _this = this;
+			clearTimeout(_this.timer);
+			if (e.keyCode==13) {
+				_this.get_organizations();
+			}else{
+				_this.timer = setTimeout(function(){
+					_this.get_organizations();
+				},_this.$parent.auto_search_timeout_value);
+			}
+		},
+		get_organizations:function(){
+			var _this = this;
+
+			_this.table_loading = true;
+			var pagination = _this.$refs.pg_data_table;
+
+			var page = pagination.internalCurrentPage;
+			var per = pagination.internalPageSize;
+
+			$.ajax({
+				url:'/admin/organizations.json?page='+page+'&per='+per+'&type_code='+(_this.selected_type_code||'')+'&search='+(_this.searchTableInputValue||''),
+				success:function(json){
+					_this.tableData = json.rows;
+					_this.pg_data_table_total = json.total;
+				},
+				complete:function(){
+					_this.table_loading = false;
+					_this.dialog_table_loading = false;
+				},
+				error:error_fun
+			})
+		},
+	},
+	activated:function() {
+		this.get_organizations();
+	},
+	mounted:function(){
+		window.apps.organizations_index = this;
+		this.defaultForm = _.cloneDeep(this.ruleForm);
+	}
+}
+</script>

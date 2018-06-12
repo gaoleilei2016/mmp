@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="ui-page-login">
+
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>腾迈智医</title>
+		<link rel="icon" href="/assets/admin/TM.ico" />
+		<link href="/assets/plugins/mui/mui.min.css" rel="stylesheet" />
+		<link href="/assets/plugins/fontawesome/font-awesome.min.css" rel="stylesheet" />
+		<script src="/assets/jquery/jquery-1.9.1.js"></script>
+		<script src="/assets/plugins/mui/mui.min.js"></script>
+		<script type="text/javascript">
+			//获取页面url参数   $.getUrlParam("ID")
+			$.getUrlParam = function(name){
+				var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				var r = window.location.search.substr(1).match(reg);
+				if (r!=null) return unescape(r[2]); return null;
+			}
+			const error_fun = function(e) {
+				console.log(e);
+				var info = '';
+				if(e.status==0){
+					info = '错误: ' + e.status + ' 访问服务器失败，请检查网络或刷新重试';
+				}else{
+					info = '错误: ' + e.status + ' ' + e.statusText;
+				}
+				mui.toast(info, {
+					duration: 8000
+				});
+			}
+		</script>
+		<style type="text/css">
+			.text-danger{
+				color: #a94442;
+			}
+			.text-muted {
+				color: #999999;
+			}
+			.my_top_nav{
+				background-image: linear-gradient(to right,#7aa3fd 20%,#4ec5ff 80%,#54b9ff 94%) !important;
+			}
+			.my_top_nav *{
+				color: #fff !important;
+			}
+			.mui-bar-tab .mui-tab-item.mui-active{
+				color: #56b9ff;
+			}
+			.mui-icon.fa{
+				font-size: 22px;
+			}
+			.hide{
+				display: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="loading" style="position: fixed;height: 100%;width: 100%;z-index: 9999;display: none;">
+			<img src="/assets/admin/load.gif" style="position: absolute;top: calc(50% - 50px);left: calc(50% - 50px);"/>
+		</div>
+		<% unless [["users/sessions",'new'],["users/sessions",'sign_up'],["users/registrations",'new'],["users/registrations",'create']].index([controller_path,action_name]) %>
+		<nav class="mui-bar mui-bar-tab ">
+			<a class="mui-tab-item" href="javascript:;" data-url="/customer/portal">
+				<span class="mui-icon fa fa-home"></span>
+				<span class="mui-tab-label">首页</span>
+			</a>
+			<a class="mui-tab-item" href="javascript:;" data-url="/customer/report">
+				<span class="mui-icon fa fa-area-chart"></span>
+				<span class="mui-tab-label">健康</span>
+			</a>
+			<a class="mui-tab-item users_home" href="javascript:;" data-url="/customer/home">
+				<span class="mui-icon fa fa-user-o"><span class="mui-badge" style="padding: 4px;"></span></span>
+				<span class="mui-tab-label">我的</span>
+			</a>
+		</nav>
+		<script type="text/javascript">
+			console.log( '111111111111' );
+			// 底部导航 当前变色
+			if (location.pathname=='/') {
+				$(".mui-tab-item.users_home").addClass("mui-active");
+			}else{
+				$(".mui-tab-item").each(function(i,v) {
+					if (location.pathname == $(v).attr('data-url')) {
+						$(v).addClass("mui-active");
+					}
+				})
+			}
+			$(".mui-tab-item").on('tap',function(e) {
+			console.log( '22222222' );
+				if ($(this).attr("data-url")) {
+					location = $(this).attr("data-url");
+				}
+			})
+		</script>
+		<% end %>
+		
+		<%= yield %>
+	</body>
+	<script type="text/javascript">
+		<% if notice.present?||alert.present? %>
+		mui.toast("<%= notice.to_s + alert.to_s %>");
+		<% end -%>
+	</script>
+</html>
