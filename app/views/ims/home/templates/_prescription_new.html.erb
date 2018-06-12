@@ -1,6 +1,6 @@
 <style type="text/css">
 </style>
-<template id="home_div">
+<template>
 	<div>
 		<div id="prescription_header" class="el-row">
 			<div class="el-col-4" style="width:auto;"><i class="fa fa-home fa-4x"></i></div>
@@ -32,25 +32,19 @@
 						<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
 					</div>
 				</div>
+
 			</div>
 
 			<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
 				<%= render "ims/home/render/order_info"%>
 			</div>
 		</div>
+
 	</div>
 </template>
-<script type="text/javascript">
-const home = Vue.extend({
-	template: '#home_div',
-	// mounted:function(){
 
-	// },
-	activated:function(){
-		window.apps.header_and_footer.header_selected_tab = '#/home';
-	},
-// })
-// window.current_template_obj = {
+<script type="text/javascript">
+window.current_template_obj = {
 	data:function(){
 		return {
 			pres:[],
@@ -168,6 +162,5 @@ const home = Vue.extend({
 		// 	this.init();
 		// })	
 	}
-// }
-})
+}
 </script>
