@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180613030123) do
+ActiveRecord::Schema.define(version: 20180613094804) do
 
   create_table "admin_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "type_code"
@@ -104,6 +104,18 @@ ActiveRecord::Schema.define(version: 20180613030123) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "cost_name", default: ""
+    t.string "out_trade_no", default: ""
+    t.float "total_fee", limit: 24, default: 0.0
+    t.string "title", default: ""
+    t.string "return_url", default: ""
+    t.string "status", default: ""
+    t.string "status_desc", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "people", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "health_file_no"
     t.string "iden"
@@ -150,18 +162,19 @@ ActiveRecord::Schema.define(version: 20180613030123) do
     t.string "photo"
   end
 
-  create_table "sms_datas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "sms_messages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "phone", default: ""
-    t.string "code", default: ""
     t.string "name", default: ""
+    t.string "code", default: ""
     t.string "expired_in", default: ""
     t.string "data_type", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["phone"], name: "index_sms_messages_on_phone"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "login"
+    t.string "login", default: "", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "email", default: "", null: false
@@ -181,6 +194,7 @@ ActiveRecord::Schema.define(version: 20180613030123) do
     t.string "sex"
     t.string "birth"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
