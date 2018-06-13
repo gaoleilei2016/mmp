@@ -1,0 +1,37 @@
+<%= form_with(model: ims_setting, local: true) do |form| %>
+  <% if ims_setting.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ims_setting.errors.count, "error") %> prohibited this ims_setting from being saved:</h2>
+
+      <ul>
+      <% ims_setting.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :ii_root %>
+    <%= form.text_field :ii_root, id: :ims_setting_ii_root %>
+  </div>
+
+  <div class="field">
+    <%= form.label :returned_at %>
+    <%= form.number_field :returned_at, id: :ims_setting_returned_at %>
+  </div>
+
+  <div class="field">
+    <%= form.label :payment_Expired %>
+    <%= form.number_field :payment_Expired, id: :ims_setting_payment_Expired %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unpaid_expired %>
+    <%= form.number_field :unpaid_expired, id: :ims_setting_unpaid_expired %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

@@ -93,7 +93,12 @@ Rails.application.routes.draw do
       collection do
         get :get_orders
         get :get_order
-        get :oprate_order
+        get :dispensing_order  #订单发药
+        get :return_order  #订单退药
+      end
+    end
+    resources :interfaces do
+      collection do
       end
     end
   end

@@ -184,16 +184,16 @@ const home = Vue.extend({
     },
     //发药  发订单
     out_order:function(id){
-    	this.oprate_order({id:id,method:"out_order",todo:"发药"})
+    	this.oprate_order({id:id,method:"dispensing_order",todo:"发药"})
     },
     //拒绝
-    refuse_order:function(id){
-			this.oprate_order({id:id,method:"refuse_order",todo:"拒绝"})   	
-    },
+   //  refuse_order:function(id){
+			// this.oprate_order({id:id,method:"refuse_order",todo:"拒绝"})   	
+   //  },
     //审核
-		check_order:function(id){
-			this.oprate_order({id:id,method:"check_order",todo:"审核"})		
-		},
+		// check_order:function(id){
+		// 	this.oprate_order({id:id,method:"check_order",todo:"审核"})		
+		// },
 		//退药
 		return_order:function(id){
 			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
@@ -224,7 +224,7 @@ const home = Vue.extend({
           duration: 0
         });
       }			
-			this.$http.get('/ims/orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
+			this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(successCallback,errorCallback);
 		},
     format_time:function(data){
 	  	var time = new Date(data)

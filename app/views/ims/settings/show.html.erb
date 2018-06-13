@@ -1,0 +1,24 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Ii root:</strong>
+  <%= @ims_setting.ii_root %>
+</p>
+
+<p>
+  <strong>Returned at:</strong>
+  <%= @ims_setting.returned_at %>
+</p>
+
+<p>
+  <strong>Payment expired:</strong>
+  <%= @ims_setting.payment_Expired %>
+</p>
+
+<p>
+  <strong>Unpaid expired:</strong>
+  <%= @ims_setting.unpaid_expired %>
+</p>
+
+<%= link_to 'Edit', edit_ims_setting_path(@ims_setting) %> |
+<%= link_to 'Back', ims_settings_path %>

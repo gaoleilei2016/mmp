@@ -61,10 +61,6 @@
 		</div>
 
 		<div class="btns_right_bottom"> 
-			<span v-if="info.header.status === 'H' ">
-				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="refuse_order(info.header.id)">拒绝</button>
-				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="check_order(info.header.id)">审核</button>
-			</span>
 			<span v-if="info.header.status === 'P' ">
 			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.header.id)">发药</button>
 			</span>
