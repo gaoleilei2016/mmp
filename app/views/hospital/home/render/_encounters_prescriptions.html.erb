@@ -8,7 +8,10 @@
 	style="width: 100%">
 	<el-table-column type="expand">
     <template slot-scope="props">
-      <el-table
+    	<div style="width: calc( 100% - 150px );">
+    		<prescriptionprint :encounter="encounter" :prescription="props.row" :orgname="orgname"></prescriptionprint>
+    	</div>
+      <!-- <el-table
 				:data="(props.row.orders||[])"
 				class="orders-table"
 				style="width: 100%">
@@ -76,7 +79,7 @@
 			    min-width="100"
 			    label="备注">
 			  </el-table-column>
-			</el-table>
+			</el-table> -->
     </template>
   </el-table-column>
   <el-table-column
@@ -167,10 +170,15 @@
     label=""
     width="140">
     <template slot-scope="scope">
-      <el-button v-if="ini.enable_print_pres && scope.row.status!='O'" type="text" size="mini" @click="editOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-print"></i></el-button>
+      <el-button v-if="ini.enable_print_pres && scope.row.status!='O'" type="text" size="mini" @click="printPrescription(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-print"></i></el-button>
       <!-- <el-button type="text" size="mini" @click="showPrescription(scope.$index, scope.row)">查看</el-button> -->
       <el-button type="text" size="mini" @click="copyPrescription(scope.$index, scope.row)">复制<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
       <el-button v-if="scope.row.status=='N'" type="text" size="mini" @click="deletePrescription(scope.$index, scope.row)" class="text-danger">作废<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
     </template>
   </el-table-column>
 </el-table>
+
+<!-- 用于处方打印的隐藏框 -->
+<div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+	<prescriptionprint :encounter="encounter" :orgname="orgname" :prescription="printPresRow"></prescriptionprint>
+</div>

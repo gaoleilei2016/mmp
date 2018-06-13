@@ -15,6 +15,10 @@ class Hospital::Sets::InisController < ApplicationController
   def cur_org_ini
     p "Hospital::Sets::InisController cur_org_ini", params
     @ini = Hospital::Sets::Ini.get_org_ini(current_user).to_web_front
+    respond_to do |format|
+      format.html # index.html.erb
+      format.json { render json: {flag: true, info:"", data: @ini} }
+    end
   end
 	# GET
   # /hospital/sets/inis/:id

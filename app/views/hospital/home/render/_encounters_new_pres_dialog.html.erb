@@ -32,6 +32,16 @@
 			    <el-checkbox v-model="prescription.specialmark">特殊门诊处方标记</el-checkbox>
 			  </el-form-item>
 			</el-col>
+			<el-col :span="22">
+    		<el-form-item
+			    label="备注">
+			    <el-input
+					  placeholder="请输入内容"
+					  v-model="prescription.note"
+					  clearable>
+					</el-input>
+			  </el-form-item>
+			</el-col>
 		</el-row>
 	</el-form>
 	<br/>
@@ -113,7 +123,9 @@
 	  </el-table-column>
 	</el-table>
   <span slot="footer" class="dialog-footer">
-    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
-    <el-button size="mini" @click="generatePrescription" type="primary">确 定<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+		<center>
+	    <el-button size="mini" @click="generatePrescription" type="primary" style="margin-left: 100px;">确 定<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+	    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
+	  </center>
   </span>
 </el-dialog>

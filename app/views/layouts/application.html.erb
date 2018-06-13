@@ -233,7 +233,8 @@
         })
         // 金额
         Vue.filter('formatMoney', function (value, fmt) {
-          return value.toFixed(fmt || 4);
+          console("--------value", value)
+          return (value||0).toFixed(fmt || 4);
         })
 
       /* 全局过滤器----end */

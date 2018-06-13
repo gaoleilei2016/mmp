@@ -36,7 +36,99 @@ $bg-purple-light: #e5e9f2;
 	color: $brand-danger;
 }
 
+
+@media only screen and (max-width: 320px) {
+	.page-header {
+		>i {
+			font-size:2.2em; 
+		}
+		>h3 {
+			>small {
+				display: none;
+			}
+		}
+	}
+}
+
+.page-header {
+  border-bottom: 1px solid #eee;
+	font-family: Consolas, "Microsoft YaHei", "Microsoft JhengHei";
+  padding-bottom: .5em;
+  position: relative;
+	margin: 0 0 9.6px 0;
+	border-bottom: 1px solid #eeeeee;
+	color: #333;
+	>i {
+		margin-left: 0px;
+		float:left;
+		width: 1.28571429em;
+    text-align: center;
+	}
+	>h3 {
+		font-size: 21px;
+		margin: 0;
+		font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+		display: inline-block;
+		width: -webkit-calc(100% - 5em);
+		width: -moz-calc(100% - 5em);
+		width: -ms-calc(100% - 5em);
+		width: -o-calc(100% - 5em);
+		width: calc(100% - 5em);
+		-webkit-margin-before: 0.5em;
+    -webkit-margin-after: 0px;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+		>small {
+			margin-top: 8px;
+			display: block;
+			font-size: 14px;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+		  width: 100%;
+		  font-weight: normal;
+		  line-height: 1;
+		}
+	}
+	small {
+		color: #999;
+	}
+}
+
+// 缩小行距
+.thin-row {
+	thead > tr > th {
+		padding: 10px 0;
+		vertical-align: middle;
+	}
+	tbody > tr > td {
+		padding: 10px 0;
+		vertical-align: middle;
+	}
+}
+// 更小的行距
+.thiner-row {
+	thead > tr > th {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+	tbody > tr > td {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+}
+// 表头背景颜色
+.bg-purple-light-thead > th {
+	background-color: $bg-purple-light;
+}
+
 #encounters_new_div {
+	// 
+	.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
+		margin-bottom: 5px;
+	}
 	.el-collapse.patient-info {
 		margin-bottom: 10px;
 		border: 1px solid #ddd;
@@ -145,7 +237,7 @@ $bg-purple-light: #e5e9f2;
 			width: 50px;
 		}
 		&.price {
-			width: 50px;
+			width: 70px;
 		}
 		&.produce {
 			width: 100px;
@@ -154,29 +246,17 @@ $bg-purple-light: #e5e9f2;
 
 }
 
-// 缩小行距
-.thin-row {
-	thead > tr > th {
-		padding: 10px 0;
-		vertical-align: middle;
+#sets_inis_div {
+	.ace-edit-wrapper {
+		.el-tabs__header {
+			margin-bottom: 0;
+		}
+		.el-tab-pane > div {
+			height: 300px;
+	    border: 1px solid #e4e7ed;
+	    border-top: none;
+	    border-bottom-right-radius: 5px;
+	    border-bottom-left-radius: 5px;
+		}
 	}
-	tbody > tr > td {
-		padding: 10px 0;
-		vertical-align: middle;
-	}
-}
-// 更小的行距
-.thiner-row {
-	thead > tr > th {
-		padding: 5px 0;
-		vertical-align: middle;
-	}
-	tbody > tr > td {
-		padding: 5px 0;
-		vertical-align: middle;
-	}
-}
-// 表头背景颜色
-.bg-purple-light-thead > th {
-	background-color: $bg-purple-light;
 }
