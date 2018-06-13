@@ -2,12 +2,14 @@
 
 require 'china_sms'
 
-class Sms::Data
-
+class Sms::Data 
+  # phone(用户电话号码),code(生成的验证码),name(用户姓名),expired_in(有效期),data_type(短信类型)
   # args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',
   #   number1: '取药码', url: 'http连接', phone: '手机号码'}
   # args = {type: :verify_code, name: '用户名或登录名', code: '验证码', hour: '有效期:例如几分钟内', phone: '手机号码'}
   # args = {type: :medic_end, name: '患者姓名',number: '处方单号', time: '完成时间'}
+  # args = {type: :login_code, code: '登录验证码'}
+  # args = {type: :new_code,,code: '注册验证码'}
   class << self
     def send_phone(args)
       write_log_return({state: :start, msg: "发送短信开始-----#{args}"})
