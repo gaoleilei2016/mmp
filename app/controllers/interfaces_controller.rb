@@ -18,6 +18,15 @@ class InterfacesController < ApplicationController
 			render json:{rows:orgs,total:orgs.total_count}
 		end
 	end
+	def get_yanzhengma
+		render "/layouts/yanzhengma.html.erb",layout:false
+	end
+	def get_duanxinma
+		# p '~~~~~~~~~~',params[:login]
+		# 图片验证码
+		raise "验证码错误" unless verify_rucaptcha?
+		render json:{flag:true,info:"操作成功"}
+	end
 	############ zyz ############
 	#############################
 

@@ -37,7 +37,10 @@
       .link-area {
         display: block;
         margin-top: 25px;
-        text-align: center;
+        /*text-align: center;*/
+      }
+      .link-area a{
+        /*color: #666;*/
       }
       
       .spliter {
@@ -80,9 +83,12 @@
     <h1></h1>
 
     <header class="my_top_nav mui-bar mui-bar-nav">
-      <h1 class="mui-title">登录</h1>
+      <h1 class="mui-title">医药物联平台</h1>
     </header>
     <div class="mui-content">
+      <div style="text-align: center;margin: 25px;">
+        <img src="/assets/admin/TM.png" style="width: 60px;"/>
+      </div>
       <form id='login-form' class="mui-input-group" action="/users/sign_in" method="post">
         <div class="mui-input-row">
           <label>账号</label>
@@ -106,14 +112,9 @@
       <div class="mui-content-padded">
         <button onclick="$('form').submit();" class="mui-btn mui-btn-block mui-btn-primary">登录</button>
         <div class="link-area">
-          <a href="/users/sign_up">注册账号</a>
-          <span class="spliter">|</span>
-          <a href="/users/password/new" onclick="mui.toast('暂未提供密码找回方式，请联系管理员找回');return false;">忘记密码</a>
-        </div>
-      </div>
-      <div class="mui-content-padded">
-        <div style="text-align: center;">
-          <img src="/assets/admin/TM.png" style="width: 100px;"/>
+          <a href="/users/sign_up" style="float: right;">使用短信登录</a>
+          <!-- <span class="spliter">|</span> -->
+          <!-- <a href="" style="float: right;">忘记密码</a> -->
         </div>
       </div>
     </div>

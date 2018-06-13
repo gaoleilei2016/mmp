@@ -2,21 +2,27 @@
 
 require 'alipay'
 
-class Pay::Alipay < ApplicationRecord
-  # cost_name,out_trade_no,total_fee,title,return_url,
+class Pay::Alipay < ActiveRecord::Base
+  self.abstract_class = true
+  # cost_name,out_trade_no,total_fee,title,return_url,status,status_desc
   class << self
     # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
     #   total_fee:'支付金额单位元(String)'}
     def payment(args)
-      write_log_return({state: :start, msg: '支付宝付款开始'})
-      return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alipay.usable
-      payment = new(args)
-      return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless payment.save
-      payment.get_payment_url
+      begin
+        write_log_return({state: :start, msg: '支付宝付款开始'})
+        return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alipay.usable
+        ali = new(args)
+        return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless ali.save
+        ali.get_payment_url        
+      rescue Exception => e
+        write_log_return({state: :fail, msg: "系统错误", desc: e.message})
+      end
     end
 
-    def write_log_return(msg)
+    def write_log_return(args)
       PayAndSmsLog.info("#{args[:state]}----#{args[:msg]}----#{args[:desc]}", {file_name: 'alipay'})
+
       args
     end
   end
@@ -42,7 +48,7 @@ class Pay::Alipay < ApplicationRecord
         }.to_json(ascii_only: true),
         timestamp: current_time
       )
-      return self.class.write_log_return({ state: :succ, msg: '请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https://mclient.alipay.com')
+      return self.class.write_log_return({state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https://mclient.alipay.com')
       self.class.write_log_return({state: :fail, msg: '支付失败', desc: payment_url})
     rescue Exception => e
       self.class.write_log_return({state: :fail, msg: "支付错误", desc: e.message})

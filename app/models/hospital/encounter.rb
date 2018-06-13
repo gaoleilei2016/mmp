@@ -10,7 +10,7 @@ class Hospital::Encounter < ApplicationRecord
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人
 	def get_person
 	  return self.person if self.person.present?
-	  cur_person = ::Person.where(name: self.name, age: self.age, iden: self.iden).first
+	  cur_person = ::Person.where(name: self.name, phone: self.phone).first
 	  if cur_person.nil?
 	  	# 没有查询到 创建一个实体Person
 	  	person_args = self.format_person_args
@@ -97,7 +97,8 @@ class Hospital::Encounter < ApplicationRecord
 		ret = {
 			name: self.name,
 			age: self.age,
-			iden: self.iden
+			iden: self.iden,
+			phone: self.phone
 		}
 		return ret
 	end

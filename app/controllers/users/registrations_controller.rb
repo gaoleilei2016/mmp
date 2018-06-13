@@ -10,19 +10,42 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def new
     build_resource
     yield resource if block_given?
-    render "/devise/registrations/new2.html.erb",layout:"customer"
+    render "/devise/registrations/new.html.erb",layout:"customer"
     
-    # str = request.user_agent
-    # if str.include?('Mobile')
-    # else
-    #   respond_with resource,layout:"customer"
-    # end
-
+    # # str = request.user_agent
+    # # if str.include?('Mobile')
+    # # else
+    # #   respond_with resource,layout:"customer"
+    # # end
+    # super
   end
 
   # POST /resource
   def create
+    params[:user] = {
+      login:params[:login],
+      password:'123456',
+      email:"#{params[:login]}@duanxinzhuce.tm"
+    }
     build_resource(sign_up_params)
+    # 图片验证码
+    unless verify_rucaptcha?
+      flash[:login] = params[:login]
+      flash[:dxyz] = params[:dxyz]
+      return render "/devise/registrations/new.html.erb",layout:"customer"
+    end
+    # 短信验证码
+    unless false
+      resource.errors.add(:base,"短信码错误：#{params[:dxyz]}")
+      flash[:login] = params[:login]
+      flash[:dxyz] = ""
+      return render "/devise/registrations/new.html.erb",layout:"customer"
+    end
+    # 如果是老用户，直接登录
+    if u=(User.where(login:params[:login]).first)
+      sign_in(u)
+      return redirect_to "/"
+    end
     resource.save
     yield resource if block_given?
     if resource.persisted?
@@ -39,13 +62,13 @@ class Users::RegistrationsController < Devise::RegistrationsController
       clean_up_passwords resource
       set_minimum_password_length
 
-      str = request.user_agent
-      if str.include?('Mobile')
+      render "/devise/registrations/new2.html.erb",layout:"customer"
+      # str = request.user_agent
+      # if str.include?('Mobile')
         # p '@@@@@@@@@@@',resource.errors.messages
-        render "/devise/registrations/new2.html.erb",layout:"customer"
-      else
-        respond_with resource
-      end
+      # else
+      #   respond_with resource
+      # end
 
     end
   end
