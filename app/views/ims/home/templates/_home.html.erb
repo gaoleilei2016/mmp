@@ -124,7 +124,11 @@ const home = Vue.extend({
         this._data.tableData_plat = response.data
       }
       var errorCallback =  function(response){
-        alert('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }
       this.$http.get('/ims/orders/get_orders?platform='+val).then(successCallback,errorCallback);
 		},
@@ -140,7 +144,11 @@ const home = Vue.extend({
       }
       var errorCallback =  function(response){
       	this.set_pres()
-        alert('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(successCallback,errorCallback);
     },
@@ -155,7 +163,11 @@ const home = Vue.extend({
         this._data.detail = response.data
       }
       var errorCallback =  function(response){
-        alert('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }
       this.$http.get('/ims/orders/get_order?sta='+stat).then(successCallback,errorCallback);
     },
@@ -177,7 +189,10 @@ const home = Vue.extend({
 		},
 		oprate_order:function(data){
     	if (data.id&&data.id.length>0){}else{
-    		alert("订单信息不全，不能发药！")
+        this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能发药！',
+        });    		
     		return false
     	}
      var successCallback =  function(response) {
@@ -192,7 +207,11 @@ const home = Vue.extend({
         })
       }
       var errorCallback =  function(response){
-        alert('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }			
 			this.$http.get('/ims/orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
 		},
