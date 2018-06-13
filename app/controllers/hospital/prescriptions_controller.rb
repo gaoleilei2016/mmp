@@ -1,7 +1,7 @@
 #encoding:utf-8
 #处方
 class Hospital::PrescriptionsController < ApplicationController
-	before_action :set_prescription, only: [:show, :edit, :update, :destroy]
+	before_action :set_prescription, only: [:show, :edit, :update, :destroy, :set_prescription]
 	# GET
   # /hospital/prescriptions
 	def index
@@ -99,6 +99,19 @@ class Hospital::PrescriptionsController < ApplicationController
     p cur_phone
     @prescriptions = ::Hospital::Interface.get_prescription(cur_phone).map { |e| e.to_web_front  }
     render json: {flag: true, info: "success", data: @prescriptions}
+  end
+
+  # /# POST
+  # /hospital/prescriptions/:id/set_drug_store
+  def set_drug_store
+    p "set_drug_store", params
+    respond_to do |format|
+      if @prescription.update_attributes(drug_store_id: params[:pharmacy_id])
+        format.json { render json: {flag: true, info:"设置处方发药房成功", data: @prescription} }
+      else
+        format.json { render json: { flag: false, info: @prescription.errors }}
+      end
+    end
   end
 
 	private
