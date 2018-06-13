@@ -245,12 +245,29 @@
 				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 					<span class="mui-icon mui-icon-left-nav"></span>
 				</button>
-				<input type="text" class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;width: calc( 100% - 60px );" placeholder="街道名称、药店名称">
+				<input v-model="search_str" type="text" class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;width: calc( 100% - 60px );" placeholder="街道名称、药店名称">
 				<i class="fa fa-map-marker mui-pull-right" style="padding-top: 12px;"></i>
 			</div>
 			<div class="mui-page-content">
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
+						<div id="account">
+							<template v-if="pharmacys">
+								<ul class="mui-table-view">
+									<li class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
+										<div>
+											<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+											<div class="mui-media-body">
+												{{item.name}}
+												<p style="float: right;">???m</p>
+												<p class="mui-ellipsis">贵州省贵阳市XXX</p>
+											</div>
+										</div>
+									</li>
+								</ul>
+							</template>
+							<div v-else><p style="margin: 8px;">请输入</p></div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -258,6 +275,35 @@
 
 	<script src="/assets/plugins/mui/mui.view.js "></script>
 	<script>
+		// document.getElementById("account").addEventListener("tap",function(e) {
+		// })
+		$('#account').on('tap',function(e) {
+			alert('xxxxxxxx')
+		})
+		new Vue({
+			el:"#account",
+			data:{
+				pharmacys:null,
+				search_str:'',
+			},
+			watch:{
+				search_str:function(val) {
+					var _this = this;
+					clearTimeout(_this.timer)
+					_this.timer = setTimeout(function() {
+						// console.log( val );
+						$.ajax({
+							url:'/interfaces/get_pharmacy?search='+val,
+							success:function(json) {
+								_this.pharmacys = json.rows;
+							}
+						})
+					},500)
+				}
+			},
+			methods:{
+			}
+		})
 		new Vue({
 			el:"#vue_data",
 			data:{

@@ -34,7 +34,7 @@
         <input type="hidden" name="code" value="<%= params[:code] %>">
         <div class="mui-input-row">
           <label>账号</label>
-          <input autocomplete="off" id='login_input' type="text" class="mui-input-clear mui-input" placeholder="登陆时使用" name="user[login]" value="<%= resource.login rescue nil %>">
+          <input autocomplete="off" id='login_input' type="text" class="mui-input-clear mui-input" placeholder="登录时使用" name="user[login]" value="<%= resource.login rescue nil %>">
         </div>
         <div class="mui-input-row">
           <label>密码</label>
