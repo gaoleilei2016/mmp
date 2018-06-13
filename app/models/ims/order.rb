@@ -7,7 +7,7 @@ class Ims::Order < ApplicationRecord
 
 	# 订单发药
   def dispensing_order
-  	self.update_attributes(status:"E")
+  	self.update_attributes(status:"E") ? {flag:true,info:"发药成功！"} : {flag:false,info:"发药失败。"}
   end
 
   # 订单退药
