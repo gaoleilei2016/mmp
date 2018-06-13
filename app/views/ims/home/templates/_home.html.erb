@@ -1,7 +1,7 @@
 <style type="text/css">
 #prescription_header{font-size: 12px;padding: 8px;}
 #prescription_header .title{font-size: 21px;}
-#prescription_header .header-right-btns{position: absolute; right:12px; text-align: right; }
+#prescription_header .header-right-btns{position: absolute; right:12px; bottom:8px; text-align: right; }
 </style>
 <template id="home_div">
 	<div>
@@ -11,7 +11,7 @@
 				药店订单
 			</div>
 			<div class="header-right-btns">
-				<el-button type="button" size="small" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">搜索</el-button>
+				<el-tooltip content="搜索订单" placement="bottom"><el-button type="button" size="mini" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">远端</el-button></el-tooltip>
 			</div>
 		</div>
 
@@ -46,7 +46,7 @@
 		</div>
 
 		<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
-		  <el-form :model="form">
+		  <el-form :model="form" @submit.native.prevent>
 		    <el-form-item label="订单标识" :label-width="formLabelWidth">
 		      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
 		    </el-form-item>
@@ -102,29 +102,21 @@ const home = Vue.extend({
 			}],
 			activeCollapse: "pre_info",
 			activeTab: "histories",
-			rules: {
-				iden: [
-		      { required: true, message: '姓名不能为空'},
-		    ],
-				phone: [
-		      { required: true, message: '姓名不能为空'},
-		    ],
-			}
 		}
 	},
 	methods:{
       handleCurrentChange:function(val) {
-      	console.log(val)
       	this.currentRow = val;
       },
       click_form_tr:function(row){
-      	console.log(this.$refs.singleTable)
-      	console.log(this.currentRow)
       	current = this.currentRow
-      	data = [{id:current.id,code:current.date, name:current.name, amount:current.amount}]
-      	// this._data.pres = [{id:current.id,code:current.date, name:current.name, amount:current.amount}]
-      	this.set_pres(data)
-        this.dialogFormVisible = false
+      	if (current) {
+	      	data = [{id:current.id,code:current.code, name:current.name, amount:current.amount}]
+	      	this.set_pres(data)
+	        this.dialogFormVisible = false
+      	}else{
+      		this.$message('请选择一条订单');
+      	}
       },		
 		search_platform_pre:function(val){
 			if (!val) {val = ""};
@@ -143,7 +135,6 @@ const home = Vue.extend({
     get_pres:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
     	if (!stat) {stat=""};
-    	console.log(this)
      var successCallback =  function(response) {
         this.set_pres(response.data)
       }
@@ -161,13 +152,10 @@ const home = Vue.extend({
     	$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
     	if (!stat) {stat=""};
      var successCallback =  function(response) {
-        console.log('服务器请求成功了')
-        console.log(response.data)
-        console.log(this._data.pres)
         this._data.detail = response.data
       }
       var errorCallback =  function(response){
-          console.log('服务器请求出错了')
+        alert('服务器请求出错了')
       }
       this.$http.get('/ims/orders/get_order?sta='+stat).then(successCallback,errorCallback);
     },
@@ -193,7 +181,6 @@ const home = Vue.extend({
     		return false
     	}
      var successCallback =  function(response) {
-     		console.log(response.data)
      		stat = response.data.flag ? true : false
      		type = stat ? "success" : "warning";
      		str = 
@@ -205,7 +192,7 @@ const home = Vue.extend({
         })
       }
       var errorCallback =  function(response){
-          console.log('服务器请求出错了')
+        alert('服务器请求出错了')
       }			
 			this.$http.get('/ims/orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
 		},
