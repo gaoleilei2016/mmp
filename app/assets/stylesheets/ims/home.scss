@@ -23,6 +23,8 @@ $header_margin : 12px;
 }
 
 .prescription_list{
+	height:calc(100% - 80px);
+	overflow-y:auto;
 	border:1px solid #ddd;
 	border-top:none;
 	padding-top:2px;

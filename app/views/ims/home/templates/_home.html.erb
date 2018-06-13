@@ -1,11 +1,17 @@
 <style type="text/css">
+#prescription_header{font-size: 12px;padding: 8px;}
+#prescription_header .title{font-size: 21px;}
+#prescription_header .header-right-btns{position: absolute; right:12px; text-align: right; }
 </style>
 <template id="home_div">
 	<div>
 		<div id="prescription_header" class="el-row">
-			<div class="el-col-4" style="width:auto;"><i class="fa fa-home fa-4x"></i></div>
-			<div class="el-col-20">
-				药店
+			<div class="el-col-4" style="width:auto;"><i class="fa fa-clipboard fa-4x"></i></div>
+			<div class="el-col-20 title">
+				药店订单
+			</div>
+			<div class="header-right-btns">
+				<el-button type="button" size="small" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">搜索</el-button>
 			</div>
 		</div>
 
@@ -27,7 +33,7 @@
 					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('T',$event)">已退订单</div>
 				</div>
 
-				<div class="prescription_list" style="height:calc(100% - 80px);">
+				<div class="prescription_list">
 					<div class="el-row">
 						<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
 					</div>
@@ -38,23 +44,58 @@
 				<%= render "ims/home/render/order_info"%>
 			</div>
 		</div>
+
+		<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
+		  <el-form :model="form">
+		    <el-form-item label="订单标识" :label-width="formLabelWidth">
+		      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
+		    </el-form-item>
+		  </el-form>
+		  <el-table
+		  ref="singleTable"
+      :data="tableData_plat"
+      highlight-current-row
+      @current-change="handleCurrentChange"
+      style="width: 100%">
+      <el-table-column
+        prop="code"
+        label="编号"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="name"
+        label="姓名"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="amount"
+        label="金额">
+      </el-table-column>
+    </el-table>
+		  <div slot="footer" class="dialog-footer">
+		    <el-button size="small" type="primary" @click="click_form_tr()">确 定</el-button>
+		  </div>
+		</el-dialog>
+
 	</div>
 </template>
 <script type="text/javascript">
 const home = Vue.extend({
 	template: '#home_div',
-	// mounted:function(){
-
-	// },
 	activated:function(){
-		window.apps.header_and_footer.header_selected_tab = '#/home';
+		// window.apps.header_and_footer.header_selected_tab = '#/home';
 	},
-// })
-// window.current_template_obj = {
 	data:function(){
 		return {
 			pres:[],
 			input21: '',
+			dialogFormVisible: false,
+			dialogFormVisible: false,
+			tableData_plat:[],
+        form: {
+          name: '',
+        },
+        formLabelWidth: '120px',
 			detail:[{
 				header:{},
 				lines:[{}]
@@ -72,17 +113,49 @@ const home = Vue.extend({
 		}
 	},
 	methods:{
+      handleCurrentChange:function(val) {
+      	console.log(val)
+      	this.currentRow = val;
+      },
+      click_form_tr:function(row){
+      	console.log(this.$refs.singleTable)
+      	console.log(this.currentRow)
+      	current = this.currentRow
+      	data = [{id:current.id,code:current.date, name:current.name, amount:current.amount}]
+      	// this._data.pres = [{id:current.id,code:current.date, name:current.name, amount:current.amount}]
+      	this.set_pres(data)
+        this.dialogFormVisible = false
+      },		
+		search_platform_pre:function(val){
+			if (!val) {val = ""};
+     var successCallback =  function(response) {
+        this._data.tableData_plat = response.data
+      }
+      var errorCallback =  function(response){
+        alert('服务器请求出错了')
+      }
+      this.$http.get('/ims/orders/get_orders?platform='+val).then(successCallback,errorCallback);
+		},
 		search:function(data){console.log(data)},
+		system_search:function(){
+			dialogFormVisible = true
+		},
     get_pres:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
     	if (!stat) {stat=""};
+    	console.log(this)
      var successCallback =  function(response) {
-        this._data.pres = response.data
+        this.set_pres(response.data)
       }
       var errorCallback =  function(response){
-          alert('服务器请求出错了')
+      	this.set_pres()
+        alert('服务器请求出错了')
       }
-      this.$http.get('orders/get_orders?='+stat).then(successCallback,errorCallback);
+      this.$http.get('/ims/orders/get_orders?stat='+stat).then(successCallback,errorCallback);
+    },
+    set_pres:function(data){
+    	this._data.pres = data
+    	setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
@@ -96,7 +169,7 @@ const home = Vue.extend({
       var errorCallback =  function(response){
           console.log('服务器请求出错了')
       }
-      this.$http.get('orders/get_order?sta='+stat).then(successCallback,errorCallback);
+      this.$http.get('/ims/orders/get_order?sta='+stat).then(successCallback,errorCallback);
     },
     //发药  发订单
     out_order:function(id){
@@ -134,7 +207,7 @@ const home = Vue.extend({
       var errorCallback =  function(response){
           console.log('服务器请求出错了')
       }			
-			this.$http.get('orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
+			this.$http.get('/ims/orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
 		},
     format_time:function(data){
 	  	var time = new Date(data)

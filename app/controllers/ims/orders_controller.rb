@@ -61,11 +61,45 @@ class Ims::OrdersController < ApplicationController
   end
 
   def get_orders
-    data = [
-      {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-      {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-      {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-    ]
+    #搜索平台的 订单 处方
+    if params[:platform]
+      data = [
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+      ]
+    end
+
+    #搜索药店的 订单 处方
+    if params[:stat]
+      data = [
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
+      ]
+    end
     render json:data.to_json
   end
   def get_order
