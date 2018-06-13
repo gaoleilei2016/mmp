@@ -1,0 +1,26 @@
+#encoding: utf-8
+
+defaults: &defaults
+  usable: true
+  name: 贵州腾迈华希医疗
+  appid: wx985d4b9d7b2784d2
+  sign_type: MD5
+  trade_type: MWEB
+  spbill_ip: 58.16.181.25
+  appsecret: 0e8523d092e28993b54b4b980116e832
+  mchid: 1432526502
+  pay_url: https://api.mch.weixin.qq.com/pay/unifiedorder
+  wap_name: 腾迈华希医药
+  wap_url: http://huaxi.tenmind.com
+  pay_key: FeiShanJie88HaoTenmindGS20170222
+  notify_url: http://huaxi.tenmind.com
+  awesome_setting: <%= "#{Rails.root}/config/setup/pay/wechat/apiclient_cert.p12" %>
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults

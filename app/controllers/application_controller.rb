@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
 	protect_from_forgery with: :exception
 	before_action :configure_permitted_parameters, if: :devise_controller?
-	before_action :authenticate_user!
+	before_action :authenticate_user!,if: :not_interfaces_controller?
 	rescue_from RuntimeError do |exception|
 		respond_to do |html|
 			html.html {render xml:{flag:false,reason:exception.class.to_s,info:exception.message}}
@@ -9,10 +9,8 @@ class ApplicationController < ActionController::Base
 		end
 	end
 
-	def index
-	end
 	def menus
-		p '~~~~~~~~~ menus ',params[:path]
+		# p '~~~~~~~~~ menus ',params[:path]
 		case params[:path]
 		when "admin/home"
 			file_name = "admin"
@@ -27,7 +25,7 @@ class ApplicationController < ActionController::Base
 		render json:{menus:yml}
 	end
 	def templates
-		p '~~~~~~~~~ templates ',params[:path]
+		# p '~~~~~~~~~ templates ',params[:path]
 		case params[:path]
 		when "admin/home"
 			dir_name = "/admin/home/templates"
@@ -42,6 +40,9 @@ class ApplicationController < ActionController::Base
 	end
 
 	protected
+	def not_interfaces_controller?
+		controller_path=="interfaces" ? false : true
+	end
 	def configure_permitted_parameters
 		devise_parameter_sanitizer.permit(:sign_up, keys: [:email])
 	end

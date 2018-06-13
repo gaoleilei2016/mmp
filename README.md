@@ -22,3 +22,7 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+医生获取可选药店 /interfaces/get_pharmacy
+根据字典代码获取字典表数据  /interfaces/getdicts  ,?code
+获取行政区划地址 /interfaces/get_addrs  ，?code

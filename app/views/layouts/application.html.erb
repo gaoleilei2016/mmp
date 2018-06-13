@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>医药管理平台</title>
+    <title>腾迈智医</title>
     <link rel="icon" href="/assets/admin/TM.ico" />
-    <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
+    <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/vue/vue-resource","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
     <%= stylesheet_link_tag "/assets/plugins/vue/element-ui-240","/assets/plugins/fontawesome/font-awesome.min","/assets/plugins/vue/display" %>
     <%= javascript_include_tag  %>
     <%= csrf_meta_tags %>
@@ -157,6 +157,9 @@
       .el-pagination .el-input__inner{
         line-height: initial;
       }
+      .el-pagination--small .el-select .el-input .el-input__inner{
+        height: 23px;
+      }
     </style>
     <%= render '/layouts/header_and_footer' %>
     <div class="container">
@@ -177,6 +180,7 @@
         when "ims/home"
           dir_name = "/ims/home/templates"
         else
+          p '~~~~~~~~~~ application.html.erb'
           raise "未处理的 controller_path : #{params[:path]} => ApplicationController#templates"
         end
       %>
@@ -204,7 +208,7 @@
       const refresh = Vue.extend({
         template: '<div></div>',
         beforeRouteEnter:function(to, from, next){
-          current_app.$message('目前由于架构所限，将刷新所有组件分页！')
+          // current_app.$message('目前由于架构所限，将刷新所有组件分页！')
           next(function(){
             router.push(from.path)
           })
@@ -217,6 +221,22 @@
         {path:'/refresh',component:refresh,meta:{notKeepAlive:true}},
         ]
       })
+      /* 全局过滤器----start */
+        // 日期
+        Vue.filter('formatDate', function (value, fmt) {
+          if(!fmt) fmt = "yyyy-MM-dd HH:mm";
+          if(!value){
+            return "";
+          }else{
+            return (new Date(value).pattern(fmt));
+          }
+        })
+        // 金额
+        Vue.filter('formatMoney', function (value, fmt) {
+          return value.toFixed(fmt || 4);
+        })
+
+      /* 全局过滤器----end */
 
       const current_app = new Vue({
         el:"#current_app_div",
@@ -227,6 +247,15 @@
           codesystem_data_sex:[],
           common_data_new_bumber:["DAY", "WEEK", "MONTH", "YEAR", "NEVER"],
           common_data_application_exec_status:[{code:"",display:'所有'},{code:'A',display:'未执行'},{code:'E',display:'已执行'}],
+          common_data_org_type_code:[{code:'1',display:'医院'},{code:'2',display:'药房'}],
+          common_data_genders:[{code:"1",display:'男'},{code:'2',display:'女'}],
+          common_data_occupations:[{code: "01", display: "幼托儿童"}, {code: "02", display: "散居儿童"}, {code: "03", display: "学生（大中小学）"}, {code: "04", display: "教师"}, {code: "05", display: "保育员及保姆"}, {code: "06", display: "餐饮食品业"}, {code: "07", display: "商业服务"}, {code: "08", display: "医务人员"}, {code: "09", display: "工人"}, {code: "10", display: "民工"}, {code: "11", display: "农民"}, {code: "12", display: "牧民"}, {code: "13", display: "渔（船）民"}, {code: "14", display: "干部职员"}, {code: "15", display: "离退人员"}, {code: "16", display: "家务及待业"}, {code: "17", display: "不详"}, {code: "99", display: "其他"}], // CodeSystem 2.16.156.1.13610.1.364.2.1.202
+          common_data_nations:[{code:"TU",display:'土族'},{code:'KZ',display:'哈沙克族'}], // ValueSet 2.16.156.1.675425699.1.11.14
+          common_data_marriages:[{code:"10",display:'未婚'},{code:'20',display:'已婚'}], // CodeSystem 2.16.156.1.19449.1.2261.2
+          common_data_bloods:[{code:"1",display:'A型'},{code:'2',display:'B型'},{code:'3',display:'O型'},{code:'4',display:'AB型'},{code:'5',display:'不详'}], // CodeSystem 2.16.156.1.13610.1.364.4.50.5
+          common_data_routes:[{code: "PO", display: "口服", jianpin: "KF"},{code: "IV.DRIP", display: "静脉滴注", jianpin: "JMDZ"},{code: "SC", display: "皮下注射", jianpin: "PXZS"},{code: "IM", display: "肌肉注射", jianpin: "JRZS"},{code: "IV.SHOVE", display: "静脉推注", jianpin: "JMTZ"},{code: "INH", display: "雾化吸入", jianpin: "WHXR"},{code: "JMBR", display: "静脉泵入", jianpin: "JMBR"},{code: "OP", display: "滴眼", jianpin: "DY"},{code: "NA", display: "滴鼻", jianpin: "DB"},{code: "ST", display: "喷喉", jianpin: "PH"},{code: "CHEW", display: "含化", jianpin: "HH"},{code: "ATW", display: "敷伤口", jianpin: "FSK"},{code: "CTS", display: "擦皮肤", jianpin: "CPF"},{code: "RE", display: "直肠用药", jianpin: "ZCYY"},{code: "SL", display: "舌下用药", jianpin: "SXYY"},{code: "INJP", display: "注射用药", jianpin: "ZSYY"},{code: "ID", display: "皮内注射", jianpin: "PNZS"},{code: "IV", display: "静脉注射", jianpin: "JMZS"},{code: "IN", display: "吸入用药", jianpin: "XRYY"},{code: "LA", display: "局部用药", jianpin: "JBYY"},{code: "SCM", display: "椎管内用药", jianpin: "ZGNYY"},{code: "ACD", display: "关节腔内用药", jianpin: "GJQNYY"},{code: "PCM", display: "胸膜腔用药", jianpin: "XMQYY"},{code: "IP", display: "腹腔用药", jianpin: "FQYY"},{code: "VA", display: "阴道用药", jianpin: "YDYY"},{code: "EM", display: "气管内用药", jianpin: "QGNYY"},{code: "ODW", display: "其他用药途径", jianpin: "QTYYTJ"}],
+          common_data_frequencys:[{code: "QD", display: "每日一次", jianpin: "MRYC"}, {code: "BID", display: "每日两次", jianpin: "MRLC"}, {code: "TID", display: "每日三次", jianpin: "MRSC"}, {code: "QID", display: "每日四次", jianpin: "MRSC"}, {code: "QUINGID", display: "每日五次", jianpin: "MRWC"}, {code: "QN", display: "每晚一次", jianpin: "MWYC"}, {code: "Q4H", display: "四小时一次", jianpin: "SXSYC"}, {code: "Q6H", display: "六小时一次", jianpin: "LXSYC"}, {code: "Q8H", display: "八小时一次", jianpin: "BXSYC"}, {code: "Q12H12", display: "小时一次", jianpin: "XSYC"}, {code: "QH", display: "一小时一次", jianpin: "YXSYC"}, {code: "Q2H", display: "二小时一次", jianpin: "EXSYC"}, {code: "Q3H", display: "三小时一次", jianpin: "SXSYC"}, {code: "QOD", display: "隔日一次", jianpin: "GRYC"}, {code: "QW", display: "每周一次", jianpin: "MZYC"}],
+          common_data_prescription_types:[{code: "1", display: "普通处方"}, {code: "2", display: "急诊处方"}, {code: "3", display: "儿科处方"}, {code: "4", display: "毒麻药品处方"}, {code: "5", display: "第一类精神药品处方"}, {code: "6", display: "第二类精神药品处方"}, {code: "7", display: "抗生素处方"}], // 处方类型CodeSystem 2.16.156.1.675425699.1.50
           pickerOptions:{
             shortcuts: [{
               text: '今天',

@@ -1,0 +1,26 @@
+#encoding: utf-8
+
+defaults: &defaults
+  usable: true
+  name: 贵州腾迈华希医疗
+  app_id: 2018060860345111
+  url: https://openapi.alipay.com/gateway.do
+  api_name: alipay.trade.wap.pay
+  format: JSON
+  charset: utf-8
+  sign_type: RSA2
+  product_code: 2018060810537243
+  version: 1.0
+  notify_url: http://mmp.tenmind.com
+  return_url: http://mmp.tenmind.com
+  public_key_root: <%= "#{Rails.root}/app/models/pay/alipay/alipay.pem" %>
+  private_key_root: <%= "#{Rails.root}/app/models/pay/alipay/rsa_private_key.pem" %>
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
