@@ -1,5 +1,8 @@
 class Orders::Order < ApplicationRecord
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
+	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
+	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
+	
 	# has_many :perscripts, class_name: '', foreign_key: 'order_id'
 	# belongs_to :user, class_name: '::User', foreign_key: 'order_id'
 
@@ -35,30 +38,55 @@ class Orders::Order < ApplicationRecord
 	class << self
 		#attrs = { target_org_ii:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_ii:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号',perscript_id:'处方id', user_id:'用户id',details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
 		#订单生成创建（一个订单内容对应一张处方）
-		def create_order(attrs = {})
-			attrs = attrs.deep_symbolize_keys
-			order_code = get_order_code
-			order = self.create(
-				 target_org_ii: attrs[:target_org_ii],
-				 target_org_name: attrs[:target_org_name],
-				 source_org_ii: attrs[:source_org_ii],
-				 source_org_name: attrs[:source_org_name],
-				 order_code: order_code,
-				 doctor: attrs[:doctor],
-				 user_id: attrs[:user_id],
-				 user_id: attrs[:person_id],
-				 status: 'N'
-		 		)
-			Relation::OrdersAndPrescription.create(prescript_id:attrs[:prescript_id] ,order_id:order.id.to_s)
-			attrs[:details].each do |detail|
-				net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
-				Orders::OrderDetail.create(detail.merge({order_id:order.id,net_amt:net_amt}))
-			end
-			order
-		end	
+		# def create_order(attrs = {})
+		# 	attrs = attrs.deep_symbolize_keys
+		# 	# order_code = get_order_code
+		# 	order = self.create(
+		# 		 target_org_ii: attrs[:target_org_ii],
+		# 		 target_org_name: attrs[:target_org_name],
+		# 		 source_org_ii: attrs[:source_org_ii],
+		# 		 source_org_name: attrs[:source_org_name],
+		# 		 order_code: order_code,
+		# 		 doctor: attrs[:doctor],
+		# 		 user_id: attrs[:user_id],
+		# 		 user_id: attrs[:person_id],
+		# 		 status: 'N'
+		#  		)
+		# 	# Relation::OrdersAndPrescription.create(prescript_id:attrs[:prescript_id] ,order_id:order.id.to_s)
+		# 	attrs[:details].each do |detail|
+		# 		net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
+		# 		order.details << ::Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
+		# 	end
+		# 	order.save
+		# 	order
+		# end	
 
 		#获取订单生成数据
-		def
+		def create_order_by_presc_ids(ids = [])
+			##通过处方拿到订单生成数据
+			prescs = ::Hospital::Interface.prescription_to_order(ids)
+			attrs = prescs.first.last
+			order = self.create(
+			 target_org_ii: attrs[:target_org_ii].to_s,
+			 target_org_name: attrs[:target_org_name].to_s,
+			 source_org_ii: attrs[:source_org_ii].to_s,
+			 source_org_name: attrs[:source_org_name].to_s,
+			 order_code: get_order_code,
+			 doctor: attrs[:doctor].to_s,
+			 user_id: attrs[:user_id].to_s,
+			 person_id: attrs[:person_id].to_s,
+			 status: 'N'
+	 		)
+			prescs.each do |k,v|
+				order.prescriptions << ::Hospital::Prescription.find(k)
+				v[:details].each do |detail|
+					net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
+					order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
+				end
+			end
+			order.save
+			order
+		end
 		#更新订单信息
 		def update_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
