@@ -8,6 +8,7 @@ class Sms::Data
   #   number1: '取药码', url: 'http连接', phone: '手机号码'}
   # args = {type: :verify_code, name: '用户名或登录名', code: '验证码', hour: '有效期:例如几分钟内', phone: '手机号码'}
   # args = {type: :medic_end, name: '患者姓名',number: '处方单号', time: '完成时间'}
+  # args = {type: :login_code, code: '登录验证码'}
   class << self
     def send_phone(args)
       write_log_return({state: :start, msg: "发送短信开始-----#{args}"})

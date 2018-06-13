@@ -8,6 +8,7 @@ defaults: &defaults
     take_medic: 2336456
     verify_code: 2335480
     medic_end: 2336458
+    login_code: 2335484
 
 development:
   <<: *defaults

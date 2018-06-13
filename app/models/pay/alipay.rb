@@ -3,7 +3,7 @@
 require 'alipay'
 
 class Pay::Alipay < ApplicationRecord
-  # cost_name,out_trade_no,total_fee,title,return_url,
+  # cost_name,out_trade_no,total_fee,title,return_url,status,status_desc
   class << self
     # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
     #   total_fee:'支付金额单位元(String)'}
