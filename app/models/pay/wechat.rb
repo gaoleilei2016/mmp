@@ -1,7 +1,9 @@
 #encoding: utf-8
 
-class Pay::Wechat < ApplicationRecord
-  # content,out_trade_no
+class Pay::Wechat < ActiveRecord::Base
+  self.abstract_class = true
+  
+  # content,out_trade_no,total_fee,status,status_desc,description
   class << self
     def payment(args)
       write_log_return({state: :start, msg: '支付宝付款开始'})
@@ -32,6 +34,7 @@ class Pay::Wechat < ApplicationRecord
       scene_info: get_scene_info
     }
     datas = handle_send_datas(args)
+    self.class.write_log_return({state: :send, msg: '发送数据', desc: datas})
     res = send_data(wx.pay_url, datas)
     return self.class.write_log_return({state: :succ, msg: '请转到微信支付',  pay_url: res['mweb_url']) if @res['result_code'].eql?('SUCCESS')
     self.class.write_log_return({state: :fail, msg: '支付失败', desc: "#{res['return_msg']}:#{res['err_code_des']}"})

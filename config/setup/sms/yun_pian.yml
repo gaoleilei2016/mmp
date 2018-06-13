@@ -9,6 +9,7 @@ defaults: &defaults
     verify_code: 2335480
     medic_end: 2336458
     login_code: 2335484
+    new_code: 2340158
 
 development:
   <<: *defaults
