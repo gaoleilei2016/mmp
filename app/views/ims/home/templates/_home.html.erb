@@ -22,15 +22,15 @@
 					    placeholder="请输入内容"
 					    prefix-icon="el-icon-search"
 					    v-model="input21"
-					    @change="search('dose')"
+					    @change="search"
 					    >
 					  </el-input>					
 				</div>
 
 				<div class="el-row prescription_list_fun">
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('W',$event)">未发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('F',$event)">已发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('T',$event)">已退订单</div>
+					<div class="el-col el-col-8 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">未发订单</div>
+					<div class="el-col el-col-8 list_fun_panel" stat="F" v-on:click="get_pres('F',$event)">已发订单</div>
+					<div class="el-col el-col-8 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">已退订单</div>
 				</div>
 
 				<div class="prescription_list">
@@ -132,9 +132,20 @@ const home = Vue.extend({
       }
       this.$http.get('/ims/orders/get_orders?platform='+val).then(successCallback,errorCallback);
 		},
-		search:function(data){console.log(data)},
-		system_search:function(){
-			dialogFormVisible = true
+		search:function(val){
+			if (!val) {val = ""};
+			stat = $(".prescription_list_fun").find("list_fun_panel.active").attr("stat")||""
+     var successCallback =  function(response) {
+        this._data.tableData_plat = response.data
+      }
+      var errorCallback =  function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      }
+      this.$http.get('/ims/orders/get_orders?stat='+stat+'&search='+val).then(successCallback,errorCallback);
 		},
     get_pres:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")

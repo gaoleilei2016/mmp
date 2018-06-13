@@ -62,6 +62,7 @@ class Ims::OrdersController < ApplicationController
 
   def get_orders
     #搜索平台的 订单 处方
+    
     if params[:platform]
       data = [
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
@@ -77,24 +78,6 @@ class Ims::OrdersController < ApplicationController
         {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
         {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
         {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
         {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
@@ -107,7 +90,6 @@ class Ims::OrdersController < ApplicationController
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
       lines:[
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
