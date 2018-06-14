@@ -4,8 +4,8 @@ class InterfacesController < ApplicationController
 	############ zyz ############
 	def pay_order
 		# p '~~~~~~~~~',params
-		order = params[:pay_order]
-		args = {out_trade_no: order, total_fee: 0.01, title: '支付后会通知药房备药', cost_name: '', return_url: '/customer/home'}
+		# order = params[:pay_order]
+		args = {out_trade_no: Time.now.to_i.to_s, total_fee: 0.01, title: '支付后会通知药房备药', cost_name: '', return_url: '/customer/home'}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
