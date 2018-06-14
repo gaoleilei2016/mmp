@@ -93,6 +93,7 @@ Rails.application.routes.draw do
     resources :home
     resources :orders do #药品订单
       collection do
+        get :order_settings
         get :get_orders
         get :get_order
         post :create_order  #生成订单

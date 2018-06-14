@@ -22,25 +22,25 @@ body > .container{
 
 		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
-		  <el-menu-item index="1" route="this.$router.push">
+		  <el-menu-item index="1">
         <router-link to="home"><i class="el-icon-setting"></i>发药</router-link>
       </el-menu-item>
 
-      <el-menu-item index="1" route="this.$router.push">
-        <router-link to="order_settings"><i class="el-icon-setting"></i>设置</router-link>
+      <el-menu-item index="1">
+        <router-link to="/ims/order/order_settings"><i class="el-icon-setting"></i>设置</router-link>
       </el-menu-item>
 
-		  <el-menu-item index="2" @route="this.$router.push">
+		  <el-menu-item index="2" >
 		    <i class="el-icon-setting"></i>
 		    <span slot="title">退药</span>
 		  </el-menu-item>
 
-		  <el-menu-item index="3" route="this.$router.push">
+		  <el-menu-item index="3">
 		    <i class="el-icon-setting"></i>
 		    <span slot="title">报表</span>
 		  </el-menu-item>
 
-      <el-menu-item index="4" route="this.$router.push">
+      <el-menu-item index="4">
         <i class="el-icon-search"></i>
         <span slot="title">搜索平台</span>
       </el-menu-item>
