@@ -13,7 +13,7 @@
 		    v-model="searchencstr">
 		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters(searchencstr)"></i>
 		  </el-input>&#12288;
-      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[ 姓名 ]</b>&#12288;
+      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else class="text-mmp-lighter">[ 姓名 ]</b>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
       <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
@@ -22,7 +22,7 @@
       	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>
       </span>
       <div style="float: right; margin-right: 1em;">
-      	<!-- <el-button size="mini" @click="resetEncounterForm('encounterForm')" icon="el-icon-refresh">刷新</el-button> -->
+      	<el-button size="mini" @click="resetEncounterForm('encounterForm')" class="refresh-btn" type="text" icon="fa fa-lg fa-fw el-icon-refresh">刷新</el-button>
       </div>
     </template>
     <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="80px">
@@ -36,7 +36,7 @@
 				  </el-form-item>
 				  <el-form-item
 				    label="性别"
-				    prop="gender">
+				    prop="gender.code">
 				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: calc(100% - 20px );" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
@@ -288,11 +288,10 @@
   width="90%">
   <el-table
 		:data="encounters"
-		class="thin-row encounters-table"
-		header-row-class-name="bg-purple-light-thead"
+		class="thiner-row encounters-table"
 		style="width: 100%">
 	  <el-table-column
-	    min-width="20"
+	    min-width="40"
 	    label="#">
 	    <template slot-scope="scope">
 	      {{ scope.$index + 1 }}
@@ -300,42 +299,42 @@
 	  </el-table-column>
 	  <el-table-column
 	    prop="name"
-	    min-width="60"
+	    min-width="80"
 	    label="姓名">
 	  </el-table-column>
 	  <el-table-column
 	    prop="gender.display"
-	    min-width="30"
+	    min-width="50"
 	    label="性别">
 	  </el-table-column>
 	  <el-table-column
 	    prop="age"
-	    min-width="30"
+	    min-width="50"
 	    label="年龄">
 	  </el-table-column>
 	  <el-table-column
-	    min-width="150"
+	    min-width="200"
 	    label="身份证号码">
 	    <template slot-scope="scope">
 	    	<i class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
-	    min-width="70"
+	    min-width="100"
 	    label="出生日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.birth_date | formatDate("yyyy-MM-dd") }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
-	    min-width="90"
+	    min-width="140"
 	    label="手机号码">
 	    <template slot-scope="scope">
 	    	<i class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
-	    min-width="80"
+	    min-width="140"
 	    label="就诊日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.created_at | formatDate }}
@@ -344,10 +343,10 @@
 	  <el-table-column
 	    fixed="right"
 	    label=""
-	    width="200">
+	    width="150">
 	    <template slot-scope="scope">
-	      <el-button size="mini" @click="editEncounter(scope.row, true)" type="primary" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button>
-	      <el-button size="mini" @click="editEncounter(scope.row, false)" type="success" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建就诊</el-button>
+	      <el-button size="mini" @click="editEncounter(scope.row, true)" type="primary" title="编辑就诊信息" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button>
+	      <el-button size="mini" @click="editEncounter(scope.row, false)" type="success" title="在此基础上新建一次就诊" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建</el-button>
 	    </template>
 	  </el-table-column>
 	</el-table>

@@ -80,8 +80,10 @@
 				</ul>
 			</template>
 			<template v-else>
-				<p style="margin: 8px;">历史记录</p>
-				<p style="margin: 8px;">大家常用</p>
+				<div style="padding-left: 16px;">
+					<p style="margin: 8px;">历史记录</p>
+					<p style="margin: 8px;">大家常用</p>
+				</div>
 			</template>
 		</div>
 	</div>
@@ -156,12 +158,15 @@
 			},
 			click_to_save_user_pharmacy:function(item) {
 				var _this = this;
+				$("#loading").show();
 				$.ajax({
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
-						// body...
 						_this.current_pharmacy = item;
 						$(".mui-icon-arrowleft").first().trigger("tap");
+					},
+					complete:function() {
+						$("#loading").hide();
 					}
 				})
 				// mui.back();
@@ -196,6 +201,7 @@
 			},
 		},
 		mounted:function() {
+			var _this = this;
 			this.get_current_pharmacy();
 			this.get_prescriptions();
 			$("#search_input").on("tap",function(e) {

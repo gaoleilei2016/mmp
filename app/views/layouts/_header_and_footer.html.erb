@@ -161,7 +161,7 @@
 
     <div class="nav-right">
       <el-dropdown trigger="click">
-        <span class="el-dropdown-link" style="color: #fff;">
+        <span class="el-dropdown-link" style="color: #CAE6E7;">
           您好，<%= current_user.try(:login) %>
           <% if current_user.organization %>
           ，<%= current_user.organization.name %>
@@ -174,7 +174,7 @@
           <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <a href="/" style="color: #fff;"><i class="fa fa-home"></i></a>
+      <a href="/" style="color: #CAE6E7;"><i class="fa fa-home"></i></a>
     </div>
 
     <!-- <el-tabs v-model="header_selected_tab" type="card" @tab-remove="removeTab" @tab-click="handleTabClick">
