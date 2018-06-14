@@ -124,7 +124,13 @@
       <a href="javascript:;" onclick="location.href='/users/sign_in?login='+$('#login_input').val()" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left" style="color: rgb(1, 190, 1);">
         <span class="mui-icon mui-icon-left-nav"></span>
       </a>
-      <h1 class="mui-title">注册</h1>
+      <h1 class="mui-title">
+        <% if params[:forget_password] %>
+        找回密码
+        <% else %>
+        注册
+        <% end -%>
+      </h1>
       <a href="javascript:;" onclick="submit_form();" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">提交</a>
     </header>
     <div class="mui-content" id="vue_form">
