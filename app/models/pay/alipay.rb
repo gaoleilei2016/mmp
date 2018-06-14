@@ -63,6 +63,10 @@ class Pay::Alipay < ApplicationRecord
     end
   end
 
+  def paid?
+    status.eql?('success')
+  end
+
   private
 
   def get_return_url
@@ -72,10 +76,6 @@ class Pay::Alipay < ApplicationRecord
 
   def current_time
     Time.now.strftime("%Y-%m-%d %H:%M:%S")
-  end
-
-  def paid?
-    status.eql?('success')
   end
 
   def ali
