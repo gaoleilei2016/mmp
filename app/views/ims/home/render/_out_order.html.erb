@@ -1,16 +1,7 @@
 		<div id="prescription_panel">
-			<div id="prescription_header" class="el-row">
-				<div class="el-col-4" style="width:auto;"><i class="fa fa-clipboard fa-4x"></i></div>
-				<div class="el-col-20 title">
-					药店订单
-				</div>
-				<div class="header-right-btns">
-					<el-tooltip content="搜索订单" placement="bottom"><el-button type="button" size="mini" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">远端</el-button></el-tooltip>
-				</div>
-			</div>
-
+			
 			<div class="el-row" id="prescription_body">
-				<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
+				<div class="el-col el-col-8" style="height: 100%; overflow: auto; padding:12px; border-right:1px solid #ddd;">
 					<div class="el-input el-input--mini" style="height:40px;">
 						<el-input
 						    placeholder="请输入内容"
@@ -33,7 +24,7 @@
 					</div>
 				</div>
 
-				<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
+				<div class="el-col el-col-16" style="height: 100%;">
 					<%= render "ims/home/render/order_info"%>
 				</div>
 			</div>
