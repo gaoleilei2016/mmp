@@ -75,7 +75,7 @@ class Ims::OrdersController < ApplicationController
 
   # 获取已发送到该药店的订单
   def get_orders
-  	p IPSocket.getaddress(Socket.gethostname)
+  	# p IPSocket.getaddress(Socket.gethostname)
   	@data = Ims::Order.order_search params.merge({org_ii:current_user.organization_id})
     render json:@data.to_json
   end

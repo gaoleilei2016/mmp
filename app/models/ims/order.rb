@@ -1,6 +1,6 @@
 #encoding:utf-8
 # => 药店-订单
-# => 状态 status (A=>"待交费",P=>"待发药",E=>"已发药",=>'退药申请',C=>"已退药",S=>"已过期",O=>'取消/作废','T'=>"终止/暂停/中断")
+# => 状态 status (A=>"待交费",P=>"待发药",E=>"已发药",C=>"已退药",S=>"已过期",O=>'取消/作废','T'=>"终止/暂停/中断")
 class Ims::Order < ApplicationRecord
 	belongs_to :operater, class_name: '::User', foreign_key: 'operater_id', optional: true
 	belongs_to :patient_order, class_name: '::Order::Order', foreign_key: 'patient_order_id', optional: true
@@ -30,7 +30,7 @@ class Ims::Order < ApplicationRecord
 
 	# 订单发药
   def dispensing_order
-  	self.update_attributes(status:"E")
+  	self.update_attributes(status:"E") ? {flag:true,info:"发药成功！"} : {flag:false,info:"发药失败。"}
   end
 
   # 订单退药
