@@ -11,7 +11,7 @@ set :user, 'tenmind'
 # set :password, nil
 # set(:env, 'development') unless exists?(:env)
 set(:env, 'production') unless exists?(:env)
-set(:branch, 'hujun') unless exists?(:branch)
+set(:branch, 'lgl') unless exists?(:branch)
 # set(:branch, 'yy_test') unless exists?(:branch)
 # set :deploy_env, 'development'
 # set :deploy_env, 'production'
@@ -40,25 +40,25 @@ namespace :deploy do
  
   desc 'Restart puma'
   task :restart do
-    run "cp /home/tenmind/app/mmp/conf/rabbitmq.yml /home/tenmind/app/mmp/current/config/rabbitmq.yml
-         && cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb
-         && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
-         && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
-         && cd /home/tenmind/app/mmp/current $$ rvm use 2.2.5 && bundle install --local && bundle exec pumactl --state /home/tenmind/app/mmp/shared/sockets/puma.state restart"
+    # run "cp /home/tenmind/app/mmp/conf/rabbitmq.yml /home/tenmind/app/mmp/current/config/rabbitmq.yml
+    #      && cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb
+    #      && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
+    #      && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
+    run " cd /home/tenmind/app/mmp/current $$ rvm use 2.3.3 && bundle install --local && bundle exec pumactl --state /home/tenmind/app/mmp/shared/sockets/puma.state restart"
          # && cd /app/mmp_puma/current && bundle exec rake assets:precompile
   end
 
   desc 'Start puma'
   task :start do
-    run "cp /home/tenmind/app/mmp/conf/rabbitmq.yml /home/tenmind/app/mmp/current/config/rabbitmq.yml
-         && cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb
-         && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
-         && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
-         && cd /home/tenmind/app/mmp/current && rvm use 2.2.5 && bundle install --local && bundle exec puma -C /home/tenmind/app/mmp/conf/puma.rb"
+    # run "cp /home/tenmind/app/mmp/conf/rabbitmq.yml /home/tenmind/app/mmp/current/config/rabbitmq.yml
+    #      && cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb
+    #      && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
+    #      && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
+    run "cd /home/tenmind/app/mmp/current && rvm use 2.3.3 && bundle install --local && bundle exec puma -C /home/tenmind/app/mmp/conf/puma.rb"
   end
 
   desc 'Stop puma'
   task :stop do
-    run "cd /home/tenmind/app/mmp/current && rvm use 2.2.5 && bundle install --local && bundle exec pumactl --state /home/tenmind/app/mmp/shared/sockets/puma.state stop"
+    run "cd /home/tenmind/app/mmp/current && rvm use 2.3.3 && bundle install --local && bundle exec pumactl --state /home/tenmind/app/mmp/shared/sockets/puma.state stop"
   end
 end
