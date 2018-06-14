@@ -13,7 +13,7 @@
 		    v-model="searchencstr">
 		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters(searchencstr)"></i>
 		  </el-input>&#12288;
-      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[ 姓名 ]</b>&#12288;
+      <b v-if="encounter.name">{{ encounter.name }}</b><b v-else class="text-mmp-lighter">[ 姓名 ]</b>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
       <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
@@ -22,7 +22,7 @@
       	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>
       </span>
       <div style="float: right; margin-right: 1em;">
-      	<!-- <el-button size="mini" @click="resetEncounterForm('encounterForm')" icon="el-icon-refresh">刷新</el-button> -->
+      	<el-button size="mini" @click="resetEncounterForm('encounterForm')" class="refresh-btn" type="text" icon="fa fa-lg fa-fw el-icon-refresh">刷新</el-button>
       </div>
     </template>
     <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="80px">
@@ -174,7 +174,7 @@
 				  <el-form-item>
 				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
 				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
-				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave" plain>
+				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave">
 				    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
 				    	<template v-if="!encounter.id">保存</template>
 				    	<template v-else>更新</template>
@@ -288,8 +288,7 @@
   width="90%">
   <el-table
 		:data="encounters"
-		class="thin-row encounters-table"
-		header-row-class-name="bg-purple-light-thead"
+		class="thiner-row encounters-table"
 		style="width: 100%">
 	  <el-table-column
 	    min-width="20"

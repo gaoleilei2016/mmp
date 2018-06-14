@@ -150,6 +150,14 @@ $bg-purple-light: #e5e9f2;
 	.el-collapse.patient-info {
 		margin-bottom: 10px;
 		// border: 1px solid #ddd;
+		// 刷新按钮
+		.refresh-btn {
+			color: #fff;
+			font-size: 110%;
+			&:hover {
+				color: $--mmp-theme-text-greener;
+			}
+		}
 		.el-collapse-item__arrow {
 			line-height: 36px;
 		}
@@ -191,7 +199,8 @@ $bg-purple-light: #e5e9f2;
 				border-radius: 15px;
 				// border: 1px solid #409eff;
 				transition: .3s linear;
-				// background: #E9FFFF;
+				background-color: #F5FEFE; // 非常浅的绿色
+    		border: 1px solid $--mmp-theme-bg-deep;
 			}
 			&.addlarge { width: 300px; }
 		}
@@ -211,15 +220,6 @@ $bg-purple-light: #e5e9f2;
 		}
 		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
 			background-color: #FAF8F8;
-		}
-		thead > tr > th {
-			// background-color: $mmp-theme-bg;
-			padding: 5px 0;
-			vertical-align: middle;
-		}
-		tbody > tr > td {
-			padding: 5px 0;
-			vertical-align: middle;
 		}
 		.orders-table {
 			.inactive-row {
@@ -295,8 +295,13 @@ $bg-purple-light: #e5e9f2;
 }
 
 .el-tabs--card > .el-tabs__header {
-	.el-tabs__item.is-active {
-		background-color: $--mmp-theme-bg;
-		color: $--mmp-theme-text-white;
+	.el-tabs__item {
+		padding: 0 15px;
+		height: 35px;
+		line-height: 35px;
+		&.is-active {
+			background-color: $--mmp-theme-bg;
+			color: $--mmp-theme-text-white;
+		}
 	}
 }

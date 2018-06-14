@@ -7,11 +7,11 @@
 		<%= render "hospital/home/render/encounters_info" %>
 		<!-- 主业务区域 -->
   	<div class="float-right-btns" style="position: relative;">
-  		<div style="position: absolute; top: 5px; right: 0; z-index: 999;">
+  		<div style="position: absolute; top: 0; right: 0; z-index: 999;">
   			<!-- 历史就诊tab -->
   			<!-- 药品tab显示模板和生成处方按钮 -->
   			<el-button size="mini" v-if="activeTab=='orders'" @click="openFavoriteModal">模板</el-button>
-  			<el-button size="mini" v-if="activeTab=='orders'" type="primary" @click="openPrescriptionModal">生成处方</el-button>
+  			<el-button size="mini" v-if="activeTab=='orders'" type="warning" @click="openPrescriptionModal">生成处方</el-button>
   			<!-- 处方Tab -->
   		</div>
 			
@@ -330,7 +330,7 @@ window.current_template_obj = {
 	  		}else if(gender.indexOf('女')>-1){
 	  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
 	  		}else{
-	  			html = '<i class="text-muted fa fa-lg fa-fw fa-male"></i>'
+	  			html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
 	  		}
 	  		return html;
 		  },
