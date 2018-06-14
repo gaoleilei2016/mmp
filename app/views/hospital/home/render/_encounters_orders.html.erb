@@ -94,7 +94,7 @@
 		  </el-form-item>
 		</el-col>
 		<el-col :span="1" style="padding-top: 20px;">
-			<el-button size="mini" type="primary" @click="submitOrderForm('orderForm')" ref="saveorder" style="padding-left: 0; padding-right: 0; width: 100%;">
+			<el-button size="mini" type="primary" @click="submitOrderForm('orderForm')" ref="saveorder" style="padding-left: 0; padding-right: 0; width: 100%;" plain>
 	    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
 	    	添加
 	    </el-button>
@@ -109,91 +109,8 @@
 	:row-class-name="judgeOrderRow"
 	@selection-change="handleOrdersSelectionChange"
 	style="width: 100%">
-	<el-table-column
-    type="selection"
-    width="30">
-  </el-table-column>
-  <el-table-column
-    prop="title"
-    min-width="250"
-    label="名称">
-  </el-table-column>
-  <el-table-column
-    prop="specification"
-    min-width="70"
-    label="规格">
-  </el-table-column>
-  <el-table-column
-    min-width="80"
-    label="单次数量">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="80"
-    label="单次剂量">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="50"
-    label="途径">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="80"
-    label="频次">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="50"
-    label="疗程">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="60"
-    label="总量">
-    <template slot-scope="scope">
-    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="80"
-    label="单价">
-    <template slot-scope="scope">
-    	<div align="right">{{scope.row.price | formatMoney}}</div>
-    </template>
-  </el-table-column>
-  <el-table-column
-    prop="author.display"
-    min-width="80"
-    label="医生">
-  </el-table-column>
-  <el-table-column
-    prop="note"
-    min-width="100"
-    label="备注">
-  </el-table-column>
-  <el-table-column
-    prop="status"
-    align="center"
-    min-width="80"
-    label="状态">
-    <template slot-scope="scope">
-    	<el-tag size="mini" v-if="scope.row.status=='N'">新建</el-tag>
-    	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
-    	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
-    	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
-    </template>
-  </el-table-column>
+	
+  <%= render "hospital/home/render/orders_table_common.html" %>
   <el-table-column
     fixed="right"
     label=""

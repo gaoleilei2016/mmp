@@ -53,6 +53,7 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :mtemplates # 医嘱模板管理
     end
     resources :home
     # 就诊管理、统计
