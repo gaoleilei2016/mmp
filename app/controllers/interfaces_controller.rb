@@ -1,6 +1,51 @@
 class InterfacesController < ApplicationController
+	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	def pay_order
+		# p '~~~~~~~~~',params
+		# order = params[:pay_order]
+		args = {out_trade_no: Time.now.to_i.to_s, total_fee: 0.01, title: '支付后会通知药房备药', cost_name: '', return_url: '/customer/home'}
+		case params[:pay_type]
+		when "Alipay"
+			res = Pay::Alipay.payment(args)
+		when "Wechat"
+			res = Pay::Wechat.payment(args)
+		end
+		# p '~~~~~~~',res
+		if res[:state]==:succ
+			redirect_to res[:pay_url]
+		else
+			flash[:notice] = res[:desc]
+			redirect_to "/customer/portal/pay"
+		end
+	end
+	def save_order
+		# p '~~~~~~~~~',params
+		redirect_to '/customer/portal/pay'
+	end
+	# 获取用户购物车
+	def get_prescriptions_cart
+		raise "未选择药单" unless session[:cart_pharmacy_ids]&&session[:cart_pharmacy_ids].length>0
+		ret = nil
+		re = ::Hospital::Prescription.where(:id=>session[:cart_pharmacy_ids]).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}
+		raise "药单出错，一次只能结算一个医院的药单" if re.keys.length != 1
+		re.each do |cur_org, _prescriptions|
+			prescription_ids = []
+			total_price = 0.0
+			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+			cur_org[:prescription_ids] = prescription_ids
+			cur_org[:total_price] = total_price
+			cur_org[:orders] = orders
+			ret = cur_org
+		end
+		render json: {flag: true, info: "success", data: ret}
+	end
+	# 设置用户购物车
+	def set_prescriptions_cart
+		session[:cart_pharmacy_ids] = params[:ids]
+		render json:{flag:true,info:"操作成功"}
+	end
 	# 用户选择药房
 	def set_current_pharmacy
 		session[:current_pharmacy_id] = params[:id]

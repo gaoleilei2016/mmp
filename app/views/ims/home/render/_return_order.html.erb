@@ -1,0 +1,68 @@
+		<div id="prescription_panel">
+			
+			<div class="el-row" id="prescription_body">
+				<div class="el-col el-col-8" style="height: 100%; overflow: auto; padding:12px; border-right:1px solid #ddd;">
+					<div class="el-input el-input--mini" style="height:40px;">
+						<el-input
+						    placeholder="请输入内容"
+						    prefix-icon="el-icon-search"
+						    v-model="input21"
+						    @change="search"
+						    >
+						  </el-input>					
+					</div>
+
+					<div class="el-row prescription_list_fun">
+						<div class="el-col el-col-12 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">已发药</div>
+						<div class="el-col el-col-12 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">已退药</div>
+					</div>
+
+					<div class="prescription_list">
+						<div class="el-row">
+							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
+						</div>
+					</div>
+				</div>
+
+				<div class="el-col el-col-16" style="height: 100%;">
+					<%= render "ims/home/render/order_info"%>
+				</div>
+			</div>
+
+			<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
+			  <el-form :model="form" @submit.native.prevent>
+			    <el-form-item label="订单标识" :label-width="formLabelWidth">
+			      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
+			    </el-form-item>
+			  </el-form>
+			  <el-table
+			  ref="multipleTable"
+	      :data="tableData_plat"
+	      highlight-current-row
+	      @current-change="handleCurrentChange"
+	      @selection-change="handleSelectionChange"
+	      style="width: 100%">
+		    <el-table-column
+		      type="selection"
+		      width="55">
+		    </el-table-column>
+	      <el-table-column
+	        prop="code"
+	        label="编号"
+	        width="180">
+	      </el-table-column>
+	      <el-table-column
+	        prop="name"
+	        label="姓名"
+	        width="180">
+	      </el-table-column>
+	      <el-table-column
+	        prop="amount"
+	        label="金额">
+	      </el-table-column>
+	    </el-table>
+			  <div slot="footer" class="dialog-footer">
+			    <el-button size="small" type="primary" @click="create_search_order()">生成订单</el-button>
+			  </div>
+			</el-dialog>
+		</div>
