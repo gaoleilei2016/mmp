@@ -74,6 +74,10 @@ class Pay::Alipay < ApplicationRecord
     Time.now.strftime("%Y-%m-%d %H:%M:%S")
   end
 
+  def paid?
+    status.eql?('success')
+  end
+
   def ali
     Set::Alibaba
   end
