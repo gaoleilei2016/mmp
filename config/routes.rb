@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :set_current_pharmacy
+      get :get_current_pharmacy
       get :get_pharmacy
       get :get_yanzhengma
       get :get_duanxinma
