@@ -31,7 +31,7 @@
 		padding: 20px 40px 0;
 	}
 	#search_content,#search_content *{
-		transition: all .8s;
+		transition: all .25s;
 	}
 	#search_content .search_header_row{}
 	#search_input{
@@ -116,8 +116,8 @@
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				合计 <span style="color: #FF376F;">¥ {{format_float(item.price)}}</span>
-				<a href="/customer/portal/settlement" class="mui-btn mui-btn-danger" style="float: right;">去结算</a>
+				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
+				<a href="javascript:;" @click="send_prescription_ids_session(item)" class="mui-btn mui-btn-danger" style="float: right;">去结算</a>
 			</div>
 		</li>
 	</ul>
@@ -146,6 +146,24 @@
 			},
 		},
 		methods:{
+			send_prescription_ids_session:function(item) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/set_prescriptions_cart",
+					data:{ids:item.prescription_ids},
+					success:function(json) {
+						if (json.flag) {
+							location.href = "/customer/portal/settlement";
+						}else{
+							$("#loading").hide();
+							mui.toast(json.info);
+						}
+					},
+					complete:function() {
+					},
+					error:error_fun
+				})
+			},
 			get_current_pharmacy:function(item) {
 				var _this = this;
 				$.ajax({
