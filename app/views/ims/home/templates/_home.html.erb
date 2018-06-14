@@ -15,90 +15,34 @@
 body > .container{
   padding: 40px 0px 41px;
 }
+
 </style>
 <template id="home_div">
-	<div>
-		<div id="side_menu" style="float:left; height:100%; width:100px;">
-			<div><i class="fa fa-home"></i>发药</div>
-			<div><i class="fa fa-home"></i>退药</div>
-			<div><i class="fa fa-home"></i>报表</div>
-		</div>
-		<div id="prescription_panel" style="float:left; height:100%; width:calc(100% - 100px); padding-left:8px;">
-			<div id="prescription_header" class="el-row">
-				<div class="el-col-4" style="width:auto;"><i class="fa fa-clipboard fa-4x"></i></div>
-				<div class="el-col-20 title">
-					药店订单
-				</div>
-				<div class="header-right-btns">
-					<el-tooltip content="搜索订单" placement="bottom"><el-button type="button" size="mini" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">远端</el-button></el-tooltip>
-				</div>
-			</div>
+	<div id="ims_order_main">
 
-			<div class="el-row" id="prescription_body" style="height:calc(100% - 20px - 80px); padding-left:18px;">
-				<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
-					<div class="el-input el-input--mini" style="height:40px;">
-						<el-input
-						    placeholder="请输入内容"
-						    prefix-icon="el-icon-search"
-						    v-model="input21"
-						    @change="search"
-						    >
-						  </el-input>					
-					</div>
+		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
-					<div class="el-row prescription_list_fun">
-						<div class="el-col el-col-12 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">未交费</div>
-						<div class="el-col el-col-12 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">待发药</div>
-					</div>
+		  <el-menu-item index="1" route="this.$router.push">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">导航1</span>
+		  </el-menu-item>
 
-					<div class="prescription_list">
-						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
-						</div>
-					</div>
-				</div>
+		  <el-menu-item index="2" @route="this.$router.push">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">导航2</span>
+		  </el-menu-item>
 
-				<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
-					<%= render "ims/home/render/order_info"%>
-				</div>
-			</div>
+		  <el-menu-item index="3" route="this.$router.push">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">导航3</span>
+		  </el-menu-item>
 
-			<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
-			  <el-form :model="form" @submit.native.prevent>
-			    <el-form-item label="订单标识" :label-width="formLabelWidth">
-			      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
-			    </el-form-item>
-			  </el-form>
-			  <el-table
-			  ref="multipleTable"
-	      :data="tableData_plat"
-	      highlight-current-row
-	      @current-change="handleCurrentChange"
-	      @selection-change="handleSelectionChange"
-	      style="width: 100%">
-		    <el-table-column
-		      type="selection"
-		      width="55">
-		    </el-table-column>
-	      <el-table-column
-	        prop="code"
-	        label="编号"
-	        width="180">
-	      </el-table-column>
-	      <el-table-column
-	        prop="name"
-	        label="姓名"
-	        width="180">
-	      </el-table-column>
-	      <el-table-column
-	        prop="amount"
-	        label="金额">
-	      </el-table-column>
-	    </el-table>
-			  <div slot="footer" class="dialog-footer">
-			    <el-button size="small" type="primary" @click="create_search_order()">生成订单</el-button>
-			  </div>
-			</el-dialog>
+		</el-menu>
+
+		<div clas="el-col-20" style="height:100%;">
+			<%= render "ims/home/render/out_order"%>
+			<%#= render "ims/home/render/return_order"%>
+			<%#= render "ims/home/render/order_reports"%>
 		</div>
 
 	</div>
@@ -111,6 +55,7 @@ const home = Vue.extend({
 	},
 	data:function(){
 		return {
+			isCollapse: false,
 			pres:[],
 			input21: '',
 			token:"<%= %>",
@@ -130,6 +75,12 @@ const home = Vue.extend({
 		}
 	},
 	methods:{
+      handleOpen:function(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose:function(key, keyPath) {
+        console.log(key, keyPath);
+      },		
 		handleSelectionChange:function(val) {
       this.multipleSelection = val;
     },

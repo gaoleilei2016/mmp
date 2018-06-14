@@ -1,4 +1,25 @@
+@import "../plugins/element-ui/mmp-variables";
+
 $header_margin : 12px;
+
+#ims_order_main {
+
+	#prescription_menu{
+		width: 120px;
+		height: 100%;
+	}
+	#prescription_panel{
+		float: left;
+		width: calc(100% - 120px);
+		height: 100%;
+		padding-left: 8px;
+
+		#prescription_body{
+			height:calc(100% - 20px - 80px);
+			padding-left:18px;
+		}
+	}
+}
 
 #prescription_header{
 	border-bottom:1px solid #ddd;
