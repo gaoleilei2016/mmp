@@ -36,7 +36,7 @@
 				  </el-form-item>
 				  <el-form-item
 				    label="性别"
-				    prop="gender">
+				    prop="gender.code">
 				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: calc(100% - 20px );" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
