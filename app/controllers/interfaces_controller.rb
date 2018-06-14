@@ -2,8 +2,26 @@ class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	def pay_order
+		# p '~~~~~~~~~',params
+		order = params[:pay_order]
+		args = {out_trade_no: order, total_fee: 0.01, title: '支付后会通知药房备药', cost_name: '', return_url: '/customer/home'}
+		case params[:pay_type]
+		when "Alipay"
+			res = Pay::Alipay.payment(args)
+		when "Wechat"
+			res = Pay::Wechat.payment(args)
+		end
+		# p '~~~~~~~',res
+		if res[:state]==:succ
+			redirect_to res[:pay_url]
+		else
+			flash[:notice] = res[:desc]
+			redirect_to "/customer/portal/pay"
+		end
+	end
 	def save_order
-		p '~~~~~~~~~',params
+		# p '~~~~~~~~~',params
 		redirect_to '/customer/portal/pay'
 	end
 	# 获取用户购物车

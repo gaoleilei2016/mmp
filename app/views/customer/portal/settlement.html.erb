@@ -80,7 +80,7 @@
 			<option v-for="id in prescription.prescription_ids" key="id">{{id}}</option>
 		</select>
 	</form>
-	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 99999;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
+	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
 		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
 		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.total_price)}}</span></div>
 	</div>

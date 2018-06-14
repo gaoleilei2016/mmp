@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      post :pay_order
       post :save_order
       get :get_prescriptions_cart
       get :set_prescriptions_cart
