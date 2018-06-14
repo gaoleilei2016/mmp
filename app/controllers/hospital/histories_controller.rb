@@ -5,11 +5,11 @@ class Hospital::HistoriesController < ApplicationController
 	# GET
   # /hospital/histories
 	def index
-		@histories = Hospital::Encounter.all rescue []
+    @encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"", data: @histories} }
+      format.json { render json: {flag: true, info:"", data: @encounters} }
     end
 	end
 
