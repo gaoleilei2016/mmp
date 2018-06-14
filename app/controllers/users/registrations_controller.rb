@@ -51,6 +51,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
     # 如果是老用户，直接登录
     if u=(User.where(login:params[:login]).first)
+      # 找回密码时的操作
+      u.password = params[:password]
+      u.save
       sign_in(u)
       return redirect_to "/"
     end
