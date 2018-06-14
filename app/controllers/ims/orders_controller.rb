@@ -63,7 +63,6 @@ class Ims::OrdersController < ApplicationController
 
   def get_orders
     #搜索平台的 订单 处方
-    
     if params[:platform]
       data = [
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
@@ -86,6 +85,7 @@ class Ims::OrdersController < ApplicationController
     end
     render json:data.to_json
   end
+
   def get_order
     data = [{
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
@@ -103,11 +103,13 @@ class Ims::OrdersController < ApplicationController
     render json:data.to_json
   end
 
-  def oprate_order
+  #POST 搜索平台处方 生成订单
+  def create_order
     p params[:id]
     p params[:method] #out_order  refuse_order   check_order   return_order
     # render json:{flag:false}
-    render json:{flag:true}
+    new_order = [{id:"102101200",code:"1250201",name:"王晓伟",amount:"23.43"}]
+    render json:new_order
   end
   
   # 订单发药

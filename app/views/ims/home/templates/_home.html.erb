@@ -2,80 +2,104 @@
 #prescription_header{font-size: 12px;padding: 8px;}
 #prescription_header .title{font-size: 21px;}
 #prescription_header .header-right-btns{position: absolute; right:12px; bottom:8px; text-align: right; }
+.router-view-content{padding-left:0;}
+#side_menu{border-right:1px solid #ddd;}
+#side_menu > div{
+	padding:8px;
+	border-bottom:1px solid #ddd;
+}
+#side_menu i{
+	padding:4px;
+	font-size: 1.2em;
+}
+body > .container{
+  padding: 40px 0px 41px;
+}
 </style>
 <template id="home_div">
 	<div>
-		<div id="prescription_header" class="el-row">
-			<div class="el-col-4" style="width:auto;"><i class="fa fa-clipboard fa-4x"></i></div>
-			<div class="el-col-20 title">
-				药店订单
-			</div>
-			<div class="header-right-btns">
-				<el-tooltip content="搜索订单" placement="bottom"><el-button type="button" size="mini" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">远端</el-button></el-tooltip>
-			</div>
+		<div id="side_menu" style="float:left; height:100%; width:100px;">
+			<div><i class="fa fa-home"></i>发药</div>
+			<div><i class="fa fa-home"></i>退药</div>
+			<div><i class="fa fa-home"></i>报表</div>
 		</div>
-
-		<div class="el-row" id="prescription_body" style="height:calc(100% - 20px - 80px);">
-			<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
-				<div class="el-input el-input--mini" style="height:40px;">
-					<el-input
-					    placeholder="请输入内容"
-					    prefix-icon="el-icon-search"
-					    v-model="input21"
-					    @change="search"
-					    >
-					  </el-input>					
+		<div id="prescription_panel" style="float:left; height:100%; width:calc(100% - 100px); padding-left:8px;">
+			<div id="prescription_header" class="el-row">
+				<div class="el-col-4" style="width:auto;"><i class="fa fa-clipboard fa-4x"></i></div>
+				<div class="el-col-20 title">
+					药店订单
 				</div>
-
-				<div class="el-row prescription_list_fun">
-					<div class="el-col el-col-8 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">未发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" stat="F" v-on:click="get_pres('F',$event)">已发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">已退订单</div>
+				<div class="header-right-btns">
+					<el-tooltip content="搜索订单" placement="bottom"><el-button type="button" size="mini" @click="dialogFormVisible = true,tableData_plat = [],form.name='' ">远端</el-button></el-tooltip>
 				</div>
+			</div>
 
-				<div class="prescription_list">
-					<div class="el-row">
-						<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
+			<div class="el-row" id="prescription_body" style="height:calc(100% - 20px - 80px); padding-left:18px;">
+				<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
+					<div class="el-input el-input--mini" style="height:40px;">
+						<el-input
+						    placeholder="请输入内容"
+						    prefix-icon="el-icon-search"
+						    v-model="input21"
+						    @change="search"
+						    >
+						  </el-input>					
+					</div>
+
+					<div class="el-row prescription_list_fun">
+						<div class="el-col el-col-12 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">未交费</div>
+						<div class="el-col el-col-12 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">待发药</div>
+					</div>
+
+					<div class="prescription_list">
+						<div class="el-row">
+							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
+						</div>
 					</div>
 				</div>
+
+				<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
+					<%= render "ims/home/render/order_info"%>
+				</div>
 			</div>
 
-			<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
-				<%= render "ims/home/render/order_info"%>
-			</div>
+			<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
+			  <el-form :model="form" @submit.native.prevent>
+			    <el-form-item label="订单标识" :label-width="formLabelWidth">
+			      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
+			    </el-form-item>
+			  </el-form>
+			  <el-table
+			  ref="multipleTable"
+	      :data="tableData_plat"
+	      highlight-current-row
+	      @current-change="handleCurrentChange"
+	      @selection-change="handleSelectionChange"
+	      style="width: 100%">
+		    <el-table-column
+		      type="selection"
+		      width="55">
+		    </el-table-column>
+	      <el-table-column
+	        prop="code"
+	        label="编号"
+	        width="180">
+	      </el-table-column>
+	      <el-table-column
+	        prop="name"
+	        label="姓名"
+	        width="180">
+	      </el-table-column>
+	      <el-table-column
+	        prop="amount"
+	        label="金额">
+	      </el-table-column>
+	    </el-table>
+			  <div slot="footer" class="dialog-footer">
+			    <el-button size="small" type="primary" @click="create_search_order()">生成订单</el-button>
+			  </div>
+			</el-dialog>
 		</div>
-
-		<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
-		  <el-form :model="form" @submit.native.prevent>
-		    <el-form-item label="订单标识" :label-width="formLabelWidth">
-		      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
-		    </el-form-item>
-		  </el-form>
-		  <el-table
-		  ref="singleTable"
-      :data="tableData_plat"
-      highlight-current-row
-      @current-change="handleCurrentChange"
-      style="width: 100%">
-      <el-table-column
-        prop="code"
-        label="编号"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="name"
-        label="姓名"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        prop="amount"
-        label="金额">
-      </el-table-column>
-    </el-table>
-		  <div slot="footer" class="dialog-footer">
-		    <el-button size="small" type="primary" @click="click_form_tr()">确 定</el-button>
-		  </div>
-		</el-dialog>
 
 	</div>
 </template>
@@ -89,6 +113,7 @@ const home = Vue.extend({
 		return {
 			pres:[],
 			input21: '',
+			token:"<%= %>",
 			dialogFormVisible: false,
 			dialogFormVisible: false,
 			tableData_plat:[],
@@ -105,19 +130,38 @@ const home = Vue.extend({
 		}
 	},
 	methods:{
-      handleCurrentChange:function(val) {
-      	this.currentRow = val;
-      },
-      click_form_tr:function(row){
-      	current = this.currentRow
-      	if (current) {
-	      	data = [{id:current.id,code:current.code, name:current.name, amount:current.amount}]
-	      	this.set_pres(data)
-	        this.dialogFormVisible = false
-      	}else{
-      		this.$message('请选择一条订单');
-      	}
-      },		
+		handleSelectionChange:function(val) {
+      this.multipleSelection = val;
+    },
+    handleCurrentChange:function(val) {
+    	this.currentRow = val;
+    },
+    create_search_order:function(row){
+    	current = this.currentRow
+    	multiple = this.multipleSelection
+    	_this = this
+    	if (multiple&&multiple.length>0) {
+    		temp = []
+    		$.each(multiple,function(k,v){
+	    		temp.push({id:v.id,code:v.code, name:v.name, amount:v.amount})
+    		})
+	    	data = {authenticity_token:"<%= form_authenticity_token %>",order:temp}
+	    	var successFun = function(response){
+	    		try{
+			    	_this.set_pres(response.data)
+	    		}catch(e){
+	    			console.log(e)
+	    		}
+		      _this.dialogFormVisible = false
+	    	};
+	    	var errorFun = function(response){
+	    		_this.$message('订单创建失败，请重试！');
+	    	};
+	    	Vue.http.post("/ims/orders/create_order",data).then(successFun,errorFun)
+    	}else{
+    		_this.$message('请选择要生成订单的数据！');
+    	}
+    },		
 		search_platform_pre:function(val){
 			if (!val) {val = ""};
      var successCallback =  function(response) {
