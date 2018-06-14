@@ -1,4 +1,5 @@
 class ::Dict::Medication < ApplicationRecord
+	# belongs_to :order, class_name: '::Orders::Order', foreign_key: 'encounter_id'
 	
 
 	# 设置查询表
