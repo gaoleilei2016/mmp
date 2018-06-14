@@ -73,7 +73,7 @@
 			<img src="/assets/admin/load.gif" style="position: absolute;top: calc(50% - 50px);left: calc(50% - 50px);"/>
 		</div>
 		<% unless [["users/sessions",'new'],["users/sessions",'sign_up'],["users/registrations",'new'],["users/registrations",'create']].index([controller_path,action_name]) %>
-		<nav class="mui-bar mui-bar-tab ">
+		<nav id="bottom_tabs" class="mui-bar mui-bar-tab">
 			<a class="mui-tab-item users_home" href="javascript:;" data-url="/customer/portal">
 				<span class="mui-icon fa fa-home"></span>
 				<span class="mui-tab-label">首页</span>
