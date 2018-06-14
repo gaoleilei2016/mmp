@@ -52,7 +52,7 @@ class Hospital::Encounter < ApplicationRecord
 			contact_phone: self.contact_phone,
 			hospital_oid: self.hospital_oid,
 			hospital_name: self.hospital_name,
-			patient_domain:{
+			patient_domain: {
 			  code: self.patient_domain_code,
 			  display: self.patient_domain_display
 			},
@@ -77,7 +77,10 @@ class Hospital::Encounter < ApplicationRecord
 			weight: self.weight,
 			diagnoses: self.diagnoses.map { |e| {code: e.code, display: e.display}  },
 			allergens: self.person.irritabilities.map { |e| e.display  },
-			person_id: self.person_id
+			person_id: self.person_id,
+			# 历史就诊需要的数据
+			orders_count: self.orders.count,
+			prescriptions_count: self.prescriptions.count
 		}
 		# 当前就诊的取药点
 		if self.drugstore_location.present?

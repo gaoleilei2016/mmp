@@ -107,6 +107,8 @@ class Hospital::OrdersController < ApplicationController
         serialno: args[:serialno],
         title: args[:title],
         specification: args[:specification],
+        formul_code: args[:format][:code],
+        formul_display: args[:format][:display],
         single_qty_value: args[:single_qty][:value],
         single_qty_unit: args[:single_qty][:unit],
         dose_value: args[:dose][:value],
@@ -135,6 +137,8 @@ class Hospital::OrdersController < ApplicationController
         serialno: args[:serialno],
         title: args[:title],
         specification: args[:specification],
+        formul_code: args[:format][:code],
+        formul_display: args[:format][:display],
         single_qty_value: args[:single_qty][:value],
         single_qty_unit: args[:single_qty][:unit],
         dose_value: args[:dose][:value],
@@ -150,6 +154,8 @@ class Hospital::OrdersController < ApplicationController
         price: args[:price],
         note: args[:note],
         order_type: 1, # 默认保存1 是药品医嘱
+        encounter_id: args[:encounter_id],
+        author_id: current_user.id
       }
       return ret
     end
