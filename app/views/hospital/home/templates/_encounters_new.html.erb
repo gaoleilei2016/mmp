@@ -11,13 +11,16 @@
   			<!-- 历史就诊tab -->
   			<!-- 药品tab显示模板和生成处方按钮 -->
   			<el-button size="mini" v-if="activeTab=='orders'" @click="openFavoriteModal">模板</el-button>
-  			<el-button size="mini" v-if="activeTab=='orders'" type="warning" @click="openPrescriptionModal">生成处方</el-button>
+  			<el-button size="mini" v-if="activeTab=='orders'" type="warning" @click="openPrescriptionModal" plain>生成处方</el-button>
   			<!-- 处方Tab -->
   		</div>
 			
   	</div>
 		<el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
-      <el-tab-pane label="历史就诊" name="histories">历史就诊</el-tab-pane>
+      <el-tab-pane label="历史就诊" name="histories">
+      	<!-- 历史就诊列表 -->
+      	<%= render "hospital/home/render/encounters_histories" %>
+      </el-tab-pane>
       <el-tab-pane label="药品" name="orders">
       	<!-- 开药之前提示先保存患者基本信息 -->
       	<%= render "hospital/home/render/encounters_orders" %>
@@ -26,7 +29,6 @@
       <el-tab-pane label="处方列表" name="prescriptions">
       	<%= render "hospital/home/render/encounters_prescriptions" %>
 
-				
       </el-tab-pane>
     </el-tabs>
   	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
@@ -115,7 +117,10 @@ window.current_template_obj = {
 
 			/* 主业务  ----- start */ 
 				activeTab: "orders",
-				histories: [],
+				/* 历史记录 --- start */
+					historiesResource: Vue.resource('/hospital/histories{/id}.json'),
+					histories: [],
+				/* 历史记录 --- end */ 
 				/* 药品 --- start */ 
 					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
 					orders: [],
@@ -250,6 +255,7 @@ window.current_template_obj = {
   			this.encounter = row;
   			if(!flag) { // 新建就诊的情况，去掉id，直接提交，新建encounter
   				this.encounter.id = "";
+  				this.encounter.type = "by_person";
   			}
   			this.showEncountersDialog = false;
   			// 重新加载页面主业务数据
@@ -447,6 +453,9 @@ window.current_template_obj = {
     	}
     	if(tab.name=="prescriptions") {
     		this.getPrescriptions();
+    	}
+    	if(tab.name=="histories") {
+    		this.getHistories();
     	}
     },
 
@@ -868,6 +877,28 @@ window.current_template_obj = {
 				})
 			},
     /* 处方操作 --- end */
+
+    /* 记录就诊 --- start */
+    	getHistories: function () {
+    		var _this = this;
+    		if(!_this.encounter.id) {
+    			_this.histories = [];
+    			_this.$message({
+		        message: "请先确认患者，才可以查询相关历史记录。",
+		        type: 'warning'
+		      });
+    			return false;
+    		}
+    		_this.historiesResource.get({encounter_id: _this.encounter.id}).then( function(response) {
+    			var res = response.data;
+    			if(res.flag) {
+    				_this.histories = res.data;
+    			}
+    		}, function (response) {
+    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    		})
+    	},
+    /* 记录就诊 --- end */
 	}
 }
 </script>
