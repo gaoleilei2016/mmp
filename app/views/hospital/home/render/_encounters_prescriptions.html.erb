@@ -8,78 +8,9 @@
 	style="width: 100%">
 	<el-table-column type="expand">
     <template slot-scope="props">
-    	<div style="width: calc( 100% - 150px );">
+    	<div class="pres-table-presprint-wrapper" style="width: calc( 100% - 150px );">
     		<prescriptionprint :encounter="encounter" :prescription="props.row" :orgname="orgname"></prescriptionprint>
     	</div>
-      <!-- <el-table
-				:data="(props.row.orders||[])"
-				class="orders-table"
-				style="width: 100%">
-			  <el-table-column
-			    prop="title"
-			    min-width="250"
-			    label="名称">
-			  </el-table-column>
-			  <el-table-column
-			    prop="specification"
-			    min-width="70"
-			    label="规格">
-			  </el-table-column>
-			  <el-table-column
-			    min-width="80"
-			    label="单次数量">
-			    <template slot-scope="scope">
-			    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="80"
-			    label="单次剂量">
-			    <template slot-scope="scope">
-			    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="50"
-			    label="途径">
-			    <template slot-scope="scope">
-			    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="80"
-			    label="频次">
-			    <template slot-scope="scope">
-			    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="50"
-			    label="疗程">
-			    <template slot-scope="scope">
-			    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="60"
-			    label="总量">
-			    <template slot-scope="scope">
-			    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    min-width="80"
-			    label="单价">
-			    <template slot-scope="scope">
-			    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
-			    </template>
-			  </el-table-column>
-			  <el-table-column
-			    prop="note"
-			    min-width="100"
-			    label="备注">
-			  </el-table-column>
-			</el-table> -->
     </template>
   </el-table-column>
   <el-table-column
@@ -90,13 +21,20 @@
     	<span>{{ scope.row.prescription_no }}</span>
     </template>
   </el-table-column>
-  <el-table-column
-    min-width="100"
+<!--   <el-table-column
+    min-width="120"
     label="患者">
     <template slot-scope="scope">
     	<span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
+    </template>
+  </el-table-column> -->
+  <el-table-column
+    min-width="80"
+    label="处方类型">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.type">{{scope.row.type.display}}</span>
     </template>
   </el-table-column>
   <el-table-column
@@ -104,13 +42,6 @@
     label="诊断">
     <template slot-scope="scope">
     	<el-tag v-for="(tag,index) in (scope.row.diagnoses||[])" :key="index" size="mini" type="info">{{tag.display}}</el-tag>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="80"
-    label="处方类型">
-    <template slot-scope="scope">
-    	<span v-if="scope.row.type">{{scope.row.type.display}}</span>
     </template>
   </el-table-column>
   <el-table-column

@@ -248,11 +248,12 @@ window.current_template_obj = {
   		// 编辑encounter，flag为false的话，为新建就诊
   		editEncounter: function (row, flag) {
   			this.encounter = row;
-  			if(!flag) {
+  			if(!flag) { // 新建就诊的情况，去掉id，直接提交，新建encounter
   				this.encounter.id = "";
   			}
   			this.showEncountersDialog = false;
   			// 重新加载页面主业务数据
+  			this.activeTab = "orders";
   			this.getOrders();
   		},
 			// 提交encounter信息
@@ -542,7 +543,7 @@ window.current_template_obj = {
 			          message: '请选择药品。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordtitle"].focus();
+			        _this.$refs["ordtitle"].focus();
 			        return false;
 	        	}
 	        	if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
@@ -550,7 +551,7 @@ window.current_template_obj = {
 			          message: '请填写药品的单次数量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordsingleqty"].focus();
+			        _this.$refs["ordsingleqty"].focus();
 			        return false;
 	        	}
 	        	if(!(_this.order.dose&&_this.order.dose.value)) {
@@ -558,7 +559,7 @@ window.current_template_obj = {
 			          message: '请填写药品的单次剂量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["orddose"].focus();
+			        _this.$refs["orddose"].focus();
 			        return false;
 	        	}
 	        	if(!_this.order.total_quantity) {
@@ -566,7 +567,7 @@ window.current_template_obj = {
 			          message: '请填写药品的总量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordtotalquantity"].focus();
+			        _this.$refs["ordtotalquantity"].focus();
 			        return false;
 	        	}
 	          // 判断是否有id，有id的话，就是编辑，没有id为新建

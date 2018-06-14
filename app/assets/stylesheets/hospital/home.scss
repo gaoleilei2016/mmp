@@ -1,3 +1,5 @@
+@import "../plugins/element-ui/mmp-variables";
+
 $gray-darker:  lighten(#000, 13.5%); // #222
 $gray-dark:    lighten(#000, 20%);   // #333
 $gray:         lighten(#000, 33.5%); // #555
@@ -14,11 +16,18 @@ $bg-purple-dark: #99a9bf;
 $bg-purple: #d3dce6;
 $bg-purple-light: #e5e9f2;
 
+
 .text-muted {
 	color: $gray-light;
 }
 .text-muted-light {
 	color: #999;
+}
+.text-mmp-lighter {
+	color: $--mmp-theme-text-lighter;
+}
+.text-mmp-white {
+	color: $--mmp-theme-text-white;
 }
 .text-primary {
 	color: $brand-primary;
@@ -120,9 +129,18 @@ $bg-purple-light: #e5e9f2;
 	}
 }
 // 表头背景颜色
-.bg-purple-light-thead > th {
-	background-color: $bg-purple-light;
-}
+// .bg-purple-light-thead > th {
+// 	background-color: $bg-purple-light;
+// }
+// // 表头背景色
+// .bg-theme-bg-thead > th {
+// 	background-color: $mmp-theme-bg;
+// 	color: #fff;
+// }
+// thead > tr > th {
+// 			background-color: $mmp-theme-bg;
+// 			color: #fff;
+// 		}
 
 #encounters_new_div {
 	// 
@@ -131,13 +149,14 @@ $bg-purple-light: #e5e9f2;
 	}
 	.el-collapse.patient-info {
 		margin-bottom: 10px;
-		border: 1px solid #ddd;
+		// border: 1px solid #ddd;
 		.el-collapse-item__arrow {
 			line-height: 36px;
 		}
 		.el-collapse-item__header {
-			border-bottom: 1px solid #ddd;
-			background-color: #f5f5f5;
+			// border-bottom: 1px solid #ddd;
+			background-color: $--mmp-theme-bg;
+			color: $--mmp-theme-text-deeper;
 			height: 36px;
 			line-height: 36px;
 			padding-left: 10px; 
@@ -170,8 +189,9 @@ $bg-purple-light: #e5e9f2;
 			width: 120px;
 			input {
 				border-radius: 15px;
-				border: 1px solid #409eff;
+				// border: 1px solid #409eff;
 				transition: .3s linear;
+				// background: #E9FFFF;
 			}
 			&.addlarge { width: 300px; }
 		}
@@ -193,7 +213,7 @@ $bg-purple-light: #e5e9f2;
 			background-color: #FAF8F8;
 		}
 		thead > tr > th {
-			background-color: $bg-purple-light;
+			// background-color: $mmp-theme-bg;
 			padding: 5px 0;
 			vertical-align: middle;
 		}
@@ -215,6 +235,19 @@ $bg-purple-light: #e5e9f2;
 			.el-button {
 				padding-left: 7.5px;
 				padding-right: 7.5px;
+			}
+		}
+	}
+
+	// 页面上显示的处方
+	.pres-table-presprint-wrapper {
+		.prescription-wrapper {
+			p {
+				line-height: 30px;
+			}
+			td, th {
+				padding: 5px 0;
+				border: none;
 			}
 		}
 	}
@@ -258,5 +291,12 @@ $bg-purple-light: #e5e9f2;
 	    border-bottom-right-radius: 5px;
 	    border-bottom-left-radius: 5px;
 		}
+	}
+}
+
+.el-tabs--card > .el-tabs__header {
+	.el-tabs__item.is-active {
+		background-color: $--mmp-theme-bg;
+		color: $--mmp-theme-text-white;
 	}
 }
