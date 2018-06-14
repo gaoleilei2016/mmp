@@ -1,16 +1,54 @@
 class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
+	# 用户选择药房
+	def set_current_pharmacy
+		session[:current_pharmacy_id] = params[:id]
+		render json:{flag:true,info:"操作成功"}
+	end
+	# 获取用户选择的药房，默认最近的药房（用户传参：当前位置）
+	def get_current_pharmacy
+		if session[:current_pharmacy_id]
+			# 自选
+			ph = ::Admin::Organization.where(:type_code=>'2').find(session[:current_pharmacy_id])
+			render json:{flag:true,pharmacy:ph,type:"self"}
+		else
+			# 最近
+			ph = ::Admin::Organization.where(:type_code=>'2').first
+			render json:{flag:true,pharmacy:ph,type:"near"}
+		end
+	end
 	def get_pharmacy
 		org = current_user.organization
-		raise "无机构的用户" unless org
-		raise "非医院的用户" unless org.type_code=='1'
-		if org.yaofang_type
-			orgs = org.pharmacy_link.map{|x| x.pharmacy}.compact
+		if org
+			raise "非医院的用户" unless org.type_code=='1'
+			# 医院用户选择合作药房
+			if org.yaofang_type
+				orgs = org.pharmacy_link.map{|x| x.pharmacy}.compact
+			else
+				orgs = ::Admin::Organization.where(:type_code=>'2')
+			end
+			render json:{rows:orgs,total:orgs.count}
 		else
-			orgs = ::Admin::Organization.where(:type_code=>'2')
+			# 客户选择常用药房
+			orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+			render json:{rows:orgs,total:orgs.total_count}
 		end
-		render json:{rows:orgs,total:orgs.count}
+	end
+	def get_yanzhengma
+		render "/layouts/yanzhengma.html.erb",layout:false
+	end
+	def get_duanxinma
+		# p '~~~~~~~~~~',params[:login]
+		# 图片验证码
+		raise "图片验证码错误" unless verify_rucaptcha?
+		raise "手机号错误" unless params[:login].present?
+		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
+		res = Sms::Message.set_up(args)
+		# 成功：{:state=>:succ, :msg=>"短信发送成功", :verify_code=>code}
+		# 失败：{state: :fail, msg: '失败', desc: '描述'}
+		raise res[:desc] if res[:state]!=:succ
+		render json:{flag:true,info:"发送成功"}
 	end
 	############ zyz ############
 	#############################

@@ -65,4 +65,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 # hujun===========================
 gem 'settingslogic'
 gem 'china_sms'
+gem 'alipay'
+gem 'rucaptcha'
+gem 'dalli'
 # hujun===========================

@@ -7,131 +7,20 @@
 		<%= render "hospital/home/render/encounters_info" %>
 		<!-- 主业务区域 -->
   	<div class="float-right-btns" style="position: relative;">
-  		<div style="position: absolute; top: 5px; right: 0; z-index: 999;">
-  			<el-button size="mini" type="primary" @click="openPrescriptionModal"><i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>生成处方</el-button>
+  		<div style="position: absolute; top: 0; right: 0; z-index: 999;">
+  			<!-- 历史就诊tab -->
+  			<!-- 药品tab显示模板和生成处方按钮 -->
+  			<el-button size="mini" v-if="activeTab=='orders'" @click="openFavoriteModal">模板</el-button>
+  			<el-button size="mini" v-if="activeTab=='orders'" type="warning" @click="openPrescriptionModal" plain>生成处方</el-button>
+  			<!-- 处方Tab -->
   		</div>
-  		<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
-			<el-dialog
-				title="生成处方"
-			  :visible.sync="showSendPresDialog"
-			  width="90%">
-				<el-form size="mini" :rules="prescriptionRules" :model="prescription" ref="prescriptionForm" label-width="100px">
-			  	<el-row>
-						<el-col :span="12">
-			    		<el-form-item
-						    label="诊断">
-						    <el-checkbox-group v-model="prescription.diagnoses">
-							    <el-checkbox v-for="dia in (encounter.diagnoses||[])" :label="dia.display"></el-checkbox>
-							  </el-checkbox-group>
-						  </el-form-item>
-						</el-col>
-						<el-col :span="6">
-			    		<el-form-item
-						    label="类型">
-						    <el-select v-model="prescription.type" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
-							    <el-option
-							      v-for="item in ($parent.common_data_prescription_types||[])"
-							      :key="item.code"
-							      :label="item.display"
-							      :value="item">
-							    </el-option>
-							  </el-select>
-						  </el-form-item>
-						</el-col>
-						<el-col :span="6">
-			    		<el-form-item
-						    label="">
-						    <el-checkbox v-model="prescription.specialmark">特殊门诊处方标记</el-checkbox>
-						  </el-form-item>
-						</el-col>
-					</el-row>
-				</el-form>
-				<br/>
-			  <el-table
-					:data="sendOrders"
-					class="thin-row"
-					header-row-class-name="bg-purple-light-thead"
-					style="width: 100%">
-				  <el-table-column
-				    min-width="20"
-				    label="#">
-				    <template slot-scope="scope">
-				      {{ scope.$index + 1 }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="title"
-				    min-width="250"
-				    label="名称">
-				  </el-table-column>
-				  <el-table-column
-				    prop="specification"
-				    min-width="70"
-				    label="规格">
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单次数量">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单次剂量">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="50"
-				    label="途径">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="频次">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="50"
-				    label="疗程">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="60"
-				    label="总量">
-				    <template slot-scope="scope">
-				    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="单价">
-				    <template slot-scope="scope">
-				    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="note"
-				    min-width="100"
-				    label="备注">
-				  </el-table-column>
-				</el-table>
-			  <span slot="footer" class="dialog-footer">
-			    <el-button size="mini" @click="showSendPresDialog = false">关 闭</el-button>
-			    <el-button size="mini" @click="generatePrescription" type="primary"><i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>确 定</el-button>
-			  </span>
-			</el-dialog>
+			
   	</div>
 		<el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
-      <el-tab-pane label="历史记录" name="histories">历史记录</el-tab-pane>
+      <el-tab-pane label="历史就诊" name="histories">
+      	<!-- 历史就诊列表 -->
+      	<%= render "hospital/home/render/encounters_histories" %>
+      </el-tab-pane>
       <el-tab-pane label="药品" name="orders">
       	<!-- 开药之前提示先保存患者基本信息 -->
       	<%= render "hospital/home/render/encounters_orders" %>
@@ -140,20 +29,25 @@
       <el-tab-pane label="处方列表" name="prescriptions">
       	<%= render "hospital/home/render/encounters_prescriptions" %>
 
-				
       </el-tab-pane>
     </el-tabs>
-
+  	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
+  	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
+  	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
 	</div>
 </template>
+<!-- 处方打印模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
 <script type="text/javascript">
 window.current_template_obj = {
 	data: function(){
 		return {
 			/* 基础设置 --- start */ 
+				orgname: "", // 机构名称
 				ini: {
-					enable_print_pres: true, // 是否允许打印处方
-					print_pres_html: "", // 处方打印样式
+					enable_print_pres: true, // 启用打印处方功能
+					print_pres_html: "", // 处方打印内容
 				},
 			/* 基础设置 --- end */ 
 			/* 患者基本信息  ----- start */ 
@@ -186,7 +80,7 @@ window.current_template_obj = {
 					name: [
 			      { required: true, message: '姓名不能为空'},
 			    ],
-					gender: [
+					"gender.code": [
 			      { required: true, message: '性别不能为空'},
 			    ],
 			    age: [
@@ -223,7 +117,10 @@ window.current_template_obj = {
 
 			/* 主业务  ----- start */ 
 				activeTab: "orders",
-				histories: [],
+				/* 历史记录 --- start */
+					historiesResource: Vue.resource('/hospital/histories{/id}.json'),
+					histories: [],
+				/* 历史记录 --- end */ 
 				/* 药品 --- start */ 
 					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
 					orders: [],
@@ -241,10 +138,18 @@ window.current_template_obj = {
 
 					}, // 新建处方验证规则
 					prescription: {}, // 处方模型
+					printPresRow: {}, // 打印处方行
 				/* 处方 --- end */ 
 
 			/* 主业务  ----- end */ 
 		}
+	},
+	components: {
+		// 处方打印组件
+		'prescriptionprint': {
+			props: ['encounter', 'prescription', 'orgname'],
+		  template: "#prescription-print-template",
+		},
 	},
 	watch: {
 	},
@@ -257,6 +162,8 @@ window.current_template_obj = {
     }
 	},
 	mounted: function () {
+		// console.log测试用
+		// apps.encounters_new = this;
 		this.$nextTick(function(){
 			this.init();
 		})
@@ -265,7 +172,8 @@ window.current_template_obj = {
 		/* 公共方法  ---- start */ 
 			init: function() {
 				var _this = this;
-
+				_this.orgname = $("#current_org_name").val();
+				_this.$refs["encname"].focus();
 				// Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
 			 //    var res = response.data;
 			 //    _this.locations = [];
@@ -275,14 +183,22 @@ window.current_template_obj = {
 			 //  },function() {
 			 //  	_this.$message.error("获取药房失败，请联系管理员。");
 			 //  })
+			 // 获取基础设置内容
+			 Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+			 	var res = response.data;
+			 	if(res.flag) {
+        	_this.ini = res.data;
+        	$("#prescription-print-template").html(_this.ini.print_pres_html)
+        }
+			 },function() {
+			  	_this.$message.error("获取初始值失败，请联系管理员。");
+			  })
 			},
 			// 聚焦下一个
 	  	focusNext: function (now, next) {
 	  		var _this = this;
 	  		var _now = _this.$refs[now],
 	  				_next = _this.$refs[next];
-	  		console.log(now,next)
-	  		console.log(_now,_next)
 	  		if(_now instanceof Array) { _now = _now[0]; }
 	  		if(_next instanceof Array) { _next = _next[0]; }
 				// el-select需要使用blur方法让下拉列表关闭
@@ -309,16 +225,11 @@ window.current_template_obj = {
 					_next.focus();
 				}
 	  	},
-			// 侧边搜索患者栏目
-			toggleSidebar: function () {
-				console.log("搜索患者侧边栏")
-			},
   	/* 公共方法  ---- end */ 
 
   	/* encounter相关操作  ---- start */
   		focusEncSearchInp: function (flag) {
   			var $target = $(this.$refs["searchencstr"].$el);
-  			console.log($target)
   			if(flag) {
   				$target.addClass('addlarge');
   			} else {
@@ -342,11 +253,13 @@ window.current_template_obj = {
   		// 编辑encounter，flag为false的话，为新建就诊
   		editEncounter: function (row, flag) {
   			this.encounter = row;
-  			if(!flag) {
+  			if(!flag) { // 新建就诊的情况，去掉id，直接提交，新建encounter
   				this.encounter.id = "";
+  				this.encounter.type = "by_person";
   			}
   			this.showEncountersDialog = false;
   			// 重新加载页面主业务数据
+  			this.activeTab = "orders";
   			this.getOrders();
   		},
 			// 提交encounter信息
@@ -392,10 +305,14 @@ window.current_template_obj = {
 	        message: "就诊信息保存成功。",
 	        type: 'success'
 	      });
+				// 聚焦医嘱搜索框
+	      this.$refs["ordtitle"].focus();
 	    },
 	    // 重置encounter表单
 	    resetEncounterForm: function (formName) {
-	      this.$refs[formName].resetFields();
+	      // this.$refs[formName].resetFields();
+	      // 重置页面
+	      router.push('/refresh');
 	    },
 	    // 判断年龄，如果小于14要求出生日期、监护人必填
 	    judgeAge: function (val) {
@@ -419,7 +336,7 @@ window.current_template_obj = {
 	  		}else if(gender.indexOf('女')>-1){
 	  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
 	  		}else{
-	  			html = '<i class="text-muted fa fa-lg fa-fw fa-male"></i>'
+	  			html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
 	  		}
 	  		return html;
 		  },
@@ -470,7 +387,6 @@ window.current_template_obj = {
 						cb(res.data);
 						// 设置下拉选择的第一项为高亮
 						var el = _this.$refs["encdiagnose"];
-						console.log('-----el',el)
 						if(el) {
 							el[_this.focusDiagnosisInputIndex].highlightedIndex = 0;
 						}
@@ -532,12 +448,14 @@ window.current_template_obj = {
 
     // 切换主业务区域tab
     handleTabClick: function (tab, event) {
-    	console.log(tab)
     	if(tab.name=="orders") {
     		this.getOrders();
     	}
     	if(tab.name=="prescriptions") {
     		this.getPrescriptions();
+    	}
+    	if(tab.name=="histories") {
+    		this.getHistories();
     	}
     },
 
@@ -556,12 +474,14 @@ window.current_template_obj = {
     			var res = response.data;
     			if(res.flag) {
     				_this.orders = res.data;
+    				// 默认勾选新建医嘱
+		      	_this.defaultCheckNewOrder();
     			}
     		}, function (response) {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
     		})
     	},
-    	// 搜索药品
+    	// 搜索药品，查询药品
     	searchDrugs: function (queryString, cb) {
     		var _this = this;
     		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
@@ -602,6 +522,7 @@ window.current_template_obj = {
     			frequency: _this.$parent.common_data_frequencys[0],// 频次
     			course_of_treatment: {value: "", unit: "天"},  // 疗程
     			total_quantity: 1, // 总量
+    			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
     			measure_val: drug.measure_val,  // 最小单位的值
     			encounter_id: _this.encounter.id, // 就诊模型id
     		}
@@ -631,7 +552,7 @@ window.current_template_obj = {
 			          message: '请选择药品。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordtitle"].focus();
+			        _this.$refs["ordtitle"].focus();
 			        return false;
 	        	}
 	        	if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
@@ -639,7 +560,7 @@ window.current_template_obj = {
 			          message: '请填写药品的单次数量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordsingleqty"].focus();
+			        _this.$refs["ordsingleqty"].focus();
 			        return false;
 	        	}
 	        	if(!(_this.order.dose&&_this.order.dose.value)) {
@@ -647,7 +568,7 @@ window.current_template_obj = {
 			          message: '请填写药品的单次剂量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["orddose"].focus();
+			        _this.$refs["orddose"].focus();
 			        return false;
 	        	}
 	        	if(!_this.order.total_quantity) {
@@ -655,7 +576,7 @@ window.current_template_obj = {
 			          message: '请填写药品的总量。',
 			          type: 'warning'
 			        });
-			        _this.$ref["ordtotalquantity"].focus();
+			        _this.$refs["ordtotalquantity"].focus();
 			        return false;
 	        	}
 	          // 判断是否有id，有id的话，就是编辑，没有id为新建
@@ -702,9 +623,26 @@ window.current_template_obj = {
 		        message: "药品保存成功。",
 		        type: 'success'
 		      });
+		      // 默认勾选新建医嘱
+		      this.defaultCheckNewOrder();
+		      // 聚焦医嘱搜索框
+		      this.$refs["ordtitle"].focus();
 	    	} else {
 	    		this.$message.error(res.info);
 	    	}
+	    },
+	    // 默认勾选新建状态的医嘱
+	    defaultCheckNewOrder: function () {
+	    	var _this = this;
+	    	_this.$nextTick(function(){
+		    	(_this.orders||[]).forEach(function (item, index) {
+		    		if(item.status=="N") {
+		    			_this.$refs["ordersTable"].toggleRowSelection(item, true);
+		    		} else {
+		    			_this.$refs["ordersTable"].clearSelection();
+		    		}
+		    	})
+				})
 	    },
 	    // 编辑药品
 	    editOrder: function (index, row) {
@@ -726,6 +664,8 @@ window.current_template_obj = {
 		          type: 'warning'
 		        });
 		        _this.orders.splice(index, 1);
+		        // 默认勾选新建医嘱
+		      	_this.defaultCheckNewOrder();
       		}else{
       			_this.$message.error(res.info);
       		}
@@ -746,6 +686,10 @@ window.current_template_obj = {
       	} else {
       		return "inactive-row";
       	}
+      },
+      // 打开模板弹出框，使用模板，创建模板
+      openFavoriteModal: function () {
+
       },
     /* 药品操作 --- end */
 
@@ -806,6 +750,7 @@ window.current_template_obj = {
 		          message: "生成处方成功，请在处方列表中查看。",
 		          type: 'success'
 		        });
+		        _this.getOrders();
       		} else {
 						_this.$message.error(res.info);
       		}
@@ -866,13 +811,94 @@ window.current_template_obj = {
     	},
     	// 复制处方
 			copyPrescription: function (index, row) {
-
+				var _this = this,
+						btn = $(event.target);
+				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【复制】此处方到本次就诊？', '复制', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then( function () {
+        	btn.attr("disabled", "disabled").find(".fa").show();
+					_this.$http.post('/hospital/prescriptions/copy', {id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	          btn.removeAttr("disabled").find(".fa").hide();
+	          var res = response.data;
+	          if(res.flag) {
+	      			_this.$message({
+			          message: res.info,
+			          type: 'success'
+			        });
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	        }, function() {
+	          btn.removeAttr("disabled").find(".fa").hide();
+	          _this.$message.error("后台出错，复制处方失败。请联系管理员");
+	        });
+					
+	      }).catch( function () {
+        	// 取消作废
+        });
 			},
-			// 删除处方
+			// 作废处方
 			deletePrescription: function (index, row) {
-
+				var _this = this,
+						btn = $(event.target);
+				_this.$confirm('是否确定【作废】此处方？', '作废', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then( function () {
+					btn.attr("disabled", "disabled").find(".fa").show();
+					_this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	      		var res = response.data;
+	      		btn.removeAttr("disabled").find(".fa").hide();
+	      		if(res.flag) {
+	      			_this.$message({
+			          message: res.info,
+			          type: 'success'
+			        });
+			        row.status = res.data.status;
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	      	}, function(response) {
+	      		btn.removeAttr("disabled").find(".fa").hide();
+	      		_this.$message.error("生成处方失败，请联系管理员。");
+	      	})
+	      }).catch( function () {
+        	// 取消作废
+        });
+			},
+			// 打印处方
+			printPrescription: function (index, row) {
+				this.printPresRow = row;
+				this.$nextTick(function(){
+					$(".print-prescription-wrapper>div").print_area();
+				})
 			},
     /* 处方操作 --- end */
+
+    /* 记录就诊 --- start */
+    	getHistories: function () {
+    		var _this = this;
+    		if(!_this.encounter.id) {
+    			_this.histories = [];
+    			_this.$message({
+		        message: "请先确认患者，才可以查询相关历史记录。",
+		        type: 'warning'
+		      });
+    			return false;
+    		}
+    		_this.historiesResource.get({encounter_id: _this.encounter.id}).then( function(response) {
+    			var res = response.data;
+    			if(res.flag) {
+    				_this.histories = res.data;
+    			}
+    		}, function (response) {
+    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    		})
+    	},
+    /* 记录就诊 --- end */
 	}
 }
 </script>

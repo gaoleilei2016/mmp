@@ -10,6 +10,10 @@ class Users::SessionsController < Devise::SessionsController
     str = request.user_agent
     if str.include?('Mobile')
       render "/devise/sessions/new2.html.erb",layout:"customer"
+      # if params[:type]=="use_psw"
+      # else
+      #   redirect_to "/users/sign_up"
+      # end
     else
       super
     end

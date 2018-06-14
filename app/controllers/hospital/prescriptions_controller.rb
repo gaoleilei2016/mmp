@@ -1,7 +1,7 @@
 #encoding:utf-8
 #处方
 class Hospital::PrescriptionsController < ApplicationController
-	before_action :set_prescription, only: [:show, :edit, :update, :destroy]
+	before_action :set_prescription, only: [:show, :edit, :update, :destroy, :set_prescription]
 	# GET
   # /hospital/prescriptions
 	def index
@@ -53,6 +53,8 @@ class Hospital::PrescriptionsController < ApplicationController
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
         p "link_orders save"
+        # 发送处方消息
+        @prescription.send_to_check()
         format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
         format.json { render json: {flag: true, info:"", data: @prescription.to_web_front} }
       else
@@ -80,13 +82,44 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.destroy
+		@prescription.update_attributes(:status=>"O")
 
     respond_to do |format|
       format.html { redirect_to prescriptions_url }
-      format.json { head :no_content }
+      format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
     end
 	end
+
+  # GET
+  # /hospital/prescriptions/get_prescriptions_by_phone
+  def get_prescriptions_by_phone
+    p "get_prescriptions_by_phone", params
+    cur_phone = params[:phone]
+    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+    ret = []
+    ::Hospital::Interface.get_prescription(cur_phone).group_by {|_prescription| {organ_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |key, _prescriptions|
+      cur_org = key
+      p cur_org
+      orders = _prescriptions.map { |e| e.orders}.flatten.map { |k| k.to_web_front  }
+      p orders
+      cur_org[:orders] = orders
+      ret << cur_org
+    end
+    render json: {flag: true, info: "success", data: ret}
+  end
+
+  # /# POST
+  # /hospital/prescriptions/:id/set_drug_store
+  def set_drug_store
+    p "set_drug_store", params
+    respond_to do |format|
+      if @prescription.update_attributes(drug_store_id: params[:pharmacy_id])
+        format.json { render json: {flag: true, info:"设置处方发药房成功", data: @prescription} }
+      else
+        format.json { render json: { flag: false, info: @prescription.errors }}
+      end
+    end
+  end
 
 	private
     # Use callbacks to share common setup or constraints between actions.

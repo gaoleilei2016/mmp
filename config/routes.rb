@@ -10,7 +10,11 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :set_current_pharmacy
+      get :get_current_pharmacy
       get :get_pharmacy
+      get :get_yanzhengma
+      get :get_duanxinma
       get :get_dicts
       get :get_addrs
       get :get_medicine_by_name
@@ -43,6 +47,13 @@ Rails.application.routes.draw do
   ############################
   ########### hospital ##########
   namespace :hospital do
+    namespace :sets do
+      resources :inis do
+        collection do
+          get :cur_org_ini
+        end
+      end
+    end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
@@ -51,7 +62,15 @@ Rails.application.routes.draw do
       end
     end
     resources :orders      # 药品
-    resources :prescriptions      # 处方
+    # 处方
+    resources :prescriptions do
+      collection do
+        get :get_prescriptions_by_phone
+      end
+      member do
+        post :set_drug_store
+      end
+    end
     resources :histories      # 历史列表
   end
   ########### hospital ##########
@@ -78,11 +97,11 @@ Rails.application.routes.draw do
         get :dispensing_order   # 发药
         get :return_order       # 退药
         get :oprate_order       # 订单操作(发药/退药、、)
+        post :create_order  #生成订单
       end
     end
     resources :interfaces do
       collection do
-        
       end
     end
   end

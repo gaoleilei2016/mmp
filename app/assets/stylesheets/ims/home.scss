@@ -1,19 +1,42 @@
-$header_margin : 12px;
+@import "../plugins/element-ui/mmp-variables";
 
-#prescription_header{
-	border-bottom:1px solid #ddd;
-	height:calc(80px - $header_margin);
-	margin-bottom: $header_margin;
+$header_margin:12px;
+$lightgreen_border:#CAE6E7;
+$gray_border:#ddd;
+
+#ims_order_main {
+	.el-menu-item{
+		padding-left: 16px!important;
+	}
+	.el-menu{border-right: 1px solid $lightgreen_border;}
+	#prescription_menu{
+		width: 120px;
+		height: 100%;
+	}
+	#prescription_panel{
+		float: left;
+		width: calc(100% - 120px);
+		height: 100%;
+
+		#prescription_body{
+			height:100%;
+		}
+	}
 }
 
-.list_fun_panel{border:1px solid #ddd; text-align: center; padding:8px;}
-.list_fun_panel.active{background:#C5E2FF !important;}
+#prescription_header{
+	border-bottom:1px solid $gray_border;
+	height: 80px;
+}
+
+.list_fun_panel{border:1px solid $gray_border; text-align: center; padding:8px;}
+.list_fun_panel.active{background:#99D2CC !important;}
 .list_fun_panel:hover{background:#ecf0f1;}
 
 .text-left{text-align: left;}
 .text-right{text-align: right;}
 .separate{
-	border-bottom:1px solid #ddd;
+	border-bottom:1px solid $gray_border;
 }
 .prescription_form_title > h3{
 	margin-top:20px;margin-bottom:15px;
@@ -23,13 +46,15 @@ $header_margin : 12px;
 }
 
 .prescription_list{
-	border:1px solid #ddd;
+	height:calc(100% - 80px);
+	overflow-y:auto;
+	border:1px solid $gray_border;
 	border-top:none;
 	padding-top:2px;
 
 	p {
 		padding: 7px;
-		border-bottom:1px dashed #ddd;
+		border-bottom:1px dashed $gray_border;
 		height:29px;
 		white-space: nowrap;
 	}
@@ -37,14 +62,13 @@ $header_margin : 12px;
 		background:#ecf0f1;
 	}
 	p.active{
-		background:#C5E2FF !important;
+		background:#99D2CC !important;
 	}
 }
 
 .prescription_content{
 	position: relative;
 	height: 100%;
-	border: 1px solid #ddd;
 	overflow: auto;
 	padding:8px;
 

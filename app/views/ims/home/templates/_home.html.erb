@@ -1,125 +1,219 @@
 <style type="text/css">
+#prescription_header{font-size: 12px;padding: 8px;}
+#prescription_header .title{font-size: 21px;}
+#prescription_header .header-right-btns{position: absolute; right:12px; bottom:8px; text-align: right; }
+.router-view-content{padding:0;}
+#side_menu{border-right:1px solid #ddd;}
+#side_menu > div{
+	padding:8px;
+	border-bottom:1px solid #ddd;
+}
+#side_menu i{
+	padding:4px;
+	font-size: 1.2em;
+}
+body > .container{
+  padding: 40px 0px 41px;
+}
+
 </style>
 <template id="home_div">
-	<div>
-		<div id="prescription_header" class="el-row">
-			<div class="el-col-4" style="width:auto;"><i class="fa fa-home fa-4x"></i></div>
-			<div class="el-col-20">
-				药店
-			</div>
-		</div>
+	<div id="ims_order_main">
 
-		<div class="el-row" id="prescription_body" style="height:calc(100% - 20px - 80px);">
-			<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
-				<div class="el-input el-input--mini" style="height:40px;">
-					<el-input
-					    placeholder="请输入内容"
-					    prefix-icon="el-icon-search"
-					    v-model="input21"
-					    @change="search('dose')"
-					    >
-					  </el-input>					
-				</div>
+		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
-				<div class="el-row prescription_list_fun">
+		  <el-menu-item index="1" route="this.$router.push">
+        <router-link to="home"><i class="el-icon-setting"></i>发药</router-link>
+      </el-menu-item>
+
+      <el-menu-item index="1" route="this.$router.push">
+        <router-link to="order_settings"><i class="el-icon-setting"></i>设置</router-link>
+      </el-menu-item>
+
+				<!-- <div class="el-row prescription_list_fun">
 					<div class="el-col el-col-12 list_fun_panel" v-on:click="get_pres('A',$event)">未交费</div>
 					<div class="el-col el-col-12 list_fun_panel" v-on:click="get_pres('P',$event)">待发药</div>
-				</div>
+				</div> -->
+		  <el-menu-item index="2" @route="this.$router.push">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">退药</span>
+		  </el-menu-item>
 
-				<div class="prescription_list" style="height:calc(100% - 80px);">
-					<div class="el-row">
-						<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
-					</div>
-				</div>
-			</div>
+		  <el-menu-item index="3" route="this.$router.push">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">报表</span>
+		  </el-menu-item>
 
-			<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
-				<%= render "ims/home/render/order_info"%>
-			</div>
+      <el-menu-item index="4" route="this.$router.push">
+        <i class="el-icon-search"></i>
+        <span slot="title">搜索平台</span>
+      </el-menu-item>
+
+		</el-menu>
+
+		<div clas="el-col-20" style="height:100%;">
+			<%= render "ims/home/render/out_order"%>
+			<%#= render "ims/home/render/return_order"%>
+			<%#= render "ims/home/render/order_reports"%>
 		</div>
+
 	</div>
 </template>
 <script type="text/javascript">
 const home = Vue.extend({
 	template: '#home_div',
-	// mounted:function(){
-
-	// },
 	activated:function(){
-		window.apps.header_and_footer.header_selected_tab = '#/home';
+		// window.apps.header_and_footer.header_selected_tab = '#/home';
 	},
-// })
-// window.current_template_obj = {
 	data:function(){
 		return {
+			isCollapse: false,
 			pres:[],
 			input21: '',
+			token:"<%= %>",
+			dialogFormVisible: false,
+			dialogFormVisible: false,
+			tableData_plat:[],
+        form: {
+          name: '',
+        },
+        formLabelWidth: '120px',
 			detail:[{
 				header:{},
 				lines:[{}]
 			}],
 			activeCollapse: "pre_info",
 			activeTab: "histories",
-			rules: {
-				iden: [
-		      { required: true, message: '姓名不能为空'},
-		    ],
-				phone: [
-		      { required: true, message: '姓名不能为空'},
-		    ],
-			}
 		}
 	},
 	methods:{
-		search:function(data){console.log(data)},
+      handleOpen:function(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose:function(key, keyPath) {
+        console.log(key, keyPath);
+      },		
+		handleSelectionChange:function(val) {
+      this.multipleSelection = val;
+    },
+    handleCurrentChange:function(val) {
+    	this.currentRow = val;
+    },
+    create_search_order:function(row){
+    	current = this.currentRow
+    	multiple = this.multipleSelection
+    	_this = this
+    	if (multiple&&multiple.length>0) {
+    		temp = []
+    		$.each(multiple,function(k,v){
+	    		temp.push({id:v.id,code:v.code, name:v.name, amount:v.amount})
+    		})
+	    	data = {authenticity_token:"<%= form_authenticity_token %>",order:temp}
+	    	var successFun = function(response){
+	    		try{
+			    	_this.set_pres(response.data)
+	    		}catch(e){
+	    			console.log(e)
+	    		}
+		      _this.dialogFormVisible = false
+	    	};
+	    	var errorFun = function(response){
+	    		_this.$message('订单创建失败，请重试！');
+	    	};
+	    	Vue.http.post("/ims/orders/create_order",data).then(successFun,errorFun)
+    	}else{
+    		_this.$message('请选择要生成订单的数据！');
+    	}
+    },		
+		search_platform_pre:function(val){
+			if (!val) {val = ""};
+     var successCallback =  function(response) {
+        this._data.tableData_plat = response.data
+      }
+      var errorCallback =  function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      }
+      this.$http.get('/ims/orders/get_orders?platform='+val).then(successCallback,errorCallback);
+		},
+		search:function(val){
+			if (!val) {val = ""};
+			stat = $(".prescription_list_fun").find("list_fun_panel.active").attr("stat")||""
+     var successCallback =  function(response) {
+        this._data.tableData_plat = response.data
+      }
+      var errorCallback =  function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      }
+      this.$http.get('/ims/orders/get_orders?stat='+stat+'&search='+val).then(successCallback,errorCallback);
+		},
     get_pres:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
     	if (!stat) {stat=""};
      var successCallback =  function(response) {
-        this._data.pres = response.data
+        this.set_pres(response.data)
       }
       var errorCallback =  function(response){
-          alert('服务器请求出错了')
+      	this.set_pres()
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }
-      this.$http.get('orders/get_orders?status='+stat).then(successCallback,errorCallback);
+      this.$http.get('/ims/orders/get_orders?status='+stat).then(successCallback,errorCallback);
+    },
+    set_pres:function(data){
+    	this._data.pres = data
+    	setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
     	if (!stat) {stat=""};
      var successCallback =  function(response) {
-        console.log('服务器请求成功了')
-        console.log(response.data)
-        console.log(this._data.pres)
         this._data.detail = response.data
       }
       var errorCallback =  function(response){
-          console.log('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }
-      this.$http.get('orders/get_order?sta='+stat).then(successCallback,errorCallback);
+      this.$http.get('/ims/orders/get_order?sta='+stat).then(successCallback,errorCallback);
     },
     //发药  发订单
     out_order:function(id){
-    	this.oprate_order({id:id,method:"out_order",todo:"发药"})
+    	this.oprate_order({id:id,method:"dispensing_order",todo:"发药"})
     },
     //拒绝
-    refuse_order:function(id){
-			this.oprate_order({id:id,method:"refuse_order",todo:"拒绝"})   	
-    },
+   //  refuse_order:function(id){
+			// this.oprate_order({id:id,method:"refuse_order",todo:"拒绝"})   	
+   //  },
     //审核
-		check_order:function(id){
-			this.oprate_order({id:id,method:"check_order",todo:"审核"})		
-		},
+		// check_order:function(id){
+		// 	this.oprate_order({id:id,method:"check_order",todo:"审核"})		
+		// },
 		//退药
 		return_order:function(id){
 			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
 		},
 		oprate_order:function(data){
     	if (data.id&&data.id.length>0){}else{
-    		alert("订单信息不全，不能发药！")
+        this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能发药！',
+        });    		
     		return false
     	}
      var successCallback =  function(response) {
-     		console.log(response.data)
      		stat = response.data.flag ? true : false
      		type = stat ? "success" : "warning";
      		str = 
@@ -131,9 +225,13 @@ const home = Vue.extend({
         })
       }
       var errorCallback =  function(response){
-          console.log('服务器请求出错了')
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
       }			
-			this.$http.get('orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
+			this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(successCallback,errorCallback);
 		},
     format_time:function(data){
 	  	var time = new Date(data)

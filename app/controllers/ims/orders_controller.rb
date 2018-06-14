@@ -61,6 +61,15 @@ class Ims::OrdersController < ApplicationController
     end
   end
 
+  # #POST 搜索平台处方 生成订单
+  # def create_order
+  #   p params[:id]
+  #   p params[:method] #out_order  refuse_order   check_order   return_order
+  #   # render json:{flag:false}
+  #   new_order = [{id:"102101200",code:"1250201",name:"王晓伟",amount:"23.43"}]
+  #   render json:new_order
+  # end
+  
   # 订单发药
   def dispensing_order
     @reslut = @ims_order.dispensing_order
@@ -131,7 +140,7 @@ class Ims::OrdersController < ApplicationController
   #   # render json:{flag:false}
   #   render json:{flag:true}
   # end
-  
+ 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order

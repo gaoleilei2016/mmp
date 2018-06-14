@@ -2,168 +2,113 @@
 
 <!-- 处方列表 -->
 <el-table
-					:data="prescriptions"
-					class="thin-row prescriptions-table"
-					header-row-class-name="bg-purple-light-thead"
-					style="width: 100%">
-					<el-table-column type="expand">
-			      <template slot-scope="props">
-			        <el-table
-								:data="(props.row.orders||[])"
-								class="orders-table"
-								style="width: 100%">
-							  <el-table-column
-							    prop="title"
-							    min-width="250"
-							    label="名称">
-							  </el-table-column>
-							  <el-table-column
-							    prop="specification"
-							    min-width="70"
-							    label="规格">
-							  </el-table-column>
-							  <el-table-column
-							    min-width="80"
-							    label="单次数量">
-							    <template slot-scope="scope">
-							    	<span v-if="scope.row.single_qty">{{scope.row.single_qty.value}}{{scope.row.single_qty.unit}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="80"
-							    label="单次剂量">
-							    <template slot-scope="scope">
-							    	<span v-if="scope.row.dose">{{scope.row.dose.value}}{{scope.row.dose.unit}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="50"
-							    label="途径">
-							    <template slot-scope="scope">
-							    	<span v-if="scope.row.route">{{scope.row.route.display}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="80"
-							    label="频次">
-							    <template slot-scope="scope">
-							    	<span v-if="scope.row.frequency">{{scope.row.frequency.code}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="50"
-							    label="疗程">
-							    <template slot-scope="scope">
-							    	<span v-if="scope.row.course_of_treatment">{{scope.row.course_of_treatment.value}}{{scope.row.course_of_treatment.display}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="60"
-							    label="总量">
-							    <template slot-scope="scope">
-							    	<span>{{scope.row.total_quantity}}{{scope.row.unit}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="80"
-							    label="单价">
-							    <template slot-scope="scope">
-							    	<span style="float: right;">{{scope.row.price | formatMoney}}</span>
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    prop="note"
-							    min-width="100"
-							    label="备注">
-							  </el-table-column>
-							</el-table>
-			      </template>
-			    </el-table-column>
-				  <el-table-column
-				    min-width="120"
-				    label="处方号">
-				    <template slot-scope="scope">
-				    	<el-button size="mini" style="padding: 4px 7px;" round>{{ (scope.row.orders||[]).length }}</el-button>
-				    	<span>{{ scope.row.prescription_no }}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="100"
-				    label="患者">
-				    <template slot-scope="scope">
-				    	<span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
-				      <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
-				      <span v-if="encounter.age">{{ encounter.age }}岁</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="250"
-				    label="诊断">
-				    <template slot-scope="scope">
-				    	<el-tag v-for="tag in (scope.row.diagnoses||[])" size="mini" type="info">{{tag.display}}</el-tag>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="处方类型">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.type">{{scope.row.type.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="科室">
-				    <template slot-scope="scope">
-				    	<span v-if="encounter.encounter_loc">{{encounter.encounter_loc.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="80"
-				    label="金额">
-				    <template slot-scope="scope">
-				    	{{scope.row.price | formatMoney(2)}}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="50"
-				    label="医生">
-				    <template slot-scope="scope">
-				    	<span v-if="scope.row.author">{{scope.row.author.display}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="note"
-				    min-width="100"
-				    label="备注">
-				  </el-table-column>
-				  <el-table-column
-				    min-width="130"
-				    label="生成日期">
-				    <template slot-scope="scope">
-				    	<span>{{scope.row.created_at | formatDate}}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    prop="status"
-				    align="center"
-				    min-width="80"
-				    label="状态">
-				    <template slot-scope="scope">
-				    	<el-tag size="mini" v-if="scope.row.status=='N'">待审核</el-tag>
-				    	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
-				    	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
-				    	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    fixed="right"
-				    label=""
-				    width="160">
-				    <template slot-scope="scope">
-				      <el-button v-if="ini.enable_print_pres && scope.row.status!='O'" type="text" size="mini" @click="editOrder(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-print"></i></el-button>
-				      <el-button type="text" size="mini" @click="showPrescription(scope.$index, scope.row)">查看</el-button>
-				      <el-button type="text" size="mini" @click="copyPrescription(scope.$index, scope.row)">复制</el-button>
-				      <el-button v-if="scope.row.status=='N'" type="text" size="mini" @click="deletePrescription(scope.$index, scope.row)"><span class="text-danger">作废</span></el-button>
-				    </template>
-				  </el-table-column>
+	:data="prescriptions"
+	class="thiner-row prescriptions-table"
+	style="width: 100%">
+	<el-table-column type="expand">
+    <template slot-scope="props">
+    	<div class="pres-table-presprint-wrapper" style="width: calc( 100% - 150px );">
+    		<prescriptionprint :encounter="encounter" :prescription="props.row" :orgname="orgname"></prescriptionprint>
+    	</div>
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="130"
+    label="处方号">
+    <template slot-scope="scope">
+    	<el-button size="mini" style="padding: 4px 7px;" round>{{ (scope.row.orders||[]).length }}</el-button>
+    	<span>{{ scope.row.prescription_no }}</span>
+    </template>
+  </el-table-column>
+<!--   <el-table-column
+    min-width="120"
+    label="患者">
+    <template slot-scope="scope">
+    	<span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
+      <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
+      <span v-if="encounter.age">{{ encounter.age }}岁</span>
+    </template>
+  </el-table-column> -->
+  <el-table-column
+    min-width="80"
+    label="处方类型">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.type">{{scope.row.type.display}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="250"
+    label="诊断">
+    <template slot-scope="scope">
+    	<el-tag v-for="(tag,index) in (scope.row.diagnoses||[])" :key="index" size="mini" type="info">{{tag.display}}</el-tag>
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="80"
+    label="特殊处方">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.specialmark" class="fa fa-fw fa-lg fa-check"></span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="80"
+    label="科室">
+    <template slot-scope="scope">
+    	<span v-if="encounter.encounter_loc">{{encounter.encounter_loc.display}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="80"
+    label="金额">
+    <template slot-scope="scope">
+    	{{scope.row.price | formatMoney(2)}}
+    </template>
+  </el-table-column>
+  <el-table-column
+    min-width="50"
+    label="医生">
+    <template slot-scope="scope">
+    	<span v-if="scope.row.author">{{scope.row.author.display}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop="note"
+    min-width="100"
+    label="备注">
+  </el-table-column>
+  <el-table-column
+    min-width="140"
+    label="生成日期">
+    <template slot-scope="scope">
+    	<span>{{scope.row.created_at | formatDate}}</span>
+    </template>
+  </el-table-column>
+  <el-table-column
+    prop="status"
+    align="center"
+    min-width="80"
+    label="状态">
+    <template slot-scope="scope">
+    	<el-tag size="mini" v-if="scope.row.status=='N'">待审核</el-tag>
+    	<el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
+    	<el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
+    	<el-tag size="mini" type="info" v-if="scope.row.status=='O'">已作废</el-tag>
+    </template>
+  </el-table-column>
+  <el-table-column
+    fixed="right"
+    label=""
+    width="140">
+    <template slot-scope="scope">
+      <el-button v-if="ini.enable_print_pres && scope.row.status!='O'" type="text" size="mini" @click="printPrescription(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-print"></i></el-button>
+      <!-- <el-button type="text" size="mini" @click="showPrescription(scope.$index, scope.row)">查看</el-button> -->
+      <el-button type="text" size="mini" @click="copyPrescription(scope.$index, scope.row)">复制<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+      <el-button v-if="scope.row.status=='N'" type="text" size="mini" @click="deletePrescription(scope.$index, scope.row)" class="text-danger">作废<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+    </template>
+  </el-table-column>
 </el-table>
+
+<!-- 用于处方打印的隐藏框 -->
+<div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+	<prescriptionprint :encounter="encounter" :orgname="orgname" :prescription="printPresRow"></prescriptionprint>
+</div>

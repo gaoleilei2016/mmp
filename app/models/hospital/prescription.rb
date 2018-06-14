@@ -4,8 +4,9 @@ class ::Hospital::Prescription < ApplicationRecord
 	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'prescription_id'
 	belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id'
 	has_many :diagnoses, class_name: '::Hospital::Diagnose', foreign_key: 'prescription_id'
-	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id'
+	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
+	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
 	# belongs_to :bill, class_name: '::'
 
 
@@ -32,7 +33,10 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+
+
 	def to_web_front
+		self.reload
 		# 患者信息
 		cur_encounter = self.encounter
 		patient_info = {
@@ -84,6 +88,13 @@ class ::Hospital::Prescription < ApplicationRecord
 				display: ''
 			}
 		}
+		# 药房信息
+		drug_store_info = {
+			drug_store: {
+				id: self.drug_store&.id,
+				display: self.drug_store&.name
+			}
+		}
 
 		# 处方信息
 		prescription_info = {
@@ -120,11 +131,28 @@ class ::Hospital::Prescription < ApplicationRecord
 			created_at: self.created_at,
 			updated_at: self.updated_at
 		}
-		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(prescription_info)
+		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
 	end
 
+	def send_to_check
+		self.reload
+		# 审核成功 自动审核
+		flag = true
+		cur_encounter = self.encounter
+		cur_org = self.organization
+		cur_doctor = self.doctor
+		price = self.orders.map{|e| e.price }.reduce(:+)
+		total_fee = [price.to_s ,"元"].join(" ")
+		#发送短信息
+		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
+		args = {type: :take_medic, name: cur_encounter.name, number: self.prescription_no || Time.now.to_i, total_fee: total_fee,number1: '1111', url: 'http连接', phone: cur_encounter.phone}
+		p args
+		Sms::Data.send_phone(args)
+	end
+
 	class<<self
+
 	end
 
 end
