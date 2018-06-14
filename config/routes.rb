@@ -74,7 +74,10 @@ Rails.application.routes.draw do
     resources :home
     resources :orders do
       collection do
-        get :get_orders
+        get :get_orders         # 获取订单
+        get :dispensing_order   # 发药
+        get :return_order       # 退药
+        get :oprate_order       # 订单操作(发药/退药、、)
       end
     end
     resources :interfaces do

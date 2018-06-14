@@ -22,9 +22,10 @@
 				</div>
 
 				<div class="el-row prescription_list_fun">
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('W',$event)">未发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('F',$event)">已发订单</div>
-					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('T',$event)">已退订单</div>
+					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('A',$event)">待交费</div>
+					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('P',$event)">待发药</div>
+					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('E',$event)">已发药</div>
+					<div class="el-col el-col-8 list_fun_panel" v-on:click="get_pres('C',$event)">已退药</div>
 				</div>
 
 				<div class="prescription_list" style="height:calc(100% - 80px);">
@@ -82,7 +83,7 @@ const home = Vue.extend({
       var errorCallback =  function(response){
           alert('服务器请求出错了')
       }
-      this.$http.get('orders/get_orders?='+stat).then(successCallback,errorCallback);
+      this.$http.get('orders/get_orders?status='+stat).then(successCallback,errorCallback);
     },
     get_pre:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("p").removeClass("active")

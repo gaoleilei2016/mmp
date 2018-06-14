@@ -1,5 +1,5 @@
 class Ims::OrdersController < ApplicationController
-  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order]
+  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order, :oprate_order]
 
   # GET /ims/orders
   # GET /ims/orders.json
@@ -75,10 +75,29 @@ class Ims::OrdersController < ApplicationController
 
   # 获取已发送到该药店的订单
   def get_orders
-  	@data = Ims::Order.order_search params
+  	p IPSocket.getaddress(Socket.gethostname)
+  	@data = Ims::Order.order_search params.merge({org_ii:current_user.organization_id})
     render json:@data.to_json
   end
 
+  # 订单明细查询
+  def get_order_detail
+  	@data = Ims::Order.get_order_detail params.merge({org_ii:current_user.organization_id})
+    render json:@data.to_json
+  end
+
+  # 订单操作(发药、退药、、、)
+  def oprate_order
+  	case params[:method]
+  	when 'out_order'
+  		@reslut = @ims_order.dispensing_order
+  	when 'return_order'
+  		@reslut = @ims_order.return_order
+  	else
+  		@reslut ={false:false,info:"该操作未处理。"}
+  	end
+    render json:@reslut.to_json
+  end
 
   # def get_orders
   #   data = [

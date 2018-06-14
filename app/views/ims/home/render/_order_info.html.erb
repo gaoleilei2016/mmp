@@ -8,13 +8,13 @@
 		</div>
 		<input type="hidden" id="prescription_id" v-bind:value="info.header.id">
 		<h3>
-			<b class="prescription_source_type"><%= current_user.try(:org_name)%></b><br>
+			<b class="prescription_source_type">{{info.header.source_org_name}}</b><br>
 			<b>门诊订单</b>
 		</h3>
-		<span class="prescription_reg_style">{{info.header.type_display}}</span>
+		<!-- <span class="prescription_reg_style">{{info.header.type_display}}</span> -->
   	<div class="el-row" style="font-size:15px; overflow:hidden; padding:6px;">
-	  	<div class="el-col-12 prescription_code text-left"><b style="color:red;opacity:0.7;">NO.<span>{{info.header.return_drug ? info.header.ori_code : info.header.code}}</span></b></div>
-	  	<div class="el-col-12 invoice_no text-right">发票号:&nbsp;&nbsp;<span>{{info.header.invoice_no}}</span></div>
+	  	<div class="el-col-12 prescription_code text-left"><b style="color:red;opacity:0.7;">NO.<span>{{info.header.return_drug ? info.header.ori_code : info.header.order_code}}</span></b></div>
+	  	<!-- <div class="el-col-12 invoice_no text-right">发票号:&nbsp;&nbsp;<span>{{info.header.invoice_no}}</span></div> -->
   	</div>					
 	</div>
 

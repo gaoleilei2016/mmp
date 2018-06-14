@@ -4,6 +4,29 @@
 class Ims::Order < ApplicationRecord
 	belongs_to :operater, class_name: '::User', foreign_key: 'operater_id', optional: true
 	belongs_to :patient_order, class_name: '::Order::Order', foreign_key: 'patient_order_id', optional: true
+	# 字段
+	# { id: integer, 
+	# 	source_org_ii: string, 
+	# 	source_org_name: string, 
+	# 	target_org_ii: string, 
+	# 	target_org_name: string, 
+	# 	patient_order_id: string, 
+	# 	order_code: string, 
+	# 	patient_name: string, 
+	# 	repeat_number: integer, 
+	# 	total_amount: float, 
+	# 	search_name: string, 
+	# 	note: string, 
+	# 	operater_id: integer, 
+	# 	operater_name: string, 
+	# 	operat_at: datetime, 
+	# 	ori_id: string, 
+	# 	ori_code: string, 
+	# 	this_returned: boolean, 
+	# 	created_at: datetime, 
+	# 	updated_at: datetime
+	# }
+
 
 	# 订单发药
   def dispensing_order
@@ -21,7 +44,7 @@ class Ims::Order < ApplicationRecord
 		  retrun result
 	  rescue Exception => e
 	  	print e.message rescue "  e.messag----"
-      print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
+      print "laaaaaaaaaaaaaaaaaaaa 订单退药 出错: " + e.backtrace.join("\n")
       result = {flag:false,:info=>"系统出错。"}
 	  end
   end
@@ -40,9 +63,21 @@ class Ims::Order < ApplicationRecord
 	    l&&h ? {flag:true,info:"退药成功！"} : {flag:false,info:"退药失败。"}
   	rescue Exception => e
   		print e.message rescue "  e.messag----"
-      print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
+      print "laaaaaaaaaaaaaaaaaaaa 退药的处方保存 出错: " + e.backtrace.join("\n")
       result = {flag:false,:info=>"系统出错。"}
   	end
+  end
+
+  # 获取订单明细信息
+  def get_order_detail
+  	begin
+  		self.patient_order
+  	rescue Exception => e
+  		print e.message rescue "  e.messag----"
+      print "laaaaaaaaaaaaaaaaaaaa 获取订单明细信息 出错: " + e.backtrace.join("\n")
+      result = {flag:false,:info=>"系统出错。"}
+  	end
+  	
   end
 
 
@@ -100,11 +135,12 @@ class Ims::Order < ApplicationRecord
 					:this_returned => false,
   				}}
   			self.create(args)
-  			{flag:true,:info=>"订单的接收成功。"}
+  			# {flag:true,:info=>"订单的接收成功。"}
   		rescue Exception => e
   			print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 订单的接收 出错: " + e.backtrace.join("\n")
-        {flag:false,:info=>"药房系统出错。"}
+        # {flag:false,:info=>"药房系统出错。"}
+        nil
   		end
   	end
 
