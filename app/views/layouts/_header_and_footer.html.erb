@@ -142,7 +142,12 @@
   <div id="_h_menus_div" style="position: fixed;left: 0;right: 0;top: 0;z-index: 9;background: #fff;">
 
     <div class="layout-header-nav">
-      <el-menu :unique-opened="true" ref="elmenu" mode="horizontal" @select="handleHeaderMenuSelect"><!--  menu-trigger="click" -->
+      <el-menu 
+        :unique-opened="true" 
+        ref="elmenu" 
+        mode="horizontal" 
+        @select="handleHeaderMenuSelect"
+        background-color="#0CBDAA"><!--  menu-trigger="click" -->
         <a class="portal_img_wrapper" :href="header_menus.portal.path"><img :src="header_menus.portal.image"></a>
         <template v-for="menu in header_menus.headers">
           <el-submenu v-if="menu.childs&&menu.childs.length" :index="menu.code"><!--  :show-timeout="0" :hide-timeout="300" -->
@@ -156,7 +161,7 @@
 
     <div class="nav-right">
       <el-dropdown trigger="click">
-        <span class="el-dropdown-link">
+        <span class="el-dropdown-link" style="color: #fff;">
           您好，<%= current_user.try(:login) %>
           <% if current_user.organization %>
           ，<%= current_user.organization.name %>
@@ -169,7 +174,7 @@
           <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <a href="/" style=""><i class="fa fa-home"></i></a>
+      <a href="/" style="color: #fff;"><i class="fa fa-home"></i></a>
     </div>
 
     <!-- <el-tabs v-model="header_selected_tab" type="card" @tab-remove="removeTab" @tab-click="handleTabClick">
