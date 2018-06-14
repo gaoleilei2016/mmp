@@ -1,6 +1,6 @@
 class ::Hospital::Sets::Ini < ApplicationRecord
 
-	belongs_to :organization, class_name: 'Admin::Organization', foreign_key: 'org_id'
+	# belongs_to :organization, class_name: 'Admin::Organization', foreign_key: 'org_id'
 
 
 	def to_web_front
