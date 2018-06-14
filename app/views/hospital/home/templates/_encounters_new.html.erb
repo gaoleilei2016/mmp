@@ -110,7 +110,7 @@ window.current_template_obj = {
 				focusDiagnosisInputIndex: 0, // 聚焦第几个诊断
 				inputTagValue: "", // 过敏源录入
 				inputTagVisible: false, // 是否显示过敏源录入框
-				showEncountersDialog: false, // 显示就诊列表模态框
+				isShowEncountersDialog: false, // 显示就诊列表模态框
 				encounters: [], // 就诊列表
 				searchencstr: "", // 搜索就诊列表
 			/* 患者基本信息  ----- end */ 
@@ -120,6 +120,9 @@ window.current_template_obj = {
 				/* 历史记录 --- start */
 					historiesResource: Vue.resource('/hospital/histories{/id}.json'),
 					histories: [],
+					isShowHisOrdersDialog: false, // 显示药品列表
+					isShowHisPresDialog: false, // 显示处方列表
+					multipleHisOrdersSelection: [], // 已经勾选的医嘱
 				/* 历史记录 --- end */ 
 				/* 药品 --- start */ 
 					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
@@ -132,7 +135,7 @@ window.current_template_obj = {
 				/* 处方 --- start */ 
 					prescriptions: [],
 					prescriptionsResource: Vue.resource('/hospital/prescriptions{/id}.json'),
-					showSendPresDialog: false, // 显示新建处方模态框
+					isShowSendPresDialog: false, // 显示新建处方模态框
 					sendOrders: [], // 将要发送生成处方的药品
 					prescriptionRules: {
 
@@ -244,7 +247,7 @@ window.current_template_obj = {
   				if(res.flag) {
   					_this.encounters = res.data;
   					// 打开就诊列表模态框
-  					_this.showEncountersDialog = true;
+  					_this.isShowEncountersDialog = true;
   				}
   			}, function(response) {
       		_this.$message.error("搜索就诊失败，请联系管理员。");
@@ -257,7 +260,7 @@ window.current_template_obj = {
   				this.encounter.id = "";
   				this.encounter.type = "by_person";
   			}
-  			this.showEncountersDialog = false;
+  			this.isShowEncountersDialog = false;
   			// 重新加载页面主业务数据
   			this.activeTab = "orders";
   			this.getOrders();
@@ -460,9 +463,10 @@ window.current_template_obj = {
     },
 
     /* 药品操作 --- start */
-    	getOrders: function () {
+    	getOrders: function (encounter_id) {
     		var _this = this;
-    		if(!_this.encounter.id) {
+    		if(!encounter_id) { encounter_id = _this.encounter.id; }
+    		if(!encounter_id) {
     			_this.orders = [];
     			_this.$message({
 		        message: "请先确认患者，才可以查询相关药品。",
@@ -470,7 +474,7 @@ window.current_template_obj = {
 		      });
     			return false;
     		}
-    		_this.ordersResource.get({encounter_id: _this.encounter.id}).then( function(response) {
+    		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
     			var res = response.data;
     			if(res.flag) {
     				_this.orders = res.data;
@@ -695,9 +699,10 @@ window.current_template_obj = {
 
     /* 处方操作 --- start */
     	// 获取处方列表
-    	getPrescriptions: function () {
+    	getPrescriptions: function (encounter_id) {
     		var _this = this;
-    		if(!_this.encounter.id) {
+    		if(!encounter_id) { encounter_id = _this.encounter.id; }
+    		if(!encounter_id) {
     			_this.prescriptions = [];
     			_this.$message({
 		        message: "请先确认患者，才可以获取相关处方。",
@@ -705,7 +710,7 @@ window.current_template_obj = {
 		      });
     			return false;
     		}
-    		Vue.resource("/hospital/encounters/"+_this.encounter.id+"/all_prescriptions").get({encounter_id: _this.encounter.id}).then( function(response) {
+    		Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
     			var res = response.data;
     			if(res.flag) {
     				_this.prescriptions = res.data;
@@ -745,7 +750,7 @@ window.current_template_obj = {
       		var res = response.data;
       		btn.removeAttr("disabled").find(".fa").hide();
       		if(res.flag) {
-      			_this.showSendPresDialog = false;
+      			_this.isShowSendPresDialog = false;
       			_this.$message({
 		          message: "生成处方成功，请在处方列表中查看。",
 		          type: 'success'
@@ -803,7 +808,7 @@ window.current_template_obj = {
     			specialmark: false, // 特殊处方标记
     			ids: [], // 药品ids
     		}
-    		_this.showSendPresDialog = true;
+    		_this.isShowSendPresDialog = true;
     	},
     	// 显示处方详细，打印处方的样子
     	showPrescription: function (index, row) {
@@ -813,27 +818,12 @@ window.current_template_obj = {
 			copyPrescription: function (index, row) {
 				var _this = this,
 						btn = $(event.target);
-				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【复制】此处方到本次就诊？', '复制', {
+				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【复制】这些药品到本次就诊？', '复制', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then( function () {
-        	btn.attr("disabled", "disabled").find(".fa").show();
-					_this.$http.post('/hospital/prescriptions/copy', {id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-	          btn.removeAttr("disabled").find(".fa").hide();
-	          var res = response.data;
-	          if(res.flag) {
-	      			_this.$message({
-			          message: res.info,
-			          type: 'success'
-			        });
-	      		} else {
-							_this.$message.error(res.info);
-	      		}
-	        }, function() {
-	          btn.removeAttr("disabled").find(".fa").hide();
-	          _this.$message.error("后台出错，复制处方失败。请联系管理员");
-	        });
+        	_this.quoteOrders(row.orders);
 					
 	      }).catch( function () {
         	// 取消作废
@@ -898,6 +888,64 @@ window.current_template_obj = {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
     		})
     	},
+    	// 显示处方列表模态框
+    	openHisOrdersDialog: function (row) {
+    		this.isShowHisOrdersDialog = true;
+    		this.getOrders(row.id);
+    	},
+    	// 显示处方列表模态框
+			openHisPresDialog: function (row) {
+				this.isShowHisPresDialog = true;
+    		this.getPrescriptions(row.id);
+			},
+			// 勾选要引用的医嘱
+			handleHisOrdersSelChange: function (val) {
+				console.log(val)
+        this.multipleHisOrdersSelection = val;
+      },
+			// 引用医嘱
+			quoteOrders: function (orders, flag) {
+				var _this = this;
+				if(flag=="batch") {
+					orders = _this.multipleHisOrdersSelection;
+				}
+				console.log("引用医嘱",orders)
+				if(!orders || orders.length==0) {
+					_this.$message({
+		        message: "请先选择要引用的医嘱。",
+		        type: 'warning'
+		      });
+		      return false;
+				}
+				var ids = [], btn = $(event.target);
+				orders.forEach(function(item, index) {
+					ids.push(item.id);
+				})
+				btn.attr("disabled", "disabled").find(".fa").show();
+				_this.$http.post('/hospital/encounters/quote_orders', {ids: ids, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          btn.removeAttr("disabled").find(".fa").hide();
+          var res = response.data;
+          if(res.flag) {
+      			_this.$message({
+		          message: res.info,
+		          type: 'success'
+		        });
+      		} else {
+						_this.$message.error(res.info);
+      		}
+      		if(/modal|batch/.test(flag)) {
+      			_this.isShowHisOrdersDialog = false; // 关闭复制医嘱弹出框
+      			_this.isShowHisPresDialog = false; // 关闭复制处方弹出框
+      		}
+        }, function() {
+          btn.removeAttr("disabled").find(".fa").hide();
+          _this.$message.error("后台出错，复制医嘱失败。请联系管理员");
+          if(/modal|batch/.test(flag)) {
+      			_this.isShowHisOrdersDialog = false; // 关闭复制医嘱弹出框
+      			_this.isShowHisPresDialog = false; // 关闭复制处方弹出框
+      		}
+        });
+			},
     /* 记录就诊 --- end */
 	}
 }
