@@ -100,7 +100,7 @@
 
     <header class=" mui-bar mui-bar-nav">
       <h1 class="mui-title">登录</h1>
-      <a href="/users/sign_up" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">注册</a>
+      <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">注册</a>
     </header>
     <div class="mui-content">
       <div style="padding: 30px;">
@@ -108,7 +108,7 @@
           <input type="hidden" name="user[remember_me]" value="1">
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-phone" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input type="text" name="user[login]" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" style="padding-left: 40px;font-size: 12px;" autocomplete="off">
+            <input type="text" id="login_input" name="user[login]" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" style="padding-left: 40px;font-size: 12px;" autocomplete="off">
           </div>
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
@@ -129,7 +129,7 @@
       <div class="mui-content-padded" style="margin: 10px 80px;">
         <button onclick="$('form').submit();" class="mui-btn mui-btn-block mui-btn-primary" style="background: rgb(1, 190, 1);border-color: rgb(1, 190, 1);border-radius: 16px;padding: 4px;">登录</button>
         <div class="link-area">
-          <a href="/users/sign_up" style="font-size: 12px;">忘记密码?</a>
+          <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" style="font-size: 12px;">忘记密码?</a>
           <!-- <span class="spliter">|</span> -->
           <!-- <a href="/users/sign_up" style="float: right;">注冊</a> -->
           <!-- <div class="clear"></div> -->
