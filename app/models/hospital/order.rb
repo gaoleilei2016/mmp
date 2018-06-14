@@ -4,8 +4,10 @@ class Hospital::Order < ApplicationRecord
 	# has_one :dict_medication, class_name: '::Dict::Medication', foreign_key: 'order_id' 
 
 	belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
+	belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
 
 	# order_type 医嘱类型 1 药品医嘱
+
 
 	def dict_medication
 		::Dict::Medication.find(self.serialno)
@@ -45,9 +47,31 @@ class Hospital::Order < ApplicationRecord
 			order_type: self.order_type,
 			encounter_id: self.encounter_id,
 			author: {
-				id: nil,
-				display: '王仁'
+				id: self.author.id,
+				display: self.author.name
 			}
 		}
 	end
+	class<<self
+		def copy_orders(order_ids, encounter_id, cur_user)
+			cur_encounter = ::Hospital::Encounter.find(encounter_id)
+			cur_orders = ::Hospital::Order.find(order_ids)
+			p cur_orders
+			::ActiveRecord::Base.transaction do 
+				cur_orders.each do |_order|
+					# 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
+					new_order = _order.clone
+					new_order.status = "N"
+          new_order.encounter_id = encounter_id
+          new_order.author_id = cur_user.id
+          new_order.prescription_id = nil
+          new_order.save!
+				end
+			end
+		end
+	end
+
+
+
+
 end

@@ -5,6 +5,7 @@ class Hospital::OrdersController < ApplicationController
 	# GET
   # /hospital/orders
 	def index
+    # 只能通过 encounter_id 查询医嘱
 		# @orders = Hospital::Order.all rescue []
     @orders = Hospital::Order.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
     respond_to do |format|
@@ -123,6 +124,7 @@ class Hospital::OrdersController < ApplicationController
         status: "N",
         order_type: 1, # 默认保存1 是药品医嘱
         encounter_id: args[:encounter_id],
+        author_id: current_user.id
       }
       return ret
     end

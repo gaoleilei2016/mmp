@@ -5,8 +5,9 @@ class Hospital::PrescriptionsController < ApplicationController
 	# GET
   # /hospital/prescriptions
 	def index
-		@prescriptions = Hospital::Prescription.all rescue []
-    @prescriptions = @prescriptions.map { |e| e.to_web_front  }
+    # 只能通过 encounter_id 查询医嘱
+    p "Hospital::PrescriptionsController index",params
+		@prescriptions = Hospital::Prescription.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @prescriptions} }
