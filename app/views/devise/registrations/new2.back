@@ -25,7 +25,7 @@
       }
     </style>
     <header class="my_top_nav mui-bar mui-bar-nav">
-      <a href="/users/login" class="mui-icon mui-icon-left-nav mui-pull-left"></a>
+      <a href="/users/sign_in" class="mui-icon mui-icon-left-nav mui-pull-left"></a>
       <h1 class="mui-title">注册</h1>
     </header>
     <div class="mui-content">
@@ -34,7 +34,7 @@
         <input type="hidden" name="code" value="<%= params[:code] %>">
         <div class="mui-input-row">
           <label>账号</label>
-          <input autocomplete="off" id='login_input' type="text" class="mui-input-clear mui-input" placeholder="登陆时使用" name="user[login]" value="<%= resource.login rescue nil %>">
+          <input autocomplete="off" id='login_input' type="text" class="mui-input-clear mui-input" placeholder="登录时使用" name="user[login]" value="<%= resource.login rescue nil %>">
         </div>
         <div class="mui-input-row">
           <label>密码</label>

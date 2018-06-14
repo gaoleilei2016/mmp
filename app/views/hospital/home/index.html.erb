@@ -1,1 +1,24 @@
 <%= stylesheet_link_tag "/assets/hospital/home" %>
+
+<script type="text/javascript">
+	$(function(){
+	  var window_printer;
+	  $('iframe#window_printer_iframe').remove();
+	  $('body').append('<iframe style="display: none;" id="window_printer_iframe"></iframe>');
+	  window_printer = document.getElementById("window_printer_iframe").contentWindow;
+	  window_printer.document.open();
+	  window_printer.document.writeln('<html><head>');
+	  // window_printer.document.writeln('<style> .noprint {display: none;} .window_printer_iframe {display: inherit; font-size: 10x;} .control-label {text-align: right;} .printarea a:after {content: "";} .lead {font-size: 20px;} .table > thead > tr > th, .table > thead > tr > td, .table > tbody > tr > th, .table > tbody > tr > td, .table > tfoot > tr > th, .table > tfoot > tr > td {font-size: 6px;} .charge_ledgers-table.table > tbody > tr > td {border-top: none; line-height: 0.8;} p.title{font-size: 1.5em;} </style>');
+	  window_printer.document.writeln('</head><body></body></html>');
+	  window_printer.document.close();
+
+	  $.fn.print_area = function() {
+	    $this = $(this);
+	    
+	    var str = $this[0].outerHTML;
+	    $(window_printer.document).find('body').html( str );
+
+	    window_printer.print();
+	  };
+	})
+</script>

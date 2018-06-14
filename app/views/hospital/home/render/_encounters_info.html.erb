@@ -1,25 +1,43 @@
 <el-collapse class="patient-info" v-model="activeCollapse">
   <el-collapse-item name="patientinfo1">
     <template slot="title">
-    	<el-tooltip content="搜索患者" placement="right">
-      	<span class="fa fa-lg fa-search fa-fw text-primary" style="cursor: pointer;" @click.stop="toggleSidebar"></span>&#12288;
-      </el-tooltip>
+      <el-input
+		    placeholder="姓名 / 手机号 / 身份证号码 / 诊断"
+		    size="mini"
+		    class="search-enc-input"
+		    @click.stop.native=""
+		    @keyup.enter.stop.native="searchEncounters(searchencstr)"
+		    ref="searchencstr"
+		    @focus="focusEncSearchInp(true)"
+		    @blur="focusEncSearchInp(false)"
+		    v-model="searchencstr">
+		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters(searchencstr)"></i>
+		  </el-input>&#12288;
       <b v-if="encounter.name">{{ encounter.name }}</b><b v-else>[ 姓名 ]</b>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
+      <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
+      <span v-if="!activeCollapse || activeCollapse.length==0">
+      	<i class="fa fa-fw fa-lg fa-phone text-mmp-lighter"></i>{{encounter.phone}}&#12288;
+      	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>
+      </span>
+      <div style="float: right; margin-right: 1em;">
+      	<!-- <el-button size="mini" @click="resetEncounterForm('encounterForm')" icon="el-icon-refresh">刷新</el-button> -->
+      </div>
     </template>
-    <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="100px">
+    <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="80px">
     	<el-row>
-	    	<el-col :span="6">
+    		<!-- 姓名、性别 -->
+	    	<el-col :span="5">
 	    		<el-form-item
 				    label="姓名"
 				    prop="name">
-				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')"></el-input>
+				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" placeholder="姓名" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="性别"
 				    prop="gender">
-				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: calc(100% - 20px );" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
 					      :key="item.code"
@@ -28,13 +46,6 @@
 					    </el-option>
 					  </el-select>
 					  <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>
-				  </el-form-item>
-				  <el-form-item
-				    label="年龄"
-				    prop="age">
-				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encdiagnose')">
-				    	<span slot="suffix">岁</span>
-				    </el-input>
 				  </el-form-item>
 				  <div v-if="showAllPatInfo">
 				  	<el-form-item
@@ -51,30 +62,20 @@
 					  </el-form-item>
 				  </div>
 				</el-col>
-				<el-col :span="8">
+				<el-col :span="6">
 				  <el-form-item
-				    label="出生日期"
-				    prop="birth_date">
-				    <el-date-picker
-				      v-model="encounter.birth_date"
-				      type="date"
-				      style="width: 100%"
-				      @change="getDecilAgeByBirthday"
-				      :picker-options="birthPickerOptions"
-				      placeholder="选择日期">
-				    </el-date-picker>
-				  </el-form-item>
-					<el-form-item
-				    label="身份证号码"
-				    @change="getBirthdayFromIdCard"
-				    prop="iden">
-				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o"></el-input>
+				    label="年龄"
+				    prop="age">
+				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encphone')">
+				    	<span slot="suffix">岁</span>
+				    </el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="手机号码"
 				    prop="phone">
-				    <el-input v-model.number="encounter.phone" prefix-icon="fa fa-phone"></el-input>
+				    <el-input v-model.number="encounter.phone" prefix-icon="fa fa-phone" ref="encphone" @keyup.enter.stop.native="focusNext('encphone', 'encdiagnose')"></el-input>
 				  </el-form-item>
+					
 				  <div v-if="showAllPatInfo">
 				  	<el-form-item
 					    label="婚姻"
@@ -90,23 +91,45 @@
 					  </el-form-item>
 				  </div>
 				</el-col>
-				<el-col :span="10">
+				<el-col :span="6">
+					<el-form-item
+				    label="身份证号"
+				    @change="getBirthdayFromIdCard"
+				    prop="iden">
+				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o"></el-input>
+				  </el-form-item>
+				  <el-form-item
+				    label="出生日期"
+				    prop="birth_date">
+				    <el-date-picker
+				      v-model="encounter.birth_date"
+				      type="date"
+				      style="width: 100%"
+				      @change="getDecilAgeByBirthday"
+				      :picker-options="birthPickerOptions"
+				      placeholder="XXXX-XX-XX">
+				    </el-date-picker>
+				  </el-form-item>
+				  <div v-if="showAllPatInfo">
+					  <el-form-item
+					    label="职业"
+					    prop="occupation">
+					    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;">
+						    <el-option
+						      v-for="item in ($parent.common_data_occupations||[])"
+						      :key="item.code"
+						      :label="item.display"
+						      :value="item">
+						    </el-option>
+						  </el-select>
+					  </el-form-item>
+					</div>
+				</el-col>
+				<el-col :span="7">
 				  <el-form-item
 				    label="住址"
 				    prop="address">
 				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline"></el-input>
-				  </el-form-item>
-				  <el-form-item
-				    label="职业"
-				    prop="occupation">
-				    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;">
-					    <el-option
-					      v-for="item in ($parent.common_data_occupations||[])"
-					      :key="item.code"
-					      :label="item.display"
-					      :value="item">
-					    </el-option>
-					  </el-select>
 				  </el-form-item>
 				  <el-form-item
 				    :label="encounter.age < 14 ? '监护人' : '联系人'"
@@ -122,12 +145,11 @@
 				  </div>
 				</el-col>
 			</el-row>
-			<hr class="info-divider"/>
-			<el-row v-for="(diagnose, index) in (encounter.diagnoses||[])">
+			<!-- <hr class="info-divider"/> -->
+			<el-row v-for="(diagnose, index) in (encounter.diagnoses||[])" :key="diagnose.code">
 				<!-- 医疗信息，诊断，血型，身高，体重，bmi -->
-				<el-col :span="12">
+				<el-col :span="10">
 					<el-form-item 
-						:key="diagnose.code"
 						:prop="'diagnoses.' + index + '.display'"
 						:label="index==0 ? '诊断' : '第 '+(index+1)+' 诊断'"
 						:rules="[{ required: true, message: '请输入诊断', trigger: 'blur, change' }]">
@@ -147,6 +169,18 @@
 	      	<el-tooltip v-else effect="dark" content="增加其他诊断" placement="right">
 			      <i class="el-icon-circle-plus-outline text-primary" @click="addDiagnosis()"></i>
 			    </el-tooltip>
+				</el-col>
+				<el-col v-if="index==(encounter.diagnoses.length-1)" :span="12" style="text-align: right;">
+				  <el-form-item>
+				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
+				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
+				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave" plain>
+				    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
+				    	<template v-if="!encounter.id">保存</template>
+				    	<template v-else>更新</template>
+				    </el-button>
+				    
+				  </el-form-item>
 				</el-col>
 			</el-row>
 			<el-row v-if="showAllPatInfo">
@@ -227,8 +261,8 @@
 				</el-col>
 			</el-row>
 			<!-- 取药点 -->
-			<hr class="info-divider"/>
-			<el-row>
+			<!-- <hr class="info-divider"/> -->
+<!-- 			<el-row>
 				<el-col :span="12">
 					<el-form-item
 				    label="取药点"
@@ -243,19 +277,81 @@
 					  </el-select>
 				  </el-form-item>
 				</el-col>
-				<el-col :span="12" style="text-align: right;">
-				  <el-form-item>
-				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
-				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
-				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave" plain>
-				    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
-				    	<template v-if="!encounter.id">保存</template>
-				    	<template v-else>更新</template>
-				    </el-button>
-				    <el-button @click="resetEncounterForm('encounterForm')">重置</el-button>
-				  </el-form-item>
-				</el-col>
-			</el-row>
+			</el-row> -->
 		</el-form>
   </el-collapse-item>
 </el-collapse>
+
+<el-dialog
+  title="就诊列表"
+  :visible.sync="showEncountersDialog"
+  width="90%">
+  <el-table
+		:data="encounters"
+		class="thin-row encounters-table"
+		header-row-class-name="bg-purple-light-thead"
+		style="width: 100%">
+	  <el-table-column
+	    min-width="20"
+	    label="#">
+	    <template slot-scope="scope">
+	      {{ scope.$index + 1 }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    prop="name"
+	    min-width="60"
+	    label="姓名">
+	  </el-table-column>
+	  <el-table-column
+	    prop="gender.display"
+	    min-width="30"
+	    label="性别">
+	  </el-table-column>
+	  <el-table-column
+	    prop="age"
+	    min-width="30"
+	    label="年龄">
+	  </el-table-column>
+	  <el-table-column
+	    min-width="150"
+	    label="身份证号码">
+	    <template slot-scope="scope">
+	    	<i class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="70"
+	    label="出生日期">
+	    <template slot-scope="scope">
+	    	{{ scope.row.birth_date | formatDate("yyyy-MM-dd") }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="90"
+	    label="手机号码">
+	    <template slot-scope="scope">
+	    	<i class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    min-width="80"
+	    label="就诊日期">
+	    <template slot-scope="scope">
+	    	{{ scope.row.created_at | formatDate }}
+	    </template>
+	  </el-table-column>
+	  <el-table-column
+	    fixed="right"
+	    label=""
+	    width="200">
+	    <template slot-scope="scope">
+	      <el-button size="mini" @click="editEncounter(scope.row, true)" type="primary" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button>
+	      <el-button size="mini" @click="editEncounter(scope.row, false)" type="success" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建就诊</el-button>
+	    </template>
+	  </el-table-column>
+	</el-table>
+  <span slot="footer" class="dialog-footer">
+    <el-button size="mini" @click="showEncountersDialog = false">关 闭</el-button>
+  </span>
+</el-dialog>

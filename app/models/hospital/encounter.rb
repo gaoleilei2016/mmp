@@ -3,12 +3,14 @@ class Hospital::Encounter < ApplicationRecord
 	has_many :diagnoses, class_name: '::Hospital::Diagnose', foreign_key: 'encounter_id'
 	belongs_to :person, class_name: '::Person', foreign_key: 'person_id', optional: true
 	belongs_to :drugstore_location, class_name: '::Admin::Organization', foreign_key: 'drugstore_location_id', optional: true
+	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'encounter_id'
+	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'encounter_id'
 
 	#1:  如果有person_id就直接取到person
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人
 	def get_person
 	  return self.person if self.person.present?
-	  cur_person = ::Person.where(name: self.name, age: self.age, iden: self.iden).first
+	  cur_person = ::Person.where(name: self.name, phone: self.phone).first
 	  if cur_person.nil?
 	  	# 没有查询到 创建一个实体Person
 	  	person_args = self.format_person_args
@@ -95,7 +97,8 @@ class Hospital::Encounter < ApplicationRecord
 		ret = {
 			name: self.name,
 			age: self.age,
-			iden: self.iden
+			iden: self.iden,
+			phone: self.phone
 		}
 		return ret
 	end

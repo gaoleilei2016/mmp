@@ -1,0 +1,127 @@
+<style type="text/css">
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</button>
+	<h1 class="mui-title">确认订单</h1>
+</header>
+<div class="mui-content" id="vue_content">
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell" style="padding: 22px 18px 14px;overflow: visible;">
+			<div>
+				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+				<div class="mui-media-body">
+					{{current_pharmacy.name}}
+					<p class="mui-ellipsis">???m</p>
+				</div>
+			</div>
+			<ul class="mui-table-view no_background" style="margin-top: 15px;">
+				<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
+					<div href="javascript:;" class="">
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
+						<div class="mui-media-body">
+							{{drug.title}}
+							<p class="mui-ellipsis">
+								{{drug.specification}}
+								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+							</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</li>
+	</ul>
+	<ul id="" class="mui-table-view mui-table-view-chevron" style="margin-top: 16px">
+		<li class="mui-table-view-cell mui-media">
+			<a href="javascript:mui.toast('线下支付请直接去药房');">
+				<div class="mui-media-body">
+					支付方式
+					<span class='mui-pull-right' style="color: #999;">在线支付</span>
+				</div>
+			</a>
+		</li>
+		<li class="mui-table-view-cell mui-media">
+			<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+				<div class="mui-media-body">
+					抵用券
+					<span class='mui-pull-right' style="color: #999;">暂无可用</span>
+					<!-- <span class='mui-pull-right' style="color: red;">-5 元</span> -->
+				</div>
+			</a>
+		</li>
+		<li class="mui-table-view-cell">
+			<span>发票</span>
+			<div class="mui-switch mui-switch-mini">
+				<div class="mui-switch-handle"></div>
+			</div>
+		</li>
+	</ul>
+	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
+		<form class="mui-input-group" action="/users/create_item" method="post">
+			<input type="hidden" name="appid" value="<%= params[:appid] %>">
+			<input type="hidden" name="code" value="<%= params[:code] %>">
+		</form>
+		<a href="javascript:$('form').submit();" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
+		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.price)}}</span></div>
+	</div>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			current_pharmacy:{},
+			prescription:{},
+			fapiao:false,
+		},
+		methods:{
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_current_pharmacy:function(item) {
+				var _this = this;
+				$.ajax({
+					url:"/interfaces/get_current_pharmacy",
+					success:function(json) {
+						// console.log( json );
+						_this.current_pharmacy = json.pharmacy;
+					}
+				})
+			},
+			get_prescriptions:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+					success:function(json) {
+						if (json.flag) {
+							_this.prescription = json.data[0];
+						}else{
+							_this.$message(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun
+				})
+			},
+		},
+		mounted:function() {
+			var _this = this;
+			this.get_current_pharmacy();
+			this.get_prescriptions();
+			mui('.mui-content .mui-switch').each(function() {
+				this.addEventListener('toggle', function(event) {
+					_this.fapiao = event.detail.isActive;
+				});
+			});
+		}
+	})
+</script>
