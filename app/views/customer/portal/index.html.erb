@@ -1,384 +1,215 @@
-
-		<style>
-			html,
-			body {
-				background-color: #efeff4;
-			}
-			.mui-views,
-			.mui-view,
-			.mui-pages,
-			.mui-page,
-			.mui-page-content {
-				position: absolute;
-				left: 0;
-				right: 0;
-				top: 0;
-				bottom: 0;
-				width: 100%;
-				height: 100%;
-				background-color: #efeff4;
-			}
-			.mui-pages {
-				top: 46px;
-				height: auto;
-			}
-			.mui-scroll-wrapper {
-				bottom: 50px;
-				overflow: auto;
-			}
-			.mui-scroll-wrapper, .mui-scroll {
-				background-color: #efeff4;
-			}
-			.mui-scroll {
-				/*padding-bottom: 50px;*/
-			}
-			.mui-page.mui-transitioning {
-				-webkit-transition: -webkit-transform 300ms ease;
-				transition: transform 300ms ease;
-			}
-			.mui-page-left {
-				-webkit-transform: translate3d(0, 0, 0);
-				transform: translate3d(0, 0, 0);
-			}
-			.mui-ios .mui-page-left {
-				-webkit-transform: translate3d(-20%, 0, 0);
-				transform: translate3d(-20%, 0, 0);
-			}
-			.mui-navbar {
-				position: fixed;
-				right: 0;
-				left: 0;
-				z-index: 10;
-				height: 44px;
-				background-color: #f7f7f8;
-			}
-			.mui-navbar .mui-bar {
-				position: absolute;
-				background: transparent;
-				text-align: center;
-			}
-			.mui-android .mui-navbar-inner.mui-navbar-left {
-				opacity: 0;
-			}
-			.mui-ios .mui-navbar-left .mui-left,
-			.mui-ios .mui-navbar-left .mui-center,
-			.mui-ios .mui-navbar-left .mui-right {
-				opacity: 0;
-			}
-			.mui-navbar .mui-btn-nav {
-				-webkit-transition: none;
-				transition: none;
-				-webkit-transition-duration: .0s;
-				transition-duration: .0s;
-			}
-			.mui-navbar .mui-bar .mui-title {
-				display: inline-block;
-				width: auto;
-			}
-			.mui-page-shadow {
-				position: absolute;
-				right: 100%;
-				top: 0;
-				width: 16px;
-				height: 100%;
-				z-index: -1;
-				content: '';
-			}
-			.mui-page-shadow {
-				background: -webkit-linear-gradient(left, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, .01) 50%, rgba(0, 0, 0, .2) 100%);
-				background: linear-gradient(to right, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 10%, rgba(0, 0, 0, .01) 50%, rgba(0, 0, 0, .2) 100%);
-			}
-			.mui-navbar-inner.mui-transitioning,
-			.mui-navbar-inner .mui-transitioning {
-				-webkit-transition: opacity 300ms ease, -webkit-transform 300ms ease;
-				transition: opacity 300ms ease, transform 300ms ease;
-			}
-			.mui-page {
-				display: none;
-			}
-			.mui-pages .mui-page {
-				display: block;
-			}
-			.mui-page .mui-table-view:first-child {
-				margin-top: 15px;
-			}
-			.mui-page .mui-table-view:last-child {
-				margin-bottom: 30px;
-			}
-			.mui-table-view {
-				margin-top: 20px;
-			}
-			
-			.mui-table-view span.mui-pull-right {
-				color: #999;
-			}
-			.mui-table-view-divider {
-				background-color: #efeff4;
-				font-size: 14px;
-			}
-			.mui-table-view-divider:before,
-			.mui-table-view-divider:after {
-				height: 0;
-			}
-			.head {
-				height: 40px;
-			}
-			#head {
-				line-height: 40px;
-			}
-			.head-img {
-				width: 40px;
-				height: 40px;
-			}
-			#head-img1 {
-				position: absolute;
-				bottom: 10px;
-				right: 40px;
-				width: 40px;
-				height: 40px;
-			}
-			.update {
-				font-style: normal;
-				color: #999999;
-				margin-right: -25px;
-				font-size: 15px
-			}
-			.mui-fullscreen {
-				position: fixed;
-				z-index: 20;
-				background-color: #000;
-			}
-			.mui-ios .mui-navbar .mui-bar .mui-title {
-				position: static;
-			}
-			input::-webkit-input-placeholder { /* WebKit browsers */
-				color:#e5e5e5;font-size:16px;
-			}
-			input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
-				color:#e5e5e5;font-size:16px;
-			}
-			input::-moz-placeholder { /* Mozilla Firefox 19+ */
-				color:#e5e5e5;font-size:16px;
-			}
-			input:-ms-input-placeholder { /* Internet Explorer 10+ */
-				color:#e5e5e5;font-size:16px;
-			}
-			#order_items + ul{
-				margin-top: 8px !important;
-			}
-		</style>
-
-		<!--页面主结构开始-->
-		<div id="app" class="mui-views">
-			<div class="mui-view">
-				<div class="mui-navbar">
-				</div>
-				<div class="mui-pages">
-				</div>
-			</div>
+<style type="text/css">
+	/*input::-webkit-input-placeholder {
+		color:#fff;
+	}
+	input:-moz-placeholder {
+		color:#fff;
+	}
+	input::-moz-placeholder {
+		color:#fff;
+	}
+	input:-ms-input-placeholder {
+		color:#fff;
+	}*/
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+	}
+	.mui-content{
+		overflow: auto;
+	}
+	#search_content .search_results{
+		opacity: 0
+	}
+	#search_content .search_results *{
+		font-size: 12px;
+	}
+	#search_content{
+		width: 100%;
+		height: 60px;
+		overflow: hidden;
+		padding: 20px 40px 0;
+	}
+	#search_content,#search_content *{
+		transition: all .8s;
+	}
+	#search_content .search_header_row{}
+	#search_input{
+		padding-left: 40px;font-size: 12px;border-radius: 18px;margin: 0;
+	}
+	#search_content.on{
+		position: absolute;
+		top: 0;
+		background: #fff;
+		z-index:  999;
+		padding: 0;
+		height: 100%;
+	}
+	#search_content.on .search_results{
+		opacity: 1;
+	}
+	#search_content.on #search_header_row{
+		margin: 0;
+	}
+	#search_content.on #search_input{
+		border-radius: 0;
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+</style>
+<div class="mui-content" id="vue_content">
+	<div id="search_content">
+		<div class="mui-input-row search_header_row">
+			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></i>
+			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
 		</div>
-		<!--页面主结构结束-->
-		<!--单页面开始-->
-		<div id="setting" class="mui-page">
-			<!--页面标题栏开始-->
-			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-				<h1 class="mui-center mui-title mui-pull-left">医药管理平台</h1>
-				<!-- <span>医药管理平台</span> -->
-				<i class="fa fa-qrcode mui-pull-right" style="font-size: 40px;padding-top: 4px;"></i>
-			</div>
-			<!--页面标题栏结束-->
-			<!--页面主内容区开始-->
-			<div class="mui-page-content">
-				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll" id="vue_data">
-						<p style="margin: 12px 0 8px 12px;">您想去哪取药</p>
-						<a id="click_to_account" href="#account">
-							<div class="mui-indexed-list-search mui-input-row mui-search" style="margin: 6px; border: 1px solid #ddd; border-radius: 8px;">
-								<input type="search" class="mui-input-clear mui-indexed-list-search-input" placeholder="" data-input-clear="1" data-input-search="1" style="background: #fff;margin: 0;">
-								<span class="mui-icon mui-icon-clear mui-hidden"></span>
-								<span class="mui-placeholder"><span class="mui-icon mui-icon-search"></span><span>搜索药房</span></span>
+		<div class="search_results" style="margin-top: 10px;">
+			<template v-if="pharmacys">
+				<ul class="mui-table-view">
+					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
+						<div>
+							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+							<div class="mui-media-body">
+								{{item.name}}
+								<p style="float: right;">???m</p>
+								<p class="mui-ellipsis">贵州省贵阳市XXX</p>
 							</div>
-						</a>
-						<p id="order_items" style="margin: 30px 0 8px 12px;">距离当前最近</p>
-						<ul class="mui-table-view mui-table-view-chevron" style="margin: 8px;margin-top: 36px;" v-for="item in prescriptions">
-							<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-								<p style="position: absolute;top: -24px;right: 10px;">{{item.org.display}}</p>
-								<div>
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png" style="/*border: 1px solid #ddd;border-radius: 50%;*/">
-									<div class="mui-media-body">
-										???
-										<p class="mui-ellipsis">???m</p>
-									</div>
-								</div>
-								<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
-									<i class="fa fa-map-marker" style="font-size: 20px;"></i>
-									<p style="font-size: 8px;">查看位置</p>
-								</div>
-								<ul class="mui-table-view" style="margin: 15px 0;">
-									<li class="mui-table-view-cell mui-media" v-for="drug in item.orders">
-										<div href="javascript:;" class="">
-											<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
-											<div class="mui-media-body">
-												{{drug.title}}
-												<p class="mui-ellipsis">
-													数量：{{drug.total_quantity}} {{drug.unit}}
-													<span style="float: right;">单价：￥{{drug.price}}</span>
-												</p>
-											</div>
-										</div>
-									</li>
-								</ul>
-								<div style="line-height: 33px;">
-									共<span style="color: #FF376F;">{{get_count_of_item(item)}}</span>件　　合计：<span style="color: #FF376F;">￥{{item.price}}</span>
-									<a href="/customer/portal/settlement" class="mui-btn mui-btn-primary" style="float: right;">结算</a>
-								</div>
-							</li>
-						</ul>
-					</div>
+						</div>
+					</li>
+				</ul>
+			</template>
+			<template v-else>
+				<p style="margin: 8px;">历史记录</p>
+				<p style="margin: 8px;">大家常用</p>
+			</template>
+		</div>
+	</div>
+	<p id="order_items" style="margin: 0;padding: 30px 0 8px 12px;">距离当前最近</p>
+	<ul class="mui-table-view" style="margin: 8px;" v-for="item in prescriptions">
+		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+			<div>
+				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+				<div class="mui-media-body">
+					{{current_pharmacy.name}}
+					<p class="mui-ellipsis">???m</p>
 				</div>
 			</div>
-			<!--页面主内容区结束-->
-		</div>
-		<!--单页面结束-->
-		<div id="account" class="mui-page">
-			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-					<span class="mui-icon mui-icon-left-nav"></span>
-				</button>
-				<input v-model="search_str" type="text" class="autofocus" style="float: left;border: 0;background: transparent;color: white;height: 44px;width: calc( 100% - 60px );" placeholder="街道名称、药店名称">
-				<i class="fa fa-map-marker mui-pull-right" style="padding-top: 12px;"></i>
+			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+				<i class="fa fa-map-marker" style="font-size: 20px;"></i>
+				<p style="font-size: 8px;">查看位置</p>
 			</div>
-			<div class="mui-page-content">
-				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll">
-						<div id="account">
-							<template v-if="pharmacys">
-								<ul class="mui-table-view">
-									<li class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
-										<div>
-											<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
-											<div class="mui-media-body">
-												{{item.name}}
-												<p style="float: right;">???m</p>
-												<p class="mui-ellipsis">贵州省贵阳市XXX</p>
-											</div>
-										</div>
-									</li>
-								</ul>
-							</template>
-							<div v-else><p style="margin: 8px;">请输入</p></div>
+			<ul class="mui-table-view" style="margin: 15px 0;">
+				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
+					<div href="javascript:;" class="">
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
+						<div class="mui-media-body">
+							{{drug.title}}
+							<p class="mui-ellipsis">
+								{{drug.specification}}
+								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+							</p>
 						</div>
 					</div>
-				</div>
+				</li>
+			</ul>
+			<div style="line-height: 33px;">
+				合计 <span style="color: #FF376F;">¥ {{format_float(item.price)}}</span>
+				<a href="/customer/portal/settlement" class="mui-btn mui-btn-danger" style="float: right;">去结算</a>
 			</div>
-		</div>
-
-	<script src="/assets/plugins/mui/mui.view.js "></script>
-	<script>
-		// document.getElementById("account").addEventListener("tap",function(e) {
-		// })
-		$('#account').on('tap',function(e) {
-			alert('xxxxxxxx')
-		})
-		new Vue({
-			el:"#account",
-			data:{
-				pharmacys:null,
-				search_str:'',
-			},
-			watch:{
-				search_str:function(val) {
-					var _this = this;
-					clearTimeout(_this.timer)
-					_this.timer = setTimeout(function() {
-						// console.log( val );
-						$.ajax({
-							url:'/interfaces/get_pharmacy?search='+val,
-							success:function(json) {
-								_this.pharmacys = json.rows;
-							}
-						})
-					},500)
-				}
-			},
-			methods:{
-			}
-		})
-		new Vue({
-			el:"#vue_data",
-			data:{
-				prescriptions:[],
-			},
-			methods:{
-				get_count_of_item:function(item) {
-					var count = 0;
-					$(item.orders).each(function(i,drug) {
-						count += parseInt(drug.total_quantity);
-					})
-					return count;
-				},
-				get_prescriptions:function() {
-					var _this = this;
-					$("#loading").show();
+		</li>
+	</ul>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			current_pharmacy:{},
+			pharmacys:null,
+			search_str:'',
+			prescriptions:[],
+		},
+		watch:{
+			search_str:function(val) {
+				var _this = this;
+				clearTimeout(_this.timer)
+				_this.timer = setTimeout(function() {
 					$.ajax({
-						url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+						url:'/interfaces/get_pharmacy?search='+val,
 						success:function(json) {
-							if (json.flag) {
-								_this.prescriptions = json.data;
-							}else{
-								_this.$message(json.info);
-							}
-						},
-						complete:function() {
-							$("#loading").hide();
-						},
-						error:error_fun
+							_this.pharmacys = json.rows;
+						}
+					})
+				},500)
+			},
+		},
+		methods:{
+			get_current_pharmacy:function(item) {
+				var _this = this;
+				$.ajax({
+					url:"/interfaces/get_current_pharmacy",
+					success:function(json) {
+						// console.log( json );
+						_this.current_pharmacy = json.pharmacy;
+					}
+				})
+			},
+			click_to_save_user_pharmacy:function(item) {
+				var _this = this;
+				$.ajax({
+					url:"/interfaces/set_current_pharmacy?id="+item.id,
+					success:function(json) {
+						// body...
+						_this.current_pharmacy = item;
+						$(".mui-icon-arrowleft").first().trigger("tap");
+					}
+				})
+				// mui.back();
+			},
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_count_of_item:function(item) {
+				var count = 0;
+				$(item.orders).each(function(i,drug) {
+					count += parseInt(drug.total_quantity);
+				})
+				return count;
+			},
+			get_prescriptions:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+					success:function(json) {
+						if (json.flag) {
+							_this.prescriptions = json.data;
+						}else{
+							_this.$message(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun
+				})
+			},
+		},
+		mounted:function() {
+			this.get_current_pharmacy();
+			this.get_prescriptions();
+			$("#search_input").on("tap",function(e) {
+				$("#search_content").addClass("on");
+				var icon = $(this).siblings("i");
+				if (icon.hasClass("mui-icon-search")) {
+					icon.toggleClass("mui-icon-search mui-icon-arrowleft");
+					icon.on("tap",function(e) {
+						$("#search_content").removeClass("on");
+						icon.toggleClass("mui-icon-search mui-icon-arrowleft");
+						icon.off("tap");
 					})
 				}
-			},
-			mounted:function() {
-				this.get_prescriptions();
-			}
-		})
-		// 
-		<% if flash[:notice].present? %>
-		mui.toast("<%= flash[:notice] rescue nil %>",{duration:8000});
-		<% end -%>
-		mui.init();
-		//初始化单页view
-		var viewApi = mui('#app').view({
-			defaultPage: '#setting'
-		});
-		//初始化单页的区域滚动
-		mui('.mui-scroll-wrapper').scroll();
-
-		var view = viewApi.view;
-		(function(mui) {
-			//处理view的后退与webview后退
-			var oldBack = mui.back;
-			mui.back = function() {
-				if (viewApi.canBack()) { //如果view可以后退，则执行view的后退
-					viewApi.back();
-				} else { //执行webview后退
-					oldBack();
-				}
-			};
-			//监听页面切换事件方案1,通过view元素监听所有页面切换事件，目前提供pageBeforeShow|pageShow|pageBeforeBack|pageBack四种事件(before事件为动画开始前触发)
-			//第一个参数为事件名称，第二个参数为事件回调，其中e.detail.page为当前页面的html对象
-			view.addEventListener('pageBeforeShow', function(e) {
-				//				console.log(e.detail.page.id + ' beforeShow');
-			});
-			view.addEventListener('pageShow', function(e) {
-				$(".autofocus").focus();
-				//				console.log(e.detail.page.id + ' show');
-			});
-			view.addEventListener('pageBeforeBack', function(e) {
-				//				console.log(e.detail.page.id + ' beforeBack');
-			});
-			view.addEventListener('pageBack', function(e) {
-				//				console.log(e.detail.page.id + ' back');
-			});
-		})(mui);
-		
-	</script>
-
+			})
+		}
+	})
+</script>

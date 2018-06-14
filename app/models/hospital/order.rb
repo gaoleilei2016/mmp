@@ -43,7 +43,11 @@ class Hospital::Order < ApplicationRecord
 			note: self.note,
 			status: self.status,
 			order_type: self.order_type,
-			encounter_id: self.encounter_id	
+			encounter_id: self.encounter_id,
+			author: {
+				id: nil,
+				display: '王仁'
+			}
 		}
 	end
 end
