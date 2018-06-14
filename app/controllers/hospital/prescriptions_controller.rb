@@ -96,9 +96,16 @@ class Hospital::PrescriptionsController < ApplicationController
     p "get_prescriptions_by_phone", params
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
-    p cur_phone
-    @prescriptions = ::Hospital::Interface.get_prescription(cur_phone).map { |e| e.to_web_front  }
-    render json: {flag: true, info: "success", data: @prescriptions}
+    ret = []
+    ::Hospital::Interface.get_prescription(cur_phone).group_by {|_prescription| {organ_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |key, _prescriptions|
+      cur_org = key
+      p cur_org
+      orders = _prescriptions.map { |e| e.orders}.flatten.map { |k| k.to_web_front  }
+      p orders
+      cur_org[:orders] = orders
+      ret << cur_org
+    end
+    render json: {flag: true, info: "success", data: ret}
   end
 
   # /# POST

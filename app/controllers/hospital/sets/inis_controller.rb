@@ -3,6 +3,7 @@ class Hospital::Sets::InisController < ApplicationController
 	# GET
   # /hospital/sets/inis
 	def index
+    p "Hospital::Sets::InisController index"
     @inis = Hospital::Sets::Ini.all rescue []
     respond_to do |format|
       format.html # index.html.erb
