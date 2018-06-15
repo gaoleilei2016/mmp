@@ -62,22 +62,28 @@ class Orders::Order < ApplicationRecord
 		# 	order
 		# end	
 
-
+# hospital_id:'医院id'
+# hospital_name:'医院名字'
+# doctor:'医院医生名字'
+# user_id:'user_id'
+# person_id:'person_id'
+# person_id:'患者名字'
+# details:{id:{details}}#处方id   处方明细
 		#获取订单生成数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			##通过处方拿到订单生成数据
 			prescs = ::Hospital::Interface.prescription_to_order(attrs[:prescription_ids])
-			attrs = prescs.first.last
+			presc = prescs.first.last
 			order = self.create(
 			 target_org_id: attrs[:pharmacy_id].to_s,
 			 target_org_name: attrs[:pharmacy_name].to_s,
-			 source_org_id: attrs[:hospital_id].to_s,
-			 source_org_name: attrs[:hospital_name].to_s,
+			 source_org_id: presc[:hospital_id].to_s,
+			 source_org_name: presc[:hospital_name].to_s,
 			 order_code: get_order_code,
-			 doctor: attrs[:doctor].to_s,
-			 user_id: attrs[:user_id].to_s,
-			 person_id: attrs[:person_id].to_s,
+			 doctor: presc[:doctor].to_s,
+			 user_id: presc[:user_id].to_s,
+			 person_id: presc[:person_id].to_s,
 			 status: '1'
 	 		)
 			prescs.each do |k,v|
@@ -167,8 +173,9 @@ class Orders::Order < ApplicationRecord
 				case  attrs[:type].to_s
 				when '1'#未付款
 					condtion.concat(" and payment_type = 1 and status = 2")
-				when '2'
+				when '2'#已付款
 					condtion.concat(" and payment_type = 2")
+				else#否则查看全部
 				end
 			end
 			Orders::Order.where(condtion).map{|order|  
@@ -182,6 +189,7 @@ class Orders::Order < ApplicationRecord
 					target_org_name: order.target_org_name,
 					source_org_name: order.source_org_name,
 					doctor: order.doctor,
+					prescriptions_id: order.prescription_ids,
 					payment_type: order.payment_type,
 					details: order.details.map{|x| {
 									name: x.name,
