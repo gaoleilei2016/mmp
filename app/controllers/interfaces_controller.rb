@@ -4,8 +4,8 @@ class InterfacesController < ApplicationController
 	############ zyz ############
 	def pay_order
 		# p '~~~~~~~~~',params
-		# order = params[:pay_order]
-		args = {out_trade_no: Time.now.to_i.to_s, total_fee: 0.01, title: '支付后会通知药房备药', cost_name: '', return_url: "#{Set::Alibaba.domain_name}/customer/home"}
+		order = params[:pay_order]
+		args = {out_trade_no: Time.now.to_i.to_s, total_fee: 0.01, title: "华希订单-#{order}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/customer/home"}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
@@ -22,7 +22,9 @@ class InterfacesController < ApplicationController
 	end
 	def save_order
 		# p '~~~~~~~~~',params
-		redirect_to '/customer/portal/pay'
+		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
+		p '~~~~~~~~~~',re
+		redirect_to "/customer/portal/pay?id=#{re.id}"
 	end
 	# 获取用户购物车
 	def get_prescriptions_cart
@@ -86,7 +88,7 @@ class InterfacesController < ApplicationController
 	def get_duanxinma
 		# p '~~~~~~~~~~',params[:login]
 		# 图片验证码
-		raise "图片验证码错误" unless verify_rucaptcha?
+		# raise "图片验证码错误" unless verify_rucaptcha?
 		raise "手机号错误" unless params[:login].present?
 		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
 		res = Sms::Message.set_up(args)

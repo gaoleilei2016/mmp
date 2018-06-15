@@ -67,6 +67,33 @@ class Position::Data < ApplicationRecord
       hash
     end
 
+    def sql_syntax(args)
+      "SELECT *, ROUND(6378.138*2*ASIN(SQRT(POW(SIN((#{args[:lat]}*PI()/180-lat*PI()/180)/2),2)+COS(#{args[:lat]}*PI()/180)*COS(lat*PI()/180)*POW(SIN((#{args[:lng]}*PI()/180-lng*PI()/180)/2),2)))*1000) AS distance FROM position_datas ORDER BY distance LIMIT #{args[:num]}"
+    end
+
+    def recent_lists(args)
+      begin
+        return "经度和纬度必须有值" unless args[:lat]&&args[:lng]
+        lat, lng = args[:lat].to_f, args[:lng].to_f
+        num = args[:num] || 1
+        res = find_by_sql(sql_syntax({lat: lat, lng: lng, num: num}))
+        return {state: :empty, msg: '结果为空', desc: '没有找到最近的结果'} if res.empty?
+        get_result(lat, lng, res)
+      rescue Exception => e
+        {state: :fail, msg: '系统错误', desc: e.message}
+      end
+    end
+
+    def get_result(lat, lng, recents)
+      res = []
+      recents&.each do |rec|
+        dis = get_distance(lng, lat, rec.lng, rec.lat)
+        dis_desc = (dis >= 1000) ? "约#{(dis/1000).round(1)}公里" : "约#{dis.round(1)}米"
+        res << { org: rec, distance: dis_desc }
+      end
+      {state: :succ, msg: '成功', res: res}
+    end
+
     def get_distance(lng1, lat1, lng2, lat2)
       rad = Math::PI / 180.0
       earth_radius = 6378.137 * 1000 #地球半径
@@ -76,7 +103,7 @@ class Position::Data < ApplicationRecord
       b = (lng1 - lng2) * rad
       s = 2 * Math.asin(Math.sqrt( (Math.sin(a/2)**2) + Math.cos(radLat1) * Math.cos(radLat2)* (Math.sin(b/2)**2) ))
       s = s * earth_radius
-      s = (s * 10000).round / 10000
+      s = (s * 10000).round / 10000.0
       s
     end
 

@@ -33,12 +33,11 @@
 	#search_content,#search_content *{
 		transition: all .25s;
 	}
-	#search_content .search_header_row{}
 	#search_input{
 		padding-left: 40px;font-size: 12px;border-radius: 18px;margin: 0;
 	}
 	#search_content.on{
-		position: absolute;
+		position: fixed;
 		top: 0;
 		background: #fff;
 		z-index:  999;
@@ -48,20 +47,27 @@
 	#search_content.on .search_results{
 		opacity: 1;
 	}
-	#search_content.on #search_header_row{
-		margin: 0;
-	}
 	#search_content.on #search_input{
 		border-radius: 0;
 	}
 	.mui-table-view-cell.no_background:after{
 		background: none;
 	}
+	#search_content .mui-icon-arrowleft{
+		display: none;
+	}
+	#search_content.on .mui-icon-search{
+		display: none;
+	}
+	#search_content.on .mui-icon-arrowleft{
+		display: block;
+	}
 </style>
 <div class="mui-content" id="vue_content">
 	<div id="search_content">
 		<div class="mui-input-row search_header_row">
-			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></i>
+			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="document.getElementById('search_input').focus();"></i>
+			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
 			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
 		</div>
 		<div class="search_results" style="margin-top: 10px;">
@@ -87,8 +93,8 @@
 			</template>
 		</div>
 	</div>
-	<p id="order_items" style="margin: 0;padding: 30px 0 8px 12px;">距离当前最近</p>
-	<ul class="mui-table-view" style="margin: 8px;" v-for="item in prescriptions">
+	<p id="order_items" style="margin: 0;padding: 16px 0 8px 12px;">距离当前最近</p>
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
 				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
@@ -117,7 +123,7 @@
 			</ul>
 			<div style="line-height: 33px;">
 				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
-				<a href="javascript:;" @click="send_prescription_ids_session(item)" class="mui-btn mui-btn-danger" style="float: right;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(item)" class="mui-btn mui-btn-danger" style="float: right;background: red;color: #fff;">去结算</a>
 			</div>
 		</li>
 	</ul>
@@ -133,6 +139,7 @@
 		},
 		watch:{
 			search_str:function(val) {
+				// console.log( 'xxxxxxxxxxxxxx' );
 				var _this = this;
 				clearTimeout(_this.timer)
 				_this.timer = setTimeout(function() {
@@ -181,7 +188,7 @@
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
 						_this.current_pharmacy = item;
-						$(".mui-icon-arrowleft").first().trigger("tap");
+						$(".mui-icon-arrowleft").click();
 					},
 					complete:function() {
 						$("#loading").hide();
@@ -203,7 +210,7 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
 							_this.prescriptions = json.data;
@@ -214,25 +221,20 @@
 					complete:function() {
 						$("#loading").hide();
 					},
-					error:error_fun
+					error:function(e) {
+						mui.toast("处方获取失败");
+					}
 				})
 			},
 		},
 		mounted:function() {
 			var _this = this;
+			// _this.search_str = '';
 			this.get_current_pharmacy();
 			this.get_prescriptions();
-			$("#search_input").on("tap",function(e) {
+			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
-				var icon = $(this).siblings("i");
-				if (icon.hasClass("mui-icon-search")) {
-					icon.toggleClass("mui-icon-search mui-icon-arrowleft");
-					icon.on("tap",function(e) {
-						$("#search_content").removeClass("on");
-						icon.toggleClass("mui-icon-search mui-icon-arrowleft");
-						icon.off("tap");
-					})
-				}
+				$("#bottom_tabs").hide(300);
 			})
 		}
 	})
