@@ -81,7 +81,7 @@
         right: 13px;
         color: rgb(1, 190, 1);
         padding: 2px 6px;
-        font-size: 10px;
+        font-size: 12px;
         border-radius: 12px;
       }
       .time_line{
@@ -131,41 +131,42 @@
         注册
         <% end -%>
       </h1>
-      <a href="javascript:;" onclick="submit_form();" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">提交</a>
+      <!-- <a href="javascript:;" onclick="submit_form();" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">提交</a> -->
     </header>
     <div class="mui-content" id="vue_form">
       <div style="padding: 30px;">
         <form id='login-form' class="mui-input-group" action="/users" method="post">
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-phone" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input id="login_input" type="text" name="login" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" maxlength="11" style="padding-left: 40px;font-size: 12px;" autocomplete="off">
+            <input id="login_input" type="text" name="login" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" maxlength="11" style="padding-left: 40px;font-size: 16px;" autocomplete="off">
           </div>
           <!-- <div class="mui-input-row">
             <span class="mui-icon mui-icon-email" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <%#= rucaptcha_input_tag(id:'yzm_input',class: 'form-control', placeholder: '请输入验证码',value:flash[:yzm],style:"padding-left: 40px;font-size: 12px;") %>
+            <%#= rucaptcha_input_tag(id:'yzm_input',class: 'form-control', placeholder: '请输入验证码',value:flash[:yzm],style:"padding-left: 40px;font-size: 16px;") %>
             <div id="click_get_yanzhengma" style="height: 40px;position: absolute;right: 0;top: 0;">
             </div>
           </div> -->
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-email" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input id="dxyz_input" type="text" name="dxyz" class="mui-input-clear mui-input" placeholder="验证码" value="<%= flash[:dxyz] %>" style="padding-left: 40px;font-size: 12px;" maxlength="4" autocomplete="off">
+            <input id="dxyz_input" type="text" name="dxyz" class="mui-input-clear mui-input" placeholder="验证码" value="<%= flash[:dxyz] %>" style="padding-left: 40px;font-size: 16px;" maxlength="4" autocomplete="off">
             <div id="get_duanxinma" style="">获取验证码<span class="time_line">(<span class="time"></span>秒)</span></div>
           </div>
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input id="password_input1" type="password" name="password" class="mui-input-clear mui-input" placeholder="密码" maxlength="16" style="padding-left: 40px;font-size: 12px;">
+            <input id="password_input1" type="password" name="password" class="mui-input-clear mui-input" placeholder="密码" maxlength="16" style="padding-left: 40px;font-size: 16px;">
           </div>
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input id="password_input2" type="password" name="confirm_password" class="mui-input-clear mui-input" placeholder="确认密码" maxlength="16" style="padding-left: 40px;font-size: 12px;">
+            <input id="password_input2" type="password" name="confirm_password" class="mui-input-clear mui-input" placeholder="确认密码" maxlength="16" style="padding-left: 40px;font-size: 16px;">
           </div>
-          <div class="mui-input-row mui-checkbox mui-left" style="border: none;margin-top: 10px;font-size: 12px;">
+          <div class="mui-input-row mui-checkbox mui-left" style="border: none;margin-top: 10px;font-size: 14px;">
             <label>我同意</label>
             <input id="i_agree" name="i_agree" value="y" type="checkbox">
           </div>
         </form>
       </div>
       <div class="mui-content-padded" style="margin: 10px 80px;">
+        <button onclick="submit_form();" class="mui-btn mui-btn-block mui-btn-primary" style="background: rgb(1, 190, 1);border-color: rgb(1, 190, 1);border-radius: 16px;padding: 4px;">提交</button>
         <div class="link-area">
           <!-- <a href="/users/sign_in?type=use_psw" style="float: right;">使用密码登录</a> -->
           <div class="clear"></div>
