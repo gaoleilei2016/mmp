@@ -2,7 +2,7 @@ class Orders::Order < ApplicationRecord
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
 	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
-	# belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'order_id'
+	belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'order_id'
 	
 	# has_many :perscripts, class_name: '', foreign_key: 'order_id'
 	# belongs_to :user, class_name: '::User', foreign_key: 'order_id'
@@ -82,6 +82,9 @@ class Orders::Order < ApplicationRecord
 		#获取订单生成数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
+			return false if attrs[:pharmacy_id].blank?
+			return false if attrs[:pharmacy_name].blank?
+			return false if attrs[:prescription_ids].blank?
 			##通过处方拿到订单生成数据
 			presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
 			order = self.create(
@@ -173,7 +176,7 @@ class Orders::Order < ApplicationRecord
 			
 		end
 
-		#药房查询
+		#药房查询 attrs = {type:'1/2',order_code:'',org_id:''}
 		def get_order_to_medical attrs = {}
 			attrs = attrs.deep_symbolize_keys
 			return [] if attrs[:org_id].blank?
