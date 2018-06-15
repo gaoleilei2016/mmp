@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   }
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to:"customer/portal#index"
+  mount ActionCable.server => "/cable"
+  
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
@@ -102,11 +104,20 @@ Rails.application.routes.draw do
         get :order_settings
         get :get_orders
         get :get_order
+        get :get_detail
         post :create_order  #生成订单
         get :dispensing_order  #订单发药
         get :return_order  #订单退药
       end
     end
+
+    resources :settings do
+      collection do
+        get :get_cur_set
+        post :save_settings
+      end
+    end
+
     resources :interfaces do
       collection do
       end

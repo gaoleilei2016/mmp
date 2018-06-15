@@ -1,5 +1,5 @@
 class Ims::SettingsController < ApplicationController
-  before_action :set_ims_setting, only: [:show, :edit, :update, :destroy]
+  # before_action :set_ims_setting, only: [:show, :edit, :update, :destroy]
 
   # GET /ims/settings
   # GET /ims/settings.json
@@ -24,6 +24,7 @@ class Ims::SettingsController < ApplicationController
   # POST /ims/settings
   # POST /ims/settings.json
   def create
+    p "create"
     @ims_setting = Ims::Setting.new(ims_setting_params)
 
     respond_to do |format|
@@ -40,6 +41,7 @@ class Ims::SettingsController < ApplicationController
   # PATCH/PUT /ims/settings/1
   # PATCH/PUT /ims/settings/1.json
   def update
+    p "update"
     respond_to do |format|
       if @ims_setting.update(ims_setting_params)
         format.html { redirect_to @ims_setting, notice: 'Setting was successfully updated.' }
@@ -59,6 +61,16 @@ class Ims::SettingsController < ApplicationController
       format.html { redirect_to ims_settings_url, notice: 'Setting was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  def get_cur_set
+    data = {id:"54sd5g5a8d2ga5sd5gfa5",validity:23, voice:"yes"}
+    render json:{flag:true,info:"success",data:data}
+  end
+
+  def save_settings
+    p params
+    render json:{flag:true,info:"success"}
   end
 
   private

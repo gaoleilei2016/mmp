@@ -70,6 +70,11 @@ class Ims::OrdersController < ApplicationController
 
   def get_orders
     #搜索平台的 订单 处方
+    status = "1"
+    org_id = current_user.organization_id rescue ""
+    order_code = ""#取药码  可以没有
+    @data = Orders::Order.get_order_to_medical({status:status,org_id:org_id,order_code:'null'})
+    p @data
     if params[:platform]
       data = [
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
@@ -90,10 +95,25 @@ class Ims::OrdersController < ApplicationController
         {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
       ]
     end
+
+            
     render json:data.to_json
   end
 
   def get_order
+    data = [{id:"12435",code:"08020231",title:"汇总",amount:"14.23"},
+        {id:"67874",code:"08020232",title:"处方1",amount:"52.23"},
+        {id:"46876",code:"08020233",title:"处方2",amount:"16.23"},
+        {id:"12435",code:"08020231",title:"处方3",amount:"14.23"},
+        {id:"12435",code:"08020231",title:"处方4",amount:"14.23"}]
+    render json:data.to_json
+  end
+
+  def get_detail
+    p "++++++++++++++++++++++++++"
+    p current_user.organization_id
+    p "++++++++++++++++++++++++++"
+    id = params[:id]
     data = [{
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
       lines:[
@@ -107,7 +127,7 @@ class Ims::OrdersController < ApplicationController
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
       ]
       }]
-    render json:data.to_json
+    render json:data
   end
 
   #POST 搜索平台处方 生成订单
