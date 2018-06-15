@@ -70,11 +70,10 @@ class Ims::OrdersController < ApplicationController
 
   def get_orders
     #搜索平台的 订单 处方
-    status = "1"
-    org_id = current_user.organization_id rescue ""
+    type = "1"
+    org_id = ""#current_user.organization_id rescue ""
     order_code = ""#取药码  可以没有
-    @data = Orders::Order.get_order_to_medical({status:status,org_id:org_id,order_code:'null'})
-    p @data
+    @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
     if params[:platform]
       data = [
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
@@ -85,18 +84,9 @@ class Ims::OrdersController < ApplicationController
 
     #搜索药店的 订单 处方
     if params[:stat]
-      data = [
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
-      ]
+      data  = []
+      @data.map{|line| data<<{id:line[:prescriptions_id],code:line[:order_code],name:"",amount:line[:amt]}}
     end
-
-            
     render json:data.to_json
   end
 

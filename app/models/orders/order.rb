@@ -163,21 +163,23 @@ class Orders::Order < ApplicationRecord
 
 		#药房查询
 		def get_order_to_medical attrs = {}
+
 			attrs = attrs.deep_symbolize_keys
-			return [] if attrs[:org_id].blank?
-			condtion = "target_org_id = #{attrs[:org_id]} "
+			# return [] if attrs[:org_id].blank?
+			# condtion = "target_org_id = #{attrs[:org_id]} "
 			if attrs[:order_code].present?
-				condtion.concat("order_code = #{attrs[:order_code]}")
+				# condtion.concat("order_code = #{attrs[:order_code]}")
 			else
 			# condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
 				case  attrs[:type].to_s
 				when '1'#未付款
-					condtion.concat(" and payment_type = 1 and status = 2")
+					# condtion.concat(" and payment_type = 1 and status = 2")
 				when '2'#已付款
-					condtion.concat(" and payment_type = 2")
+					# condtion.concat(" and payment_type = 2")
 				else#否则查看全部
 				end
 			end
+			condtion = "target_org_id = ''"
 			Orders::Order.where(condtion).map{|order|  
 				{
 					order_code: order.order_code,
