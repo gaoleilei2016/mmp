@@ -24,6 +24,16 @@ class Admin::Organization < ApplicationRecord
       end
     end
 
+    def distance_list(point, target)
+      dis = get_distance(point[:lng], point[:lat], target[:lng], target[:lat])
+      handle_distance(dis)
+    end
+
+    def handle_distance(dis)
+      return "约#{(dis/1000.0).round(1)}公里" if (dis >= 1000)
+      "约#{dis.round(1)}米"
+    end
+
     def sql_syntax(args)
       "SELECT *, ROUND(6378.138*2*ASIN(SQRT(POW(SIN((#{args[:lat]}*PI()/180-lat*PI()/180)/2),2)+COS(#{args[:lat]}*PI()/180)*COS(lat*PI()/180)*POW(SIN((#{args[:lng]}*PI()/180-lng*PI()/180)/2),2)))*1000) AS distance FROM admin_organizations ORDER BY distance LIMIT #{args[:num]}"
     end
@@ -32,7 +42,7 @@ class Admin::Organization < ApplicationRecord
       res = []
       recents&.each do |rec|
         dis = get_distance(lng, lat, rec.lng, rec.lat)
-        dis_desc = (dis >= 1000) ? "约#{(dis/1000).round(1)}公里" : "约#{dis.round(1)}米"
+        dis_desc = handle_distance(dis)
         res << { org: rec, distance: dis_desc }
       end
       {state: :succ, msg: '成功', res: res}
