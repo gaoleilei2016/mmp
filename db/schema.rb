@@ -318,17 +318,19 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
-
   create_table "orders_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.time "payment_at"
     t.time "end_time"
     t.time "close_time"
-    t.string "target_org_ii"
+    t.string "target_org_id"
     t.string "target_org_name"
-    t.string "source_org_ii"
+    t.string "source_org_id"
     t.string "source_org_name"
+    t.string "phone_number"
     t.string "order_code"
     t.string "user_id"
+    t.string "person_id"
+    t.string "doctor"
     t.string "shipping_name"
     t.string "shipping_code"
     t.float "payment_type", limit: 24

@@ -2,6 +2,7 @@ class Orders::Order < ApplicationRecord
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
 	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
+	belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'order_id'
 	
 	# has_many :perscripts, class_name: '', foreign_key: 'order_id'
 	# belongs_to :user, class_name: '::User', foreign_key: 'order_id'
@@ -21,10 +22,10 @@ class Orders::Order < ApplicationRecord
 #  user_id VARCHAR(32) NOT NULL '用户id',
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
+#  phone_number varchar(20)  NULL '患者电话号码',
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
-#  shipping_code varchar(20)  NULL '物流单号',
-#  payment_type float NOT NULL '支付类型,1.在线支付,2.货到付款',
+#  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
 #  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭',
 #  PRIMARY KEY ( id )
 #  )
@@ -143,13 +144,67 @@ class Orders::Order < ApplicationRecord
 			end
 			result
 		end
+
+		#订单完成（药房调用）
+		def order_completion
+
+		end
+
+		#订单状态消息发送推送
+		def send_order_message
+			
+		end
+
+		#药房查询
+		def get_order_to_medical attrs = {}
+			attrs = attrs.deep_symbolize_keys
+			return [] if attrs[:org_id].blank?
+			condtion = "target_org_id = #{attrs[:org_id]} "
+			if attrs[:order_code].present?
+				condtion.concat("order_code = #{attrs[:order_code]}")
+			else
+			# condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
+				case  attrs[:type].to_s
+				when '1'#未付款
+					condtion.concat(" and payment_type = 1 and status = 2")
+				when '2'
+					condtion.concat(" and payment_type = 2")
+				end
+			end
+			Orders::Order.where(condtion).map{|order|  
+				{
+					order_code: order.order_code,
+					amt: order.net_amt,
+					status: order.status,
+					payment_at: order.payment_at,
+					end_time: order.end_time,
+					close_time: order.close_time,
+					target_org_name: order.target_org_name,
+					source_org_name: order.source_org_name,
+					doctor: order.doctor,
+					payment_type: order.payment_type,
+					details: order.details.map{|x| {
+									name: x.name,
+									quantity: x.quantity,
+									unit: x.unit,
+									specifications: x.specifications,
+									dosage: x.dosage,
+									price: x.price,
+									net_amt: x.net_amt,
+									img_path: x.img_path
+								}
+							}
+				}  
+			}
+		end
+
 		private
 		##获取订单号，私有调用
 		def get_order_code
 			t = Time.now
 			y = t.year.to_s[2,2]
 			d = t.yday
-			code = "#{y}#{d}#{t.object_id}"
+			code = "D#{y}#{d}#{t.object_id}"
 			while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 				code = get_order_code
 			end
