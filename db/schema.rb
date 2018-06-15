@@ -9,7 +9,9 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-ActiveRecord::Schema.define(version: 20180612072906) do
+
+
+ActiveRecord::Schema.define(version: 20180615090924) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -25,12 +27,9 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "yaofang_type"
-  end
-
-  create_table "admin_organizations_organizations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "organization_id"
+    t.string "addr"
+    t.float "lat", limit: 53
+    t.float "lng", limit: 53
   end
 
   create_table "common_addresses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -195,6 +194,8 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.string "height"
     t.string "weight"
     t.integer "person_id"
+
+    t.integer "author_id"
   end
 
   create_table "hospital_irritabilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -210,7 +211,8 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "hospital_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+
+  create_table "hospital_orders", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "serialno"
     t.string "title"
     t.string "specification"
@@ -234,29 +236,48 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "prescription_id"
+
+    t.integer "author_id"
+    t.string "formul_code"
+    t.string "formul_display"
   end
 
-  create_table "hospital_prescriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
     t.integer "organization_id"
-    t.string "status"
-    t.string "note"
-    t.string "type_code"
+    t.boolean "status", default: true, comment: "处方状态:0 未审核,  1:已审核   2:待收费   3:已收费   4:已发药   7:废弃   8:已退药  9:已退费 "
+    t.string "note", collation: "utf8_general_ci"
+    t.string "type_code", collation: "utf8_general_ci"
     t.integer "bill_id"
-    t.string "confidentiality_code"
+    t.string "confidentiality_code", collation: "utf8_general_ci"
     t.integer "doctor_id"
     t.integer "encounter_id"
     t.datetime "effective_start"
     t.datetime "effective_end"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "type_display", comment: "处分类型名称"
-    t.string "confidentiality_display", comment: " 权限描述"
-    t.string "prescription_no", comment: "处方号"
+
+    t.string "type_display", collation: "utf8_general_ci", comment: "处分类型名称"
+    t.string "confidentiality_display", collation: "utf8_general_ci", comment: " 权限描述"
+    t.string "prescription_no", collation: "utf8_general_ci", comment: "处方号"
     t.boolean "specialmark", default: false, comment: "特殊处方标记"
+    t.integer "drug_store_id"
+    t.integer "order_id"
+    t.string "tookcode", limit: 20, comment: "取药码"
+    t.integer "author_id"
+  end
+
+  create_table "hospital_sets_departments", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "org_id"
+    t.string "name", default: ""
+    t.string "jianpin", default: ""
+    t.string "status", default: ""
+    t.string "search_str", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "hospital_sets_inis", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.boolean "enable_print_pres", default: false, comment: "是否启用打印"
+    t.boolean "enable_print_pres", default: false
     t.integer "uoperator_id"
     t.text "print_pres_html"
     t.integer "org_id"
@@ -264,13 +285,34 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "hospital_sets_mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "org_id"
+    t.string "status"
+    t.string "title"
+    t.string "note"
+    t.string "sharing_scope_code"
+    t.string "sharing_scope_display"
+    t.string "disease_code"
+    t.string "disease_display"
+    t.integer "author_id"
+    t.string "author_display"
+    t.integer "location_id"
+    t.string "location_display"
+    t.string "search_str"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "ims_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "org_ii", comment: "组织机构代码"
+    t.string "org_name", comment: "组织机构名称"
     t.string "source_org_ii", comment: "来源机构"
     t.string "source_org_name", comment: "来源机构名称"
     t.string "target_org_ii", comment: "目标机构代码"
     t.string "target_org_name", comment: "目标机构名称"
     t.string "patient_order_id", comment: "患者订单id"
     t.string "order_code", comment: "订单号"
+    t.string "author_name", comment: "开单医生"
     t.string "patient_name", comment: "患者姓名"
     t.integer "repeat_number", default: 1, comment: "中药副数"
     t.float "total_amount", limit: 24, default: 0.0, comment: "总金额"
@@ -323,17 +365,42 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.time "close_time"
     t.string "target_org_id"
     t.string "target_org_name"
-    t.string "source_org_id"
     t.string "source_org_name"
-    t.string "phone_number"
     t.string "order_code"
     t.string "user_id"
-    t.string "person_id"
-    t.string "doctor"
     t.string "shipping_name"
     t.string "shipping_code"
     t.float "payment_type", limit: 24
     t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+
+    t.string "doctor", limit: 32
+    t.string "source_org_id", limit: 32
+    t.string "person_id", limit: 32
+    t.string "settle_id", limit: 32
+  end
+
+  create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "cost_name", default: ""
+    t.string "out_trade_no", default: ""
+    t.float "total_fee", limit: 24, default: 0.0
+    t.string "title", default: ""
+    t.string "return_url", default: ""
+    t.string "status", default: ""
+    t.string "status_desc", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "pay_wechats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "cost_name", default: ""
+    t.string "out_trade_no", default: ""
+    t.integer "total_fee", default: 0
+    t.string "title", default: ""
+    t.string "return_url", default: ""
+    t.string "status", default: ""
+    t.string "status_desc", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -383,6 +450,53 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.datetime "updated_at", null: false
     t.string "photo"
     t.integer "person_id"
+
+    t.string "blood_code"
+    t.string "blood_display"
+    t.float "height", limit: 24
+    t.float "weight", limit: 24
+  end
+
+  create_table "position_datas", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", default: ""
+    t.string "title", default: ""
+    t.float "lat", limit: 53
+    t.float "lng", limit: 53
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "relation_orders_and_prescriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "prescript_id"
+    t.string "order_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "settles_settles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "order_code"
+    t.float "net_amt", limit: 53
+    t.string "pay_method", limit: 8
+    t.string "pay_type", limit: 8
+    t.string "out_trade_no", limit: 32
+    t.string "body", limit: 128
+    t.string "detail", limit: 6000
+    t.string "device_info", limit: 32
+    t.string "auth_code", limit: 128
+    t.string "status", limit: 4
+  end
+
+  create_table "sms_messages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "phone", default: ""
+    t.string "name", default: ""
+    t.string "code", default: ""
+    t.string "expired_in", default: ""
+    t.string "data_type", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["phone"], name: "index_sms_messages_on_phone"
   end
 
   create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -405,6 +519,7 @@ ActiveRecord::Schema.define(version: 20180612072906) do
     t.string "organization_id"
     t.string "sex"
     t.string "birth"
+    t.string "pharmacy_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

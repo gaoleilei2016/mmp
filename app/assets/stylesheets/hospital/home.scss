@@ -252,6 +252,34 @@ $bg-purple-light: #e5e9f2;
 			}
 		}
 	}
+
+	.copy-orders-modal {
+		.el-dialog__body {
+			padding-top: 10px;
+    	padding-bottom: 10px;
+		}
+		.encounters-list {
+			padding: 0;
+	    margin-top: 1em;
+	    font-size: 1em;
+	    line-height: 0.5em;
+	    list-style: none;
+	    margin-bottom: 7.5px;
+	    li {
+	    	border-bottom: 1px solid #ddd;
+	    	a {
+	    		color: #444;
+			    line-height: 10px;
+			    padding: 10px 5px;
+			    display: block;
+			    text-decoration: none;
+	    	}
+	    	a:active, a:hover {
+	    		background-color: #F5FEFE; 
+	    	}
+	    }
+		}
+	}
 }
 // 药品下拉框
 .order-autocomplete {
