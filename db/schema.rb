@@ -376,6 +376,8 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.datetime "updated_at", null: false
 
     t.string "doctor", limit: 32
+    t.string "patient_name", limit: 32
+    t.string "patient_phone", limit: 32
     t.string "source_org_id", limit: 32
     t.string "person_id", limit: 32
     t.string "settle_id", limit: 32
