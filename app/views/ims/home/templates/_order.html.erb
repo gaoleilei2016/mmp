@@ -258,8 +258,6 @@ window.current_template_obj = {
         });    		
     		return false
     	}
-     var successCallback =  
-      var errorCallback =  
 			this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         type = stat ? "success" : "warning";
