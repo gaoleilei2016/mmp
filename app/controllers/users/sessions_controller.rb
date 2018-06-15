@@ -7,13 +7,14 @@ class Users::SessionsController < Devise::SessionsController
 
   # GET /resource/sign_in
   def new
+    flash[:login] = params[:login] if params[:login].present?
     str = request.user_agent
     if str.include?('Mobile')
-      if params[:type]=="use_psw"
-        render "/devise/sessions/new2.html.erb",layout:"customer"
-      else
-        redirect_to "/users/sign_up"
-      end
+      render "/devise/sessions/new2.html.erb",layout:"customer"
+      # if params[:type]=="use_psw"
+      # else
+      #   redirect_to "/users/sign_up"
+      # end
     else
       super
     end

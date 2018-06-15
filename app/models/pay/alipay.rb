@@ -2,16 +2,24 @@
 
 require 'alipay'
 
-class Pay::Alipay < ActiveRecord::Base
-  self.abstract_class = true
-  # cost_name,out_trade_no,total_fee,title,return_url,status,status_desc
+class Pay::Alipay < ApplicationRecord
+  self.table_name = 'pay_alipays'
+
+  validates_presence_of :out_trade_no, message: '订单号不能为空'
+  validates_presence_of :total_fee,    message: '订单金额不能为空'
+  validates_presence_of :title,        message: '订单标题不能为空'
+
+  # cost_name(费用类别),
+  # return_url(支付后返回路径)
+  # status(订单状态 为success时是已支付)
+  # status_desc(订单状态描述)
   class << self
     # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
     #   total_fee:'支付金额单位元(String)'}
     def payment(args)
       begin
         write_log_return({state: :start, msg: '支付宝付款开始'})
-        return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alipay.usable
+        return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alibaba.usable
         ali = new(args)
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless ali.save
         ali.get_payment_url        
@@ -22,7 +30,7 @@ class Pay::Alipay < ActiveRecord::Base
 
     def write_log_return(args)
       PayAndSmsLog.info("#{args[:state]}----#{args[:msg]}----#{args[:desc]}", {file_name: 'alipay'})
-
+      args[:rec].update_attributes({status: args[:state], status_desc: args[:msg]}) if args[:rec]
       args
     end
   end
@@ -48,11 +56,15 @@ class Pay::Alipay < ActiveRecord::Base
         }.to_json(ascii_only: true),
         timestamp: current_time
       )
-      return self.class.write_log_return({state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https://mclient.alipay.com')
-      self.class.write_log_return({state: :fail, msg: '支付失败', desc: payment_url})
+      return self.class.write_log_return({rec: self, state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https')
+      self.class.write_log_return({rec: self, state: :fail, msg: '支付失败', desc: payment_url})
     rescue Exception => e
-      self.class.write_log_return({state: :fail, msg: "支付错误", desc: e.message})
+      self.class.write_log_return({rec: self, state: :fail, msg: "支付错误", desc: e.message})
     end
+  end
+
+  def paid?
+    status.eql?('success')
   end
 
   private
@@ -67,7 +79,7 @@ class Pay::Alipay < ActiveRecord::Base
   end
 
   def ali
-    Set::Alipay
+    Set::Alibaba
   end
 
   def base_set
@@ -87,8 +99,7 @@ class Pay::Alipay < ActiveRecord::Base
     # signature = CGI.escape(Base64.encode64(sign))
     signature = Base64.encode64(sign)
     # signature = signature.delete("\n","\r")
-    signature = signature.delete("\n").delete("\r")
-    return signature
+    signature.delete("\n").delete("\r")
   end
 
   # rsa验签，文本内容和签名内容，公钥路径
@@ -97,7 +108,7 @@ class Pay::Alipay < ActiveRecord::Base
     pub = OpenSSL::PKey::RSA.new public_key
     digester = OpenSSL::Digest::SHA1.new
     sign = Base64.decode64(sign)
-    return pub.verify(digester, sign, data)
+    pub.verify(digester, sign, data)
   end
 
   # rsa签名验签测试
@@ -120,33 +131,29 @@ class Pay::Alipay < ActiveRecord::Base
     datas[:sign] = sign
   end
 
-  def url
-    'https://openapi.alipay.com/gateway.do'
-  end
+  # def args
+  #   {
+  #     app_id: '2018060860325957',
+  #     method: 'alipay.trade.wap.pay',
+  #     format: 'JSON',
+  #     charset: 'utf-8',
+  #     sign_type: 'RSA2',
+  #     sign: '',
+  #     timestamp: current_time,
+  #     version: '1.0',
+  #     notify_url: 'http://mmp.tenmind.com/pay/alipay',
+  #     biz_content: ''
+  #   }
+  # end
 
-  def args
-    {
-      app_id: '2018060860325957',
-      method: 'alipay.trade.wap.pay',
-      format: 'JSON',
-      charset: 'utf-8',
-      sign_type: 'RSA2',
-      sign: '',
-      timestamp: current_time,
-      version: '1.0',
-      notify_url: 'http://mmp.tenmind.com/pay/alipay',
-      biz_content: ''
-    }
-  end
-
-  def body
-    {
-      body: '测试一下支付嘛',
-      subject: '药品',
-      out_trade_no: '123456',
-      timeout_express: '1d'
-      total_amount: 0.01,
-      product_code: '2018060810537243'
-    }
-  end
+  # def body
+  #   {
+  #     body: '测试一下支付嘛',
+  #     subject: '药品',
+  #     out_trade_no: '123456',
+  #     timeout_express: '1d'
+  #     total_amount: 0.01,
+  #     product_code: '2018060810537243'
+  #   }
+  # end
 end

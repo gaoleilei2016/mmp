@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
 	protect_from_forgery with: :exception
 	before_action :configure_permitted_parameters, if: :devise_controller?
 	before_action :authenticate_user!,if: :not_interfaces_controller?
+	before_action :set_language
 	rescue_from RuntimeError do |exception|
 		respond_to do |html|
 			html.html {render xml:{flag:false,reason:exception.class.to_s,info:exception.message}}
@@ -40,7 +41,12 @@ class ApplicationController < ActionController::Base
 	end
 
 	protected
+	def set_language
+		I18n.locale = 'zh-CN'
+	end
 	def not_interfaces_controller?
+		# p '~~~~~~~~~~~~',controller_path
+		raise "非admin用户禁止进入" if controller_path =~ /^admin/&&current_user.login != 'admin'
 		controller_path=="interfaces" ? false : true
 	end
 	def configure_permitted_parameters
