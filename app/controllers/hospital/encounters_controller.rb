@@ -82,21 +82,31 @@ class Hospital::EncountersController < ApplicationController
 	def create
     p "==========create", params
     # raise "测试"
-    case params[:encounter][:type].to_s
+    case params[:type].to_s
     when "by_person"
+      cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
+      render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
+      encounter_info = ::Hospital::Encounter.get_encounter_info_from_person(cur_person.id)
+      encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id)
+      @encounter = ::Hospital::Encounter.new(encounter_info)
+      if @encounter.save
+        render json: {flag: true, info:"success", data: @encounter.to_web_front}
+      else
+        render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}
+      end
     when "by_iden"
       render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
     when "by_qrcode"
       render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
     when "" # by_write默认不传 手动填写
       create_data = format_encounter_create_params
-      @encounter = Hospital::Encounter.new(create_data[:encounter])
+      @encounter = ::Hospital::Encounter.new(create_data[:encounter])
       respond_to do |format|
         ::ActiveRecord::Base.transaction  do
           if @encounter.save! # 保存成功后创建诊断和过敏信息
             cur_person = @encounter.get_person
             # p "person_id = #{cur_person.id} name = #{cur_person.name}"
-            @encounter.update_attributes!(@encounter.get_encounter_info_from_person)
+            @encounter.update_attributes!(::Hospital::Encounter.get_encounter_info_from_person(cur_person.id))
             ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
             ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
             format.html { redirect_to @encounter.to_web_front, notice: 'encounter was successfully created.' }
@@ -189,7 +199,8 @@ class Hospital::EncountersController < ApplicationController
         blood_display: args[:blood][:display], 
         height: args[:height], 
         weight: args[:weight], 
-        drugstore_location_id: args[:drugstore_location][:id]
+        drugstore_location_id: args[:drugstore_location][:id],
+        author_id: current_user.id
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息
@@ -223,7 +234,8 @@ class Hospital::EncountersController < ApplicationController
         blood_display: args[:blood][:display], 
         height: args[:height], 
         weight: args[:weight], 
-        drugstore_location_id: args[:drugstore_location][:id]
+        drugstore_location_id: args[:drugstore_location][:id],
+        author_id: current_user.id
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息

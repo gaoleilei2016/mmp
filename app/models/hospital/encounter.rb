@@ -5,6 +5,7 @@ class Hospital::Encounter < ApplicationRecord
 	belongs_to :drugstore_location, class_name: '::Admin::Organization', foreign_key: 'drugstore_location_id', optional: true
 	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'encounter_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'encounter_id'
+	belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
 
 	#1:  如果有person_id就直接取到person
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人
@@ -80,7 +81,11 @@ class Hospital::Encounter < ApplicationRecord
 			person_id: self.person_id,
 			# 历史就诊需要的数据
 			orders_count: self.orders.count,
-			prescriptions_count: self.prescriptions.count
+			prescriptions_count: self.prescriptions.count,
+			author: {
+				id: self.author_id,
+				display: self.author.name
+			}
 		}
 		# 当前就诊的取药点
 		if self.drugstore_location.present?
@@ -128,9 +133,8 @@ class Hospital::Encounter < ApplicationRecord
 		return ret.compact
 	end
 
-	def get_encounter_info_from_person
-		self.reload
-		cur_person = self.person
+	def self.get_encounter_info_from_person(person_id)
+		cur_person = ::Person.find(person_id)
 		encounter_info = {
 			iden: cur_person.iden,
 			name: cur_person.name,
@@ -159,5 +163,4 @@ class Hospital::Encounter < ApplicationRecord
 		}
 		return encounter_info.compact
 	end
-
 end

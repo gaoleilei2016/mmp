@@ -91,5 +91,16 @@ class Hospital::Order < ApplicationRecord
         end
       end
     end
+
+    def can_create?(encounter_id)
+      cur_encounter = ::Hospital::Encounter.find(encounter_id) rescue nil
+      return {flag: false, info:"无效就诊id"}if cur_encounter.nil?
+      # 判断是否存在诊断  存在诊断就能创建 医嘱
+      if cur_encounter.diagnoses.present?
+        return {flag: true, info: "success"}
+      else
+        return {flag: false, info: "请先下诊断"}
+      end
+    end
   end
 end

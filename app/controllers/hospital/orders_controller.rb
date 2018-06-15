@@ -45,15 +45,17 @@ class Hospital::OrdersController < ApplicationController
   # /hospital/orders
 	def create
     p "Hospital::OrdersController create",params
+    # 验证信息完整程度
+    ret = ::Hospital::Order.can_create?(params[:order][:encounter_id])
+    render json:{flag: false, info: ret[:info]} if !ret[:flag]
 		@order = Hospital::Order.new(format_order_create_args)
-
     respond_to do |format|
       if @order.save
         format.html { redirect_to @order, notice: 'order was successfully created.' }
-        format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
+        format.json { render json: {flag: true, info:"success", data: @order.to_web_front} }
       else
         format.html { render action: "new" }
-        format.json { render json: {flag: false , info: @order.errors} }
+        format.json { render json: {flag: false , info: @order.errors.messages.values.flatten} }
       end
     end
 	end
@@ -107,8 +109,8 @@ class Hospital::OrdersController < ApplicationController
         serialno: args[:serialno],
         title: args[:title],
         specification: args[:specification],
-        formul_code: args[:format][:code],
-        formul_display: args[:format][:display],
+        formul_code: args[:formul][:code],
+        formul_display: args[:formul][:display],
         single_qty_value: args[:single_qty][:value],
         single_qty_unit: args[:single_qty][:unit],
         dose_value: args[:dose][:value],
@@ -137,8 +139,8 @@ class Hospital::OrdersController < ApplicationController
         serialno: args[:serialno],
         title: args[:title],
         specification: args[:specification],
-        formul_code: args[:format][:code],
-        formul_display: args[:format][:display],
+        formul_code: args[:formul][:code],
+        formul_display: args[:formul][:display],
         single_qty_value: args[:single_qty][:value],
         single_qty_unit: args[:single_qty][:unit],
         dose_value: args[:dose][:value],
