@@ -104,6 +104,9 @@ window.current_template_obj = {
 			    iden: [
 			    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
 			    ],
+			    address: [
+			    	{ required: false, message: '地址不能为空'},
+			    ],
 			    contact_name: [
 			    	{ required: false, message: '监护人不能为空'},
 			    ],
@@ -133,7 +136,8 @@ window.current_template_obj = {
 				/* 历史记录 --- end */ 
 				/* 药品 --- start */ 
 					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
-					orders: [],
+					orders: [], // 本次就诊药品列表
+					encorders: [], // 其他用到药品列表的地方
 					order: {},
 					drugs: [],
 					editIndex: -1, // 正在编辑的医嘱序号
@@ -272,14 +276,15 @@ window.current_template_obj = {
   			}
   		},
   		// 搜索患者
-  		searchEncounters: function (search) {
+  		searchEncounters: function (json) {
   			var _this = this;
-  			_this.encountersResource.get({search: search}).then( function(response) {
+  			_this.encountersResource.get({search: json.search}).then( function(response) {
   				var res = response.data;
   				if(res.flag) {
   					_this.encounters = res.data;
-  					// 打开就诊列表模态框
-  					_this.isShowEncountersDialog = true;
+  					if(json.modal){
+  						_this[json.modal] = true;
+  					}
   				}
   			}, function(response) {
       		_this.$message.error("搜索就诊失败，请联系管理员。");
@@ -512,6 +517,7 @@ window.current_template_obj = {
     },
 
     /* 药品操作 --- start */
+    	// 患者的药品列表
     	getOrders: function (encounter_id) {
     		var _this = this;
     		if(!encounter_id) { encounter_id = _this.encounter.id; }
@@ -529,6 +535,19 @@ window.current_template_obj = {
     				_this.orders = res.data;
     				// 默认勾选新建医嘱
 		      	_this.defaultCheckNewOrder();
+    			}
+    		}, function (response) {
+    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    		})
+    	},
+    	// 其他使用药品列表的地方，复制某次就诊的药品
+    	getEncOrders: function (encounter_id) {
+    		var _this = this;
+    		_this.encorders = [];
+    		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
+    			var res = response.data;
+    			if(res.flag) {
+    				_this.encorders = res.data;
     			}
     		}, function (response) {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
@@ -841,6 +860,7 @@ window.current_template_obj = {
       // 打开复制医嘱
       openCopyModal: function () {
       	this.isShowCopyDialog = true;
+      	this.getEncOrders(this.encounter.id);
       },
       // 复制勾选医嘱
       handleCopyOrdersSelChange: function (val) {
@@ -1039,7 +1059,7 @@ window.current_template_obj = {
     	// 显示处方列表模态框
     	openHisOrdersDialog: function (row) {
     		this.isShowHisOrdersDialog = true;
-    		this.getOrders(row.id);
+    		this.getEncOrders(row.id);
     	},
     	// 显示处方列表模态框
 			openHisPresDialog: function (row) {
@@ -1054,9 +1074,6 @@ window.current_template_obj = {
 			// 引用医嘱
 			quoteOrders: function (orders, flag) {
 				var _this = this;
-				if(flag=="batch") {
-					orders = _this.multipleHisOrdersSelection;
-				}
 				console.log("引用医嘱",orders)
 				if(!orders || orders.length==0) {
 					_this.$message({
@@ -1078,6 +1095,8 @@ window.current_template_obj = {
 		          message: "引用成功，请在药品列表中查看。",
 		          type: 'success'
 		        });
+		        // 重新加载药品列表
+		        _this.getOrders(_this.encounter.id);
       		} else {
 						_this.$message.error(res.info);
       		}
