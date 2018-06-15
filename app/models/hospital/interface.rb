@@ -33,9 +33,9 @@ module ::Hospital::Interface
       cur_org = cur_prescription.organization
       cur_orders = cur_prescription.orders
       attrs = { 
-        target_org_ii: cur_prescription.drug_store&.id,
+        target_org_id: cur_prescription.drug_store&.id,
         target_org_name: cur_prescription.drug_store&.name,
-        source_org_ii: cur_org.id,
+        source_org_id: cur_org.id,
         source_org_name: cur_org.name,
         order_code: nil,
         perscript_id: cur_prescription.id,
@@ -56,6 +56,38 @@ module ::Hospital::Interface
       end
       attrs.merge!(details: details)
       ret[prescription_id] = attrs
+    end
+    return ret
+  end
+
+  # 处方转账单  处方id是同一个就诊的处方id
+  def self.prescription_to_order2(prescription_ids)
+    ret = {details: {}}
+    prescription_ids.each_with_index do |prescription_id, index|
+      cur_prescription = ::Hospital::Prescription.find(prescription_id)
+      cur_orders = cur_prescription.orders
+      if index == 0
+        cur_org = cur_prescription.organization
+        ret[:hospital_id] = cur_org.id
+        ret[:hospital_name] = cur_org.name
+        ret[:doctor] = cur_prescription.doctor&.name
+        ret[:user_id] = cur_prescription.encounter.person.user&.id
+        ret[:person_id] = cur_prescription.encounter.person.id
+        ret[:person_name] = cur_prescription.encounter.person.name
+        ret[:phone] = cur_prescription.encounter.phone # 当前就诊的电话号
+      end
+      prescription_details = cur_orders.map do |_order|
+        {
+          name: _order.title,
+          item_id: _order.serialno,
+          unit: _order.unit,
+          quantity: _order.total_quantity,
+          price: _order.price,
+          specifications: _order.specification,
+          dosage:'剂型'
+        }
+      end
+      ret[:details][prescription_id] = prescription_details
     end
     return ret
   end
