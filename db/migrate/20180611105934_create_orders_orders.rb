@@ -10,6 +10,8 @@ class CreateOrdersOrders < ActiveRecord::Migration[5.1]
       t.string :source_org_name
       t.string :order_code
       t.string :user_id
+      t.string :person_id
+      t.string :doctor
       t.string :shipping_name
       t.string :shipping_code
       t.float :payment_type
