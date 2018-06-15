@@ -58,6 +58,9 @@ Rails.application.routes.draw do
     resources :home
     # 就诊管理、统计
     resources :encounters do 
+      collection do 
+        post :quote_orders
+      end
       member do
         get :all_prescriptions
       end
