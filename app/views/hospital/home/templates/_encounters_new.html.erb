@@ -10,8 +10,11 @@
   		<div style="position: absolute; top: 0; right: 0; z-index: 999;">
   			<!-- 历史就诊tab -->
   			<!-- 药品tab显示模板和生成处方按钮 -->
-  			<el-button size="mini" v-if="activeTab=='orders'" @click="openFavoriteModal">模板</el-button>
-  			<el-button size="mini" v-if="activeTab=='orders'" type="warning" @click="openPrescriptionModal" plain>生成处方</el-button>
+  			<div v-if="activeTab=='orders' && encounter.id">
+	  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
+	  			<el-button size="mini" @click="openCopyModal">复制</el-button>
+	  			<el-button size="mini" type="warning" @click="openPrescriptionModal" plain>生成处方</el-button>
+  			</div>
   			<!-- 处方Tab -->
   		</div>
 			
@@ -33,6 +36,10 @@
     </el-tabs>
   	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
   	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
+  	<!-- 模板弹出框 -->
+  	<%= render "hospital/home/render/encounters_favorite_dialog" %>
+  	<!-- 复制弹出框 -->
+  	<%= render "hospital/home/render/encounters_copy_dialog" %>
   	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
 	</div>
 </template>
@@ -132,6 +139,31 @@ window.current_template_obj = {
 					editIndex: -1, // 正在编辑的医嘱序号
 					multipleOrdersSelection: [], // 已经勾选的医嘱
 				/* 药品 --- end */ 
+
+				/* 药品模板 --- start */ 
+					isShowFavoriteDialog: false, // 显示模板模态框
+					favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
+					mtemplates: [], // 医嘱模板列表
+					multipleMTempOrdersSelection: [], // 医嘱模板勾选医嘱
+					mtemplate: {}, // 新建医嘱模板对象
+					mtemplatesResource: "", // 医嘱模板访问路径
+					// 药品模板创建规则
+					mtemplateRules: {
+						title: [
+				      { required: true, message: '姓名不能为空'},
+				    ],
+						"sharing_scope.code": [
+				      { required: true, message: '共享范围不能为空'},
+				    ],
+					},
+				/* 药品模板 --- end */ 
+
+				/* 复制药品 --- start */ 
+					isShowCopyDialog: false, // 显示复制模态框
+					searchCopyEncStr: "", // 搜索要复制医嘱的对象
+					multipleCopyOrdersSelection: [], // 复制医嘱的勾选项
+				/* 复制药品 --- end */ 
+
 				/* 处方 --- start */ 
 					prescriptions: [],
 					prescriptionsResource: Vue.resource('/hospital/prescriptions{/id}.json'),
@@ -253,17 +285,31 @@ window.current_template_obj = {
       		_this.$message.error("搜索就诊失败，请联系管理员。");
       	})
   		},
-  		// 编辑encounter，flag为false的话，为新建就诊
-  		editEncounter: function (row, flag) {
+  		// 编辑encounter
+  		editEncounter: function (row) {
   			this.encounter = row;
-  			if(!flag) { // 新建就诊的情况，去掉id，直接提交，新建encounter
-  				this.encounter.id = "";
-  				this.encounter.type = "by_person";
-  			}
   			this.isShowEncountersDialog = false;
   			// 重新加载页面主业务数据
   			this.activeTab = "orders";
   			this.getOrders();
+  		},
+  		// 用一些特殊的方式创建encounter，刷身份证，在曾经就诊的基础上创建
+  		createEncounterBySomeMethods: function (json) {
+  			var _this = this, encounter, btn = $(event.target);
+  			if(json.type=="by_person") { // 通过就诊创建新的就诊
+  				encounter = json.row;
+  			}
+  			btn.removeAttr("disabled").find(".fa").hide();
+				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
+      		_this.handleEncounterReturn(response, btn);
+      		_this.getOrders();
+      		if(json.type=="by_person") { // 通过就诊创建新的就诊
+	  				_this.isShowEncountersDialog = false;
+	  			}
+      	}, function(response) {
+      		btn.removeAttr("disabled").find(".fa").hide();
+      		_this.$message.error("创建就诊信息失败，请联系管理员。");
+      	})
   		},
 			// 提交encounter信息
 			submitEncounterForm: function (formName) {
@@ -308,6 +354,9 @@ window.current_template_obj = {
 	        message: "就诊信息保存成功。",
 	        type: 'success'
 	      });
+	      if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+	      	this.encounter.diagnoses = [{code: "", display: ""}];
+	      }
 				// 聚焦医嘱搜索框
 	      this.$refs["ordtitle"].focus();
 	    },
@@ -691,11 +740,114 @@ window.current_template_obj = {
       		return "inactive-row";
       	}
       },
+    /* 药品操作 --- end */
+
+    /* 药品模板 --- start */
       // 打开模板弹出框，使用模板，创建模板
       openFavoriteModal: function () {
-
+      	this.isShowFavoriteDialog = true;
+      	this.mtemplate = {
+      		title: "", // 模板名称
+      		sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
+      		// disease: {code: "", display: ""}, // 病种
+      		note: "", // 备注
+      	}
+      	this.mtemplatesResource = Vue.resource('/hospital/sets/mtemplates{/id}.json');
+      	this.favoriteActiveName = "use"; // 打开模态框，默认显示使用模板tab
+      	this.getMtemplates();
       },
-    /* 药品操作 --- end */
+      // 药品模板tab改变
+      handleMTemplateTabClick: function (tab, event) {
+      	var _this = this;
+	    	if(tab.name=="use") {
+	    		
+	    	}
+	    	if(tab.name=="create") {
+	    		// 点击到创建模板的时候，将所有待选医嘱全部勾选起来
+	      	_this.$nextTick(function(){
+			    	(_this.orders||[]).forEach(function (item, index) {
+			    		_this.$refs["mtemplateOrdersTable"].toggleRowSelection(item, true);
+			    	})
+					})
+	    	}
+	    	
+	    },
+      // 获取药品模板
+      getMtemplates: function () {
+      	var _this = this;
+      	_this.mtemplatesResource.get().then( function(response) {
+    			var res = response.data;
+    			if(res.flag) {
+    				_this.mtemplates = res.data;
+    			}
+    		}, function (response) {
+    			_this.$message.error("获取药品模板列表失败，请联系管理员。");
+    		})
+      },
+      // 提交药品模板的方法
+      submitMtemplateForm: function (formName) {
+      	var _this = this;
+      	_this.$refs[formName].validate( function (valid) {
+	        if (valid) {
+	        	if(!_this.multipleMTempOrdersSelection || _this.multipleMTempOrdersSelection.length==0) {
+	        		_this.$message({
+			          message: "必须选择医嘱。",
+			          type: 'warning'
+			        });
+	        		return false;
+	        	}
+	        	_this.mtemplate["orders"] = _this.multipleMTempOrdersSelection;
+	        	var btn = $(event.target);
+	        	btn.attr("disabled", "disabled").find(".fa").show();
+	        	_this.mtemplatesResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate}).then( function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		var res = response.data;
+		      		if(res.flag) {
+		      			_this.$message({
+				          message: "生成医嘱模板成功，请在模板列表中查看。",
+				          type: 'success'
+				        });
+		      			// 将创建的模板添加到使用模板列表
+		      			_this.mtemplates.push(res.data);
+		      			// 关闭模态框
+		      			_this.isShowFavoriteDialog = false;
+		      		} else {
+		      			_this.$message.error(res.info);
+		      		}
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("创建医嘱模板失败，请联系管理员。");
+		      	})
+					} else {
+	          _this.$message({
+		          message: '请按照规范录入数据。',
+		          type: 'warning'
+		        });
+	          return false;
+	        }
+	      })
+      },
+      // 医嘱模板勾选医嘱
+      handleMTempOrdersSelChange: function (val) {
+      	this.multipleMTempOrdersSelection = val;
+      },
+      // 选择疾病
+      handleSelectMTempDisease: function (item) {
+      	this.mtemplate.disease = {code: item.code, display: item.display};
+      },
+    /* 药品模板 --- end */
+
+    /* 复制药品 --- start */
+      // 打开复制医嘱
+      openCopyModal: function () {
+      	this.isShowCopyDialog = true;
+      },
+      // 复制勾选医嘱
+      handleCopyOrdersSelChange: function (val) {
+      	this.multipleCopyOrdersSelection = val;
+      },
+
+    /* 复制药品 --- end */
 
     /* 处方操作 --- start */
     	// 获取处方列表
@@ -797,7 +949,7 @@ window.current_template_obj = {
 	        });
     			return false;
     		}
-    		// 将诊断处理为checkbox能够显示
+    		// 将诊断处理为checkbox能够显示，形式[诊断名]数组
     		var diagnoses = [];
     		(_this.encounter.diagnoses||[]).forEach(function (item, index){
     			diagnoses.push(item.display);
@@ -809,10 +961,6 @@ window.current_template_obj = {
     			ids: [], // 药品ids
     		}
     		_this.isShowSendPresDialog = true;
-    	},
-    	// 显示处方详细，打印处方的样子
-    	showPrescription: function (index, row) {
-
     	},
     	// 复制处方
 			copyPrescription: function (index, row) {
@@ -868,7 +1016,7 @@ window.current_template_obj = {
 			},
     /* 处方操作 --- end */
 
-    /* 记录就诊 --- start */
+    /* 就诊记录 --- start */
     	getHistories: function () {
     		var _this = this;
     		if(!_this.encounter.id) {
@@ -927,7 +1075,7 @@ window.current_template_obj = {
           var res = response.data;
           if(res.flag) {
       			_this.$message({
-		          message: res.info,
+		          message: "引用成功，请在药品列表中查看。",
 		          type: 'success'
 		        });
       		} else {
@@ -946,7 +1094,7 @@ window.current_template_obj = {
       		}
         });
 			},
-    /* 记录就诊 --- end */
+    /* 就诊记录 --- end */
 	}
 }
 </script>

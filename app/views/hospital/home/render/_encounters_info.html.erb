@@ -345,8 +345,8 @@
 	    label=""
 	    width="150">
 	    <template slot-scope="scope">
-	      <el-button size="mini" @click="editEncounter(scope.row, true)" type="primary" title="编辑就诊信息" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button>
-	      <el-button size="mini" @click="editEncounter(scope.row, false)" type="success" title="在此基础上新建一次就诊" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建</el-button>
+	      <el-button size="mini" @click="editEncounter(scope.row)" type="primary" title="编辑就诊信息" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button>
+	      <el-button size="mini" @click="createEncounterBySomeMethods({type: 'by_person', row: scope.row})" type="success" title="在此基础上新建一次就诊" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
 	    </template>
 	  </el-table-column>
 	</el-table>

@@ -46,7 +46,8 @@
     label="药品">
     <template slot-scope="scope">
       <el-tooltip content="查看药品详情" placement="bottom" effect="light">
-        <el-button size="mini" type="primary" @click="openHisOrdersDialog(scope.row)" plain>6 个</el-button>
+        <el-button v-if="scope.row.orders_count>0" size="mini" type="primary" @click="openHisOrdersDialog(scope.row)" plain>{{scope.row.orders_count}} 个</el-button>
+        <span v-else>0 个</span>
       </el-tooltip>
     </template>
   </el-table-column>
@@ -56,11 +57,12 @@
     label="处方">
     <template slot-scope="scope">
       <el-tooltip content="查看处方详情" placement="bottom" effect="light">
-        <el-button size="mini" type="success" @click="openHisPresDialog(scope.row)" plain>2 张</el-button>
+        <el-button v-if="scope.row.prescriptions_count>0" size="mini" type="success" @click="openHisPresDialog(scope.row)" plain>{{scope.row.prescriptions_count}} 张</el-button>
+        <span v-else>0 张</span>
       </el-tooltip>
     </template>
   </el-table-column>
-  <el-table-column
+<!--   <el-table-column
     min-width="60"
     align="right"
     label="总金额">
@@ -75,16 +77,16 @@
     <template slot-scope="scope">
       30.00
     </template>
-  </el-table-column>
+  </el-table-column> -->
 </el-table>
 
 <el-dialog
   title="药品列表"
   :visible.sync="isShowHisOrdersDialog"
-  @selection-change="handleHisOrdersSelChange"
   width="90%">
   <el-table
     :data="orders"
+    @selection-change="handleHisOrdersSelChange"
     class="orders-table thiner-row"
     style="width: 100%">
     <%= render "hospital/home/render/orders_table_common.html" %>
