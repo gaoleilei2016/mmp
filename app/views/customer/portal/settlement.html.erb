@@ -24,16 +24,18 @@
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="padding: 22px 18px 14px;overflow: visible;">
 			<div>
-				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
 					{{current_pharmacy.name}}
-					<p class="mui-ellipsis">???m</p>
+					<p class="mui-ellipsis">地址</p>
 				</div>
 			</div>
 			<ul class="mui-table-view no_background" style="margin-top: 15px;">
 				<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
-						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
+						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 						<div class="mui-media-body">
 							{{drug.title}}
 							<p class="mui-ellipsis">
@@ -48,10 +50,13 @@
 	</ul>
 	<ul id="" class="mui-table-view mui-table-view-chevron" style="margin: 16px 0 36px;">
 		<li class="mui-table-view-cell mui-media">
-			<a href="javascript:mui.toast('线下支付请直接去药房');">
+			<a href="#picture" class="mui-btn-outlined">
 				<div class="mui-media-body">
 					支付方式
-					<span class='mui-pull-right' style="color: #999;">在线支付</span>
+					<span class='mui-pull-right' style="color: #999;">
+						<template v-if="pay_type=='online'">在线支付</template>
+						<template v-if="pay_type=='offline'">到店支付</template>
+					</span>
 				</div>
 			</a>
 		</li>
@@ -71,7 +76,23 @@
 			</div>
 		</li>
 	</ul>
+	<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell">
+				<a href="javascript:;" @click="pay_type='online';mui('#picture').popover('toggle');">在线支付</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a href="javascript:;" @click="pay_type='offline';mui('#picture').popover('toggle');">到店支付</a>
+			</li>
+		</ul>
+		<ul class="mui-table-view">
+			<li class="mui-table-view-cell">
+				<a href="#picture"><b>取消</b></a>
+			</li>
+		</ul>
+	</div>
 	<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
+		<input type="text" name="order[pay_type]" v-model="pay_type">
 		<input type="text" name="order[hospital_id]" v-model="prescription.org_id">
 		<input type="text" name="order[hospital_name]" v-model="prescription.org_name">
 		<input type="text" name="order[pharmacy_id]" v-model="current_pharmacy.id">
@@ -80,21 +101,25 @@
 			<option v-for="id in prescription.prescription_ids" key="id">{{id}}</option>
 		</select>
 	</form>
-	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
+	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 998;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
 		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
 		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.total_price)}}</span></div>
 	</div>
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
-	new Vue({
+	var current_app = new Vue({
 		el:"#vue_content",
 		data:{
 			current_pharmacy:{},
 			prescription:{},
 			fapiao:false,
+			pay_type:'online', // online | offline
 		},
 		methods:{
+			xxxxx:function() {
+				alert('xxxxx')
+			},
 			submit_form:function() {
 				var _this = this;
 				if (!_this.prescription.org_id) {
@@ -147,6 +172,19 @@
 					_this.fapiao = event.detail.isActive;
 				});
 			});
+			// mui('body').on('tap', '.mui-popover-action li>a', function() {
+			// 	var a = this,
+			// 		parent;
+			// 	//根据点击按钮，反推当前是哪个actionsheet
+			// 	for (parent = a.parentNode; parent != document.body; parent = parent.parentNode) {
+			// 		if (parent.classList.contains('mui-popover-action')) {
+			// 			break;
+			// 		}
+			// 	}
+			// 	//关闭actionsheet
+			// 	mui('#' + parent.id).popover('toggle');
+			// 	info.innerHTML = "你刚点击了\"" + a.innerHTML + "\"按钮";
+			// })
 		}
 	})
 </script>

@@ -8,6 +8,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # GET /resource/sign_up
   def new
+    flash[:login] = params[:login] if params[:login].present?
     build_resource
     yield resource if block_given?
     render "/devise/registrations/new.html.erb",layout:"customer"
@@ -22,9 +23,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # POST /resource
   def create
+    # p '~~~~~~~~~',params
     params[:user] = {
       login:params[:login],
-      password:'123456',
+      password:params[:password],
       email:"#{params[:login]}@duanxinzhuce.tm"
     }
     build_resource(sign_up_params)
@@ -49,6 +51,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
     end
     # 如果是老用户，直接登录
     if u=(User.where(login:params[:login]).first)
+      # 找回密码时的操作
+      u.password = params[:password]
+      u.save
       sign_in(u)
       return redirect_to "/"
     end

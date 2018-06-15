@@ -7,7 +7,6 @@ class ChangeUsers < ActiveRecord::Migration[5.1]
       t.string :organization_id
       t.string :sex
       t.string :birth
-      t.string :pharmacy_id
     end
   end
 end

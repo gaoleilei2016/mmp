@@ -41,9 +41,10 @@ class Settles::Settle < ApplicationRecord
 				)	
 				order.set(:status,'2')
 			when '2'
-				
+
 			when '3'
 			when '4'
+			end
 		end
 	end
 end

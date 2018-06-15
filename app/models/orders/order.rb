@@ -22,7 +22,8 @@ class Orders::Order < ApplicationRecord
 #  user_id VARCHAR(32) NOT NULL '用户id',
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
-#  phone_number varchar(20)  NULL '患者电话号码',
+#  patient_name varchar(20)  NULL '患者名字',
+#  patient_phone varchar(20)  NULL '患者电话号码',
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
 #  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
@@ -69,26 +70,39 @@ class Orders::Order < ApplicationRecord
 # person_id:'person_id'
 # person_id:'患者名字'
 # details:{id:{details}}#处方id   处方明细
+
+
+
+# {:details=>{16=>[{:name=>"心胃止痛胶囊", :item_id=>500, :unit=>"盒", :quantity=>1.0, :price=>43.0, :specifications=>"0.25gx48s", :dosage=>"剂型"}], 17=>[{:name=>"对乙酰氨基酚混悬滴剂（泰诺林）", :item_id=>388, :unit=>"瓶", :quantity=>1.0, :price=>11.0, :specifications=>"15ml", :dosage=>"剂型"}, {:name=>"乳酸钠林格注射液（直立代）", :item_id=>164, :unit=>"袋", :quantity=>1.0, :price=>4.0, :specifications=>"500ml", :dosage=>"剂型"}]}, 
+
+# :hospital_id=>33, :hospital_name=>"第一个医院", :doctor=>"cg1", :user_id=>nil, :person_id=>13, :person_name=>"陈刚", :phone=>"18585075312"} 
+
+
+
 		#获取订单生成数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
+			return false if attrs[:pharmacy_id].blank?
+			return false if attrs[:pharmacy_name].blank?
+			return false if attrs[:prescription_ids].blank?
 			##通过处方拿到订单生成数据
-			prescs = ::Hospital::Interface.prescription_to_order(attrs[:prescription_ids])
-			presc = prescs.first.last
+			presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
 			order = self.create(
 			 target_org_id: attrs[:pharmacy_id].to_s,
 			 target_org_name: attrs[:pharmacy_name].to_s,
 			 source_org_id: presc[:hospital_id].to_s,
 			 source_org_name: presc[:hospital_name].to_s,
+			 patient_name: presc[:person_name].to_s,
+			 patient_phone: presc[:phone].to_s,
 			 order_code: get_order_code,
 			 doctor: presc[:doctor].to_s,
 			 user_id: presc[:user_id].to_s,
 			 person_id: presc[:person_id].to_s,
 			 status: '1'
 	 		)
-			prescs.each do |k,v|
+			presc[:details].each do |k,details|
 				order.prescriptions << ::Hospital::Prescription.find(k)
-				v[:details].each do |detail|
+				details.each do |detail|
 					net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 					order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
 				end
@@ -133,6 +147,7 @@ class Orders::Order < ApplicationRecord
 					close_time: order.close_time,
 					target_org_name: order.target_org_name,
 					source_org_name: order.source_org_name,
+					patient_phone: order.patient_phone,
 					doctor: order.doctor,
 					payment_type: order.payment_type,
 					details: order.details.map{|x| {
@@ -161,7 +176,7 @@ class Orders::Order < ApplicationRecord
 			
 		end
 
-		#药房查询
+		#药房查询 attrs = {type:'1/2',order_code:'',org_id:''}
 		def get_order_to_medical attrs = {}
 
 			attrs = attrs.deep_symbolize_keys
@@ -192,6 +207,8 @@ class Orders::Order < ApplicationRecord
 					source_org_name: order.source_org_name,
 					doctor: order.doctor,
 					prescriptions_id: order.prescription_ids,
+					patient_name: order.patient_name,
+					patient_phone: order.patient_phone,
 					payment_type: order.payment_type,
 					details: order.details.map{|x| {
 									name: x.name,

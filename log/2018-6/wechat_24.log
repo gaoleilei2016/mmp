@@ -1,0 +1,43 @@
+# Logfile created on 2018-06-14 17:26:12 +0800 by logger.rb/56438
+$$:-=-2018-06-14 17:26:12-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:26:12-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>支付后会通知药房备药</body><mch_id>1432526502</mch_id><nonce_str>a2NJJ2rY4ntggU2okDMFZt36VDACY04t</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>1528968372</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>E63CDCC1A3850429FFBDAB7A00F06B9F</sign></xml> 
+ 
+$$:-=-2018-06-14 17:26:13-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:28:13-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:28:13-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>花溪</body><mch_id>1432526502</mch_id><nonce_str>EulnSykdT7tsO7H6qMSt2ppSVLrxUkxv</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>20180613519</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>0887535CE1375C12ABC556F9EA3ED123</sign></xml> 
+ 
+$$:-=-2018-06-14 17:28:14-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:28:43-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:28:44-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>支付后会通知药房备药</body><mch_id>1432526502</mch_id><nonce_str>vwCfv3sW1gmur4z2hkPJ1rlNump1iSX0</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>1528968523</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>0B7A7E5A37B583CB219D468E4F61A873</sign></xml> 
+ 
+$$:-=-2018-06-14 17:28:44-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:32:38-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:32:38-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>花溪</body><mch_id>1432526502</mch_id><nonce_str>hNhTB3GmBiSfLR1FHNVizMscdZjVru34</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>20180613722</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>DAA52B24B031AC5E29C3EA8207840458</sign></xml> 
+ 
+$$:-=-2018-06-14 17:32:39-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:34:07-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:34:07-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>支付后会通知药房备药</body><mch_id>1432526502</mch_id><nonce_str>rl40jEAucYcQja4KvYQvPz3lTARKqIZ6</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>1528968847</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>18BC3F43B423D9A27AD4DB4C03CC5530</sign></xml> 
+ 
+$$:-=-2018-06-14 17:34:07-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:35:33-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:35:34-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>支付后会通知药房备药</body><mch_id>1432526502</mch_id><nonce_str>NJrYImC4y0tFOkURvgDujfm0pMmU0kus</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>1528968933</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>CA9DB8EE290A1C6B0A217031771BDA09</sign></xml> 
+ 
+$$:-=-2018-06-14 17:35:34-=-INFO--: succ----请转到微信支付---- 
+ 
+$$:-=-2018-06-14 17:40:24-=-INFO--: start----微信付款开始---- 
+ 
+$$:-=-2018-06-14 17:40:24-=-INFO--: send----发送数据----<xml><appid>wx985d4b9d7b2784d2</appid><body>花溪</body><mch_id>1432526502</mch_id><nonce_str>HaDxok0SnQM5lCH62F7pTMgcDF2ifwbp</nonce_str><notify_url>http://mmp.tenmind.com/pay/wechat</notify_url><out_trade_no>20180613819</out_trade_no><scene_info>{:h5_info=>{:type=>"Wap", :wap_url=>"http://huaxi.tenmind.com", :wap_name=>"腾迈华希医药"}}</scene_info><sign_type>MD5</sign_type><spbill_create_ip>58.16.181.25</spbill_create_ip><total_fee>1</total_fee><trade_type>MWEB</trade_type><sign>3676E355DA9D7BDE0107818F133BD10C</sign></xml> 
+ 
+$$:-=-2018-06-14 17:40:24-=-INFO--: succ----请转到微信支付---- 
+ 
