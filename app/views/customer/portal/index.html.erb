@@ -97,20 +97,22 @@
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
-				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
 					{{current_pharmacy.name}}
-					<p class="mui-ellipsis">???m</p>
+					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">地址</p>
 				</div>
 			</div>
 			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fa fa-map-marker" style="font-size: 20px;"></i>
-				<p style="font-size: 8px;">查看位置</p>
+				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
+				<p style="font-size: 12px;">???m</p>
 			</div>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
-						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
+						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 						<div class="mui-media-body">
 							{{drug.title}}
 							<p class="mui-ellipsis">
