@@ -108,7 +108,7 @@ class Orders::Order < ApplicationRecord
 				 source_org_name: presc[:hospital_name].to_s,
 				 patient_name: presc[:person_name].to_s,
 				 patient_phone: presc[:phone].to_s,
-				 order_code: get_order_code,
+				 order_code: get_order_code(attrs[:pharmacy_id].to_s),
 				 doctor: presc[:doctor].to_s,
 				 user_id: attrs[:user_id].to_s,
 				 person_id: presc[:person_id].to_s,
