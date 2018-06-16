@@ -89,24 +89,44 @@ class Ims::Order < ApplicationRecord
         return [] if args[:org_id].blank?
         query = "target_org_id = #{args[:org_id]}"
         query.concat("order_code = #{args[:order_code]}") unless args[:order_code].blank?
-        # case args[:type].to_s
-        # when '1' # 未付款
-        #   query.concat(" and status = '1'")
-        # when '2' # 已付款
-        #   query.concat(" and status = #{args[:order_code]}")
-        # else
-        # end
-        query.concat(" and status =#{ args[:type].to_s}")
-        Order::Order.where(query).map{|order| 
+        query = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
+        case  args[:type].to_s
+        when '1'#未付款
+          query.concat(" and payment_type = 1 and status = 2")
+        when '2'#已付款
+          query.concat(" and payment_type = 2")
+        else#否则查看全部
+        end
+        # query.concat(" and status =#{ args[:type].to_s}")
+        Orders::Order.where(condtion).map{|order|  
           {
-            order_code:order.order_code,
-            amt:order.net_amt,
-            status:order.status,
-            payment_at:order.payment_at, # 支付时间
-            end_time:order.end_time, # 订单完成时间
-          }
+            order_code: order.order_code,
+            amt: order.net_amt,
+            status: order.status,
+            payment_at: order.payment_at,     # 支付时间
+            end_time: order.end_time,     # 订单完成时间
+            close_time: order.close_time,
+            target_org_name: order.target_org_name,
+            source_org_name: order.source_org_name,
+            doctor: order.doctor,
+            prescriptions_id: order.prescription_ids,
+            patient_name: order.patient_name,
+            patient_phone: order.patient_phone,
+            payment_type: order.payment_type,
+            details: order.details.map{|x| {
+                    name: x.name,
+                    quantity: x.quantity,
+                    unit: x.unit,
+                    specifications: x.specifications,
+                    dosage: x.dosage,
+                    price: x.price,
+                    net_amt: x.net_amt,
+                    firm: x.firm,
+                    img_path: x.img_path
+                  }
+                }
+          }  
         }
-
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
