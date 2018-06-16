@@ -28,7 +28,7 @@ class InterfacesController < ApplicationController
 		params[:order][:user_id] = current_user.id
 		p '~~~~~~~~~',params
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		# p '~~~~~~~~~~',re
+		p '~~~~~~~~~~',re
 		redirect_to "/customer/portal/pay?id=#{re.id}"
 	end
 	# 获取用户购物车
