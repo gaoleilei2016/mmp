@@ -13,6 +13,7 @@ class Orders::Order < ApplicationRecord
 #  created_at DATETIME NOT NULL '创建时间',
 #  updated_at DATETIME NOT NULL '更新时间',
 #  payment_at DATETIME NOT NULL '支付时间',
+#  drug_user varchar(20)  NULL '发药人',
 #  end_time DATETIME NOT NULL '订单完成时间',
 #  close_time DATETIME NOT NULL '订单关闭时间',
 #  target_org_id VARCHAR(32) NOT NULL '目标机构编码',
@@ -83,35 +84,48 @@ class Orders::Order < ApplicationRecord
 		#获取订单生成数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
-			result = {}
-			return false if attrs[:pharmacy_id].blank?
-			return false if attrs[:pharmacy_name].blank?
-			return false if attrs[:prescription_ids].blank?
-			##通过处方拿到订单生成数据
-			presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
-			Orders::Order.where(:prescription_ids.in=>attrs[:prescription_ids]).count
-			order = self.create(
-			 target_org_id: attrs[:pharmacy_id].to_s,
-			 target_org_name: attrs[:pharmacy_name].to_s,
-			 source_org_id: presc[:hospital_id].to_s,
-			 source_org_name: presc[:hospital_name].to_s,
-			 patient_name: presc[:person_name].to_s,
-			 patient_phone: presc[:phone].to_s,
-			 order_code: get_order_code,
-			 doctor: presc[:doctor].to_s,
-			 user_id: attrs[:user_id].to_s,
-			 person_id: presc[:person_id].to_s,
-			 status: '1'
-	 		)
-			presc[:details].each do |k,details|
-				order.prescriptions << ::Hospital::Prescription.find(k)
-				details.each do |detail|
-					net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
-					order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
-				end
+			result = {ret_code:'0',info:'',order:nil}
+			if attrs[:pharmacy_id].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("药房ID不能为空!")
 			end
-			order.save
-			order
+			if attrs[:pharmacy_name].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("药房名称不能为空！")
+			end
+			if attrs[:prescription_ids].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("处方ID不能为空!")
+			end
+			if result[:ret_code].to_s == '0'
+			##通过处方拿到订单生成数据
+				presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
+				Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
+				order = self.create(
+				 target_org_id: attrs[:pharmacy_id].to_s,
+				 target_org_name: attrs[:pharmacy_name].to_s,
+				 source_org_id: presc[:hospital_id].to_s,
+				 source_org_name: presc[:hospital_name].to_s,
+				 patient_name: presc[:person_name].to_s,
+				 patient_phone: presc[:phone].to_s,
+				 order_code: get_order_code,
+				 doctor: presc[:doctor].to_s,
+				 user_id: attrs[:user_id].to_s,
+				 person_id: presc[:person_id].to_s,
+				 status: '1'
+		 		)
+				presc[:details].each do |k,details|
+					order.prescriptions << ::Hospital::Prescription.find(k)
+					details.each do |detail|
+						net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
+						order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
+					end
+				end
+				order.save
+				result[:info].concat("订单生成成功！")
+				result[:order] = order
+			end
+			result
 		end
 		#更新订单信息
 		def update_order(attrs = {})
