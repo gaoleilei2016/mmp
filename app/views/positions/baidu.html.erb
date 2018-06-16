@@ -13,6 +13,8 @@
 </body>
 </html>
 <script type="text/javascript">
+  window.onload = addressOverlay("allmap");
+  
   // 根据用户的经纬度绘出用户在地图上的位置
   function addressOverlay(div_id_name){
     var map = new BMap.Map(div_id_name);

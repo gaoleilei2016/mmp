@@ -45,12 +45,13 @@
 			</el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="名称" prop="name"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="位置" prop="addr"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="创建时间" prop="created_at" width="140"></el-table-column>
 		</el-table>
 		<el-pagination background ref="pg_data_table" :page-size="10" @size-change="get_organizations" @current-change="get_organizations" layout="total, sizes, prev, pager, next, jumper" :total="pg_data_table_total"></el-pagination>
-		<el-dialog @open="get_users();get_users1();" :title="seleced_organization.name" :visible.sync="dialogVisible" width="80%" top="62px">
+		<el-dialog class="tab_content_full_height_bug" :fullscreen="true" @open="get_users();get_users1();" :title="seleced_organization.name" :visible.sync="dialogVisible">
 			<el-form size="small" id="organizations_index_form" :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="">
-				<el-tabs type="border-card">
+				<el-tabs @tab-click="tabClick" type="border-card">
 					<el-tab-pane label="基本信息">
 						<el-form-item label="类型" prop="type_code">
 							<el-select :disabled="seleced_organization.save_method=='PUT'" v-model="ruleForm.type_code" @change="change_type" style="max-width: 200px;">
@@ -69,9 +70,9 @@
 						</el-form-item>
 					</el-tab-pane>
 					<el-tab-pane label="管理员">
-						<el-row>
-							<el-col :span="13" style="padding-right: 6px;">
-								<el-table ref="data_table2" class="table_header_dark" size="mini" border :data="tableData2">
+						<el-row style="height: 100%;">
+							<el-col :span="13" style="padding-right: 6px;height: 100%;">
+								<el-table height="'100%'" style="height: 100%;" ref="data_table2" class="table_header_dark" size="mini" border :data="tableData2">
 									<el-table-column label="id" prop="id"></el-table-column>
 									<el-table-column :show-overflow-tooltip="true" label="login" prop="login"></el-table-column>
 									<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
@@ -83,7 +84,7 @@
 									</el-table-column>
 								</el-table>
 							</el-col>
-							<el-col :span="11" style="border: 1px solid #ddd;">
+							<el-col :span="11" style="border: 1px solid #ddd;height: 100%;">
 								<div class="header_dark">
 									项目列表
 									<div class="vertical_bottom" style="position: absolute;right: 7px;top: 7px;">
@@ -94,7 +95,7 @@
 										</div>
 									</div>
 								</div>
-								<el-table id="dialog_right_table" ref="data_table3" @row-click="right_copyto_left" v-loading="dialog_table_loading" class="table_header_dark" size="mini" border :data="tableData3">
+								<el-table height="'100%'" style="height: calc( 100% - 64px );" id="dialog_right_table" ref="data_table3" @row-click="right_copyto_left" v-loading="dialog_table_loading" class="table_header_dark" size="mini" border :data="tableData3">
 									<el-table-column label="id" prop="id">
 										<template slot-scope="scope">
 											{{scope.row.id}}
@@ -110,9 +111,9 @@
 						</el-row>
 					</el-tab-pane>
 					<el-tab-pane label="合作机构">
-						<el-row>
-							<el-col :span="13" style="padding-right: 6px;">
-								<el-table ref="data_table21" class="table_header_dark" size="mini" border :data="tableData21">
+						<el-row style="height: 100%;">
+							<el-col :span="13" style="padding-right: 6px;height: 100%;">
+								<el-table height="'100%'" style="height: 100%;" ref="data_table21" class="table_header_dark" size="mini" border :data="tableData21">
 									<el-table-column label="id" prop="id"></el-table-column>
 									<el-table-column :show-overflow-tooltip="true" label="名称" prop="name"></el-table-column>
 									<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
@@ -123,7 +124,7 @@
 									</el-table-column>
 								</el-table>
 							</el-col>
-							<el-col :span="11" style="border: 1px solid #ddd;">
+							<el-col :span="11" style="border: 1px solid #ddd;height: 100%;">
 								<div class="header_dark">
 									列表
 									<div class="vertical_bottom" style="position: absolute;right: 7px;top: 7px;">
@@ -134,7 +135,7 @@
 										</div>
 									</div>
 								</div>
-								<el-table id="dialog_right_table1" ref="data_table31" @row-click="right_copyto_left1" v-loading="dialog_table_loading1" class="table_header_dark" size="mini" border :data="tableData31">
+								<el-table height="'100%'" style="height: calc( 100% - 64px );" id="dialog_right_table1" ref="data_table31" @row-click="right_copyto_left1" v-loading="dialog_table_loading1" class="table_header_dark" size="mini" border :data="tableData31">
 									<el-table-column label="id" prop="id">
 										<template slot-scope="scope">
 											{{scope.row.id}}
@@ -147,6 +148,16 @@
 								<el-pagination small background ref="pg_data_table31" :page-size="10" @size-change="get_users1" @current-change="get_users1" layout="sizes, prev, pager, next" :total="pg_data_table_total31"></el-pagination>
 							</el-col>
 						</el-row>
+					</el-tab-pane>
+					<el-tab-pane label="位置">
+						<div>
+							<el-input v-model="map_search_str" size="small" style="padding-bottom: 6px;width: 300px;"></el-input>
+							<span style="margin-left: 20px;">经度：{{point.lng}}</span>
+							<span style="margin-left: 20px;">纬度：{{point.lat}}</span>
+						</div>
+						<div style="height: calc( 100% - 38px );padding: 0 6px 6px 0;">
+							<div id="map_use_div" style="height: 100%;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
+						</div>
 					</el-tab-pane>
 				</el-tabs>
 			</el-form>
@@ -161,6 +172,8 @@
 window.current_template_obj = {
 	data:function(){
 		return {
+			map_search_str:'',
+			point:{},
 			tableData21:[],
 			searchInputValue1:'',
 			dialog_table_loading1:false,
@@ -196,7 +209,70 @@ window.current_template_obj = {
 			},
 		}
 	},
+	watch:{
+		// map_search_str:function(val) {
+		// 	var _this = this;
+		// 	addressToPoint('map_use_div',val,function(point) {
+		// 		_this.point = point;
+		// 	})
+		// }
+		map_search_str:function(val) {
+			var _this = this;
+			if (_this.click_to_fill) {
+				_this.click_to_fill = false;
+			}else{
+				var map = _this.map;
+				var myGeo = new BMap.Geocoder();
+				myGeo.getPoint(val, function(point){
+					if (point) {
+							map.centerAndZoom(point);
+							map.clearOverlays();
+							map.addOverlay(new BMap.Marker(point));
+							myGeo.getLocation(point, function(rs){
+								_this.point = rs.point;
+								console.log( '~~~~~~~~~ search',rs );
+							});
+					}else{
+						// alert("您选择地址没有解析到结果!");
+					}
+				}, "贵阳市");
+			}
+		},
+	},
 	methods:{
+		init_map:function() {
+			var _this = this;
+			if (!_this.map) {
+				$(function() {
+					_this.map = new BMap.Map("map_use_div");
+					var map = _this.map;
+					var point = new BMap.Point(106.7091771,26.62990674);
+					map.centerAndZoom(point,12);
+					map.enableScrollWheelZoom(true);
+					var myGeo = new BMap.Geocoder();    
+					map.addEventListener("click", function(e){        
+						var pt = e.point;
+						myGeo.getLocation(pt, function(rs){
+							_this.map_search_str = rs.address;
+							_this.click_to_fill = true;
+							_this.point = rs.point;
+							console.log( '~~~~~~~~~ click',rs );
+						});
+						map.centerAndZoom(pt);
+						map.clearOverlays();
+						map.addOverlay(new BMap.Marker(pt));
+					});
+				})
+			}
+		},
+		tabClick:function(tab) {
+			var _this = this;
+			console.log( tab.label=='位置' );
+			_this.$nextTick(function() {
+				// addressOverlay("map_use_div");
+				_this.init_map();
+			})
+		},
 		change_type:function () {
 			this.tableData21 = [];
 			$('#dialog_right_table1 tr').removeClass("selected-success");
@@ -388,7 +464,7 @@ window.current_template_obj = {
 			// if (this.selected_type_code) {
 			// 	this.ruleForm.located_entity_id = this.selected_type_code;
 			// }
-			this.seleced_organization = {save_method:'POST',form_type:1,name:"新增单项",code:""};
+			this.seleced_organization = {save_method:'POST',form_type:1,name:"新增",code:""};
 			this.dialogVisible = true;
 		},
 		edit_organization:function(row) {
@@ -458,6 +534,15 @@ window.current_template_obj = {
 		submitForm:function(formName) {
 			var _this = this;
 			_this.$refs[formName].validate(function(valid){
+				if(_this.ruleForm.type_code == '2'){
+					if ( !(_this.map_search_str&&_this.point.lat&&_this.point.lng) ) {
+						current_app.$message("药房必须录入位置！")
+						return false;
+					}
+					_this.ruleForm.addr = _this.map_search_str;
+					_this.ruleForm.lat = _this.point.lat;
+					_this.ruleForm.lng = _this.point.lng;
+				}
 				if (valid) {
 					var method = _this.seleced_organization.save_method;
 					if (method) {

@@ -78,8 +78,8 @@
 							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
 							<div class="mui-media-body">
 								{{item.name}}
-								<p style="float: right;">???m</p>
-								<p class="mui-ellipsis">贵州省贵阳市XXX</p>
+								<p style="float: right;">{{item.distance}}</p>
+								<p class="mui-ellipsis">{{item.addr}}</p>
 							</div>
 						</div>
 					</li>
@@ -93,20 +93,24 @@
 			</template>
 		</div>
 	</div>
-	<p id="order_items" style="margin: 0;padding: 16px 0 8px 12px;">距离当前最近</p>
+	<p id="order_items" style="margin: 0;padding: 16px 0 8px 12px;">
+		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
+		<span v-else>距离当前最近</span>
+	</p>
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
-					{{current_pharmacy.name}}
-					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">地址</p>
+					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+					<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
+					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
 				</div>
 			</div>
 			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
-				<p style="font-size: 12px;">???m</p>
+				<p style="font-size: 12px;">{{current_pharmacy.distance||"　"}}</p>
 			</div>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
@@ -134,6 +138,7 @@
 	new Vue({
 		el:"#vue_content",
 		data:{
+			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
 			search_str:'',
@@ -141,47 +146,92 @@
 		},
 		watch:{
 			search_str:function(val) {
-				// console.log( 'xxxxxxxxxxxxxx' );
+				// console.log( 'xxxxxxxxxxxxxx',val,val.length );
 				var _this = this;
 				clearTimeout(_this.timer)
 				_this.timer = setTimeout(function() {
+					$("#loading").show();
 					$.ajax({
-						url:'/interfaces/get_pharmacy?search='+val,
+						url:'/interfaces/get_pharmacy?search='+val+'&',
+						data:{lng:_this.point.lng,lat:_this.point.lat},
 						success:function(json) {
-							_this.pharmacys = json.rows;
-						}
+							if (json.flag) {
+								_this.pharmacys = json.rows;
+							}else{
+								mui.toast("请刷新后重试");
+							}
+						},
+						complete:function() {
+							$("#loading").hide();
+						},
+						error:error_fun
 					})
 				},500)
 			},
 		},
 		methods:{
 			send_prescription_ids_session:function(item) {
-				$("#loading").show();
+				var _this = this;
+				if (_this.current_pharmacy.id) {
+					$("#loading").show();
+					$.ajax({
+						url:"/interfaces/set_prescriptions_cart",
+						data:{
+							ids:item.prescription_ids,
+							pharmacy_id:_this.current_pharmacy.id,
+						},
+						success:function(json) {
+							if (json.flag) {
+								location.href = "/customer/portal/settlement";
+							}else{
+								$("#loading").hide();
+								mui.toast(json.info);
+							}
+						},
+						complete:function() {
+						},
+						error:error_fun
+					})
+				}else{
+					mui.toast("请先选择药房");
+					return false;
+				}
+			},
+			get_c_phar:function(point) {
+				var _this = this;
 				$.ajax({
-					url:"/interfaces/set_prescriptions_cart",
-					data:{ids:item.prescription_ids},
+					url:"/interfaces/get_current_pharmacy",
+					data:point,
 					success:function(json) {
 						if (json.flag) {
-							location.href = "/customer/portal/settlement";
+							_this.current_pharmacy = json.pharmacy;
+							_this.current_pharmacy.sele_type = json.type;
 						}else{
-							$("#loading").hide();
 							mui.toast(json.info);
 						}
 					},
-					complete:function() {
-					},
-					error:error_fun
+					error:function(e) {
+						if (point) {
+							mui.toast("定位失败，请自选药房");
+						}else{
+							mui.toast("定位错误，请重选药房");
+						}
+					}
 				})
 			},
 			get_current_pharmacy:function(item) {
 				var _this = this;
-				$.ajax({
-					url:"/interfaces/get_current_pharmacy",
-					success:function(json) {
-						// console.log( json );
-						_this.current_pharmacy = json.pharmacy;
-					}
+				<%# if session[:current_pharmacy_id].present? %>
+				// 如果有自选药房，就先显示药房，延迟定位
+				// _this.get_c_phar();
+				<%# else %>
+				$(function() {
+					addressOverlay('',function(point) {
+						_this.point = point;
+						_this.get_c_phar({lng:point.lng,lat:point.lat});
+					})
 				})
+				<%# end -%>
 			},
 			click_to_save_user_pharmacy:function(item) {
 				var _this = this;
