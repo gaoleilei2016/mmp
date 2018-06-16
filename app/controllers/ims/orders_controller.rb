@@ -1,5 +1,5 @@
 class Ims::OrdersController < ApplicationController
-  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order, :oprate_order]
+  before_action :set_ims_order, only: [:show, :edit, :update, :destroy]
 
   # GET /ims/orders
   # GET /ims/orders.json
@@ -87,34 +87,19 @@ class Ims::OrdersController < ApplicationController
     data  = []
     if params[:platform]
       @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
-      @data.map{|line| data<<{
-        id:line[:id],
-        code:line[:order_code],
-        name:line[:patient_name],
-        amount:line[:amt],
-        }
-      }      
     end
 
     #搜索药店的 订单 处方
     if params[:stat]
-      attrs = {type: params[:stat],org_id: current_user.try(:target_org_id)}
+      attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
       @data = Ims::Order.order_search attrs
     end
     render json:@data.to_json
   end
 
   def get_order
-    data = []
-    @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
-    @data.map{|line| data<<{
-      id:line[:prescriptions_id],
-      code:line[:order_code],
-      title:line[:patient_name],
-      amount:line[:amt],
-      }
-    }
-    render json:data.to_json
+    @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
+    render json:@data.to_json
   end
 
   def get_detail
@@ -149,11 +134,13 @@ class Ims::OrdersController < ApplicationController
   
   # 订单发药
   def dispensing_order
-    @reslut = @ims_order.dispensing_order rescue {flag:true,info:"发药成功！"}
-    render json:@reslut.to_json
-    # @reslut = @ims_order.dispensing_order
-    # render json:@reslut.to_json
-    # render json:{flag:true, info:"发药成功！"}
+    p current_user
+    drug_user = current_user.try(:name)
+    drug_user_id = current_user.try(:id)
+    p {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id}
+    @data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id})
+    p @data
+    render json:@data.to_json
   end
 
   # 订单退药

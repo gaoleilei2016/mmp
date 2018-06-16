@@ -78,12 +78,9 @@ window.current_template_obj = {
       return_detail:[],
 			pres:[],
       pre_detail:[],
-			detail:[{
-				header:{},
-				lines:[{}]
-			}],
+			detail:[{}],
       tab_header: '0', return_tab_header: '0',
-      tab_header_data: [],return_tab_header_data: [],      
+      tab_header_data: [],return_tab_header_data: [],
       input21: '',
       setting: {},
       options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
@@ -142,9 +139,9 @@ window.current_template_obj = {
 	methods:{
     init:function(){
       $("div.list_fun_panel[stat='1']").addClass("active");
-      stat = ""
+      stat = "1"
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response){
-        this._data.pres =response.data;
+        this._data.pres =response.data.data;
       },this.errorCallback);
     },
     errorCallback:function(response){
@@ -163,15 +160,17 @@ window.current_template_obj = {
 		},
 		choose_prescription:function(){
 			number = this.tab_header
+      console.log(number)
 			tab_val = this.tab_header_data[number]
-			console.log(tab_val.id)
-			this.get_detail(tab_val.id)
+      this._data.detail = [tab_val]
+			// console.log(tab_val)
+			// this.get_detail(tab_val.id)
 		},
     return_choose_prescription:function(){
       number = this.tab_header
       tab_val = this.tab_header_data[number]
-      console.log(tab_val.id)
-      this.get_detail(tab_val.id)
+      // console.log(tab_val.id)
+      // this.get_detail(tab_val.id)
     },    
       handleOpen:function(key, keyPath) {
         console.log(key, keyPath);
@@ -238,7 +237,7 @@ window.current_template_obj = {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
     	if (!stat) {stat=""};
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
-        if(response.data&&response.data.length>0) this.set_pres(response.data)
+        if(response.data.data&&response.data.data.length>0) this.set_pres(response.data.data)
       },function(response){
         this.set_pres()
         this.$notify({
@@ -250,27 +249,28 @@ window.current_template_obj = {
     },
     set_pres:function(data){
     	this._data.pres = data
-    	setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
+    	// setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (id,e) {
     	var _this = this;
-      this._data.tab_header_data = []
-      this._data.detail = []   
+      _this._data.tab_header_data = []
+      _this._data.detail = []   
     	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
     	if (!id) {
     		id="";
-        this.$notify({
+        _this.$notify({
           title: '提示',
-          message: '服务器请求出错了',
+          message: '订单信息不全！',
           duration: 0
         });
         return ""
     	};
-      this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
-        this._data.tab_header_data = response.data
-        setTimeout(function(){ _this.get_detail(_this.tab_header_data[_this.tab_header] )},300)
+      _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
+        console.log(response.data.data)
+        _this._data.tab_header_data = response.data.data
+        setTimeout(function(){  _this._data.detail =  [_this.tab_header_data[0]] },300)
       },function(response){
-        this.$notify({
+        _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
           duration: 0
@@ -302,7 +302,10 @@ window.current_template_obj = {
 			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
 		},
 		oprate_order:function(data){
-    	if (data.id&&data.id.length>0){}else{
+      console.log(data)
+      console.log(data.id)
+      console.log(data.id.length)
+    	if (data.id){}else{
         this.$notify({
           title: '提示',
           message: '订单信息不全，不能发药！',
