@@ -83,6 +83,7 @@ class Orders::Order < ApplicationRecord
 		#获取订单生成数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
+			result = {}
 			return false if attrs[:pharmacy_id].blank?
 			return false if attrs[:pharmacy_name].blank?
 			return false if attrs[:prescription_ids].blank?
@@ -98,7 +99,7 @@ class Orders::Order < ApplicationRecord
 			 patient_phone: presc[:phone].to_s,
 			 order_code: get_order_code,
 			 doctor: presc[:doctor].to_s,
-			 user_id: presc[:user_id].to_s,
+			 user_id: attrs[:user_id].to_s,
 			 person_id: presc[:person_id].to_s,
 			 status: '1'
 	 		)
@@ -234,7 +235,7 @@ class Orders::Order < ApplicationRecord
 			y = t.year.to_s[2,2]
 			d = ("00" + t.yday.to_s)[-3,3]
 			ser = ("000" + Orders::Order.where("source_org_id = ? AND created_at > ?",source_org_id,t).count.to_s)[-4,4]
-			code = "#{y}#{d}#{ser}"
+			"#{y}#{d}#{ser}"
 			# while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 			# 	code = get_order_code
 			# end
