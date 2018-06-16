@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180615090924) do
+ActiveRecord::Schema.define(version: 20180615135030) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -115,9 +115,11 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.string "usedescribe", limit: 80, comment: "用法用量描述"
     t.string "measure_unit", limit: 30, comment: "最小计量单位"
     t.decimal "measure_val", precision: 10, comment: "最小计量值"
+    t.string "base_unit", limit: 30, comment: "基本单位"
     t.string "purch_unit", limit: 30, comment: "采购单位"
     t.string "unit", limit: 30, comment: "销售单位"
-    t.decimal "mul", precision: 10, comment: "倍率"
+    t.decimal "mul", precision: 10, comment: "销售/基本单位的倍率"
+    t.decimal "purch_mul", precision: 10, comment: "采购/基本单位的倍率"
     t.decimal "purch_price", precision: 10, comment: "采购价格"
     t.decimal "price", precision: 10, comment: "销售价格"
     t.string "kindcode", limit: 4, comment: "药品分类"
@@ -236,6 +238,7 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.integer "author_id"
     t.string "formul_code"
     t.string "formul_display"
+    t.integer "mtemplate_id"
   end
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
@@ -262,11 +265,11 @@ ActiveRecord::Schema.define(version: 20180615090924) do
   end
 
   create_table "hospital_sets_departments", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "org_id"
-    t.string "name", default: ""
-    t.string "jianpin", default: ""
-    t.string "status", default: ""
-    t.string "search_str", default: ""
+    t.integer "org_id", comment: "机构id"
+    t.string "name", default: "", comment: "科室名称"
+    t.string "jianpin", default: "", comment: "科室简称"
+    t.string "status", default: "", comment: "状态"
+    t.string "search_str", default: "", comment: "模糊查询字段"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -280,20 +283,29 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "hospital_sets_locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "org_id", comment: "机构id"
+    t.string "name", comment: "科室名称"
+    t.string "jianpin", comment: "科室简称"
+    t.string "status", comment: "状态"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "hospital_sets_mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "org_id"
-    t.string "status"
-    t.string "title"
-    t.string "note"
-    t.string "sharing_scope_code"
-    t.string "sharing_scope_display"
-    t.string "disease_code"
-    t.string "disease_display"
-    t.integer "author_id"
-    t.string "author_display"
-    t.integer "location_id"
-    t.string "location_display"
-    t.string "search_str"
+    t.integer "org_id", comment: "机构id"
+    t.string "status", comment: "状态 默认A状态"
+    t.string "title", comment: "模板名称"
+    t.string "note", comment: "模板备注"
+    t.string "sharing_scope_code", comment: "共享代码"
+    t.string "sharing_scope_display", comment: "共享名称"
+    t.string "disease_code", comment: "病种代码"
+    t.string "disease_display", comment: "病种名称"
+    t.integer "author_id", comment: "作者id"
+    t.string "author_display", comment: "作者名称"
+    t.integer "location_id", comment: "科室id"
+    t.string "location_display", comment: "科室名称"
+    t.string "search_str", comment: "查询模糊字段"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -331,6 +343,24 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.integer "unpaid_expired", comment: "未支付订单过期天数"
     t.datetime "created_at", null: false, comment: "创建时间"
     t.datetime "updated_at", null: false, comment: "更新时间"
+  end
+
+  create_table "mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "org_id"
+    t.string "status", default: ""
+    t.string "title", default: ""
+    t.string "note", default: ""
+    t.string "sharing_scope_code", default: ""
+    t.string "sharing_scope_display", default: ""
+    t.string "disease_code", default: ""
+    t.string "disease_display", default: ""
+    t.string "author_id", default: ""
+    t.string "author_display", default: ""
+    t.string "location_id", default: ""
+    t.string "location_display", default: ""
+    t.string "search_str", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "order_headers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -374,6 +404,8 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.string "source_org_id", limit: 32
     t.string "person_id", limit: 32
     t.string "settle_id", limit: 32
+    t.string "patient_name", limit: 8
+    t.string "patient_phone", limit: 16
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

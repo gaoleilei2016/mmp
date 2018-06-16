@@ -25,6 +25,16 @@ module ::Hospital::Interface
 # }
 
 
+  def self.get_prescription_by_ids(prescription_ids)
+    ret = {}
+    prescription_ids.each do |_prescription_id|
+      ret[_prescription_id] = ::Hospital::Prescription.find(_prescription_id).to_web_front
+    end
+    return ret
+  end
+
+
+
   # 处方转账单
   def self.prescription_to_order(prescription_ids)
     ret = {}
