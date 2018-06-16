@@ -86,12 +86,27 @@ class Ims::Order < ApplicationRecord
   	# 订单查询()
   	def order_search args={}
       begin
-        status = args[:status]
-        search = args[:search]
-        org_ii = args[:org_ii]
-        query = {org_ii:org_ii,search_name:/#{search}/i}
-        query[:status] = status if status.blank?
-    		self.where(query)
+        return [] if args[:org_id].blank?
+        query = "target_org_id = #{args[:org_id]}"
+        query.concat("order_code = #{args[:order_code]}") unless args[:order_code].blank?
+        # case args[:type].to_s
+        # when '1' # 未付款
+        #   query.concat(" and status = '1'")
+        # when '2' # 已付款
+        #   query.concat(" and status = #{args[:order_code]}")
+        # else
+        # end
+        query.concat(" and status =#{ args[:type].to_s}")
+        Order::Order.where(query).map{|order| 
+          {
+            order_code:order.order_code,
+            amt:order.net_amt,
+            status:order.status,
+            payment_at:order.payment_at, # 支付时间
+            end_time:order.end_time, # 订单完成时间
+          }
+        }
+
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
