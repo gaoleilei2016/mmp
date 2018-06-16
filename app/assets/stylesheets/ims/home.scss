@@ -1,0 +1,118 @@
+@import "../plugins/element-ui/mmp-variables";
+
+$header_margin:12px;
+$lightgreen_border:#CAE6E7;
+$gray_border:#ddd;
+
+#ims_order_main,#prescription_setting_div {
+	.el-menu-item{
+		padding-left: 16px!important;
+	}
+	.el-menu{border-right: 1px solid $lightgreen_border;}
+	#prescription_menu{
+		width: 120px;
+		height: 100%;
+	}
+	#prescription_panel{
+		float: left;
+		width: calc(100% - 120px);
+		height: 100%;
+
+		#prescription_body{
+			height:100%;
+		}
+	}
+}
+
+#prescription_header{
+	border-bottom:1px solid $gray_border;
+	height: 80px;
+}
+
+.list_fun_panel{border:1px solid $gray_border; text-align: center; padding:8px;}
+.list_fun_panel.active{background:#99D2CC !important;}
+.list_fun_panel:hover{background:#ecf0f1;}
+
+.text-left{text-align: left;}
+.text-right{text-align: right;}
+.separate{
+	border-bottom:1px solid $gray_border;
+}
+.prescription_form_title > h3{
+	margin-top:20px;margin-bottom:15px;
+}
+.receipt_drug_label > h3{
+	font-size: 24px;margin:0;
+}
+
+.prescription_list{
+	height:calc(100% - 80px);
+	overflow-y:auto;
+	border:1px solid $gray_border;
+	border-top:none;
+	padding-top:2px;
+
+	p {
+		padding: 7px;
+		border-bottom:1px dashed $gray_border;
+		height:29px;
+		white-space: nowrap;
+	}
+	p:hover {
+		background:#ecf0f1;
+	}
+	p.active{
+		background:#99D2CC !important;
+	}
+}
+
+.prescription_content{
+	position: relative;
+	height: 100%;
+	overflow: auto;
+	padding:8px;
+
+	.receipt_drug_label{
+		position:absolute;  
+		left:-24px; 
+		top:28px;
+		width:133px;
+		color:red;
+		font-family:华文隶书;
+		opacity:0.6;
+		transform:rotate(-47deg);
+	}
+
+	.prescription_form_title{
+		text-align: center;
+	}
+
+	.btns_right_bottom{
+		position:absolute;
+		right:5px;
+		bottom:0px;width:100%;
+	  button{
+			float: right;
+			margin-right: 4px;
+			margin-bottom: 8px;
+	  }
+	}
+}
+
+
+.prescription_item_info{
+	overflow-x:hidden;
+	overflow-y:auto;
+	height:calc(100% - 300px);
+
+	.item_list{
+		padding-left: 12px;
+		line-height: 23px;
+	}
+}
+
+.prescription_basic_info{
+	padding-top:8px;
+	padding-bottom:8px;
+	line-height:27px;
+}

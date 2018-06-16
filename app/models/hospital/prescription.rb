@@ -7,7 +7,7 @@ class ::Hospital::Prescription < ApplicationRecord
 	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
 	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
-	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'prescription_id', optional: true
+	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
 	# belongs_to :bill, class_name: '::'
 
 

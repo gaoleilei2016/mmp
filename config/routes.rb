@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   }
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to:"customer/portal#index"
+  mount ActionCable.server => "/cable"
+  
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
@@ -109,6 +111,31 @@ Rails.application.routes.draw do
   ########### ims ##########
   namespace :ims do
     resources :home
+    resources :orders do
+      collection do
+        get :get_orders         # 获取订单
+        get :get_order          # 获取订单
+        get :charging_pre       # 收费
+        get :dispensing_order   # 发药
+        get :return_order       # 退药
+        get :oprate_order       # 订单操作(发药/退药、、)
+        get :order_settings
+        get :get_detail
+        post :create_order  #生成订单
+      end
+    end
+
+    resources :settings do
+      collection do
+        get :get_cur_set
+        post :save_settings
+      end
+    end
+
+    resources :interfaces do
+      collection do
+      end
+    end
   end
   ########### ims ##########
   ############################
