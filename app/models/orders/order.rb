@@ -245,7 +245,7 @@ class Orders::Order < ApplicationRecord
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
 										end_time:Time.now,
-										status:'5',
+										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
 				##更新处方状态。。。。。。
