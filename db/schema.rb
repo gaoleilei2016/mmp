@@ -359,6 +359,7 @@ ActiveRecord::Schema.define(version: 20180615090924) do
     t.string "dosage"
     t.float "price", limit: 24
     t.float "net_amt", limit: 24
+    t.float "firm", limit: 48
     t.string "img_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
