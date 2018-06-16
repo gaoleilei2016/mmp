@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  id: 1
+  use: MyString
+  type: 
+  province: MyString
+  city: MyString
+  country: MyString
+  township: MyString
+  street: MyString
+  house_number: MyString
+  post_code: MyString
+  detail: MyString
+  period_start: MyString
+  period_end: MyString
+  status: MyString
+  master_id: 1
+
+two:
+  id: 1
+  use: MyString
+  type: 
+  province: MyString
+  city: MyString
+  country: MyString
+  township: MyString
+  street: MyString
+  house_number: MyString
+  post_code: MyString
+  detail: MyString
+  period_start: MyString
+  period_end: MyString
+  status: MyString
+  master_id: 1

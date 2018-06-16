@@ -7,8 +7,183 @@ class ::Hospital::Prescription < ApplicationRecord
 	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
 	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
-	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'prescription_id', optional: true
-	# belongs_to :bill, class_name: '::'
+	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
+
+
+
+	def initialize args = {}
+		super args
+		self.status = 0
+	end
+
+
+	###=== 处方状态流转  ===###
+	# 创建后默认是 0: 未审核状态
+	#每一个参数都是必传参数
+	# {
+	# 	# 审核人
+	# 	auditor: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 审核时间
+	# 	audit_at: Time
+	# }
+	def audit(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 0 # 未审核
+				self.auditor_id = args[:auditor][:id] 
+				self.auditor_display = args[:auditor][:display]
+				self.audit_at = args[:audit_at]
+				self.status = 1
+			self.orders.update_all(status: 1) if self.save
+		else
+			false
+		end
+	end
+
+	# 处方废弃
+	# {
+	# 	# 废弃人
+	# 	abandonor: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 废弃时间
+	# 	abandon_at: Time
+	# }
+	def abandon(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 1 # 已审核的处方可以废弃
+				self.abandonor_id = args[:abandonor][:id] 
+				self.abandonor_display = args[:abandonor][:display]
+				self.abandon_at = args[:abandon_at]
+				self.status = 7
+			self.orders.update_all(status: 7) if self.save
+		else
+			false
+		end
+	end
+
+	# 待收费处方  生成订单之后待收费
+	# {
+	# 	# 创建订单人
+	# 	create_bill_opt: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 订单创建时间
+	# 	bill_at: Time
+	#   bill_id: 
+	# }
+	def wait_charge(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 1 # 已审核的处方可以变为待收费
+			self.status = 2
+			self.create_bill_opt_id = args[:create_bill_opt][:id]
+			self.create_bill_opt_display = args[:create_bill_opt][:display]
+			self.bill_at = args[:bill_at]
+			self.bill_id = args[:bill_id]
+			self.orders.update_all(status: 2) if  self.save
+		else
+			false
+		end
+	end
+
+	# 已收费处方  账单收费后更新
+	# {
+	# 	# 创建订单人
+	# 	charger: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 订单创建时间
+	# 	charge_at: Time
+	# }
+	def charged(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 2 # 已审核的处方可以变为待收费
+			self.status = 3
+			self.charger_id = args[:charger][:id]
+			self.charger_display = args[:charger][:display]
+			self.charge_at = args[:charge_at]
+			self.orders.update_all(status: 3) if self.save
+		else
+			false
+		end
+	end
+
+	# 已收费后可以退费
+	# {
+	# 	# 退费人
+	# 	return_charge_opt: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 退费时间
+	# 	return_charge_at: Time
+	# }
+	def return_charge(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 3 # 已审核的处方可以变为待收费
+			self.status = 9
+			self.return_charge_opt_id = args[:return_charge_opt][:id]
+			self.return_charge_opt_display = args[:return_charge_opt][:display]
+			self.return_charge_at = args[:return_charge_at]
+			self.orders.update_all(status: 9) if self.save
+		else
+			false
+		end
+	end
+
+	# 发药
+	# {
+	# 	# 发药人
+	# 	delivery: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 发药时间
+	# 	delivery_at: Time
+	# }
+	def send_drug(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 3 # 已审核的处方可以变为待收费
+			self.status = 4
+			self.delivery_id = args[:delivery][:id] 
+			self.delivery_display = args[:delivery][:display]
+			self.delivery_at = args[:delivery_at]
+			self.orders.update_all(status: 4) if  self.save
+		else
+			false
+		end
+	end
+
+	###=== 处方状态流转  ===###
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	def link_diagnoses(args, cur_user)
@@ -28,14 +203,14 @@ class ::Hospital::Prescription < ApplicationRecord
 	def link_orders(cur_orders, cur_user)
 		self.reload
 		cur_orders.each do |_order|
-			_order.status = "A"
+			_order.status = 0
 			_order.prescription_id = self.id
 			_order.save
 		end
 	end
 
 
-
+	# 这个方法是公共的接口方法  不能随意更改   字段可以增加  但是不能修改和删除
 	def to_web_front
 		self.reload
 		# 患者信息
@@ -102,7 +277,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			# 处方id 
 			id: self.id,
 			# 处方号
-			prescription_no: self.prescription_no || Time.now.to_i,
+			prescription_no: format("%010d",self.id),
 			# 处方状态
 			status: self.status,
 			# 处方备注
@@ -145,9 +320,10 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_doctor = self.doctor
 		price = self.orders.map{|e| e.price }.reduce(:+)
 		total_fee = [price.to_s ,"元"].join(" ")
+		url = "http://huaxi.tenmind.com/"
 		#发送短信息
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
-		args = {type: :take_medic, name: cur_encounter.name, number: self.prescription_no || Time.now.to_i, total_fee: total_fee,number1: '1111', url: 'http连接', phone: cur_encounter.phone}
+		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: '1111', url: url, phone: cur_encounter.phone}
 		p args
 		Sms::Data.send_phone(args)
 	end
