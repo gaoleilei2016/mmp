@@ -3,7 +3,7 @@ class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
 	def get_orders
-		orders = ::Orders::Order.where(user_id:current_user.id).page(params[:page]).per(params[:per])
+		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
 		ret = []
 		orders.each{|o|
 			re = JSON.parse(o.to_json)

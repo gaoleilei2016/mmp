@@ -77,20 +77,9 @@
 			</div>
 		</li>
 	</ul>
-	<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
-		<ul class="mui-table-view">
-			<li class="mui-table-view-cell">
-				<a href="javascript:;" @click="pay_type='online';mui('#picture').popover('toggle');">在线支付</a>
-			</li>
-			<li class="mui-table-view-cell">
-				<a href="javascript:;" @click="pay_type='offline';mui('#picture').popover('toggle');">到店支付</a>
-			</li>
-		</ul>
-		<ul class="mui-table-view">
-			<li class="mui-table-view-cell">
-				<a href="#picture"><b>取消</b></a>
-			</li>
-		</ul>
+	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 998;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
+		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
+		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.total_price)}}</span></div>
 	</div>
 	<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
 		<input type="text" name="order[payment_type]" v-model="pay_type">
@@ -102,10 +91,21 @@
 			<option v-for="id in prescription.prescription_ids" key="id">{{id}}</option>
 		</select>
 	</form>
-	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 998;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
-		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
-		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.total_price)}}</span></div>
-	</div>
+</div>
+<div id="picture" class="mui-popover mui-popover-action mui-popover-bottom">
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell">
+			<a href="javascript:;" onclick="current_app.pay_type='online';mui('#picture').popover('toggle');">在线支付</a>
+		</li>
+		<li class="mui-table-view-cell">
+			<a href="javascript:;" onclick="current_app.pay_type='offline';mui('#picture').popover('toggle');">到店支付</a>
+		</li>
+	</ul>
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell">
+			<a href="#picture"><b>取消</b></a>
+		</li>
+	</ul>
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();

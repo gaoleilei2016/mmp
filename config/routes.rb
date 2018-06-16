@@ -47,6 +47,7 @@ Rails.application.routes.draw do
     end
     resources :portal do
       collection do
+        get :map
         get :settlement
         get :pay
       end
