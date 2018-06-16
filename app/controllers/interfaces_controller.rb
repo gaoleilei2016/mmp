@@ -3,6 +3,16 @@ class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
 	def get_orders
+		orders = ::Orders::Order.where(user_id:current_user.id).page(params[:page]).per(params[:per])
+		ret = []
+		orders.each{|o|
+			re = JSON.parse(o.to_json)
+			re[:drugs] = o.details
+			re[:organ] = ::Admin::Organization.find(o.target_org_id)
+			re[:total_price] = o.net_amt
+			ret<<re
+		}
+		render json:{flag:true,rows:ret,total:orders.total_count}
 	end
 	def pay_order
 		# p '~~~~~~~~~',params
@@ -27,7 +37,7 @@ class InterfacesController < ApplicationController
 		params[:order][:user_id] = current_user.id
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
 		raise re[:info] if re[:ret_code]!='0'
-		p '~~~~~~~~~~~~',re
+		# p '~~~~~~~~~~~~',re
 		redirect_to "/customer/portal/pay?id=#{re[:order].id}"
 	end
 	# 获取用户购物车
@@ -82,13 +92,14 @@ class InterfacesController < ApplicationController
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
 			recents = ::Admin::Organization.recent_lists(args)
+			p '~~~~~~~~~~',recents
 			if recents[:state] == :succ
 				re = JSON.parse(recents[:res][0][:org].to_json)
 				re['distance'] = recents[:res][0][:distance]
 				# p '~~~~~~~~~~~',re
 				render json:{flag:true,pharmacy:re,type:"near"}
 			else
-				render json:{flag:false,info:"定位错误，请自选药房",type:"near"}
+				render json:{flag:false,info:recents[:desc],type:"near"}
 			end
 		end
 	end

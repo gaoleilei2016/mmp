@@ -207,6 +207,7 @@
 							_this.current_pharmacy = json.pharmacy;
 							_this.current_pharmacy.sele_type = json.type;
 						}else{
+							_this.current_pharmacy = {name:"定位失败"};
 							mui.toast(json.info);
 						}
 					},
@@ -240,6 +241,7 @@
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
 						_this.current_pharmacy = item;
+						_this.current_pharmacy.sele_type = "self";
 						$(".mui-icon-arrowleft").click();
 					},
 					complete:function() {

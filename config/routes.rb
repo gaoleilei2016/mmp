@@ -42,6 +42,7 @@ Rails.application.routes.draw do
       collection do
         get :prescriptions
         get :orders
+        get :order
       end
     end
     resources :portal do
