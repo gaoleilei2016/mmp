@@ -15,7 +15,7 @@ zh-CN:
   devise:
     failure:
       already_authenticated: '用户名已被注册'
-      unauthenticated: ''
+      unauthenticated: '请先登录或者注册'
       unconfirmed: 'You have to confirm your account before continuing.'
       # locked: '用户已锁定，30秒内拒绝登陆'
       locked: '用户已锁定，请联系管理员'

@@ -1,8 +1,20 @@
 module ::Hospital::Interface
   # => 根据电话号获取处方单
-  def self.get_prescription(phone)
+  def self.get_prescriptions_by_phone(phone)
     ::Hospital::Prescription.find_by_sql("SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone}")
   end
+
+
+
+  # 根据处方ids 获取处方信息
+  def self.get_prescriptions_by_ids(prescription_ids)
+    ret = {}
+    prescription_ids.each do |_prescription_id|
+      ret[_prescription_id] = ::Hospital::Prescription.find(_prescription_id).to_web_front
+    end
+    return ret
+  end
+
 
 
 #   attrs = { 
@@ -23,8 +35,6 @@ module ::Hospital::Interface
 #     dosage:'剂型'
 #   ]
 # }
-
-
   # 处方转账单
   def self.prescription_to_order(prescription_ids)
     ret = {}
@@ -75,6 +85,9 @@ module ::Hospital::Interface
         ret[:person_id] = cur_prescription.encounter.person.id
         ret[:person_name] = cur_prescription.encounter.person.name
         ret[:phone] = cur_prescription.encounter.phone # 当前就诊的电话号
+        ret[:patient_sex] = cur_prescription.encounter.gender_display # 当前就诊的性别
+        ret[:patient_age] = cur_prescription.encounter.age # 当前就诊年龄
+        ret[:patient_iden] = cur_prescription.encounter.iden # 当前就诊的身份证
       end
       prescription_details = cur_orders.map do |_order|
         {
@@ -84,6 +97,7 @@ module ::Hospital::Interface
           quantity: _order.total_quantity,
           price: _order.price,
           specifications: _order.specification,
+          firm: _order.factory_name,
           dosage:'剂型'
         }
       end

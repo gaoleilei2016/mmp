@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :get_orders
       post :pay_order
       post :save_order
       get :get_prescriptions_cart
@@ -37,7 +38,12 @@ Rails.application.routes.draw do
   ############################
   ########### customer 个人中心 客户 ##########
   namespace :customer do
-    resources :home
+    resources :home do
+      collection do
+        get :prescriptions
+        get :orders
+      end
+    end
     resources :portal do
       collection do
         get :settlement
@@ -74,8 +80,8 @@ Rails.application.routes.draw do
     # 处方
     resources :prescriptions do
       collection do
+        get :get_all_prescriptions_by_phone
         get :get_prescriptions_by_phone
-        get :get_prescription_by_ids
       end
       member do
         post :set_drug_store

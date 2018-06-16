@@ -26,9 +26,13 @@ class Orders::Order < ApplicationRecord
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
 #  patient_name varchar(20)  NULL '患者名字',
+#  patient_sex varchar(20)  NULL '性别',
+#  patient_age varchar(20)  NULL '年龄',
+#  patient_iden varchar(20)  NULL '身份证',
 #  patient_phone varchar(20)  NULL '患者电话号码',
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
+#  pay_type float NOT NULL '支付类型,1.微信,2.支付宝',
 #  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
 #  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消',
 #  PRIMARY KEY ( id )
@@ -53,31 +57,13 @@ class Orders::Order < ApplicationRecord
 		update_attributes(status:'6')
 	end
 
+	#订单结算
+	def order_settle pay_type = '1'
+		update_attributes(pay_type:pay_type,status:'2')
+	end
+
 	class << self
-		#attrs = { target_org_id:'目标药房的名称和机构', target_org_name:'目标药房的名称和机构', source_org_id:'来源的医院名称和ii', source_org_name:'来源的医院名称和ii', order_code:'订单号',perscript_id:'处方id', user_id:'用户id',details:[name:'名称',item_id:'商品id',unit:'2',quantity:'1',price:'单价',specifications:'规格', dosage:'剂型']} 
-		#订单生成创建（一个订单内容对应一张处方）
-		# def create_order(attrs = {})
-		# 	attrs = attrs.deep_symbolize_keys
-		# 	# order_code = get_order_code
-		# 	order = self.create(
-		# 		 target_org_id: attrs[:target_org_id],
-		# 		 target_org_name: attrs[:target_org_name],
-		# 		 source_org_id: attrs[:source_org_id],
-		# 		 source_org_name: attrs[:source_org_name],
-		# 		 order_code: order_code,
-		# 		 doctor: attrs[:doctor],
-		# 		 user_id: attrs[:user_id],
-		# 		 user_id: attrs[:person_id],
-		# 		 status: 'N'
-		#  		)
-		# 	# Relation::OrdersAndPrescription.create(prescript_id:attrs[:prescript_id] ,order_id:order.id.to_s)
-		# 	attrs[:details].each do |detail|
-		# 		net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
-		# 		order.details << ::Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
-		# 	end
-		# 	order.save
-		# 	order
-		# end	
+			
 
 # hospital_id:'医院id'
 # hospital_name:'医院名字'
@@ -130,15 +116,18 @@ class Orders::Order < ApplicationRecord
 				order = self.create(
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
+				 user_id: attrs[:user_id].to_s,
+				 payment_type: attrs[:payment_type] == 'online' ? 1 : 2,
 				 source_org_id: presc[:hospital_id].to_s,
+				 patient_sex: presc[:patient_sex].to_s,
+				 patient_age: presc[:patient_age].to_s,
+				 patient_iden: presc[:patient_iden].to_s,
 				 source_org_name: presc[:hospital_name].to_s,
 				 patient_name: presc[:person_name].to_s,
 				 patient_phone: presc[:phone].to_s,
 				 order_code: get_order_code(presc[:hospital_id].to_s),
 				 doctor: presc[:doctor].to_s,
-				 user_id: attrs[:user_id].to_s,
 				 person_id: presc[:person_id].to_s,
-				 payment_type: attrs[:payment_type] == 'online' ? 1 : 2,
 				 status: '1'
 		 		)
 				presc[:details].each do |k,details|

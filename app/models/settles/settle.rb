@@ -39,7 +39,7 @@ class Settles::Settle < ApplicationRecord
 					auth_code: attrs[:auth_code],
 					order_code: order.order_code
 				)	
-				order.set(:status,'2')
+				order.update_attributes(:status,'2')
 			when '2'
 
 			when '3'
