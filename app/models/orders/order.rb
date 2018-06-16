@@ -52,12 +52,12 @@ class Orders::Order < ApplicationRecord
 		::Admin::Organization.find(source_org_id) rescue nil
 	end
 
-	#取消订单
+	#取消订单 Orders::Order.find(id).cancel_order()
 	def cancel_order
 		update_attributes(status:'6')
 	end
 
-	#订单结算
+	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
 	def order_settle pay_type = '1'
 		update_attributes(pay_type:pay_type,status:'2')
 	end
