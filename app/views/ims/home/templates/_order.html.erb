@@ -237,10 +237,10 @@ window.current_template_obj = {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       $(".prescription_list").find(".active").removeClass("active")
       this._data.tab_header_data = []
-      this._data.detail = [{}]
+      this._data.detail = [{}] 
     	if (!stat) {stat=""};
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
-        if(response.data.data&&response.data.data.length>0) this.set_pres(response.data.data)
+        if(response.data.data&&response.data.data.length>0){this.set_pres(response.data.data)}else{this.set_pres([])}
       },function(response){
         this.set_pres()
         this.$notify({
