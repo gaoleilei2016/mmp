@@ -1,0 +1,48 @@
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">我的订单</h1>
+</header>
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+</style>
+<div class="mui-content" id="vue_content">
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+		},
+		methods:{
+
+			get_prescriptions:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
+					success:function(json) {
+						if (json.flag) {
+							_this.prescriptions = json.data;
+						}else{
+							_this.$message(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("处方获取失败");
+					}
+				})
+			},
+		}
+	})
+</script>

@@ -15,9 +15,9 @@
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
+	<a href="/" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
-	</button>
+	</a>
 	<h1 class="mui-title">确认订单</h1>
 </header>
 <div class="mui-content" id="vue_content">
@@ -27,8 +27,9 @@
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
-					{{current_pharmacy.name}}
-					<p class="mui-ellipsis">地址</p>
+					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+					<span v-else><i class="fal fa-spinner fa-spin"></i> 获取购物车</span>
+					<p class="mui-ellipsis">{{current_pharmacy.addr||"　"}}</p>
 				</div>
 			</div>
 			<ul class="mui-table-view no_background" style="margin-top: 15px;">
@@ -117,9 +118,6 @@
 			pay_type:'online', // online | offline
 		},
 		methods:{
-			xxxxx:function() {
-				alert('xxxxx')
-			},
 			submit_form:function() {
 				var _this = this;
 				if (!_this.prescription.org_id) {
@@ -130,20 +128,21 @@
 					mui.toast('药房获取失败');
 					return false;
 				}
+				$("#loading").show();
 				$('form').submit();
 			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},
-			get_current_pharmacy:function(item) {
-				var _this = this;
-				$.ajax({
-					url:"/interfaces/get_current_pharmacy",
-					success:function(json) {
-						_this.current_pharmacy = json.pharmacy;
-					}
-				})
-			},
+			// get_current_pharmacy:function(item) {
+			// 	var _this = this;
+			// 	$.ajax({
+			// 		url:"/interfaces/get_current_pharmacy",
+			// 		success:function(json) {
+			// 			_this.current_pharmacy = json.pharmacy;
+			// 		}
+			// 	})
+			// },
 			get_prescriptions:function() {
 				var _this = this;
 				$("#loading").show();
@@ -151,7 +150,8 @@
 					url:'/interfaces/get_prescriptions_cart',
 					success:function(json) {
 						if (json.flag) {
-							_this.prescription = json.data;
+							_this.prescription = json.prescription;
+							_this.current_pharmacy = json.pharmacy;
 						}else{
 							_this.$message(json.info);
 						}
@@ -165,7 +165,7 @@
 		},
 		mounted:function() {
 			var _this = this;
-			this.get_current_pharmacy();
+			// this.get_current_pharmacy();
 			this.get_prescriptions();
 			mui('.mui-content .mui-switch').each(function() {
 				this.addEventListener('toggle', function(event) {

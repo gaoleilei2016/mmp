@@ -9,7 +9,6 @@ class PayController < ApplicationController
   def wechat
     begin
       xml = request.body.string
-      p 'uuuuuuuuuuuuuuuuuuuuuuuu',xml
       write_log("----收到微信支付通知-----#{xml}")
       res = Hash.from_xml(xml)['xml']
       wx = Pay::Wechat.find_by(out_trade_no: res['out_trade_no'])
@@ -76,7 +75,6 @@ class PayController < ApplicationController
     args = {cost_name: '测试费', out_trade_no: "20180613#{num}", total_fee: 0.01, title: '花溪',
       return_url: 'http://mmp.tenmind.com/pay/index'}
     res = Pay::Wechat.payment(args)
-    p '666666666666666666', res
     if res[:state].eql?(:succ)
       redirect_to res[:pay_url]
     else
