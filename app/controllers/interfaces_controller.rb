@@ -62,12 +62,19 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~',params, session[:current_pharmacy_id]
 		if session[:current_pharmacy_id]
 			# 自选
-			ph = ::Admin::Organization.where(:type_code=>'2').find(session[:current_pharmacy_id])
-			render json:{flag:true,pharmacy:ph,type:"self"}
+			o = ::Admin::Organization.where(:type_code=>'2').find(session[:current_pharmacy_id])
+
+			re = JSON.parse(o.to_json)
+			if o.lat.present? && o.lng.present? && params[:lat].present? && params[:lng].present?
+				args = {lat: params[:lat].to_f, lng:  params[:lng].to_f}
+				tar = {lat: o.lat.to_f, lng:  o.lng.to_f}
+				dis = Admin::Organization.distance_list(args,tar)
+				re['distance'] = dis[:res]
+			end
+
+			render json:{flag:true,pharmacy:re,type:"self"}
 		else
 			# 最近
-			# ph = ::Admin::Organization.where(:type_code=>'2').first
-
 			# p '~~~~~~~~~~~',params
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
