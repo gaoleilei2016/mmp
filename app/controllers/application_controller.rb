@@ -42,7 +42,7 @@ class ApplicationController < ActionController::Base
 
 	protected
 	def set_language
-		I18n.locale = 'zh-CN'
+		I18n.locale = :'zh-CN'
 	end
 	def not_interfaces_controller?
 		# p '~~~~~~~~~~~~',controller_path
