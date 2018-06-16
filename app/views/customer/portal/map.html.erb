@@ -15,7 +15,7 @@
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
 	</a>
 	<h1 class="mui-title"><%= params[:name] %></h1>
@@ -34,7 +34,7 @@
 		var new_point = new BMap.Point("<%= params[:lng] %>","<%= params[:lat] %>");
 		var marker = new BMap.Marker(new_point);
 		map.addOverlay(marker);
-		map.centerAndZoom(new_point,12);
+		map.centerAndZoom(new_point,14);
 
 		var navigationControl = new BMap.NavigationControl({
 			// 靠左上角位置
@@ -45,7 +45,24 @@
 			enableGeolocation: true
 		});
 		map.addControl(navigationControl);
-		
+		// 添加定位控件
+		var geolocationControl = new BMap.GeolocationControl();
+		geolocationControl.addEventListener("locationSuccess", function(e){
+			// // 定位成功事件
+			// var address = '';
+			// address += e.addressComponent.province;
+			// address += e.addressComponent.city;
+			// address += e.addressComponent.district;
+			// address += e.addressComponent.street;
+			// address += e.addressComponent.streetNumber;
+			// alert("当前定位地址为：" + address);
+		});
+		geolocationControl.addEventListener("locationError",function(e){
+			// 定位失败事件
+			alert(e.message);
+		});
+		map.addControl(geolocationControl);
+
 		// map.panTo(new_point);  
 		// var myGeo = new BMap.Geocoder();    
 		// map.addEventListener("click", function(e){        
