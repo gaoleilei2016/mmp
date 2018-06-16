@@ -81,7 +81,7 @@ class Orders::Order < ApplicationRecord
 
 
 
-		#获取订单生成数据
+		#获取处方生成订单数据
 		def create_order_by_presc_ids(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',order:nil}
@@ -96,6 +96,14 @@ class Orders::Order < ApplicationRecord
 			if attrs[:prescription_ids].blank?
 				result[:ret_code] = '-1'
 				result[:info].concat("处方ID不能为空!")
+			end
+			if attrs[:prescription_ids].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("处方ID不能为空!")
+			end
+			if attrs[:payment_type].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("支付类别不能为空!")
 			end
 			if result[:ret_code].to_s == '0'
 			##通过处方拿到订单生成数据
@@ -112,6 +120,7 @@ class Orders::Order < ApplicationRecord
 				 doctor: presc[:doctor].to_s,
 				 user_id: attrs[:user_id].to_s,
 				 person_id: presc[:person_id].to_s,
+				 payment_type: attrs[:payment_type] == 'online' ? 1 : 2,
 				 status: '1'
 		 		)
 				presc[:details].each do |k,details|
@@ -122,7 +131,7 @@ class Orders::Order < ApplicationRecord
 					end
 				end
 				order.save
-				result[:info].concat("订单生成成功！")
+				result[:info].concat("订单生成成功！请在#{(Time.now + 10.minutes)}之前完成订单支付")
 				result[:order] = order
 			end
 			result
@@ -184,8 +193,36 @@ class Orders::Order < ApplicationRecord
 			result
 		end
 
-		#订单完成（药房调用）
-		def order_completion
+		#订单完成（药房调用） attrs = {id:'',drug_user:'发药人',drug_user_id:'发药人id'}
+		def order_completion attrs = {}
+			attrs = attrs.deep_symbolize_keys
+			result = {ret_code:'0',info:''}
+			if attrs[:id].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("发药人不能为空!")
+			end
+			if attrs[:drug_user].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("发药人id不能为空！")
+			end
+			if attrs[:drug_user_id].blank?
+				result[:ret_code] = '-1'
+				result[:info].concat("订单ID不能为空!")
+			end
+			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id])
+				result[:ret_code] = '-1'
+				result[:info].concat("当前订单状态异常!")	
+			end
+			if result[:ret_code].to_s == '-1'
+				order.update_attributes(drug_user:attrs[:drug_user],
+										drug_user_id:attrs[:drug_user_id],
+										end_time:Time.now,
+										status:'5',
+										)
+				result[:info] = "订单已完成。" 
+				##更新处方状态。。。。。。
+			end
+			result
 
 		end
 
