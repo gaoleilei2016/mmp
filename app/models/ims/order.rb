@@ -179,9 +179,7 @@ class Ims::Order < ApplicationRecord
                 }
               }
           }]
-p "++++++++++++++++"
-p prescriptions
-p "++++++++++++++++"
+          
           temp = 0;         
           prescriptions.each{|key,line| data<<{
             type:'处方'+(temp += 1).to_s,

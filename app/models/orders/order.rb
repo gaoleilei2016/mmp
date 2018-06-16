@@ -237,11 +237,11 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("订单ID不能为空!")
 			end
-			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id])
+			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
 				result[:ret_code] = '-1'
 				result[:info].concat("当前订单状态异常!")	
 			end
-			if result[:ret_code].to_s == '-1'
+			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
 										end_time:Time.now,

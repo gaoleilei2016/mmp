@@ -132,15 +132,22 @@ class Ims::OrdersController < ApplicationController
   #   render json:new_order
   # end
   
-  # 订单发药
-  def dispensing_order
-    p current_user
+  #订单收费
+  def charging_pre
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    p {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id}
-    @data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id})
-    p @data
-    render json:@data.to_json
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2"})
+    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
+    render json:re_data.to_json
+  end
+
+  # 订单发药
+  def dispensing_order
+    drug_user = current_user.try(:name)
+    drug_user_id = current_user.try(:id)
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"5"})
+    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
+    render json:re_data.to_json
   end
 
   # 订单退药

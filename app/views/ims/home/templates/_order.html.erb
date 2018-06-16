@@ -235,6 +235,9 @@ window.current_template_obj = {
 		},
     get_pres:function (stat,e) {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+      $(".prescription_list").find(".active").removeClass("active")
+      this._data.tab_header_data = []
+      this._data.detail = [{}]
     	if (!stat) {stat=""};
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0) this.set_pres(response.data.data)
@@ -291,7 +294,12 @@ window.current_template_obj = {
           duration: 0
         });
       });
-    },    
+    },
+
+    //发药  发订单
+    charging_pre:function(id){
+      this.oprate_order({id:id,method:"charging_pre",todo:"收费"})
+    },
     //发药  发订单
     out_order:function(id){
     	this.oprate_order({id:id,method:"dispensing_order",todo:"发药"})
@@ -302,9 +310,6 @@ window.current_template_obj = {
 			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
 		},
 		oprate_order:function(data){
-      console.log(data)
-      console.log(data.id)
-      console.log(data.id.length)
     	if (data.id){}else{
         this.$notify({
           title: '提示',
