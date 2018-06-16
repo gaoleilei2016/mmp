@@ -9,6 +9,7 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
+
 ActiveRecord::Schema.define(version: 20180615135030) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -242,7 +243,7 @@ ActiveRecord::Schema.define(version: 20180615135030) do
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
     t.integer "organization_id"
-    t.boolean "status", default: true, comment: "处方状态:0 未审核,  1:已审核   2:待收费   3:已收费   4:已发药   7:废弃   8:已退药  9:已退费 "
+    t.integer "status", default: 0, comment: "处方状态:0 未审核,  1:已审核   2:待收费   3:已收费   4:已发药   7:废弃   8:已退药  9:已退费 "
     t.string "note", collation: "utf8_general_ci"
     t.string "type_code", collation: "utf8_general_ci"
     t.integer "bill_id"
