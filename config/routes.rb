@@ -37,7 +37,12 @@ Rails.application.routes.draw do
   ############################
   ########### customer 个人中心 客户 ##########
   namespace :customer do
-    resources :home
+    resources :home do
+      collection do
+        get :prescriptions
+        get :orders
+      end
+    end
     resources :portal do
       collection do
         get :settlement
