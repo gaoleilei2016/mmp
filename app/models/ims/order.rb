@@ -188,40 +188,6 @@ class Ims::Order < ApplicationRecord
       end
   	end
 
-  	# 订单的接收(接收完订单要发消息，提醒药店)
-  	def receive_order args={}
-  		begin
-  			args = args.deep_symbolize_key
-  			order_code = args[:order_code]
-  			order = Orders::Order.where(order_code:order_code).last
-  			return {flag:true,:info=>"订单的接收失败。"} if order.blank?
-  			search_name = ""
-  			total_amount = order.details.sum(:net_amt)
-  			self.create{{
-  				:org_ii => order.target_org_ii,
-					:org_name => order.target_org_name,
-					:source_org_ii => order.source_org_ii, 
-					:source_org_name => order.source_org_name, 
-					:target_org_ii => order.target_org_ii, 
-					:target_org_name => order.target_org_name, 
-					:patient_order_id => order.id.to_s,
-					:order_code => order.order_code,
-					:patient_name => '',
-					:repeat_number => (order.quantity||1),
-					:total_amount => total_amount,
-					:search_name => search_name,
-					:this_returned => false,
-  				}}
-  			self.create(args)
-  			# {flag:true,:info=>"订单的接收成功。"}
-  		rescue Exception => e
-  			print e.message rescue "  e.messag----"
-        print "laaaaaaaaaaaaaaaaaaaa 订单的接收 出错: " + e.backtrace.join("\n")
-        # {flag:false,:info=>"药店系统出错。"}
-        nil
-  		end
-  	end
-
     def send_message attrs
       NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
     end
