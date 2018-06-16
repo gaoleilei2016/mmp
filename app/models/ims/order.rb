@@ -100,7 +100,8 @@ class Ims::Order < ApplicationRecord
         end
         # query.concat(" and status =#{ args[:type].to_s}")
         Orders::Order.where(query).map{|order| 
-          data ={
+          preson = Person.find order.person_id rescue nil
+          data <<{
           order_id: order.id,
           order_code: order.order_code,
           amt: order.net_amt,
@@ -114,6 +115,9 @@ class Ims::Order < ApplicationRecord
           prescriptions_id: order.prescription_ids,
           prescriptions_count: order.try(:prescription_ids).count,
           patient_name: order.patient_name,
+          patient_sex: preson.try(:gender_display),
+          patient_age: preson.try(:age),
+          patient_iden: preson.try(:iden),
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           }
@@ -137,6 +141,7 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+        preson = Person.find order.person_id rescue nil
         data = [{
           type:'订单',
           order_id: order.id,
@@ -144,6 +149,7 @@ class Ims::Order < ApplicationRecord
           amt: order.net_amt,
           status: order.status,
           payment_at: order.payment_at,     # 支付时间
+          created_at: order.created_at,     # 订单生成时间
           end_time: order.end_time,     # 订单完成时间
           close_time: order.close_time,
           target_org_name: order.target_org_name,
@@ -152,6 +158,9 @@ class Ims::Order < ApplicationRecord
           prescriptions_id: order.prescription_ids,
           prescriptions_count: order.try(:prescription_ids).count,
           patient_name: order.patient_name,
+          patient_sex: preson.try(:gender_display),
+          patient_age: preson.try(:age),
+          patient_iden: preson.try(:iden),
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           details: order.details.map{|x| {
