@@ -1,7 +1,7 @@
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
+	<a href="/customer/portal/settlement" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
-	</button>
+	</a>
 	<h1 class="mui-title">支付订单</h1>
 </header>
 <style type="text/css">
@@ -35,12 +35,12 @@
 			</a>
 		</li>
 	</ul>
+	<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: absolute;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
+		确认支付 ¥ <%= sprintf("%.2f",@order.net_amt) %>
+	</button>
 	<form action="/interfaces/pay_order" method="post">
 		<input type="hidden" id="pay_type" name="pay_type">
 		<input type="hidden" name="order_id" value="<%= @order.id %>">
-		<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
-			确认支付 ¥ <%= sprintf("%.2f",@order.net_amt) %>
-		</button>
 	</form>
 </div>
 <script type="text/javascript">
