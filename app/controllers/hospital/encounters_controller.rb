@@ -57,25 +57,68 @@ class Hospital::EncountersController < ApplicationController
 	def edit
 	end
 
+  # POST
+  # 引用医嘱
+  # /hospital/encounters/quote_orders
+  def quote_orders
+    p " quote_orders",params
+    flag = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
+    info = flag ? "引用成功" : "复制出错 有药品以停用" 
+    # cur_encounter_orders = @encounter.orders.map { |_order| _order.to_web_front  }
+    render json: {flag: flag, info: info}
+  end
+
+
+
+
+
 	# POST
   # /hospital/encounters
+  # 就诊信息创建总共有四种方式
+  # 1：通过查询的就诊列表创建新的就诊  参数  type: "by_person", person_id: 
+  # 2：通过刷身份证创建就诊 (刷身份证自动像后台发起请求创建信息) type: "by_iden", iden: ""
+  # 3：通过扫二维码创建就诊 type: "by_qrcode", qrcode: 
+  # 4：手动输入信息后保存创建就诊 （采用姓名、手机号做唯一识别  查询Person信息做关联） type: "by_write"
 	def create
     p "==========create", params
-    create_data = format_encounter_create_params
-		@encounter = Hospital::Encounter.new(create_data[:encounter])
-    p @encounter
-    respond_to do |format|
-      if @encounter.save # 保存成功后创建诊断和过敏信息
-        cur_person = @encounter.get_person
-        p cur_person
-        ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
-        ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
-        format.html { redirect_to @encounter.to_web_front, notice: 'encounter was successfully created.' }
-        format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
+    # raise "测试"
+    case params[:type].to_s
+    when "by_person"
+      cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
+      render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
+      encounter_info = ::Hospital::Encounter.get_encounter_info_from_person(cur_person.id)
+      encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id)
+      @encounter = ::Hospital::Encounter.new(encounter_info)
+      if @encounter.save
+        render json: {flag: true, info:"success", data: @encounter.to_web_front}
       else
-        format.html { render action: "new" }
-        format.json { render json: @encounter.errors, status: :unprocessable_entity }
+        render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}
       end
+    when "by_iden"
+      render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
+    when "by_qrcode"
+      render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
+    when "" # by_write默认不传 手动填写
+      create_data = format_encounter_create_params
+      @encounter = ::Hospital::Encounter.new(create_data[:encounter])
+      respond_to do |format|
+        ::ActiveRecord::Base.transaction  do
+          if @encounter.save! # 保存成功后创建诊断和过敏信息
+            cur_person = @encounter.get_person
+            # p "person_id = #{cur_person.id} name = #{cur_person.name}"
+            @encounter.update_attributes!(::Hospital::Encounter.get_encounter_info_from_person(cur_person.id))
+            ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
+            ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
+            format.html { redirect_to @encounter.to_web_front, notice: 'encounter was successfully created.' }
+            format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
+          else
+            format.html { render action: "new" }
+            format.json { render json: @encounter.errors, status: :unprocessable_entity }
+          end
+        end
+      end
+    else
+      render json: {flag: false, info: "该功能不提供  请正确流程使用系统"}
     end
 	end
 
@@ -85,15 +128,18 @@ class Hospital::EncountersController < ApplicationController
     p "==========update", params
     update_data = format_encounter_update_params
     respond_to do |format|
-      if @encounter.update_attributes(update_data[:encounter])
-        cur_person = @encounter.person
-        ::Hospital::Irritability.batch_update(update_data[:irritabilities], cur_person, current_user)
-        ::Hospital::Diagnose.batch_update(update_data[:diagnoses], @encounter, current_user)
-        format.html { redirect_to @encounter, notice: 'encounter was successfully updated.' }
-        format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @encounter.errors, status: :unprocessable_entity }
+      ::ActiveRecord::Base.transaction  do
+        if @encounter.update_attributes!(update_data[:encounter])
+          cur_person = @encounter.person
+          cur_person.update_attributes!(@encounter.format_person_args)
+          ::Hospital::Irritability.batch_update(update_data[:irritabilities], cur_person, current_user)
+          ::Hospital::Diagnose.batch_update(update_data[:diagnoses], @encounter, current_user)
+          format.html { redirect_to @encounter, notice: 'encounter was successfully updated.' }
+          format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
+        else
+          format.html { render action: "edit" }
+          format.json { render json: @encounter.errors, status: :unprocessable_entity }
+        end
       end
     end
   end
@@ -153,7 +199,8 @@ class Hospital::EncountersController < ApplicationController
         blood_display: args[:blood][:display], 
         height: args[:height], 
         weight: args[:weight], 
-        drugstore_location_id: args[:drugstore_location][:id]
+        drugstore_location_id: args[:drugstore_location][:id],
+        author_id: current_user.id
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息
@@ -187,7 +234,8 @@ class Hospital::EncountersController < ApplicationController
         blood_display: args[:blood][:display], 
         height: args[:height], 
         weight: args[:weight], 
-        drugstore_location_id: args[:drugstore_location][:id]
+        drugstore_location_id: args[:drugstore_location][:id],
+        author_id: current_user.id
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息

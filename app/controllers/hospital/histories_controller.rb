@@ -4,12 +4,15 @@ class Hospital::HistoriesController < ApplicationController
 	before_action :set_order, only: [:show, :edit, :update, :destroy]
 	# GET
   # /hospital/histories
+  # 接受encounter_id 查询该就诊人的历史就诊
 	def index
-    @encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
-
+    p "Hospital::HistoriesController index", params
+    # @encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
+    @encounter = ::Hospital::Encounter.find(params[:encounter_id])
+    all_encounters = @encounter.person.encounters.map { |_encounter| _encounter.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"", data: @encounters} }
+      format.json { render json: {flag: true, info:"", data: all_encounters} }
     end
 	end
 

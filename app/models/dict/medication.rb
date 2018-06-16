@@ -10,5 +10,21 @@ class ::Dict::Medication < ApplicationRecord
   	def to_hash
   		self.attributes
   	end
-    
+
+  	# 能否开此药品
+  	def can_create?
+  		self.status == "A" ? true : false
+  	end
+
+  	def to_order_info
+  		{
+  			serialno: self.serialno,
+  			title: self.name,
+  			specification: self.spec,
+  			unit: self.unit,
+			price: self.price,
+			formul_code: self.formul_code,
+			formul_display: self.formul_name
+  		}
+  	end
 end

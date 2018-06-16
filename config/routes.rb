@@ -63,10 +63,14 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :mtemplates # 医嘱模板管理
     end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
+      collection do 
+        post :quote_orders
+      end
       member do
         get :all_prescriptions
       end
