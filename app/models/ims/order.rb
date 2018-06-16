@@ -115,13 +115,16 @@ class Ims::Order < ApplicationRecord
   	def get_order args={}
       begin
     		return {flag:false,:info=>"药店机构为空。"} if args[:order_id].blank?
-        order = Orders::Order.where("id = #{args[:order_id]} and target_org_id = #{args[:org_id]}")
-        return {flag:false,:info=>""} if order.blank?
+        order = Orders::Order.find args[:order_id] rescue nil #and target_org_id = #{args[:org_id]}
+        p order.blank?
+        return {flag:false,:info=>"未找到订单信息"} if order.blank?
+        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
+        p order.prescription_ids
         prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
         p prescriptions
         data = [{
           type:'订单',
-          order_id: id,
+          order_id: order.id,
           order_code: order.order_code,
           amt: order.net_amt,
           status: order.status,
