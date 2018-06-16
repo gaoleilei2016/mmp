@@ -2,7 +2,7 @@ class Orders::Order < ApplicationRecord
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
 	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
-	# belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'order_id'
+	belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'settle_id' , optional: true
 	
 	# has_many :perscripts, class_name: '', foreign_key: 'order_id'
 	# belongs_to :user, class_name: '::User', foreign_key: 'order_id'
@@ -14,6 +14,7 @@ class Orders::Order < ApplicationRecord
 #  updated_at DATETIME NOT NULL '更新时间',
 #  payment_at DATETIME NOT NULL '支付时间',
 #  drug_user varchar(20)  NULL '发药人',
+#  drug_user_id varchar(20)  NULL '发药人',
 #  end_time DATETIME NOT NULL '订单完成时间',
 #  close_time DATETIME NOT NULL '订单关闭时间',
 #  target_org_id VARCHAR(32) NOT NULL '目标机构编码',
@@ -29,7 +30,7 @@ class Orders::Order < ApplicationRecord
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
 #  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭',
+#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消',
 #  PRIMARY KEY ( id )
 #  )
 
@@ -37,6 +38,19 @@ class Orders::Order < ApplicationRecord
 	#订单金额
 	def net_amt
 		details.sum(:net_amt)
+	end
+	#药房
+	def pharmacy
+		::Admin::Organization.find(target_org_id) rescue nil
+	end
+	#医院
+	def pharmacy
+		::Admin::Organization.find(source_org_id) rescue nil
+	end
+
+	#取消订单
+	def cancel_order
+		update_attributes(status:'6')
 	end
 
 	class << self
@@ -105,6 +119,10 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("支付类别不能为空!")
 			end
+			if ::Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]).select{|x|x.order}.present?
+				result[:ret_code] = '-1'
+				result[:info].concat("处方包含有效订单，无法继续生成!")
+			end
 			if result[:ret_code].to_s == '0'
 			##通过处方拿到订单生成数据
 				presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
@@ -116,7 +134,7 @@ class Orders::Order < ApplicationRecord
 				 source_org_name: presc[:hospital_name].to_s,
 				 patient_name: presc[:person_name].to_s,
 				 patient_phone: presc[:phone].to_s,
-				 order_code: get_order_code(attrs[:pharmacy_id].to_s),
+				 order_code: get_order_code(presc[:hospital_id].to_s),
 				 doctor: presc[:doctor].to_s,
 				 user_id: attrs[:user_id].to_s,
 				 person_id: presc[:person_id].to_s,
@@ -124,14 +142,17 @@ class Orders::Order < ApplicationRecord
 				 status: '1'
 		 		)
 				presc[:details].each do |k,details|
-					order.prescriptions << ::Hospital::Prescription.find(k)
+					prescription = ::Hospital::Prescription.find(k)
+					order.prescriptions << prescription
+					prescription.order = order
+					prescription.save
 					details.each do |detail|
 						net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 						order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt}))
 					end
 				end
 				order.save
-				result[:info].concat("订单生成成功！请在#{(Time.now + 10.minutes)}之前完成订单支付")
+				result[:info].concat("订单生成成功！请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
 				result[:order] = order
 			end
 			result
@@ -151,6 +172,13 @@ class Orders::Order < ApplicationRecord
 			return {ret_code:'-1',info:'未找到需要更新的处方信息！'} unless detail
 			detail.update_attributes(attrs)
 			{ret_code:'0',info:'更新成功'} 
+		end
+
+		#取消订单
+		def cancel_order(attrs = {})
+			attrs = attrs.deep_symbolize_keys
+			order = self.where(:id=>attrs[:id]).last
+			order.update_attributes(status:'6')
 		end
 
 		#作废订单明细
@@ -193,7 +221,7 @@ class Orders::Order < ApplicationRecord
 			result
 		end
 
-		#订单完成（药房调用） attrs = {id:'',drug_user:'发药人',drug_user_id:'发药人id'}
+		#订单完成（药房调用） attrs = {id:'订单id',drug_user:'发药人',drug_user_id:'发药人id'}
 		def order_completion attrs = {}
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:''}
@@ -250,6 +278,7 @@ class Orders::Order < ApplicationRecord
 			end
 			Orders::Order.where(condtion).map{|order|  
 				{
+					id: order.id,
 					order_code: order.order_code,
 					amt: order.net_amt,
 					status: order.status,
