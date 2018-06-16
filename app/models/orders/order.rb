@@ -62,14 +62,14 @@ class Orders::Order < ApplicationRecord
 
 	#订单超时自动关闭
 	def close_order
-		update_attributes(status:'6')
+		update_attributes(status:'6',close_time:Time.now.to_s(:db))
 		prescriptions.each{|x| x.order = nil;x.save}
 		{ret_code:'0',info:'订单已超时，自动关闭。'}
 	end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
 	def order_settle pay_type = '1'
-		update_attributes(pay_type:pay_type,status:'2')
+		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
@@ -152,8 +152,12 @@ class Orders::Order < ApplicationRecord
 					end
 				end
 				order.save
-				result[:info].concat("订单生成成功！请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
+				result[:info].concat("订单生成成功！请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
 				result[:order] = order
+				if attrs[:payment_type] == 'online'
+					sch = ::Scheduler.new()
+					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.cancel_order({id:#{order.id.to_s}})")
+				end
 			end
 			result
 		end
@@ -174,11 +178,13 @@ class Orders::Order < ApplicationRecord
 			{ret_code:'0',info:'更新成功'} 
 		end
 
-		#取消订单
+		#取消订单(自动或者手动)
 		def cancel_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			order = self.where(:id=>attrs[:id]).last
-			order.update_attributes(status:'6')
+			if order.status.to_s == '1'
+				order.update_attributes(status:'6',close_time:Time.now.to_s(:db))
+			end
 		end
 
 		#作废订单明细

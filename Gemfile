@@ -12,7 +12,7 @@ gem 'rails', '~> 5.1.6'
 # gem 'sqlite3'
 gem 'therubyracer'
 
-# gem 'rufus-scheduler', '~> 3.5'
+gem 'rufus-scheduler', '~> 3.5'
 
 gem 'mysql2', '>= 0.3.18', '< 0.5'
 gem 'devise'
