@@ -13,6 +13,9 @@ class Pay::Wechat < ApplicationRecord
   # return_url(支付后返回路径)
   # status(订单状态 为success时是已支付)
   # status_desc(订单状态描述)
+
+  # status:=>{fail: '订单提交时出错或参数错误',succ:'订单提交成功,等待支付',
+  #   success:'已支付',ref_err:'退款出错', ref_succ:'退款成功'}
   class << self
     def payment(args)
       begin
@@ -66,6 +69,35 @@ class Pay::Wechat < ApplicationRecord
     return self.class.write_log_return({rec: self, state: :fail, msg: '支付失败', desc: "#{res['return_msg']}:#{res['err_code_des']}"}) unless res['result_code'].eql?('SUCCESS')
     return self.class.write_log_return({rec: self, state: :succ, msg: '请求成功, 请转到微信支付',  pay_url: res['mweb_url']}) if return_url.empty?
     self.class.write_log_return({rec: self, state: :succ, msg: '请转到微信支付',  pay_url: "#{res['mweb_url']}&redirect_url=#{return_url}"})
+  end
+
+  #微信退费
+  # 在服务器上导出
+  # openssl pkcs12 -clcerts -nokeys -in apiclient_cert.p12 -out apiclient_cert.pem
+  # openssl pkcs12 -nocerts -in apiclient_cert.p12 -out apiclient_key.pem
+  def send_cert_data(datas)
+    uri = URI(wx.refund_url)
+
+    file_root = "#{Rails.root}#{wx.cert_root}"
+    cert_cont = File.read(file_root)
+    p12       = OpenSSL::PKCS12.new(cert_cont, wx.mchid)
+    pk12_cert = p12.certificate.to_s
+    pk12_key  = p12.key.to_s
+    cert      = OpenSSL::X509::Certificate.new(pk12_cert)
+    key       = OpenSSL::PKey::RSA.new(pk12_key)
+
+    https             = Net::HTTP.new(uri.host, uri.port)
+    https.use_ssl     = true
+    https.cert        = cert
+    https.key         = key
+    https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    req      = Net::HTTP::Post.new(uri.path, initheader = {'Content-Type' => 'text/xml'})
+    req.body = datas
+    res      = https.request(req)
+
+    p '2222222222222222222222222', res.body
+    Hash.from_xml(res.body)['xml']
   end
 
   # 微信设置

@@ -3,16 +3,16 @@
 require 'alipay'
 
 class Pay::Alipay < ApplicationRecord
-  self.table_name = 'pay_alipays'
+  # self.table_name = 'pay_alipays'
 
-  validates_presence_of :out_trade_no, message: '订单号不能为空'
-  validates_presence_of :total_fee,    message: '订单金额不能为空'
-  validates_presence_of :title,        message: '订单标题不能为空'
+  # validates_presence_of :out_trade_no, message: '订单号不能为空'
+  # validates_presence_of :total_fee,    message: '订单金额不能为空'
+  # validates_presence_of :title,        message: '订单标题不能为空'
 
-  # cost_name(费用类别),
-  # return_url(支付后返回路径)
-  # status(订单状态 为success时是已支付)
-  # status_desc(订单状态描述)
+  # # cost_name(费用类别),
+  # # return_url(支付后返回路径)
+  # # status(订单状态 为success时是已支付)
+  # # status_desc(订单状态描述)
   class << self
     # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
     #   total_fee:'支付金额单位元(String)'}

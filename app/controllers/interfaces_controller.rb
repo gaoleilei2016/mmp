@@ -3,12 +3,22 @@ class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
 	def get_orders
+		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
+		ret = []
+		orders.each{|o|
+			re = JSON.parse(o.to_json)
+			re[:drugs] = o.details
+			re[:organ] = ::Admin::Organization.find(o.target_org_id)
+			re[:total_price] = o.net_amt
+			ret<<re
+		}
+		render json:{flag:true,rows:ret,total:orders.total_count}
 	end
 	def pay_order
 		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
-		# order.net_amt
-		args = {out_trade_no: Time.now.to_i.to_s, total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/customer/portal/pay?id=#{order.id}"}
+		# order.net_amt ##订单号用机构id+订单号
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/pay/confirm/#{order.order_code}?type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
@@ -24,12 +34,11 @@ class InterfacesController < ApplicationController
 		end
 	end
 	def save_order
-		p '~~~~~~~~~',params
 		params[:order][:user_id] = current_user.id
-		p '~~~~~~~~~',params
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		# p '~~~~~~~~~~',re
-		redirect_to "/customer/portal/pay?id=#{re.id}"
+		raise re[:info] if re[:ret_code]!='0'
+		# p '~~~~~~~~~~~~',re
+		redirect_to "/customer/portal/pay?id=#{re[:order].id}"
 	end
 	# 获取用户购物车
 	def get_prescriptions_cart
@@ -83,13 +92,14 @@ class InterfacesController < ApplicationController
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
 			recents = ::Admin::Organization.recent_lists(args)
+			p '~~~~~~~~~~',recents
 			if recents[:state] == :succ
 				re = JSON.parse(recents[:res][0][:org].to_json)
 				re['distance'] = recents[:res][0][:distance]
 				# p '~~~~~~~~~~~',re
 				render json:{flag:true,pharmacy:re,type:"near"}
 			else
-				render json:{flag:false,info:"定位错误，请自选药房",type:"near"}
+				render json:{flag:false,info:recents[:desc],type:"near"}
 			end
 		end
 	end

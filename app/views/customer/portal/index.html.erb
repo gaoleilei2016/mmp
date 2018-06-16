@@ -108,10 +108,10 @@
 					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
 				</div>
 			</div>
-			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
-				<p style="font-size: 12px;">{{current_pharmacy.distance||"　"}}</p>
-			</div>
+				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
+			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
@@ -207,6 +207,7 @@
 							_this.current_pharmacy = json.pharmacy;
 							_this.current_pharmacy.sele_type = json.type;
 						}else{
+							_this.current_pharmacy = {name:"定位失败"};
 							mui.toast(json.info);
 						}
 					},
@@ -240,6 +241,7 @@
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
 						_this.current_pharmacy = item;
+						_this.current_pharmacy.sele_type = "self";
 						$(".mui-icon-arrowleft").click();
 					},
 					complete:function() {

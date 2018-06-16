@@ -1,3 +1,5 @@
+#定时器
+#参考https://github.com/jmettraux/rufus-scheduler
 class Scheduler
 	require 'rufus-scheduler'
 

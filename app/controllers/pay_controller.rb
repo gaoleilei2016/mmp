@@ -5,6 +5,21 @@ class PayController < ApplicationController
 
   layout false
   
+  def confirm
+    if params[:id]
+      rec = Pay::Alipay.find_by(out_trade_no: params[:id]) if params[:type].eql?('Alipay')
+      rec = Pay::Wechat.find_by(out_trade_no: params[:id]) if params[:type].eql?('Wechat')
+      if rec&.paid?
+        flash[:notice] = '订单已支付'
+        redirect_to '/'
+      else
+        redirect_to "/customer/portal/pay?id=#{params[:id]}"        
+      end
+    else
+      redirect_to '/'
+    end
+  end
+
   #接收微信支付通知
   def wechat
     begin

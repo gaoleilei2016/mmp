@@ -42,10 +42,12 @@ Rails.application.routes.draw do
       collection do
         get :prescriptions
         get :orders
+        get :order
       end
     end
     resources :portal do
       collection do
+        get :map
         get :settlement
         get :pay
       end
@@ -113,12 +115,13 @@ Rails.application.routes.draw do
 
   ########### hujun_start ##########
   # mount Pay::Api => '/'
-  match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
+  # match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
   match '/pay/wechat', to: 'pay#wechat', via: [:post]
   match '/pay/alipay', to: 'pay#alipay', via: [:post]
 
-  match '/pay/index',  to: 'pay#index',  via: [:get]
-  match '/pay/wx/pay', to: 'pay#wx', via: [:post]
-  match '/pay/ali/pay', to: 'pay#ali', via: [:post]
+  match '/pay/confirm/:id', to: 'pay#confirm', via: [:get]
+  match '/pay/index',       to: 'pay#index',   via: [:get]
+  match '/pay/wx/pay',      to: 'pay#wx',      via: [:post]
+  match '/pay/ali/pay',     to: 'pay#ali',     via: [:post]
   ########### hujun_end   ##########
 end

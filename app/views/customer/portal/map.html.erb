@@ -1,0 +1,81 @@
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title"><%= params[:name] %></h1>
+</header>
+<div class="mui-content" id="vue_content">
+	<div style="height: calc( 100% );padding: 6px;">
+		<div id="map_use_div" style="height: 100%;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() {
+		var map = new BMap.Map("map_use_div");
+		// var point = new BMap.Point(106.7091771,26.62990674);
+		// map.centerAndZoom(point,12);
+		map.enableScrollWheelZoom(true);
+		var new_point = new BMap.Point("<%= params[:lng] %>","<%= params[:lat] %>");
+		var marker = new BMap.Marker(new_point);
+		map.addOverlay(marker);
+		map.centerAndZoom(new_point,14);
+
+		var navigationControl = new BMap.NavigationControl({
+			// 靠左上角位置
+			anchor: BMAP_ANCHOR_TOP_LEFT,
+			// LARGE类型
+			type: BMAP_NAVIGATION_CONTROL_LARGE,
+			// 启用显示定位
+			enableGeolocation: true
+		});
+		map.addControl(navigationControl);
+		// 添加定位控件
+		var geolocationControl = new BMap.GeolocationControl();
+		geolocationControl.addEventListener("locationSuccess", function(e){
+			// // 定位成功事件
+			// var address = '';
+			// address += e.addressComponent.province;
+			// address += e.addressComponent.city;
+			// address += e.addressComponent.district;
+			// address += e.addressComponent.street;
+			// address += e.addressComponent.streetNumber;
+			// alert("当前定位地址为：" + address);
+		});
+		geolocationControl.addEventListener("locationError",function(e){
+			// 定位失败事件
+			alert(e.message);
+		});
+		map.addControl(geolocationControl);
+
+		// map.panTo(new_point);  
+		// var myGeo = new BMap.Geocoder();    
+		// map.addEventListener("click", function(e){        
+		// 	var pt = e.point;
+		// 	myGeo.getLocation(pt, function(rs){
+		// 		// _this.search_str = rs.address;
+		// 		// _this.click_to_fill = true;
+		// 		// _this.point = rs.point;
+		// 		console.log( '~~~~~~~~~ click',rs );
+		// 	});
+		// 	map.centerAndZoom(pt);
+		// 	map.clearOverlays();
+		// 	map.addOverlay(new BMap.Marker(pt));
+		// });
+	})
+</script>

@@ -9,10 +9,6 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended that you check this file into your version control system.
-<<<<<<< HEAD
-
-=======
->>>>>>> 5257f8a634826035d2e6b42f9fd4d9bc5f27d4da
 
 ActiveRecord::Schema.define(version: 20180615135030) do
 
@@ -562,8 +558,4 @@ ActiveRecord::Schema.define(version: 20180615135030) do
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-<<<<<<< HEAD
-
-=======
->>>>>>> 5257f8a634826035d2e6b42f9fd4d9bc5f27d4da
 end
