@@ -125,12 +125,13 @@ class Hospital::PrescriptionsController < ApplicationController
     ret = []
     ::Hospital::Interface.get_prescription(cur_phone).each do |_prescription|
       re = JSON.parse(_prescription.to_json)
-      total_price = 0.0
-      orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      re[:total_price] = total_price
-      re[:orders] = orders
-      re[:organ] = Admin::Organization.find(_prescription.organization_id)
-      ret << re
+      # total_price = 0.0
+      # orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      # re[:total_price] = total_price
+      # re[:orders] = orders
+      # re[:organ] = Admin::Organization.find(_prescription.organization_id)
+      # ret << re
+      ret << _prescription.to_web_front
     end
     render json: {flag: true, info: "success", data: ret}
   end

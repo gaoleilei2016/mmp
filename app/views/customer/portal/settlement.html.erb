@@ -66,7 +66,7 @@
 				<div class="mui-media-body">
 					抵用券
 					<span class='mui-pull-right' style="color: #999;">暂无可用</span>
-					<!-- <span class='mui-pull-right' style="color: red;">-5 元</span> -->
+					<!-- <span class='mui-pull-right' style="color: #F55742;">-5 元</span> -->
 				</div>
 			</a>
 		</li>
@@ -78,8 +78,8 @@
 		</li>
 	</ul>
 	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 998;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
-		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: red;height: 100%;text-align: center;">提交订单</a>
-		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: red;">¥ {{format_float(prescription.total_price)}}</span></div>
+		<a href="javascript:;" @click="submit_form" style="float: right;width: 130px;color: #fff;background: #F55742;height: 100%;text-align: center;">提交订单</a>
+		<div style="overflow: hidden;padding-right: 10px;text-align: right;">总金额 <span style="color: #F55742;">¥ {{format_float(prescription.total_price)}}</span></div>
 	</div>
 	<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
 		<input type="text" name="order[payment_type]" v-model="pay_type">

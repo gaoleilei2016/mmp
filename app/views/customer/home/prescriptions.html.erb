@@ -13,6 +13,9 @@
 	.mui-table-view.no_background:after{
 		background: none;
 	}
+	.mui-table-view:after,.mui-table-view:before{
+		height: 1px;
+	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
 	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
@@ -27,7 +30,10 @@
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 				<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
-					<span>{{item.organ.name}}</span>
+					<div>
+						<span>{{item.org.name}}</span>
+						<span style="float: right;">{{item.created_at}}</span>
+					</div>
 					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{item.type_display}}</p>
 				</div>
 			</div>
