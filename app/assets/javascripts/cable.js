@@ -8,6 +8,5 @@
   this.App || (this.App = {});
 
   App.cable = ActionCable.createConsumer();
-  ActionCable.startDebugging(); // 启用调试
 
 }).call(this);

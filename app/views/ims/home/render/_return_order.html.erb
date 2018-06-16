@@ -13,28 +13,32 @@
 					</div>
 
 					<div class="el-row prescription_list_fun">
-						<div class="el-col el-col-12 list_fun_panel" stat="W" v-on:click="get_pres('W',$event)">已发药</div>
-						<div class="el-col el-col-12 list_fun_panel" stat="T" v-on:click="get_pres('T',$event)">已退药</div>
+						<div class="el-col el-col-12 list_fun_panel" stat="3" v-on:click="get_pres('3',$event)">已发药</div>
+						<div class="el-col el-col-12 list_fun_panel" stat="4" v-on:click="get_pres('4',$event)">已退药</div>
 					</div>
 
 					<div class="prescription_list">
 						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
+							<p class="el-col el-col-24" v-for="pre in return_pres" v-bind:id="pre.id" v-on:click="get_pre(pre.order_code,$event)">
+								<span class="el-col el-col-8" style="overflow:hidden; display:block; float:left;">{{pre.order_code}}</span>
+								<span class="el-col el-col-8 text-center" style="display:block; float:left;">{{pre.patient_name}}</span>
+								<span class="el-col el-col-8 text-right" style="display:block; float:left;">{{format_price(pre.amt)}}</span>
+							</p>
 						</div>
 					</div>
 				</div>
 
 				<div class="el-col el-col-16" style="height: 100%;">
 					<div style="height:30px;">
-						<el-tabs v-model="editableTabsValue2" type="card" @tab-click="choose_prescription">
+						<el-tabs v-model="return_tab_header" type="card" @tab-click="return_choose_prescription">
 						  <el-tab-pane
-						    v-for="(item, index) in editableTabs2"
+						    v-for="(item, index) in return_tab_header_data"
 						    :key="item.id"
 						    :label="item.title"
 						  ></el-tab-pane>
 						</el-tabs>
 					</div>
-					<div class="prescription_content" v-for="(info,index) in detail" style="height:calc(100% - 30px)">
+					<div class="prescription_content" v-for="(info,index) in return_detail" style="height:calc(100% - 30px)">
 						<div class="prescription_form_title separate">
 							<div class="receipt_drug_label">
 									<h3 v-if="info.header.status == 'P'">未发药</h3>

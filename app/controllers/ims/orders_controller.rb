@@ -70,10 +70,21 @@ class Ims::OrdersController < ApplicationController
 
   def get_orders
     #搜索平台的 订单 处方
-    type = "1"
+    case params[:stat].to_s
+    when '1' #未交费
+      type = "1"
+    when '2' #待发药
+      type = "2"
+    when '3' #已发药
+      type = ""
+    when '4' #已退药
+      type = ""
+    else
+      type = ""
+    end
     org_id = ""#current_user.organization_id rescue ""
     order_code = ""#取药码  可以没有
-    @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
+    data  = []
     if params[:platform]
       data = [
         {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
@@ -84,10 +95,17 @@ class Ims::OrdersController < ApplicationController
 
     #搜索药店的 订单 处方
     if params[:stat]
-      data  = []
-      @data.map{|line| data<<{id:line[:prescriptions_id],code:line[:order_code],name:"",amount:line[:amt]}}
+      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
+      # @data.map{|line| data<<{
+      #   id:line[:prescriptions_id],
+      #   code:line[:order_code],
+      #   name:line[:patient_name],
+      #   amount:line[:amt],
+      #   pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
+      #   }
+      # }
     end
-    render json:data.to_json
+    render json:@data.to_json
   end
 
   def get_order

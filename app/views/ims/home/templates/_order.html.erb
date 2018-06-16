@@ -76,23 +76,25 @@ window.current_template_obj = {
 	data:function(){
 		return {
 			isCollapse: false,
+      return_pres:[],
+      return_detail:[],
 			pres:[],
-			editableTabsValue2: '0',
-      editableTabs2: [],			
-			input21: '',
-			setting: {},
-			options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
-			token:"<%= %>",
-			dialogFormVisible: false,
-			tableData_plat:[],
-        form: {
-          name: '',
-        },
-        formLabelWidth: '120px',
 			detail:[{
 				header:{},
 				lines:[{}]
 			}],
+      tab_header: '0', return_tab_header: '0',
+      tab_header_data: [],return_tab_header_data: [],      
+      input21: '',
+      setting: {},
+      options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
+      token:"<%= %>",
+      dialogFormVisible: false,
+      tableData_plat:[],
+        form: {
+          name: '',
+        },
+        formLabelWidth: '120px',
 			rules: {
 				validity: [
 		      { required: true, message: '效期不能为空'},
@@ -108,22 +110,38 @@ window.current_template_obj = {
 	},
 	methods:{
     init:function(){
-      console.log("init")
-      // this.$http.get('/ims/orders/get_orders?stat='+stat+'&search='+val).then(successCallback,errorCallback);
+      $("div.list_fun_panel[stat='1']").addClass("active");
+      stat = ""
+      this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response){
+        this._data.pres =response.data;
+      },this.errorCallback);
+    },
+    errorCallback:function(response){
+      this.$notify({
+        title: '提示',
+        message: '服务器请求出错了',
+        duration: 0
+      });
     },
 		show_panel:function(method){
-			console.log(method)
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
-      console.log(str)
       $(document).find(str).show();
+      // this._data.tab_header_data = []
+      // this._data.detail = []
 		},
 		choose_prescription:function(){
-			number = this.editableTabsValue2
-			tab_val = this.editableTabs2[number]
+			number = this.tab_header
+			tab_val = this.tab_header_data[number]
 			console.log(tab_val.id)
 			this.get_detail(tab_val.id)
 		},
+    return_choose_prescription:function(){
+      number = this.tab_header
+      tab_val = this.tab_header_data[number]
+      console.log(tab_val.id)
+      this.get_detail(tab_val.id)
+    },    
       handleOpen:function(key, keyPath) {
         console.log(key, keyPath);
       },
@@ -189,7 +207,7 @@ window.current_template_obj = {
     	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
     	if (!stat) {stat=""};
       this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
-        this.set_pres(response.data)
+        if(response.data&&response.data.length>0) this.set_pres(response.data)
       },function(response){
         this.set_pres()
         this.$notify({
@@ -205,6 +223,8 @@ window.current_template_obj = {
     },
     get_pre:function (id,e) {
     	var _this = this;
+      this._data.tab_header_data = []
+      this._data.detail = []   
     	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
     	if (!id) {
     		id="";
@@ -216,8 +236,8 @@ window.current_template_obj = {
         return ""
     	};
       this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
-        this._data.editableTabs2 = response.data
-        setTimeout(function(){ _this.get_detail(_this.editableTabs2[_this.editableTabsValue2] )},300)
+        this._data.tab_header_data = response.data
+        setTimeout(function(){ _this.get_detail(_this.tab_header_data[_this.tab_header] )},300)
       },function(response){
         this.$notify({
           title: '提示',
