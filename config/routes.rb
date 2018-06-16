@@ -111,7 +111,6 @@ Rails.application.routes.draw do
   ############################
 
   ########### hujun_start ##########
-  # mount Pay::Api => '/'
   # match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
   match '/pay/wechat', to: 'pay#wechat', via: [:post]
   match '/pay/alipay', to: 'pay#alipay', via: [:post]
@@ -120,5 +119,8 @@ Rails.application.routes.draw do
   match '/pay/index',       to: 'pay#index',   via: [:get]
   match '/pay/wx/pay',      to: 'pay#wx',      via: [:post]
   match '/pay/ali/pay',     to: 'pay#ali',     via: [:post]
+
+  match '/refund/wechat', to: 'refund#wechat', via: [:post]
+  match '/refund/alipay', to: 'refund#alipay', via: [:post]
   ########### hujun_end   ##########
 end
