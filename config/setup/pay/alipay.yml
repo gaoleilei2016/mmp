@@ -11,7 +11,8 @@ defaults: &defaults
   sign_type: RSA2
   product_code: 2018060810537243
   version: 1.0
-  notify_url: http://mmp.tenmind.com
+  domain_name: http://mmp.tenmind.com
+  notify_url: http://mmp.tenmind.com/pay/alipay
   return_url: http://mmp.tenmind.com
   public_key_root: <%= "#{Rails.root}/app/models/pay/alipay/alipay.pem" %>
   private_key_root: <%= "#{Rails.root}/app/models/pay/alipay/rsa_private_key.pem" %>

@@ -10,6 +10,11 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :get_orders
+      post :pay_order
+      post :save_order
+      get :get_prescriptions_cart
+      get :set_prescriptions_cart
       get :set_current_pharmacy
       get :get_current_pharmacy
       get :get_pharmacy
@@ -33,10 +38,16 @@ Rails.application.routes.draw do
   ############################
   ########### customer 个人中心 客户 ##########
   namespace :customer do
-    resources :home
+    resources :home do
+      collection do
+        get :prescriptions
+        get :orders
+      end
+    end
     resources :portal do
       collection do
         get :settlement
+        get :pay
       end
     end
     resources :report
@@ -69,6 +80,7 @@ Rails.application.routes.draw do
     # 处方
     resources :prescriptions do
       collection do
+        get :get_all_prescriptions_by_phone
         get :get_prescriptions_by_phone
       end
       member do
@@ -100,6 +112,13 @@ Rails.application.routes.draw do
   ############################
 
   ########### hujun_start ##########
+  # mount Pay::Api => '/'
   match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
+  match '/pay/wechat', to: 'pay#wechat', via: [:post]
+  match '/pay/alipay', to: 'pay#alipay', via: [:post]
+
+  match '/pay/index',  to: 'pay#index',  via: [:get]
+  match '/pay/wx/pay', to: 'pay#wx', via: [:post]
+  match '/pay/ali/pay', to: 'pay#ali', via: [:post]
   ########### hujun_end   ##########
 end

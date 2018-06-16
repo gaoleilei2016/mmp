@@ -1,0 +1,75 @@
+<template>
+	<div>
+		<div style="padding-bottom: 6px;">
+			<el-input v-model="search_str" size="small" style="width: 300px;" placeholder="街道地址"></el-input>
+			经度：{{point.lng}}
+			纬度：{{point.lat}}
+		</div>
+		<div style="height: calc( 100% - 38px );padding: 0 6px 6px 0;">
+			<div id="map_use_div" style="height: 100%;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
+		</div>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function() {
+		return {
+			point:{},
+			search_str:'',
+		};
+	},
+	watch:{
+		search_str:function(val) {
+			var _this = this;
+			if (_this.click_to_fill) {
+				_this.click_to_fill = false;
+			}else{
+				var map = _this.map;
+				var myGeo = new BMap.Geocoder();
+				myGeo.getPoint(val, function(point){
+					if (point) {
+							map.centerAndZoom(point);
+							map.clearOverlays();
+							map.addOverlay(new BMap.Marker(point));
+							myGeo.getLocation(point, function(rs){
+								_this.point = rs.point;
+								console.log( '~~~~~~~~~ search',rs );
+							});
+					}else{
+						// alert("您选择地址没有解析到结果!");
+					}
+				}, "贵阳市");
+			}
+		},
+	},
+	methods:{
+		init_map:function() {
+			var _this = this;
+			$(function() {
+				_this.map = new BMap.Map("map_use_div");
+				var map = _this.map;
+				var point = new BMap.Point(106.7091771,26.62990674);
+				map.centerAndZoom(point,12);
+				map.enableScrollWheelZoom(true);
+				var myGeo = new BMap.Geocoder();    
+				map.addEventListener("click", function(e){        
+					var pt = e.point;
+					myGeo.getLocation(pt, function(rs){
+						_this.search_str = rs.address;
+						_this.click_to_fill = true;
+						_this.point = rs.point;
+						console.log( '~~~~~~~~~ click',rs );
+					});
+					map.centerAndZoom(pt);
+					map.clearOverlays();
+					map.addOverlay(new BMap.Marker(pt));
+				});
+			})
+		}
+	},
+	mounted:function() {
+		var _this = this;
+		_this.init_map();
+	}
+}
+</script>

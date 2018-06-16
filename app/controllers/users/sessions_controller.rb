@@ -7,6 +7,7 @@ class Users::SessionsController < Devise::SessionsController
 
   # GET /resource/sign_in
   def new
+    flash[:login] = params[:login] if params[:login].present?
     str = request.user_agent
     if str.include?('Mobile')
       render "/devise/sessions/new2.html.erb",layout:"customer"
