@@ -54,12 +54,23 @@ class Orders::Order < ApplicationRecord
 
 	#取消订单 Orders::Order.find(id).cancel_order()
 	def cancel_order
+		# ['']
+		update_attributes(status:'7')
+		prescriptions.each{|x| x.order = nil;x.save}
+		{ret_code:'0',info:'订单已取消。'}
+	end
+
+	#订单超时自动关闭
+	def close_order
 		update_attributes(status:'6')
+		prescriptions.each{|x| x.order = nil;x.save}
+		{ret_code:'0',info:'订单已超时，自动关闭。'}
 	end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
 	def order_settle pay_type = '1'
 		update_attributes(pay_type:pay_type,status:'2')
+		{ret_code:'0',info:'订单结算成功！'}
 	end
 
 	class << self
