@@ -100,7 +100,7 @@ class Orders::Order < ApplicationRecord
 			if result[:ret_code].to_s == '0'
 			##通过处方拿到订单生成数据
 				presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
-				Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
+				# Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
 				order = self.create(
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
