@@ -168,7 +168,7 @@ const home = Vue.extend({
           duration: 0
         });
       }
-      this.$http.get('/ims/orders/get_orders?status='+stat).then(successCallback,errorCallback);
+      this.$http.get('/ims/orders/get_orders?stat='+stat).then(successCallback,errorCallback);
     },
     set_pres:function(data){
     	this._data.pres = data

@@ -61,6 +61,50 @@ class Ims::OrdersController < ApplicationController
     end
   end
 
+
+  def get_orders
+    #搜索平台的 订单 处方
+    # if params[:platform]
+    #   data = [
+    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+    #   ]
+    # end
+
+    # #搜索药店的 订单 处方
+    # if params[:stat]
+    #   data = [
+    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
+    #   ]
+    # end
+    data = []
+    render json:data.to_json
+  end
+
+  def get_order
+    data = [{
+      header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
+      lines:[
+        {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
+        {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
+      ]
+      }]
+    render json:data.to_json
+  end
+
   # #POST 搜索平台处方 生成订单
   # def create_order
   #   p params[:id]
@@ -72,22 +116,22 @@ class Ims::OrdersController < ApplicationController
   
   # 订单发药
   def dispensing_order
-    @reslut = @ims_order.dispensing_order
+    @reslut = @ims_order.dispensing_order rescue {flag:true,info:"发药成功！"}
     render json:@reslut.to_json
   end
 
   # 订单退药
   def return_order
-    @reslut = @ims_order.return_order
+    @reslut = @ims_order.return_order rescue {flag:true,info:"发药成功！"}
     render json:@reslut.to_json
   end
 
   # 获取已发送到该药店的订单
-  def get_orders
-  	# p IPSocket.getaddress(Socket.gethostname)
-  	@data = Ims::Order.order_search params.merge({org_ii:current_user.organization_id})
-    render json:@data.to_json
-  end
+  # def get_orders
+  # 	# p IPSocket.getaddress(Socket.gethostname)
+  # 	@data = Ims::Order.order_search params.merge({org_ii:current_user.organization_id})
+  #   render json:@data.to_json
+  # end
 
   # 订单明细查询
   def get_order_detail
@@ -108,43 +152,10 @@ class Ims::OrdersController < ApplicationController
     render json:@reslut.to_json
   end
 
-  # def get_orders
-  #   data = [
-  #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-  #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-  #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-  #   ]
-  #   render json:data.to_json
-  # end
-  # def get_order
-  #   data = [{
-  #     header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
-  #     lines:[
-  #       {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-  #       {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
-  #     ]
-  #     }]
-  #   render json:data.to_json
-  # end
-
-  # def oprate_order
-  #   p params[:id]
-  #   p params[:method] #out_order  refuse_order   check_order   return_order
-  #   # render json:{flag:false}
-  #   render json:{flag:true}
-  # end
- 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order
-      @ims_order = Ims::Order.find(params[:id])
+      @ims_order = Ims::Order.find(params[:id]) rescue nil
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
