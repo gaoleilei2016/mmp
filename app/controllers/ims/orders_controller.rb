@@ -92,22 +92,14 @@ class Ims::OrdersController < ApplicationController
         code:line[:order_code],
         name:line[:patient_name],
         amount:line[:amt],
-        pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
         }
       }      
     end
 
     #搜索药店的 订单 处方
     if params[:stat]
-      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
-      @data.map{|line| data<<{
-        id:line[:prescriptions_id],
-        code:line[:order_code],
-        name:line[:patient_name],
-        amount:line[:amt],
-        pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
-        }
-      }
+      attrs = {type: params[:stat],org_id: current_user.try(:target_org_id)}
+      @data = Ims::Order.order_search attrs
     end
     render json:@data.to_json
   end
@@ -120,7 +112,6 @@ class Ims::OrdersController < ApplicationController
       code:line[:order_code],
       title:line[:patient_name],
       amount:line[:amt],
-      pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
       }
     }
     render json:data.to_json
