@@ -1,8 +1,20 @@
 module ::Hospital::Interface
   # => 根据电话号获取处方单
-  def self.get_prescription(phone)
+  def self.get_prescriptions_by_phone(phone)
     ::Hospital::Prescription.find_by_sql("SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone}")
   end
+
+
+
+  # 根据处方ids 获取处方信息
+  def self.get_prescriptions_by_ids(prescription_ids)
+    ret = {}
+    prescription_ids.each do |_prescription_id|
+      ret[_prescription_id] = ::Hospital::Prescription.find(_prescription_id).to_web_front
+    end
+    return ret
+  end
+
 
 
 #   attrs = { 
@@ -23,18 +35,6 @@ module ::Hospital::Interface
 #     dosage:'剂型'
 #   ]
 # }
-
-
-  def self.get_prescription_by_ids(prescription_ids)
-    ret = {}
-    prescription_ids.each do |_prescription_id|
-      ret[_prescription_id] = ::Hospital::Prescription.find(_prescription_id).to_web_front
-    end
-    return ret
-  end
-
-
-
   # 处方转账单
   def self.prescription_to_order(prescription_ids)
     ret = {}
