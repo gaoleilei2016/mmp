@@ -131,6 +131,13 @@ class Ims::Order < ApplicationRecord
   	end
 
   	# 未指定药店的订单查询(未在平台上操作的患者也能在药店客户端协助患者自选药品购药)[可能查到]
+    def get_prescription_or_order_data args = {}
+      i_days = 6
+      attrs = {search:args[:search],i_days:i_days,org_id:args[:org_id]}
+      data = Ims::GetData.find_data attrs
+      p data
+      data.map{|e| }
+    end
 
 
     # 订单明细信息及处方信息查询
@@ -177,7 +184,7 @@ class Ims::Order < ApplicationRecord
               }
           }, 
           {
-            type:'订单',
+            type:'处方',
             prescriptions:prescriptions
           }]
         return {flag:true,:data=>data}
