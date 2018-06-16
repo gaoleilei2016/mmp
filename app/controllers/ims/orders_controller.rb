@@ -1,5 +1,5 @@
 class Ims::OrdersController < ApplicationController
-  # before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order]
+  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order, :oprate_order]
 
   # GET /ims/orders
   # GET /ims/orders.json
@@ -147,36 +147,60 @@ class Ims::OrdersController < ApplicationController
     render json:data
   end
 
-  #POST 搜索平台处方 生成订单
-  def create_order
-    p params[:id]
-    p params[:method] #out_order  refuse_order   check_order   return_order
-    # render json:{flag:false}
-    new_order = [{id:"102101200",code:"1250201",name:"王晓伟",amount:"23.43"}]
-    render json:new_order
-  end
+  # #POST 搜索平台处方 生成订单
+  # def create_order
+  #   p params[:id]
+  #   p params[:method] #out_order  refuse_order   check_order   return_order
+  #   # render json:{flag:false}
+  #   new_order = [{id:"102101200",code:"1250201",name:"王晓伟",amount:"23.43"}]
+  #   render json:new_order
+  # end
   
   # 订单发药
   def dispensing_order
-    
-    drug_user = current_user
-    order_id = params[:order_id]
-    Orders::Order.order_completion({id:'订单id',drug_user:'发药人',drug_user_id:'发药人id'})
+    @reslut = @ims_order.dispensing_order rescue {flag:true,info:"发药成功！"}
+    render json:@reslut.to_json
     # @reslut = @ims_order.dispensing_order
     # render json:@reslut.to_json
-    render json:{flag:true, info:"发药成功！"}
+    # render json:{flag:true, info:"发药成功！"}
   end
 
   # 订单退药
   def return_order
-    @reslut = @ims_order.return_order
+    @reslut = @ims_order.return_order rescue {flag:true,info:"发药成功！"}
+    render json:@reslut.to_json
+  end
+
+  # 获取已发送到该药店的订单
+  # def get_orders
+  # 	# p IPSocket.getaddress(Socket.gethostname)
+  # 	@data = Ims::Order.order_search params.merge({org_ii:current_user.organization_id})
+  #   render json:@data.to_json
+  # end
+
+  # 订单明细查询
+  def get_order_detail
+  	@data = Ims::Order.get_order_detail params.merge({org_ii:current_user.organization_id})
+    render json:@data.to_json
+  end
+
+  # 订单操作(发药、退药、、、)
+  def oprate_order
+  	case params[:method]
+  	when 'out_order'
+  		@reslut = @ims_order.dispensing_order
+  	when 'return_order'
+  		@reslut = @ims_order.return_order
+  	else
+  		@reslut ={false:false,info:"该操作未处理。"}
+  	end
     render json:@reslut.to_json
   end
 
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order
-      @ims_order = Ims::Order.find(params[:id])
+      @ims_order = Ims::Order.find(params[:id]) rescue nil
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.

@@ -9,6 +9,7 @@ class CreateImsOrders < ActiveRecord::Migration[5.1]
       t.string :target_org_name
       t.string :patient_order_id
       t.string :order_code
+      t.string :author_name
       t.string :patient_name
       t.integer :repeat_number
       t.float :total_amount

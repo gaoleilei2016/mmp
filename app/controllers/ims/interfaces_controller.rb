@@ -15,7 +15,6 @@ class Ims::InterfacesController < Admin::User::SessionsController
   def receive_order
     response.headers['Access-Control-Allow-Origin'] = '*'
     # departments = RestClient::Resource.new "http://#{localhost}/hr/hr_interfaces/departments.json?org_ii="+current_user.org_ii #'http://199.199.199.233:3000/hr/hr_interfaces/organizations.json'
-    p params
     received = Ims::Order.receive_order params
     render json:received.to_json
   end

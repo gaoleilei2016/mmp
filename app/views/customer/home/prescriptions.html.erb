@@ -1,0 +1,84 @@
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">我的处方</h1>
+</header>
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+</style>
+<div class="mui-content" id="vue_content">
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
+		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+			<div>
+				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+				<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+				<div class="mui-media-body">
+					<span>{{item.organ.name}}</span>
+					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{item.type_display}}</p>
+				</div>
+			</div>
+			<ul class="mui-table-view" style="margin: 15px 0;">
+				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
+					<div href="javascript:;" class="">
+						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+						<div class="mui-media-body">
+							{{drug.title}}
+							<p class="mui-ellipsis">
+								{{drug.specification}}
+								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+							</p>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div style="line-height: 33px;">
+				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
+			</div>
+		</li>
+	</ul>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			prescriptions:[],
+		},
+		methods:{
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_prescriptions:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/hospital/prescriptions/get_all_prescriptions_by_phone?phone=<%= current_user.login %>',
+					success:function(json) {
+						if (json.flag) {
+							_this.prescriptions = json.data;
+						}else{
+							_this.$message(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("处方获取失败");
+					}
+				})
+			},
+		},
+		mounted:function() {
+			this.get_prescriptions();
+		}
+	})
+</script>
