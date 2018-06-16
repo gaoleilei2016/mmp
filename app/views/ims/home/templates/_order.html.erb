@@ -41,17 +41,15 @@ body > .container{
 		  </el-menu-item>
 
 		  <el-menu-item index="4" @click="show_panel('settings')">
-		    <i class="el-icon-search"></i>
+		    <i class="el-icon-setting"></i>
 		    <span slot="title">设置</span>
 		  </el-menu-item>
 		  
-		  <el-menu-item index="5" @click="dialogFormVisible = true">
+<!-- 		  <el-menu-item index="5" @click="dialogFormVisible = true">
 		    <i class="el-icon-search"></i>
 		    <span slot="title">搜索平台</span>
-		  </el-menu-item>
-
+		  </el-menu-item> -->
 		</el-menu>
-
 
 		<div class="function_panel out_order" style="height:100%;">
 			<%= render "ims/home/render/out_order"%>
@@ -79,6 +77,7 @@ window.current_template_obj = {
       return_pres:[],
       return_detail:[],
 			pres:[],
+      pre_detail:[],
 			detail:[{
 				header:{},
 				lines:[{}]
@@ -91,6 +90,7 @@ window.current_template_obj = {
       token:"<%= %>",
       dialogFormVisible: false,
       tableData_plat:[],
+      activeCollapse: "patientinfo1",
         form: {
           name: '',
         },
@@ -135,8 +135,8 @@ window.current_template_obj = {
         }]
       },
       value6: '',
-      value7: ''
-
+      value7: '',
+      report_type:[]
 		}
 	},
 	methods:{

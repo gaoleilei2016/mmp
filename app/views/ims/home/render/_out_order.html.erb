@@ -19,7 +19,7 @@
 
 					<div class="prescription_list">
 						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.order_code,$event)">
+							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)">
 								<span class="el-col el-col-8" style="overflow:hidden; display:block; float:left;">{{pre.order_code}}</span>
 								<span class="el-col el-col-8 text-center" style="display:block; float:left;">{{pre.patient_name}}</span>
 								<span class="el-col el-col-8 text-right" style="display:block; float:left;">{{format_price(pre.amt)}}</span>
@@ -48,12 +48,12 @@
 							</div>
 							<input type="hidden" id="prescription_id" v-bind:value="info.header.id">
 							<h3 style="">
-								<b class="prescription_source_type"><%= current_user.try(:org_name)%></b><br>
+								<b class="prescription_source_type"><%= current_user.try(:organization).try(:name)%></b><br>
 								<b>药品订单</b>
 							</h3>
 							<span class="prescription_reg_style">{{info.header.type_display}}</span>
 					  	<div class="el-row" style="font-size:15px; overflow:hidden; padding:6px;">
-						  	<div class="el-col-12 prescription_code text-left"><b style="color:red;opacity:0.7;">NO.<span>{{info.header.return_drug ? info.header.ori_code : info.header.code}}</span></b></div>
+						  	<div class="el-col-12 prescription_code text-left">订单号：<span>{{info.header.return_drug ? info.header.ori_code : info.header.code}}</span></b></div>
 						  	<div class="el-col-12 invoice_no text-right">发票号:&nbsp;&nbsp;<span>{{info.header.invoice_no}}</span></div>
 					  	</div>					
 						</div>
@@ -96,16 +96,16 @@
 
 						<div class="prescription_footer">
 							<div class="el-row" style="margin:0;">
-								<div class="el-col-12 author_name">医师: <span>{{info.header.author_name}}</span></div>
+								<div class="el-col-12 author_name"></div>
 								<div class="el-col-12 text-right total_amount">金额: <span>{{format_price(info.header.total_amount)}}</span></div>
 							</div>
 
 							<div class="btns_right_bottom"> 
+								<span v-if="info.header.status === '1' ">
+								  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.header.id)">发药</button>
+								</span>								
 								<span v-if="info.header.status === 'P' ">
 								  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.header.id)">发药</button>
-								</span>
-								<span v-if="info.header.status === 'E'&&info.header.delivery_status == 'E' ">
-									<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="return_order(info.header.id)">退药</button>
 								</span>
 							</div>
 						</div>
