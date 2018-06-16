@@ -99,7 +99,25 @@ class Ims::Order < ApplicationRecord
         else
         end
         # query.concat(" and status =#{ args[:type].to_s}")
-        data = Orders::Order.where(query)
+        Orders::Order.where(query).map{|order| 
+          data ={
+          order_id: order.id,
+          order_code: order.order_code,
+          amt: order.net_amt,
+          status: order.status,
+          payment_at: order.payment_at,     # 支付时间
+          end_time: order.end_time,     # 订单完成时间
+          close_time: order.close_time,
+          target_org_name: order.target_org_name,
+          source_org_name: order.source_org_name,
+          doctor: order.doctor,
+          prescriptions_id: order.prescription_ids,
+          prescriptions_count: order.try(:prescription_ids).count,
+          patient_name: order.patient_name,
+          patient_phone: order.patient_phone,
+          payment_type: order.payment_type,
+          }
+        }
         return {flag:true,data:data}
       rescue Exception => e
         print e.message rescue "  e.messag----"
@@ -116,12 +134,9 @@ class Ims::Order < ApplicationRecord
       begin
     		return {flag:false,:info=>"药店机构为空。"} if args[:order_id].blank?
         order = Orders::Order.find args[:order_id] rescue nil #and target_org_id = #{args[:org_id]}
-        p order.blank?
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
-        p order.prescription_ids
         prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-        p prescriptions
         data = [{
           type:'订单',
           order_id: order.id,
