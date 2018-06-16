@@ -1,37 +1,38 @@
 <el-dialog
-  title="复制"
+  title="复制药品"
   :visible.sync="isShowCopyDialog"
+  class="copy-orders-modal"
   width="90%">
   <el-row :gutter="20">
-	  <el-col :span="8" style="border: 1px solid #999; border-radius: 5px; padding: 0;">
+	  <el-col :span="4" style="border: 1px solid #999; border-radius: 5px; padding: 0;">
   		<div style="padding: 10px; margin-bottom: 1em;">
 	  		<el-input
 			    placeholder="搜索患者"
 			    size="mini"
-			    @change="searchEncounters(searchCopyEncStr)"
+			    @change="searchEncounters({search: searchCopyEncStr})"
 			    v-model="searchCopyEncStr">
-			    <i slot="prefix" class="el-input__icon fa fa-search fa-lg" @click="searchEncounters(searchCopyEncStr)"></i>
+			    <i slot="prefix" class="el-input__icon fa fa-search fa-lg" @click="searchEncounters({search: searchCopyEncStr})"></i>
 			  </el-input>
   		</div>
   		<div class="scroll-section" style="height: 400px; overflow: auto;">
   			<ul class="encounters-list">
-  				<li v-for="(en, index) in encounters" :key="index" :en-id="en.id" @click="getOrders(en.id)">
+  				<li v-for="(en, index) in encounters" :key="index" :en-id="en.id" @click="getEncOrders(en.id)">
   					<a>
-  						<i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>
-  						<font style="width: 55px; display: inline-block;">{{ en.name }}</font>
-  						<font style="width: 26px; display: inline-block;">{{ en.age }}</font>
+  						<i v-html="judgeGender(en.gender&&en.gender.display)"></i>
+  						<font style="width: 65px; display: inline-block;">{{ en.name }}</font>
+  						<font style="width: 50px; display: inline-block;">{{ en.age }}岁</font>
   						<font>{{ en.encounter_loc&&en.encounter_loc.display }}</font>
   					</a>
   				</li>
   			</ul>
   		</div>
   	</el-col>
-	  <el-col :span="16">
+	  <el-col :span="20">
 	  	<el-table
-        :data="orders"
-        :height="450"
+        :data="encorders"
+        :height="465"
         @selection-change="handleCopyOrdersSelChange"
-        class="orders-table thiner-row"
+        class="encorders-table thiner-row"
         ref="copyOrdersTable"
         style="width: 100%">
         <%= render "hospital/home/render/orders_table_common.html" %>
@@ -40,6 +41,6 @@
 	</el-row>
 	<span slot="footer" class="dialog-footer">
     <el-button size="mini" @click="isShowCopyDialog = false">关 闭</el-button>
-    <el-button size="mini" type="primary" @click="quoteOrders(multipleCopyOrdersSelection)">确 定</el-button>
+    <el-button size="mini" type="primary" @click="quoteOrders(multipleCopyOrdersSelection);isShowCopyDialog=false;">确 定</el-button>
   </span>
 </el-dialog>

@@ -85,9 +85,9 @@
   :visible.sync="isShowHisOrdersDialog"
   width="90%">
   <el-table
-    :data="orders"
+    :data="encorders"
     @selection-change="handleHisOrdersSelChange"
-    class="orders-table thiner-row"
+    class="encorders-table thiner-row"
     style="width: 100%">
     <%= render "hospital/home/render/orders_table_common.html" %>
     <el-table-column
@@ -101,7 +101,7 @@
   </el-table>
   <span slot="footer" class="dialog-footer">
     <el-button @click="isShowHisOrdersDialog = false" size="mini">关 闭</el-button>
-    <el-button type="primary" @click="quoteOrders([],'batch')" size="mini">引 用<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+    <el-button type="primary" @click="quoteOrders(multipleHisOrdersSelection,'batch')" size="mini">引 用<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
   </span>
 </el-dialog>
 
