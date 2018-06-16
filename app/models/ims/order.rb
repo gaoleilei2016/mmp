@@ -104,12 +104,6 @@ class Ims::Order < ApplicationRecord
   		
   	end
 
-  	# 
-  	# def method_name
-  		
-  	# end
-
-
   	# 订单的接收(接收完订单要发消息，提醒药房)
   	def receive_order args={}
   		begin
@@ -143,6 +137,18 @@ class Ims::Order < ApplicationRecord
         nil
   		end
   	end
+
+    def send_message attrs
+      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+    end
+
+    def order_message attrs
+      p "modal   hahahahha"
+      p attrs
+      # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      # ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
+      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+    end
 
   end
 end

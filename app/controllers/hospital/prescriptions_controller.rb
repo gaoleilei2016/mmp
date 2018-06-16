@@ -5,8 +5,9 @@ class Hospital::PrescriptionsController < ApplicationController
 	# GET
   # /hospital/prescriptions
 	def index
-		@prescriptions = Hospital::Prescription.all rescue []
-    @prescriptions = @prescriptions.map { |e| e.to_web_front  }
+    # 只能通过 encounter_id 查询医嘱
+    p "Hospital::PrescriptionsController index",params
+		@prescriptions = Hospital::Prescription.where(encounter_id: params[:encounter_id]).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @prescriptions} }
@@ -93,15 +94,16 @@ class Hospital::PrescriptionsController < ApplicationController
   # GET
   # /hospital/prescriptions/get_prescriptions_by_phone
   def get_prescriptions_by_phone
-    p "get_prescriptions_by_phone", params
+    # p "get_prescriptions_by_phone", params
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
-    ::Hospital::Interface.get_prescription(cur_phone).group_by {|_prescription| {organ_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |key, _prescriptions|
-      cur_org = key
-      p cur_org
-      orders = _prescriptions.map { |e| e.orders}.flatten.map { |k| k.to_web_front  }
-      p orders
+    ::Hospital::Interface.get_prescription(cur_phone).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
+      prescription_ids = []
+      total_price = 0.0
+      orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      cur_org[:prescription_ids] = prescription_ids
+      cur_org[:total_price] = total_price
       cur_org[:orders] = orders
       ret << cur_org
     end
@@ -141,8 +143,8 @@ class Hospital::PrescriptionsController < ApplicationController
         organization_id: cur_org.id,
         status: "N",
         note: args[:note],
-        type_code: "1",
-        type_display: "普通处方",
+        type_code: args[:type][:code],
+        type_display: args[:type][:display],
         bill_id: nil,
         confidentiality_code: "0",
         confidentiality_display: "医院",

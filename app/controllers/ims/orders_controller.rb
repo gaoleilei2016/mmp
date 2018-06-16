@@ -61,34 +61,67 @@ class Ims::OrdersController < ApplicationController
     end
   end
 
+  def order_settings
+    respond_to do |format|
+      format.html{render "/ims/home/temp"}
+      format.json{}
+    end
+  end
 
   def get_orders
     #搜索平台的 订单 处方
-    # if params[:platform]
-    #   data = [
-    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-    #   ]
-    # end
+    case params[:stat].to_s
+    when '1' #未交费
+      type = "1"
+    when '2' #待发药
+      type = "2"
+    when '3' #已发药
+      type = ""
+    when '4' #已退药
+      type = ""
+    else
+      type = ""
+    end
+    org_id = ""#current_user.organization_id rescue ""
+    order_code = ""#取药码  可以没有
+    data  = []
+    if params[:platform]
+      data = [
+        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
+        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
+        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
+      ]
+    end
 
-    # #搜索药店的 订单 处方
-    # if params[:stat]
-    #   data = [
-    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-    #     {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-    #     {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-    #     {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},        
-    #   ]
-    # end
-    data = []
-    render json:data.to_json
+    #搜索药店的 订单 处方
+    if params[:stat]
+      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
+      # @data.map{|line| data<<{
+      #   id:line[:prescriptions_id],
+      #   code:line[:order_code],
+      #   name:line[:patient_name],
+      #   amount:line[:amt],
+      #   pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
+      #   }
+      # }
+    end
+    render json:@data.to_json
   end
 
   def get_order
+    data = [{id:"12435",code:"08020231",title:"汇总",amount:"14.23"},
+        {id:"67874",code:"08020232",title:"处方1",amount:"52.23"},
+        {id:"46876",code:"08020233",title:"处方2",amount:"16.23"},
+        {id:"12435",code:"08020231",title:"处方3",amount:"14.23"},
+        {id:"12435",code:"08020231",title:"处方4",amount:"14.23"}]
+    render json:data.to_json
+  end
+
+  def get_detail
+    p "++++++++++++++++++++++++++"
+    p current_user.organization_id
+    p "++++++++++++++++++++++++++"
+    id = params[:id]
     data = [{
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
       lines:[
@@ -102,7 +135,7 @@ class Ims::OrdersController < ApplicationController
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
       ]
       }]
-    render json:data.to_json
+    render json:data
   end
 
   # #POST 搜索平台处方 生成订单
@@ -118,6 +151,9 @@ class Ims::OrdersController < ApplicationController
   def dispensing_order
     @reslut = @ims_order.dispensing_order rescue {flag:true,info:"发药成功！"}
     render json:@reslut.to_json
+    # @reslut = @ims_order.dispensing_order
+    # render json:@reslut.to_json
+    # render json:{flag:true, info:"发药成功！"}
   end
 
   # 订单退药

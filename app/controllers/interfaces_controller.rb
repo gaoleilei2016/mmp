@@ -1,6 +1,53 @@
 class InterfacesController < ApplicationController
+	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	def pay_order
+		# p '~~~~~~~~~',params
+		order = params[:pay_order]
+		args = {out_trade_no: Time.now.to_i.to_s, total_fee: 0.01, title: "华希订单-#{order}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/customer/home"}
+		case params[:pay_type]
+		when "Alipay"
+			res = Pay::Alipay.payment(args)
+		when "Wechat"
+			res = Pay::Wechat.payment(args)
+		end
+		# p '~~~~~~~',res
+		if res[:state]==:succ
+			redirect_to res[:pay_url]
+		else
+			flash[:notice] = res[:desc]
+			redirect_to "/customer/portal/pay"
+		end
+	end
+	def save_order
+		# p '~~~~~~~~~',params
+		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
+		p '~~~~~~~~~~',re
+		redirect_to "/customer/portal/pay?id=#{re.id}"
+	end
+	# 获取用户购物车
+	def get_prescriptions_cart
+		raise "未选择药单" unless session[:cart_pharmacy_ids]&&session[:cart_pharmacy_ids].length>0
+		ret = nil
+		re = ::Hospital::Prescription.where(:id=>session[:cart_pharmacy_ids]).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}
+		raise "药单出错，一次只能结算一个医院的药单" if re.keys.length != 1
+		re.each do |cur_org, _prescriptions|
+			prescription_ids = []
+			total_price = 0.0
+			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+			cur_org[:prescription_ids] = prescription_ids
+			cur_org[:total_price] = total_price
+			cur_org[:orders] = orders
+			ret = cur_org
+		end
+		render json: {flag: true, info: "success", data: ret}
+	end
+	# 设置用户购物车
+	def set_prescriptions_cart
+		session[:cart_pharmacy_ids] = params[:ids]
+		render json:{flag:true,info:"操作成功"}
+	end
 	# 用户选择药房
 	def set_current_pharmacy
 		session[:current_pharmacy_id] = params[:id]
@@ -41,7 +88,7 @@ class InterfacesController < ApplicationController
 	def get_duanxinma
 		# p '~~~~~~~~~~',params[:login]
 		# 图片验证码
-		raise "图片验证码错误" unless verify_rucaptcha?
+		# raise "图片验证码错误" unless verify_rucaptcha?
 		raise "手机号错误" unless params[:login].present?
 		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
 		res = Sms::Message.set_up(args)

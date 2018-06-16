@@ -1,0 +1,48 @@
+<div clas="el-col-20" style="height:calc(100% - 120px);">
+<div class="el-row" style="float:left; width:calc(100% - 120px);">
+<!--   <article class="page-header" style="border-bottom: 1px solid #ddd; padding:8px;">
+    <i class="fa fa-cogs fa-fw fa-3x"></i>
+    <h3>药店设置<small>药店设置</small></h3>
+    <div class="header-right-btns">
+   </div>
+  </article> -->
+  <el-row style="padding:8px; border-bottom:1px solid #ddd;">
+  	<el-col :span="4" style="width:60px;"><i class="fa fa-cogs fa-fw fa-3x"></i></el-col>
+  	<el-col :span="20"><h3>药店设置<small>药店设置</small></h3></el-col>
+	</el-row>
+
+	<el-form size="mini" style="padding-top:8px;" id="setting_form" :rules="rules" :model="setting" ref="settingForm" label-width="100px" url="/ims/settings/save_settings" method="post">
+		<el-row>
+	  	<el-col :span="10">
+	  		<el-form-item
+			    label="订单效期"
+			    prop="validity">
+			    <el-input v-model="setting.validity" auto-complete="off" name="settings[validity]">
+				    <template slot="append">天</template>
+				  </el-input>
+			  </el-form-item>
+
+			  <el-form-item
+			    label="语音提示"
+			    prop="voice">
+			  	<el-select v-model="setting.voice" value-key="code" placeholder="请选择" name="settings[voice]">
+				    <el-option
+				      v-for="item in options"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				  </el-select>
+			  </el-form-item>
+
+			</el-col>
+
+			<el-col :span="24">
+			  <el-form-item>
+			    <el-button id="submit_btn" type="primary" @click="submitForm('settingForm')">提交</el-button>
+			  </el-form-item>
+			</el-col>
+		</el-row>
+	</el-form>
+</div>
+</div>

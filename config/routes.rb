@@ -6,10 +6,16 @@ Rails.application.routes.draw do
   }
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to:"customer/portal#index"
+  mount ActionCable.server => "/cable"
+  
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      post :pay_order
+      post :save_order
+      get :get_prescriptions_cart
+      get :set_prescriptions_cart
       get :set_current_pharmacy
       get :get_current_pharmacy
       get :get_pharmacy
@@ -37,6 +43,7 @@ Rails.application.routes.draw do
     resources :portal do
       collection do
         get :settlement
+        get :pay
       end
     end
     resources :report
@@ -53,10 +60,14 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :mtemplates # 医嘱模板管理
     end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
+      collection do 
+        post :quote_orders
+      end
       member do
         get :all_prescriptions
       end
@@ -66,6 +77,7 @@ Rails.application.routes.draw do
     resources :prescriptions do
       collection do
         get :get_prescriptions_by_phone
+        get :get_prescription_by_ids
       end
       member do
         post :set_drug_store
@@ -98,9 +110,19 @@ Rails.application.routes.draw do
         get :dispensing_order   # 发药
         get :return_order       # 退药
         get :oprate_order       # 订单操作(发药/退药、、)
+        get :order_settings
+        get :get_detail
         post :create_order  #生成订单
       end
     end
+
+    resources :settings do
+      collection do
+        get :get_cur_set
+        post :save_settings
+      end
+    end
+
     resources :interfaces do
       collection do
       end
@@ -110,6 +132,13 @@ Rails.application.routes.draw do
   ############################
 
   ########### hujun_start ##########
+  # mount Pay::Api => '/'
   match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
+  match '/pay/wechat', to: 'pay#wechat', via: [:post]
+  match '/pay/alipay', to: 'pay#alipay', via: [:post]
+
+  match '/pay/index',  to: 'pay#index',  via: [:get]
+  match '/pay/wx/pay', to: 'pay#wx', via: [:post]
+  match '/pay/ali/pay', to: 'pay#ali', via: [:post]
   ########### hujun_end   ##########
 end

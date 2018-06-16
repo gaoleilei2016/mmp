@@ -13,7 +13,7 @@ defaults: &defaults
   wap_name: 腾迈华希医药
   wap_url: http://huaxi.tenmind.com
   pay_key: FeiShanJie88HaoTenmindGS20170222
-  notify_url: http://huaxi.tenmind.com
+  notify_url: http://mmp.tenmind.com/pay/wechat
   awesome_setting: <%= "#{Rails.root}/config/setup/pay/wechat/apiclient_cert.p12" %>
 
 development:
