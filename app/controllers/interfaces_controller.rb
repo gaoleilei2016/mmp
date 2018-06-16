@@ -2,6 +2,8 @@ class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	def get_orders
+	end
 	def pay_order
 		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
@@ -23,8 +25,10 @@ class InterfacesController < ApplicationController
 	end
 	def save_order
 		p '~~~~~~~~~',params
+		params[:order][:user_id] = current_user.id
+		p '~~~~~~~~~',params
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		p '~~~~~~~~~~',re
+		# p '~~~~~~~~~~',re
 		redirect_to "/customer/portal/pay?id=#{re.id}"
 	end
 	# 获取用户购物车
