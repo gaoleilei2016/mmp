@@ -23,12 +23,12 @@ class Settles::Settle < ApplicationRecord
 	class << self
 		def settle_save attrs = {}
 			attrs = attrs.deep_symbolize_keys
+			result = {ret_code:'0',info:''}
 			order = ::Orders::Order.find(attrs[:order_id])
 			return false if order.status != '1'
 			case order.payment_type.to_s
 			when '1'
 				self.create(
-					order_code: attrs[:order_code],
 					net_amt: attrs[:net_amt],
 					pay_method: attrs[:pay_method],
 					pay_type: attrs[:pay_type],
@@ -39,7 +39,7 @@ class Settles::Settle < ApplicationRecord
 					auth_code: attrs[:auth_code],
 					order_code: order.order_code
 				)	
-				order.set(:status,'2')
+				order.update_attributes(:status,'2')
 			when '2'
 
 			when '3'

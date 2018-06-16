@@ -1,0 +1,371 @@
+<style type="text/css">
+#prescription_header{font-size: 12px;padding: 8px;}
+#prescription_header .title{font-size: 21px;}
+#prescription_header .header-right-btns{position: absolute; right:12px; bottom:8px; text-align: right; }
+.router-view-content{padding:0;}
+#side_menu{border-right:1px solid #ddd;}
+#side_menu > div{
+	padding:8px;
+	border-bottom:1px solid #ddd;
+}
+#side_menu i{
+	padding:4px;
+	font-size: 1.2em;
+}
+body > .container{
+  padding: 40px 0px 41px;
+}
+.el-table th, .el-table td{
+	padding:8px 0px;
+}
+</style>
+<template>
+
+	<div id="ims_order_main">
+
+		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
+
+		  <el-menu-item index="1" @click="show_panel('out_order')">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">发药</span>  
+		  </el-menu-item>
+
+		  <el-menu-item index="2" @click="show_panel('return_order')">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">退药</span>  
+		  </el-menu-item>
+
+		  <el-menu-item index="3" @click="show_panel('reports')">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">报表</span>
+		  </el-menu-item>
+
+		  <el-menu-item index="4" @click="show_panel('settings')">
+		    <i class="el-icon-setting"></i>
+		    <span slot="title">设置</span>
+		  </el-menu-item>
+		  
+<!-- 		  <el-menu-item index="5" @click="dialogFormVisible = true">
+		    <i class="el-icon-search"></i>
+		    <span slot="title">搜索平台</span>
+		  </el-menu-item> -->
+		</el-menu>
+
+		<div class="function_panel out_order" style="height:100%;">
+			<%= render "ims/home/render/out_order"%>
+		</div>
+
+		<div class="function_panel return_order" style="height:100%;display:none;">
+			<%= render "ims/home/render/return_order"%>
+		</div>
+
+		<div class="function_panel reports" style="height:100%;display:none;">
+			<%= render "ims/home/render/order_reports"%>
+		</div>
+
+		<div class="function_panel settings" style="height:100%;display:none;">
+			<%= render "ims/home/render/settings"%>
+		</div>
+
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+			isCollapse: false,
+      return_pres:[],
+      return_detail:[],
+			pres:[],
+      pre_detail:[],
+			detail:[{}],
+      tab_header: '0', return_tab_header: '0',
+      tab_header_data: [],return_tab_header_data: [],
+      input21: '',
+      setting: {},
+      options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
+      token:"<%= %>",
+      dialogFormVisible: false,
+      tableData_plat:[],
+      activeCollapse: "patientinfo1",
+        form: {
+          name: '',
+        },
+        formLabelWidth: '120px',
+			rules: {
+				validity: [
+		      { required: true, message: '效期不能为空'},
+		    ],
+				voice: [
+		      { required: true, message: '请选择语音'},
+		    ]
+			},
+			activeCollapse: "pre_info",
+			activeTab: "histories",
+			tableData3: [],
+
+      pickerOptions2: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick:function(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick:function(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick:function(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
+      value6: '',
+      value7: '',
+      report_type:[]
+		}
+	},
+	methods:{
+    init:function(){
+      $("div.list_fun_panel[stat='1']").addClass("active");
+      stat = "1"
+      this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response){
+        this._data.pres =response.data.data;
+      },this.errorCallback);
+    },
+    errorCallback:function(response){
+      this.$notify({
+        title: '提示',
+        message: '服务器请求出错了',
+        duration: 0
+      });
+    },
+		show_panel:function(method){
+      $("div.function_panel").hide();
+      var str = "div.function_panel."+method
+      $(document).find(str).show();
+      // this._data.tab_header_data = []
+      // this._data.detail = []
+		},
+		choose_prescription:function(){
+			number = this.tab_header
+      console.log(number)
+			tab_val = this.tab_header_data[number]
+      this._data.detail = [tab_val]
+			// console.log(tab_val)
+			// this.get_detail(tab_val.id)
+		},
+    return_choose_prescription:function(){
+      number = this.tab_header
+      tab_val = this.tab_header_data[number]
+      // console.log(tab_val.id)
+      // this.get_detail(tab_val.id)
+    },    
+      handleOpen:function(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose:function(key, keyPath) {
+        console.log(key, keyPath);
+      },		
+		handleSelectionChange:function(val) {
+      this.multipleSelection = val;
+    },
+    handleCurrentChange:function(val) {
+    	this.currentRow = val;
+    },
+    create_search_order:function(row){
+    	current = this.currentRow
+    	multiple = this.multipleSelection
+    	_this = this
+    	if (multiple&&multiple.length>0) {
+    		temp = []
+    		$.each(multiple,function(k,v){
+	    		temp.push({id:v.id,code:v.code, name:v.name, amount:v.amount})
+    		})
+	    	data = {authenticity_token:"<%= form_authenticity_token %>",order:temp}
+	    	Vue.http.post("/ims/orders/create_order",data).then(function(response){
+          try{
+            _this.set_pres(response.data)
+          }catch(e){
+            console.log(e)
+          }
+          _this.dialogFormVisible = false
+        },function(response){
+          _this.$message('订单创建失败，请重试！');
+        })
+    	}else{
+    		_this.$message('请选择要生成订单的数据！');
+    	}
+    },		
+		search_platform_pre:function(val){
+			if (!val) {val = ""};
+      this.$http.get('/ims/orders/get_orders?platform='+val).then(function(response) {
+        this._data.tableData_plat = response.data
+      },function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+		},
+		search:function(val){
+			if (!val) {val = ""};
+			stat = $(".prescription_list_fun").find("list_fun_panel.active").attr("stat")||""
+      this.$http.get('/ims/orders/get_orders?stat='+stat+'&search='+val).then(function(response) {
+        this._data.tableData_plat = response.data
+      },function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+		},
+    get_pres:function (stat,e) {
+    	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+      $(".prescription_list").find(".active").removeClass("active")
+      this._data.tab_header_data = []
+      this._data.detail = [{}] 
+    	if (!stat) {stat=""};
+      this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
+        if(response.data.data&&response.data.data.length>0){this.set_pres(response.data.data)}else{this.set_pres([])}
+      },function(response){
+        this.set_pres()
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },
+    set_pres:function(data){
+    	this._data.pres = data
+    	// setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
+    },
+    get_pre:function (id,e) {
+    	var _this = this;
+      _this._data.tab_header_data = []
+      _this._data.detail = []   
+    	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
+    	if (!id) {
+    		id="";
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全！',
+          duration: 0
+        });
+        return ""
+    	};
+      _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
+        console.log(response.data.data)
+        _this._data.tab_header_data = response.data.data
+        setTimeout(function(){  _this._data.detail =  [_this.tab_header_data[0]] },300)
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },
+    get_detail:function (id,e) {
+    	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
+    	if (!id) { id="";     this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
+        return ""
+    	};
+      this.$http.get('/ims/orders/get_detail?id='+id).then(function(response) {
+        this._data.detail = response.data
+      },function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },
+
+    //发药  发订单
+    charging_pre:function(id){
+      this.oprate_order({id:id,method:"charging_pre",todo:"收费"})
+    },
+    //发药  发订单
+    out_order:function(id){
+    	this.oprate_order({id:id,method:"dispensing_order",todo:"发药"})
+    },
+
+		//退药
+		return_order:function(id){
+			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
+		},
+		oprate_order:function(data){
+    	if (data.id){}else{
+        this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能发药！',
+        });    		
+    		return false
+    	}
+			this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
+        stat = response.data.flag ? true : false
+        type = stat ? "success" : "warning";
+        str = 
+        this.$notify({
+          title: '提示',
+          message: data.todo+(stat ? "成功" : "失败"),
+          type:type,
+          duration:(stat ? 4500 : 0)
+        })
+      },function(response){
+        this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+		},
+    format_time:function(data){
+	  	var time = new Date(data)
+	  	if (data) {
+		    return time.toLocaleDateString().replace(/\//g,"-")+" "+time.toTimeString().slice(0,5)
+	  	}else{
+	  		return ""
+	  	}
+    },
+    format_price:function(data){
+			if (data) {
+				return Number(data)==NaN ? 0.00 : parseFloat(data).toFixed(2)
+			}else{
+				return ""
+			}
+    },
+    fix_diagnoses:function(data){
+			try{
+				if (typeof(data.join())==Object) {
+					return ""
+				}else{
+					return data.join();
+				}
+			}catch(err){
+				return ""
+			}
+    }
+	},
+	mounted:function(){
+		this.$nextTick(function(){
+			this.init();
+		})	
+	}
+}
+</script>
