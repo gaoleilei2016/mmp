@@ -87,18 +87,17 @@ class Ims::Order < ApplicationRecord
   	def order_search args={}
       begin
         return [] if args[:org_id].blank?
-        query = "target_org_id = #{args[:org_id]}"
-        query.concat("order_code = #{args[:order_code]}") unless args[:order_code].blank?
-        query = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
+        sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
+        sql.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
         case  args[:type].to_s
         when '1'#未付款
-          query.concat(" and payment_type = 1 and status = 2")
+         sql.concat(" and payment_type = 2 and `status`=1 ")
         when '2'#已付款
-          query.concat(" and payment_type = 2")
-        else#否则查看全部
+         sql.concat(" and `status`=2 ")
+        else
         end
         # query.concat(" and status =#{ args[:type].to_s}")
-        Orders::Order.where(condtion).map{|order|  
+        Orders::Order.find_by_sql(sql).map{|order|  
           {
             order_code: order.order_code,
             amt: order.net_amt,
