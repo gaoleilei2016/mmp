@@ -10,6 +10,8 @@ defaults: &defaults
   appsecret: 0e8523d092e28993b54b4b980116e832
   mchid: 1432526502
   pay_url: https://api.mch.weixin.qq.com/pay/unifiedorder
+  refund_url: https://api.mch.weixin.qq.com/secapi/pay/refund
+  cert_root: "/../../zhengshu/apiclient_cert.p12"
   wap_name: 腾迈华希医药
   wap_url: http://huaxi.tenmind.com
   pay_key: FeiShanJie88HaoTenmindGS20170222
