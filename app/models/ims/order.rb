@@ -86,59 +86,82 @@ class Ims::Order < ApplicationRecord
   	# 订单查询()
   	def order_search args={}
       begin
-        return [] if args[:org_id].blank?
-        sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
-        sql.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
+        data = []
+        return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
+        # sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
+        query ="target_org_id = #{args[:org_id]}"
+        query.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
         case  args[:type].to_s
         when '1'#未付款
-         sql.concat(" and payment_type = 2 and `status`=1 ")
+         query.concat(" and payment_type = 2 and `status`=1 ")
         when '2'#已付款
-         sql.concat(" and `status`=2 ")
+         query.concat(" and `status`=2 ")
         else
         end
         # query.concat(" and status =#{ args[:type].to_s}")
-        Orders::Order.find_by_sql(sql).map{|order|  
-          {
-            order_code: order.order_code,
-            amt: order.net_amt,
-            status: order.status,
-            payment_at: order.payment_at,     # 支付时间
-            end_time: order.end_time,     # 订单完成时间
-            close_time: order.close_time,
-            target_org_name: order.target_org_name,
-            source_org_name: order.source_org_name,
-            doctor: order.doctor,
-            prescriptions_id: order.prescription_ids,
-            patient_name: order.patient_name,
-            patient_phone: order.patient_phone,
-            payment_type: order.payment_type,
-            details: order.details.map{|x| {
-                    name: x.name,
-                    quantity: x.quantity,
-                    unit: x.unit,
-                    specifications: x.specifications,
-                    dosage: x.dosage,
-                    price: x.price,
-                    net_amt: x.net_amt,
-                    firm: x.firm,
-                    img_path: x.img_path
-                  }
-                }
-          }  
-        }
+        data = Orders::Order.where(query)
+        return {flag:true,data:data}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
-        result = {flag:false,:info=>"药房系统出错。"}
+        result = {flag:false,:info=>"药店系统出错。"}
       end
   	end
 
-  	# 未指定药房的订单查询(未在平台上操作的患者也能在药店客户端协助患者自选药品购药)[可能查到]
+  	# 未指定药店的订单查询(未在平台上操作的患者也能在药店客户端协助患者自选药品购药)[可能查到]
+
+
+    # 订单明细信息及处方信息查询
   	def get_order args={}
-  		
+      begin
+    		return {flag:false,:info=>"药店机构为空。"} if args[:order_id].blank?
+        order = Orders::Order.where("id = #{args[:order_id]} and target_org_id = #{args[:org_id]}")
+        return {flag:false,:info=>""} if order.blank?
+        prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+        p prescriptions
+        data = [{
+          type:'订单',
+          order_id: id,
+          order_code: order.order_code,
+          amt: order.net_amt,
+          status: order.status,
+          payment_at: order.payment_at,     # 支付时间
+          end_time: order.end_time,     # 订单完成时间
+          close_time: order.close_time,
+          target_org_name: order.target_org_name,
+          source_org_name: order.source_org_name,
+          doctor: order.doctor,
+          prescriptions_id: order.prescription_ids,
+          prescriptions_count: order.try(:prescription_ids).count,
+          patient_name: order.patient_name,
+          patient_phone: order.patient_phone,
+          payment_type: order.payment_type,
+          details: order.details.map{|x| {
+                  name: x.name,
+                  quantity: x.quantity,
+                  unit: x.unit,
+                  specifications: x.specifications,
+                  dosage: x.dosage,
+                  price: x.price,
+                  net_amt: x.net_amt,
+                  firm: x.firm,
+                  img_path: x.img_path
+                }
+              }
+          }, 
+          {
+            type:'订单',
+            prescriptions:prescriptions
+          }]
+        return {flag:true,:data=>data}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 订单明细信息及处方信息查询 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
   	end
 
-  	# 订单的接收(接收完订单要发消息，提醒药房)
+  	# 订单的接收(接收完订单要发消息，提醒药店)
   	def receive_order args={}
   		begin
   			args = args.deep_symbolize_key
@@ -167,7 +190,7 @@ class Ims::Order < ApplicationRecord
   		rescue Exception => e
   			print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 订单的接收 出错: " + e.backtrace.join("\n")
-        # {flag:false,:info=>"药房系统出错。"}
+        # {flag:false,:info=>"药店系统出错。"}
         nil
   		end
   	end
