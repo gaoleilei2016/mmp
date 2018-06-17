@@ -91,9 +91,6 @@ class InterfacesController < ApplicationController
 	end
 	def cancel_order
 		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
-		p '~~~~~~~~ cancel_order ',ret
-		unless ret[:ret_code] == "0"
-		end
 		render json: ret
 	end
 	# 获取用户购物车
@@ -148,7 +145,7 @@ class InterfacesController < ApplicationController
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
 			recents = ::Admin::Organization.recent_lists(args)
-			p '~~~~~~~~~~',recents
+			# p '~~~~~~~~~~',recents
 			if recents[:state] == :succ
 				re = JSON.parse(recents[:res][0][:org].to_json)
 				re['distance'] = recents[:res][0][:distance]
