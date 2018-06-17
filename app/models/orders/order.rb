@@ -92,15 +92,15 @@ class Orders::Order < ApplicationRecord
 	# end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
-	def order_settle(pay_type,cur_user)
+	def order_settle(pay_type,cur_user=nil)
 		result = {ret_code:'0',info:''}
-		case pay_type.to_s
-		when "Alipay"
-			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
-		when "Wechat" #查询微信订单是否支付成功
-			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
-		end
-		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		cur_user ||= User.find(user_id)
+		# case pay_type.to_s
+		# when "Alipay"
+		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		# when "Wechat" #查询微信订单是否支付成功
+		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		# end
 		args = {
 			# 创建订单人
 			charger: {
@@ -112,6 +112,7 @@ class Orders::Order < ApplicationRecord
 		}
 		##通知处方订单已结算
 	 	prescriptions.each{|x|x.charged(args, cur_user)}
+		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
