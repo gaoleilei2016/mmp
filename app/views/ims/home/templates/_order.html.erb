@@ -487,7 +487,18 @@ window.current_template_obj = {
 			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         type = stat ? "success" : "warning";
-        // $(document).find("div.function_panel.out_order").find(".is-active").click()
+        try{
+          method = ""
+          if(data.method == "charging_pre"||data.method == "dispensing_order"){
+            method = "out_order"
+          }else{
+            method = data.method
+          }
+          str = "div.function_panel."+method
+          $(document).find(str).find(".is-active").click()
+        }catch(e){
+          console.log(e)
+        }
         _this._data.tab_header_data = []
         _this._data.detail = [{is_order:true}]
         _this.$notify({
