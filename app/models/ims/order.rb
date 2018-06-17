@@ -129,6 +129,7 @@ class Ims::Order < ApplicationRecord
           patient_iden: order.patient_iden,
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
+          is_returned: order.is_returned,
           details: order.details.map{|x| {
                   name: x.name,
                   quantity: x.quantity,
