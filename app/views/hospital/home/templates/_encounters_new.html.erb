@@ -519,6 +519,7 @@ window.current_template_obj = {
 				    code = item.code;
 				    display = item.display;
 					}
+					console.log('============111111111')
 					_this.diagnosis = {
 						id: _this.diagnosis.id,
 						code: code,
@@ -575,7 +576,6 @@ window.current_template_obj = {
 		          var btn = $(_this.$refs["diasave"].$el);
 		          btn.attr("disabled", "disabled").find(".fa").show();
 		          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), diagnosis: _this.diagnosis, encounter_id: _this.encounter.id};
-		          console.log(_this.diagnosis.id, '=========11111111111')
 		          if(!_this.diagnosis.id) {
 		          	_this.diagnosesResource.save(json).then( function(response) {
 		          		_this.handleDiagReturn({res: response, btn: btn, action: "save"});
@@ -604,7 +604,7 @@ window.current_template_obj = {
 		    	json.btn.removeAttr("disabled").find(".fa").hide();
 		    	var res = json.res.data;
 		      if(res.flag) {
-			    	if(json=="save") {
+			    	if(json.action=="save") {
 			    		this.diagnoses.push(res.data);
 			    	} else {
 			    		this.diagnoses.splice(this.editDiaIndex, 1); // 修改已经编辑的数据
@@ -883,7 +883,7 @@ window.current_template_obj = {
 	    	var _this = this;
 	    	_this.$nextTick(function(){
 		    	(_this.orders||[]).forEach(function (item, index) {
-		    		if(item.status=="N") {
+		    		if(item.status=="0") {
 		    			_this.$refs["ordersTable"].toggleRowSelection(item, true);
 		    		} else {
 		    			_this.$refs["ordersTable"].clearSelection();
@@ -928,7 +928,7 @@ window.current_template_obj = {
       // 已经发送的医嘱（待交费、完成）和作废的医嘱显示非激活状态灰色{row, rowIndex}
       judgeOrderRow: function (obj) {
       	var row = obj.row;
-      	if(row.status=='N'){
+      	if(row.status=='0'){
       		return "";
       	} else {
       		return "inactive-row";
@@ -1088,7 +1088,7 @@ window.current_template_obj = {
 		      return false;
     		}
     		(orders||[]).forEach(function(item, index){
-    			if(item.status=="N") {
+    			if(item.status=="0") {
     				ids.push(item.id);
     			}
     		})
@@ -1137,7 +1137,7 @@ window.current_template_obj = {
     		var orders = _this.multipleOrdersSelection;
     		_this.sendOrders = [];
     		(orders||[]).forEach(function(item, index){
-    			if(item.status=="N") {
+    			if(item.status=="0") {
     				_this.sendOrders.push(item);
     			}
     		})

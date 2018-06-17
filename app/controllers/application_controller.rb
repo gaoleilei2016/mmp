@@ -47,7 +47,7 @@ class ApplicationController < ActionController::Base
 	def not_interfaces_controller?
 		# p '~~~~~~~~~~~~',controller_path
 		raise "非admin用户禁止进入" if controller_path =~ /^admin/&&current_user.login != 'admin'
-		controller_path=="interfaces" ? false : true
+		["interfaces","pay","refund","wechat"].index(controller_path) ? false : true
 	end
 	def configure_permitted_parameters
 		devise_parameter_sanitizer.permit(:sign_up, keys: [:email])
