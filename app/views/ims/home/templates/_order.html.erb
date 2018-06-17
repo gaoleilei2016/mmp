@@ -240,7 +240,13 @@ window.current_template_obj = {
         flag_arr = []
         flag = true
         ori_data = response.data
-        
+        if (ori_data[0]&&ori_data[0].r_status<0) {
+          _this.$notify({
+            title: '提示',
+            message: '没有数据！',
+          });
+          return ""
+        };
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
@@ -312,7 +318,7 @@ window.current_template_obj = {
           if (flag_arr.indexOf(1)>=0) {
             temp2 = []
             stat = _this.activeName2
-            temp.map(function(itme){
+            temp.map(function(item){
               if (item.status == stat) {
                 temp2<<{
                   order_id:item.order_id,
@@ -428,6 +434,10 @@ window.current_template_obj = {
       $.each(boxs,function(k,v){
         ids.push($(v).val())
       })
+      if(ids&&ids.length>0){}else{
+        _this.$message('没有数据！');
+        return false;
+      }
         data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"2"}
         Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
           _this.$message('收费成功');
@@ -445,6 +455,10 @@ window.current_template_obj = {
       $.each(boxs,function(k,v){
         ids.push($(v).val())
       })
+      if(ids&&ids.length>0){}else{
+        _this.$message('没有数据！');
+        return false;
+      }      
         data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"5"}
         Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
           _this.$message('收费并发药成功');

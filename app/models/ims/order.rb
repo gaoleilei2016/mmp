@@ -145,7 +145,8 @@ class Ims::Order < ApplicationRecord
               }
           }]
           
-          temp = 0;         
+          temp = 0;
+          p prescriptions
           prescriptions.each{|key,line| data<<{
             type:'处方'+(temp += 1).to_s,
             is_order:false,
