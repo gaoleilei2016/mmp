@@ -52,7 +52,7 @@ class Orders::Order < ApplicationRecord
 		::Admin::Organization.find(source_org_id) rescue nil
 	end
 
-	#取消订单 Orders::Order.find(id).cancel_order(cur_user)
+	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
 	def cancel_order(cur_user)
 		result = {ret_code:'0',info:''}
 		case status.to_s
@@ -104,7 +104,7 @@ class Orders::Order < ApplicationRecord
 			charge_at: created_at.to_s(:db)
 		}
 		##通知处方订单已结算
-	 	::Hospital::Prescription.charged(args, cur_user)
+	 	prescriptions.each{|x|x.charged(args, cur_user)}
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
