@@ -14,8 +14,7 @@ class Ims::GetData < ApplicationRecord
 		                            )
 				# sql = "select code,name,py from dictarea limit 5";
 				sql = "CALL p_getYPDataList('#{args[:search]}',#{args[:i_days]},'#{args[:org_id]}');"
-				result = client.query(sql)
-				result.to_a
+				result = client.query(sql).to_a 
 			rescue Exception => e
 				print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 执行存储过程 出错: " + e.backtrace.join("\n")

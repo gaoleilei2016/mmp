@@ -175,17 +175,12 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
-  # 订单操作(发药、退药、、、)
-  def oprate_order
-  	case params[:method]
-  	when 'out_order'
-  		@reslut = @ims_order.dispensing_order
-  	when 'return_order'
-  		@reslut = @ims_order.return_order
-  	else
-  		@reslut ={false:false,info:"该操作未处理。"}
-  	end
-    render json:@reslut.to_json
+  def get_search_data
+    # @yd = Ims::Order.get_order_by_code params.merge({org_id:current_user.organization_id})
+    attrs = {search:params[:search],org_id:current_user.organization_id}
+    @data = Ims::Order.get_prescription_or_order_data attrs #unless @data[:flag]
+    
+    render json:@data.to_json
   end
 
   private

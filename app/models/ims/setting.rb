@@ -12,4 +12,15 @@ class Ims::Setting < ApplicationRecord
 	# 	created_at: datetime,     # 
 	# 	updated_at: datetime    # 
 	# }
+	
+	def update_set args = {}
+		
+	end
+
+	class << self
+		# 
+		def create_set args = {}
+			
+		end
+	end
 end
