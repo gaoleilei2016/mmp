@@ -226,15 +226,16 @@ class Ims::Order < ApplicationRecord
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.status=="7"
+        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned
         return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"
         order.update_attributes(is_returned:true)
         new_order = order.clone.dup
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id
         new_order.ori_code = order.order_code
-        new_order.drug_user = args[:user_name]
-        new_order.drug_user_id = args[:user_id]
+        new_order.returner = args[:user_name]
+        new_order.returner_id = args[:user_id]
+        new_order.return_at = Time.new
         new_order.prescriptions = order.prescriptions
         new_order.status = '7'
         order.details.each do |detail|
