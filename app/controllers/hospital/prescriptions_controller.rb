@@ -119,6 +119,7 @@ class Hospital::PrescriptionsController < ApplicationController
       cur_org[:prescription_ids] = prescription_ids
       cur_org[:total_price] = total_price
       cur_org[:orders] = orders
+      cur_org[:first_created_at] = _prescriptions[0].created_at
       ret << cur_org
     end
     render json: {flag: true, info: "success", data: ret}
@@ -134,13 +135,14 @@ class Hospital::PrescriptionsController < ApplicationController
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
     ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).each do |_prescription|
-      re = JSON.parse(_prescription.to_json)
-      total_price = 0.0
-      orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      re[:total_price] = total_price
-      re[:orders] = orders
-      re[:organ] = Admin::Organization.find(_prescription.organization_id)
-      ret << re
+      # re = JSON.parse(_prescription.to_json)
+      # total_price = 0.0
+      # orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      # re[:total_price] = total_price
+      # re[:orders] = orders
+      # re[:organ] = Admin::Organization.find(_prescription.organization_id)
+      # ret << re
+      ret << _prescription.to_web_front
     end
     render json: {flag: true, info: "success", data: ret}
   end

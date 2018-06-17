@@ -3,7 +3,7 @@ class Customer::PortalController < ApplicationController
 	def index
 	end
 	def pay
-		# p '~~~~~~~ pay',params
+		p '~~~~~~~ pay',params
 		@order = ::Orders::Order.find(params[:id])
 		# p '~~~~~~',@order
 	end

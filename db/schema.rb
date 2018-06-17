@@ -204,6 +204,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.string "height"
     t.string "weight"
     t.integer "person_id"
+
     t.integer "author_id"
   end
 
@@ -219,6 +220,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
 
   create_table "hospital_orders", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "serialno"
@@ -244,6 +246,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "prescription_id"
+
     t.integer "author_id"
     t.string "formul_code"
     t.string "formul_display"
@@ -255,7 +258,11 @@ ActiveRecord::Schema.define(version: 20180617095501) do
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
     t.integer "organization_id"
-    t.integer "status", limit: 1, default: 1, comment: "濠㈣泛瀚弻鐔兼偐閼哥鍋?0 闁哄牜浜滈鎼佸冀?  1:鐎瑰憡褰冮鎼佸冀?  2:鐎垫澘鎳忛弫鍦嫻?  3:鐎圭寮堕弫鍦嫻?  4:鐎瑰憡褰冭ぐ鍌炴嚒?  7:閹煎鍠庣槐?  8:鐎瑰憡鐓￠埀顑藉亾闁? 9:鐎瑰憡鐓￠埀顑藉亾閻?"
+# <<<<<<< HEAD
+    t.integer "status", default: 0, comment: "处方状态:0 未审核,  1:已审核   2:待收费   3:已收费   4:已发药   7:废弃   8:已退药  9:已退费 "
+# =======
+#     t.integer "status", limit: 1, default: 1, comment: "濠㈣泛瀚弻鐔兼偐閼哥鍋?0 闁哄牜浜滈鎼佸冀?  1:鐎瑰憡褰冮鎼佸冀?  2:鐎垫澘鎳忛弫鍦嫻?  3:鐎圭寮堕弫鍦嫻?  4:鐎瑰憡褰冭ぐ鍌炴嚒?  7:閹煎鍠庣槐?  8:鐎瑰憡鐓￠埀顑藉亾闁? 9:鐎瑰憡鐓￠埀顑藉亾閻?"
+# >>>>>>> 9517846e0d0b1ab5744e35e132e207c0f88e3b3b
     t.string "note", collation: "utf8_general_ci"
     t.string "type_code", collation: "utf8_general_ci"
     t.integer "bill_id"
@@ -266,6 +273,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "effective_end"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+
     t.string "type_display", collation: "utf8_general_ci", comment: "处分类型名称"
     t.string "confidentiality_display", collation: "utf8_general_ci", comment: " 权限描述"
     t.integer "prescription_no", comment: "处方号"
@@ -410,12 +418,12 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.string "dosage"
     t.float "price", limit: 24
     t.float "net_amt", limit: 24
+    t.float "firm", limit: 48
     t.string "img_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "firm", limit: 50
   end
-
   create_table "orders_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.time "payment_at"
     t.time "end_time"
@@ -432,6 +440,8 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string "doctor", limit: 32
+    t.string "patient_name", limit: 32
+    t.string "patient_phone", limit: 32
     t.string "source_org_id", limit: 32
     t.string "person_id", limit: 32
     t.string "settle_id", limit: 32
@@ -538,6 +548,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "updated_at", null: false
     t.string "photo"
     t.integer "person_id"
+
     t.string "blood_code"
     t.string "blood_display"
     t.float "height", limit: 24

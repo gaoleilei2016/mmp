@@ -1,9 +1,3 @@
-<header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-		<span class="mui-icon mui-icon-left-nav"></span>
-	</a>
-	<h1 class="mui-title">我的处方</h1>
-</header>
 <style type="text/css">
 	html,body,.mui-content{
 		height: 100%;
@@ -13,7 +7,28 @@
 		overflow: auto;
 		/*padding-bottom: 60px;*/
 	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-table-view:after,.mui-table-view:before{
+		height: 1px;
+	}
+	.mui-table-view-cell{
+		padding: 13px 15px 0;
+	}
+	.mui-table-view-cell:last-child{
+		padding-bottom: 13px;
+	}
 </style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/home" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">我的处方</h1>
+</header>
 <div class="mui-content" id="vue_content">
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
@@ -21,19 +36,30 @@
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 				<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
-					<span>{{item.organ.name}}</span>
-					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{item.type_display}}</p>
+					<div>
+						<span>{{item.org.display}}</span>
+						<span style="float: right;">{{item.created_at.slice(0,10)}}</span>
+					</div>
+					<p class="mui-ellipsis" style="font-size: 12px;">
+						{{show_diagnoses(item.diagnoses)}}
+						<span style="float: right;">{{item.author.display}}</span>
+					</p>
 				</div>
 			</div>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
 						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+						<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 						<div class="mui-media-body">
 							{{drug.title}}
+							<p class="mui-ellipsis" style="float: right;">
+								<span>{{drug.specification}}</span>
+							</p>
 							<p class="mui-ellipsis">
-								{{drug.specification}}
+								<span style="margin-right: 10px;color: #F55742;">{{drug.route.display}}</span>
+								<span style="margin-right: 10px;color: #F55742;">{{drug.dose.value}}{{drug.dose.unit}}</span>
+								<span style="color: #F55742;">{{drug.frequency.display}}</span>
 								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
 							</p>
 						</div>
@@ -41,7 +67,6 @@
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
 			</div>
 		</li>
 	</ul>
@@ -53,6 +78,11 @@
 			prescriptions:[],
 		},
 		methods:{
+			show_diagnoses:function(diagnoses) {
+				return (diagnoses||[]).map(function(v) {
+					return v.display;
+				}).join("。")
+			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},

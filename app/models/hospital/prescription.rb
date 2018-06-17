@@ -176,31 +176,6 @@ class ::Hospital::Prescription < ApplicationRecord
 
 	###=== 处方状态流转  ===###
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	def link_diagnoses(args, cur_user)
 		self.reload
 		args.each_with_index do |fhir_coding_diagnose, i|

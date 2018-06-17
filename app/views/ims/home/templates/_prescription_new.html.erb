@@ -1,0 +1,167 @@
+<style type="text/css">
+</style>
+<template>
+	<div>
+		<div id="prescription_header" class="el-row">
+			<div class="el-col-4" style="width:auto;"><i class="fa fa-home fa-4x"></i></div>
+			<div class="el-col-20">
+				药店
+			</div>
+		</div>
+
+		<div class="el-row" id="prescription_body" style="height:calc(100% - 20px - 80px);">
+			<div class="el-col el-col-8" style="height: 100%;border: 1px solid rgb(221, 221, 221);overflow: auto; padding:8px;">
+				<div class="el-input el-input--mini" style="height:40px;">
+					<el-input
+					    placeholder="请输入内容"
+					    prefix-icon="el-icon-search"
+					    v-model="input21"
+					    @change="search('dose')"
+					    >
+					  </el-input>					
+				</div>
+
+				<div class="el-row prescription_list_fun">
+					<div class="el-col el-col-6 list_fun_panel" v-on:click="get_pres('A',$event)">未交费</div>
+					<div class="el-col el-col-6 list_fun_panel" v-on:click="get_pres('P',$event)">待发药</div>
+					<div class="el-col el-col-6 list_fun_panel" v-on:click="get_pres('E',$event)">已发药</div>
+					<div class="el-col el-col-6 list_fun_panel" v-on:click="get_pres('C',$event)">已退药</div>
+				</div>
+
+				<div class="prescription_list" style="height:calc(100% - 80px);">
+					<div class="el-row">
+						<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.id" v-on:click="get_pre(pre.id,$event)"><span class="el-col el-col-8">{{pre.code}}</span><span class="el-col el-col-8">{{pre.name}}</span><span class="el-col el-col-8">{{pre.amount}}</span></p>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="el-col el-col-16" style="height: 100%; padding-left:8px;">
+				<%= render "ims/home/render/order_info"%>
+			</div>
+		</div>
+
+	</div>
+</template>
+
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+			pres:[],
+			input21: '',
+			detail:[{
+				header:{},
+				lines:[{}]
+			}],
+			activeCollapse: "pre_info",
+			activeTab: "histories",
+			rules: {
+				iden: [
+		      { required: true, message: '姓名不能为空'},
+		    ],
+				phone: [
+		      { required: true, message: '姓名不能为空'},
+		    ],
+			}
+		}
+	},
+	methods:{
+		search:function(data){console.log(data)},
+    get_pres:function (stat,e) {
+    	$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+    	if (!stat) {stat=""};
+     var successCallback =  function(response) {
+        this._data.pres = response.data
+      }
+      var errorCallback =  function(response){
+          alert('服务器请求出错了')
+      }
+      this.$http.get('orders/get_orders?status='+stat).then(successCallback,errorCallback);
+    },
+    get_pre:function (stat,e) {
+    	$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
+    	if (!stat) {stat=""};
+     var successCallback =  function(response) {
+        console.log('服务器请求成功了')
+        console.log(response.data)
+        console.log(this._data.pres)
+        this._data.detail = response.data
+      }
+      var errorCallback =  function(response){
+          console.log('服务器请求出错了')
+      }
+      this.$http.get('orders/get_order_detail?status='+stat).then(successCallback,errorCallback);
+    },
+    //发药  发订单
+    out_order:function(id){
+    	this.oprate_order({id:id,method:"out_order",todo:"发药"})
+    },
+    //拒绝
+    refuse_order:function(id){
+			this.oprate_order({id:id,method:"refuse_order",todo:"拒绝"})   	
+    },
+    //审核
+		check_order:function(id){
+			this.oprate_order({id:id,method:"check_order",todo:"审核"})		
+		},
+		//退药
+		return_order:function(id){
+			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
+		},
+		oprate_order:function(data){
+    	if (data.id&&data.id.length>0){}else{
+    		alert("订单信息不全，不能发药！")
+    		return false
+    	}
+     var successCallback =  function(response) {
+     		console.log(response.data)
+     		stat = response.data.flag ? true : false
+     		type = stat ? "success" : "warning";
+     		str = 
+	     	this.$notify({
+	     		title: '提示',
+          message: data.todo+(stat ? "成功" : "失败"),
+          type:type,
+          duration:(stat ? 4500 : 0)
+        })
+      }
+      var errorCallback =  function(response){
+          console.log('服务器请求出错了')
+      }			
+			this.$http.get('orders/oprate_order?id='+data.id+'&method='+data.method).then(successCallback,errorCallback);
+		},
+    format_time:function(data){
+	  	var time = new Date(data)
+	  	if (data) {
+		    return time.toLocaleDateString().replace(/\//g,"-")+" "+time.toTimeString().slice(0,5)
+	  	}else{
+	  		return ""
+	  	}
+    },
+    format_price:function(data){
+			if (data) {
+				return Number(data)==NaN ? 0.00 : parseFloat(data).toFixed(2)
+			}else{
+				return ""
+			}
+    },
+    fix_diagnoses:function(data){
+			try{
+				if (typeof(data.join())==Object) {
+					return ""
+				}else{
+					return data.join();
+				}
+			}catch(err){
+				return ""
+			}
+    }
+	},
+	mounted:function(){
+		// this.$nextTick(function(){
+		// 	this.init();
+		// })	
+	}
+}
+</script>
