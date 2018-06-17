@@ -53,7 +53,8 @@ class Orders::Order < ApplicationRecord
 	end
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
-	def cancel_order(cur_user)
+	def cancel_order(cur_user=nil)
+		cur_user ||= User.find(user_id)
 		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
