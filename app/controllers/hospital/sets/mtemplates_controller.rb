@@ -10,11 +10,12 @@ class Hospital::Sets::MtemplatesController < ApplicationController
     when "0" # 自己创建的 
       @mtemplates = Hospital::Sets::Mtemplate.where("author_id=? AND title LIKE ?", current_user.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
     when "1" # 科室共享的
-      cur_dep = current_user.current_dep
-      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='1' AND location_id=? AND title LIKE ?", cur_dep.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      # cur_dep = current_user.current_dep
+      # @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='1' AND location_id=? AND title LIKE ?", cur_dep.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      @mtemplates = []
     when "2" # 医院共享的
-      cur_org = current_user.organizations
-      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='2' AND organization_id=? AND title LIKE ?", cur_org.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      cur_org = current_user.organization
+      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='2' AND org_id=? AND title LIKE ?", cur_org.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
     when "avaliable" # 可以使用的
       @mtemplates = Hospital::Sets::Mtemplate.all.page(params[:page]||1).per(params[:per]||25)
     else
