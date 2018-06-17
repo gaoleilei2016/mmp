@@ -117,7 +117,6 @@ $gray_border:#ddd;
 .prescription_item_info{
 	overflow-x:hidden;
 	overflow-y:auto;
-	height:calc(100% - 300px);
 
 	.item_list{
 		padding-left: 12px;
@@ -129,4 +128,11 @@ $gray_border:#ddd;
 	padding-top:8px;
 	padding-bottom:8px;
 	line-height:27px;
+}
+
+.platform_search_dialog{
+	.el-dialog{
+		min-width: 800px;
+	}
+	th{padding-top:0px!important; padding-bottom:0px!important;}
 }

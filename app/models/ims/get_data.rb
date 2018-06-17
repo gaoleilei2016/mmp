@@ -14,6 +14,7 @@ class Ims::GetData < ApplicationRecord
 		                            )
 				# sql = "select code,name,py from dictarea limit 5";
 				sql = "CALL p_getYPDataList('#{args[:search]}',#{args[:i_days]},'#{args[:org_id]}');"
+				p sql
 				result = client.query(sql).to_a 
 			rescue Exception => e
 				print e.message rescue "  e.messag----"

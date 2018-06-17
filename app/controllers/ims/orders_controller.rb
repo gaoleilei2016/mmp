@@ -136,7 +136,7 @@ class Ims::OrdersController < ApplicationController
   def charging_pre
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2"})
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2",current_user:current_user})
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
