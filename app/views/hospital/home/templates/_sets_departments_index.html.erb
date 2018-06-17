@@ -1,0 +1,295 @@
+<style type="text/css">
+</style>
+<template>
+	<div id="sets_departments_index_div">
+		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+		  <el-breadcrumb-item>设置</el-breadcrumb-item>
+		  <el-breadcrumb-item>科室管理</el-breadcrumb-item>
+		</el-breadcrumb>
+		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+			<div style="">
+				<el-row :gutter="20" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<el-input
+					    placeholder="搜索科室名称 / 简拼"
+					    prefix-icon="el-icon-search"
+					    size="mini"
+					    v-model="search">
+					    <i
+						    class="el-icon-circle-close-outline el-input__icon"
+						    slot="suffix"
+						    v-on:click="search=''">
+						  </i>
+					  </el-input>
+					</el-col>
+					<el-col :span="6" style="line-height: 30px;">&nbsp;
+						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
+					</el-col>
+					<el-col :span="10" style="text-align: right;">
+						<el-button size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建科室</el-button>
+					</el-col>
+				</el-row>
+				<el-table
+		      :data="departments"
+		      :height="tableHeight"
+		      class="thiner-row"
+		      style="width: 100%">
+		      <el-table-column
+		        prop="id"
+		        label="科室编号">
+		      </el-table-column>
+		      <el-table-column
+		        prop="name"
+		        label="科室名称">
+		      </el-table-column>
+		      <el-table-column
+		        prop="jianpin"
+		        label="简拼">
+		      </el-table-column>
+		      <el-table-column
+		        prop="created_at"
+		        label="创建日期"
+		        min-width="120">
+		        <template slot-scope="scope">
+			      	{{scope.row.created_at | formatDate}}
+			      </template>
+		      </el-table-column>
+		      <el-table-column
+		        label="状态"
+		        min-width="120">
+		        <template slot-scope="scope">
+			      	<template v-for="st in statusOptions">
+				        <el-tag size="mini" :type="st.type" v-if="scope.row.status==st.value">{{st.label}}</el-tag>
+				      </template>
+			      </template>
+		      </el-table-column>
+		      <el-table-column
+		        label=""
+		        min-width="80">
+		        <template slot-scope="scope">
+			      	<el-button
+			        	v-if="scope.row.status!='O'"
+			        	style="color: #a94442;"
+			          type="text"
+			          @click="abandonDepartment(scope.$index, scope.row)"
+			          size="mini">
+			          作废
+			        </el-button>
+			        <el-button
+			        	v-if="scope.row.status!='O'"
+			          type="text"
+			          @click="openFormModal({action:'edit', index: scope.$index, row: scope.row})"
+			          size="mini">
+			          编辑
+			        </el-button>
+			      </template>
+		      </el-table-column>
+		    </el-table>
+			</div>
+	  </el-tabs>
+	  <!-- 分页标记 -->
+	  <el-pagination
+	  	background
+	    @size-change="handleSizeChange"
+	    @current-change="handleCurrentChange"
+	    :current-page="currentPage"
+	    :page-sizes="[10, 25, 50, 100, 200]"
+	    :page-size="pageSize"
+	    layout="total, sizes, prev, pager, next, jumper"
+	    :total="dataCount">
+	  </el-pagination>
+
+
+
+	  <!-- 编辑模态框 -->
+	  <el-dialog
+		  :title="(!department.id ? '新建' : '编辑')+'科室'"
+		  :visible.sync="isShowFormDialog"
+		  width="70%">
+		  <el-form size="mini" label-width="80px" :model="department" :rules="departmentRules" ref="departmentForm" style="width: 80%; margin: 0 auto;">
+        <el-form-item 
+          label="科室名称" 
+          prop="name">
+          <el-input v-model="department.name"></el-input>
+        </el-form-item>
+        <el-form-item 
+          label="备注">
+          <el-input v-model="department.note"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitDepartmentForm('departmentForm')">保 存<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+          <el-button @click="isShowFormDialog = false">取 消</el-button>
+        </el-form-item>
+      </el-form>
+		</el-dialog>
+
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		var cardTabsOptions = [{code: "0", display: "所有科室"}];
+		return {
+			statusOptions: [
+				{value: "N", label: "新建", type: "primary"},
+				{value: "A", label: "活动", type: "primary"},
+				{value: "O", label: "废弃", type: "info"},
+			],
+			cardTabsOptions: cardTabsOptions,
+			activeName: cardTabsOptions[0].code,
+			multipleSelection: [],
+			departments: [],
+			departmentsResource: Vue.resource('/hospital/sets/departments{/id}.json'),
+			// 编辑
+			department: {},
+			isShowFormDialog: false,
+			departmentRules: {
+				name: [
+		      { required: true, message: '科室名称不能为空'},
+		    ],
+			},
+			
+			// 搜索
+    	search: "", // 搜索内容
+    	tableHeight: 200, // 表格高度
+    	// 分页相关
+	  	currentPage: 1, // 当前页
+	  	pageSize: 25, // 默认一页显示25条
+	  	dataCount: 100, // 总数据条数
+		}
+	},
+	watch: {
+		search: function (newValue, oldValue) {
+    	this.getData();
+    },
+	},
+	mounted: function() {
+		this.$nextTick(function(){
+			this.init();
+		})
+	},
+	methods: {
+		init: function () {
+			var _this = this;
+
+      var clientHeight = document.body.clientHeight;
+      _this.tableHeight = clientHeight - 290;
+      _this.getData();
+		},
+		getData: function () {
+			var _this = this;
+			_this.departmentsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize}).then( function(response) {
+				var res = response.data;
+  			if(res.flag) {
+          _this.departments = res.data;
+          _this.dataCount = res.data.length;
+  			}else{
+  				_this.$message.error(res.info);
+  			}
+      },function(response) {
+      	_this.$message.error("后台出错，获取科室列表失败。");
+      })
+		},
+		// 
+  	handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    handleCurrentChange: function (val) {
+    	this.currentPage = val;
+      this.getData();
+    },
+    handleSelectionChange: function (val) {
+    	this.multipleSelection = val;
+    	console.log(val)
+    },
+		handleTabClick: function (tab, event) {
+
+		},
+		// 打开模态框
+    openFormModal: function (json) {
+    	var _this = this;
+    	if(json.action=="create") {
+	    	_this.department = {
+	    		name: "", // 名称
+	    		note: "", // 备注
+	    	}
+    	}
+    	if(json.action=="edit") {
+    		_this.department = json.row;
+    	}
+    	_this.isShowFormDialog = true;
+    },
+		submitDepartmentForm: function (formName) {
+			var _this = this;
+      _this.$refs[formName].validate( function (valid) {
+        if (valid) {
+        	var btn = $(event.target);
+        	btn.attr("disabled", "disabled").find(".fa").show();
+        	var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), department: _this.department};
+        	if(!_this.department.id) {
+	        	_this.departmentsResource.save(json).then( function(response) {
+	        		_this.handleAfterSave({btn: btn, res: response, action: "create"});
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("创建科室失败，请联系管理员。");
+		      	})
+        	} else {
+        		_this.departmentsResource.update({id: _this.department.id}, json).then( function(response) {
+	        		_this.handleAfterSave({btn: btn, res: response, action: "update"});
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("更新科室失败，请联系管理员。");
+		      	})
+        	}
+        } else {
+          _this.$message({
+	          message: '请按照规范录入数据。',
+	          type: 'warning'
+	        });
+          return false;
+        }
+      });
+		},
+		handleAfterSave: function (json) {
+			json.btn.removeAttr("disabled").find(".fa").hide();
+  		var res = json.res.data;
+  		if(res.flag) {
+  			this.$message({
+          message: "生成科室成功。",
+          type: 'success'
+        });
+  			// 将创建的科室添加到使用科室列表
+  			this.getData();
+  			// 关闭模态框
+  			this.isShowFormDialog = false;
+  		} else {
+  			this.$message.error(res.info);
+  		}
+		},
+		abandonDepartment: function (index, row) {
+			var _this = this;
+    	_this.$confirm('此操作将作废科室, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then( function () {
+      	_this.departmentsResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+  				var res = response.data;
+    			if(res.flag) {
+	          row.status = res.data.status;
+	          // _this.departmentsResource.splice(index, 1);
+    			}else{
+    				_this.$message.error(res.info);
+    			}
+	      },function(response) {
+	      	_this.$message.error("后台出错，作废科室失败。");
+	      })
+    	}).catch( function () {
+    	})
+		},
+	},
+}
+</script>

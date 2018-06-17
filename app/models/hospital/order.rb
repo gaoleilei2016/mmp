@@ -10,7 +10,7 @@ class Hospital::Order < ApplicationRecord
 
   def initialize args = {}
     super args
-    self.status = "N"
+    self.status = 0
   end
 
 
@@ -73,7 +73,7 @@ class Hospital::Order < ApplicationRecord
       cur_order_status = ::Hospital::Order.find(order_ids).map { |e| e.status  }
       cur_order_status.uniq! 
       p cur_order_status
-      if cur_order_status.size == 1 && cur_order_status[0] == "N" # 还是新建状态的医嘱就能创建处方
+      if cur_order_status.size == 1 && cur_order_status[0] == 0 # 还是新建状态的医嘱就能创建处方
         true
       else
         false
@@ -103,7 +103,7 @@ class Hospital::Order < ApplicationRecord
               course_of_treatment_unit: _order.course_of_treatment_unit,
               total_quantity: _order.total_quantity,
               order_type: _order.order_type,
-              status: "N",
+              status: 0,
               encounter_id: encounter_id,
               author_id: cur_user.id,
               prescription_id: nil,
@@ -143,7 +143,7 @@ class Hospital::Order < ApplicationRecord
               course_of_treatment_unit: _order.course_of_treatment_unit,
               total_quantity: _order.total_quantity,
               order_type: _order.order_type,
-              status: "N",
+              status: 0,
               author_id: cur_user.id,
               mtemplate_id: mtemplate_id,
               type_type:"template"

@@ -9,9 +9,8 @@
       min-width="80"
       label="状态">
       <template slot-scope="scope">
-        <el-tag size="mini" v-if="scope.row.status=='N'">新建</el-tag>
-        <el-tag size="mini" type="warning" v-if="scope.row.status=='A'">待缴费</el-tag>
-        <el-tag size="mini" type="success" v-if="scope.row.status=='E'">缴费</el-tag>
-        <el-tag size="mini" type="info" v-if="scope.row.status=='O'">作废</el-tag>
+        <template v-for="st in ordersStatus">
+          <el-tag size="mini" :type="st.type" v-if="scope.row.status==st.value">{{st.label}}</el-tag>
+        </template>
       </template>
     </el-table-column>

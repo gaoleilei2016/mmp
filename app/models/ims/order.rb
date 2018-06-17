@@ -145,41 +145,42 @@ class Ims::Order < ApplicationRecord
               }
           }]
           
-          temp = 0;         
+          temp = 0;
+          p prescriptions
           prescriptions.each{|key,line| data<<{
             type:'处方'+(temp += 1).to_s,
             is_order:false,
-            order_id: line.try(:[],:id),
-            order_code: line.try(:[],:prescription_no),
-            amt: line.try(:[],:price),
-            status: line.try(:[],:status),
-            payment_at: line.try(:[],:payment_at),     # 支付时间
-            created_at: line.try(:[],:created_at).try(:to_s,:db),     # 订单生成时间
-            end_time: line.try(:[],:end_time),     # 订单完成时间
-            close_time: line.try(:[],:close_time),
-            target_org_name: line.try(:[],:target_org_name),
-            source_org_name: line.try(:[],:source_org_name),
-            doctor: line.try(:[],:author).try(:[],:display),
-            prescriptions_id: line.try(:[],:prescription_ids),
-            prescriptions_count: line.try(:[],:prescription_ids).try(:[],:count),
-            patient_name: line.try(:[],:name),
+            order_id: line[:id],
+            order_code: line[:prescription_no],
+            amt: line[:price],
+            status: line[:status],
+            payment_at: line[:payment_at],     # 支付时间
+            created_at: line[:created_at].try(:to_s,:db),     # 订单生成时间
+            end_time: line[:end_time],     # 订单完成时间
+            close_time: line[:close_time],
+            target_org_name: line[:target_org_name],
+            source_org_name: line[:source_org_name],
+            doctor: line[:author][:display],
+            prescriptions_id: line[:prescription_ids],
+            prescriptions_count: line[:prescription_ids].try(:count),
+            patient_name: line[:name],
 
-            patient_sex: line.try(:gender_display),
-            patient_age: line.try(:age),
-            patient_iden: line.try(:iden),
+            patient_sex: line[:gender_display],
+            patient_age: line[:age],
+            patient_iden: line[:iden],
             
-            patient_phone: line.try(:[],:patient_phone),
-            payment_type: line.try(:[],:payment_type),
-            details: (line.try(:[],:orders)||[]).map{|x| {
-                    name: x.try(:title),
-                    specifications: x.try(:specification),
-                    quantity: x.try(:total_quantity),
-                    unit: x.try(:unit),
-                    dosage: x.try(:dosage),
-                    price: x.try(:price),
-                    net_amt: x.try(:net_amt),
-                    firm: x.try(:firm),
-                    img_path: x.try(:img_path)
+            patient_phone: line[:patient_phone],
+            payment_type: line[:payment_type],
+            details: (line[:orders]||[]).map{|x| {
+                    name: x[:title],
+                    specifications: x[:specification],
+                    quantity: x[:total_quantity],
+                    unit: x[:unit],
+                    dosage: x[:dosage],
+                    price: x[:price],
+                    net_amt: x[:net_amt],
+                    firm: x[:firm],
+                    img_path: x[:img_path]
                   }
                 }
             }
