@@ -57,8 +57,9 @@ class Orders::Order < ApplicationRecord
 		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
-			result = {ret_code:'0',info:'订单已取消。'}
 			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
+			update_attributes(status:'6',close_time:Time.now.to_s(:db))
+			result = {ret_code:'0',info:'订单已取消。'}
 		when '2'
 			arg = {
 				# 退费人
@@ -70,6 +71,7 @@ class Orders::Order < ApplicationRecord
 				return_charge_at: Time.now.to_s(:db)
 			}
 			prescriptions.each{|x|x.return_charge(arg, cur_user)}
+			update_attributes(status:'7',end_time:Time.now.to_s(:db))
 			result = {ret_code:'0',info:'取消成功，处方已失效。'}
 		when '5'
 			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -78,7 +80,6 @@ class Orders::Order < ApplicationRecord
 		when '7'
 			return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
 		end
-		update_attributes(status:'7',end_time:Time.now.to_s(:db))
 		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 		result
 	end
@@ -195,7 +196,7 @@ class Orders::Order < ApplicationRecord
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
-					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.cancel_order({id:#{order.id.to_s}})")
+					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
 					result[:info].concat("请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
 				end
 				#订单创建成功之后改变处方状态
@@ -232,24 +233,24 @@ class Orders::Order < ApplicationRecord
 		end
 
 		#取消订单(自动或者手动)
-		def cancel_order(attrs = {})
-			attrs = attrs.deep_symbolize_keys
-			order = self.where(:id=>attrs[:id]).last
-			if order.status.to_s == '1'
-				order.update_attributes(status:'6',close_time:Time.now.to_s(:db))
-				args = {
-					# 创建订单人
-					create_bill_opt: {
-						id: attrs[:current_user][:id],
-						display: attrs[:current_user][:name],
-					},
-					# 订单创建时间
-					bill_at: order.created_at.to_s(:db),
-				  	bill_id: order.id,
-				}
-				order.prescriptions.each{|pre| pre.back_wait_charge(args, attrs[:current_user])}
-			end
-		end
+		# def cancel_order(attrs = {})
+		# 	attrs = attrs.deep_symbolize_keys
+		# 	order = self.where(:id=>attrs[:id]).last
+		# 	if order.status.to_s == '1'
+		# 		order.update_attributes(status:'6',close_time:Time.now.to_s(:db))
+		# 		args = {
+		# 			# 创建订单人
+		# 			create_bill_opt: {
+		# 				id: attrs[:current_user][:id],
+		# 				display: attrs[:current_user][:name],
+		# 			},
+		# 			# 订单创建时间
+		# 			bill_at: order.created_at.to_s(:db),
+		# 		  	bill_id: order.id,
+		# 		}
+		# 		order.prescriptions.each{|pre| pre.back_wait_charge(args, attrs[:current_user])}
+		# 	end
+		# end
 
 		#作废订单明细
 		def remove_order_detail(attrs = {})
