@@ -327,27 +327,31 @@ class Orders::Order < ApplicationRecord
 										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
-				args = {
-					# 创建订单人
-					charger: {
-						id: attrs[:current_user].id,
-						display: attrs[:current_user].name
-						},
-					# 订单创建时间
-					charge_at: order.created_at.to_s(:db)
-				}
-				##通知处方订单已结算
-			 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
-			 	args2 = {
-					# 发药人
-					delivery: {
-						id: attrs[:current_user].id,
-						display: attrs[:current_user].name
-					},
-					# 发药时间
-					delivery_at: order.created_at.to_s(:db)
-				}
-				order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+				if ["2","5"].include?attrs[:status].to_s
+					args = {
+						# 创建订单人
+						charger: {
+							id: attrs[:current_user].id,
+							display: attrs[:current_user].name
+							},
+						# 订单创建时间
+						charge_at: order.created_at.to_s(:db)
+					}
+					##通知处方订单已结算
+				 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
+					if ["5"].include?attrs[:status].to_s
+					 	args2 = {
+							# 发药人
+							delivery: {
+								id: attrs[:current_user].id,
+								display: attrs[:current_user].name
+							},
+							# 发药时间
+							delivery_at: order.created_at.to_s(:db)
+						}
+						order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+					end
+				end
 				##更新处方状态。。。。。。
 			end
 			result
