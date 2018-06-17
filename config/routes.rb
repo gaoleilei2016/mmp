@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      post :refund_order
       get :get_orders
       post :pay_order
       post :save_order
