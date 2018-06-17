@@ -64,7 +64,7 @@ class Pay::Alipay
       client   
     end
 
-    def get_payment_url(order)
+    def get_payment_url(order)#order.return_url
       begin
         client = get_client
         payment_url = client.page_execute_url(
@@ -75,8 +75,8 @@ class Pay::Alipay
             out_trade_no: order.out_trade_no,
             product_code: ali.product_code,
             total_amount: order.total_fee.to_f,
-            subject: order.title
-            # quit_url: get_return_url
+            subject: order.title,
+            quit_url: order.return_url
           }.to_json(ascii_only: true),
           timestamp: current_time
         )

@@ -19,7 +19,7 @@ class PayController < ApplicationController
     end
   end
 
-  #接收微信支付通知
+  #接收微信支付通知Orders::Order.find('订单号').order_settle("Alipay / Wechat")
   def wechat
     begin
       xml = request.body.string
@@ -28,7 +28,8 @@ class PayController < ApplicationController
       wx = Pay::Order.find_by(out_trade_no: res['out_trade_no'])
       return write_log("----订单未找到-#{res['out_trade_no']}----#{xml}") unless wx
       return write_log("----订单支付异常--#{res}---") unless res['return_code'].eql?('SUCCESS') && res['result_code'].eql?('SUCCESS')
-      if (wx.total_fee*100) == res['total_fee'].to_i
+      if (wx.total_fee.to_f*100) == res['total_fee'].to_i
+        Orders::Order.find(wx.out_trade_no).order_settle("Wechat")
         return write_log("-----订单已支付----#{res['out_trade_no']}") if wx.update_attributes({status: 'success', status_desc: '订单已支付'})
         write_log("------订单已支付但数据更新失败----原因:#{wx.errors.full_messages.join(',')}")
       else
@@ -70,7 +71,8 @@ class PayController < ApplicationController
       ali = Pay::Order.find_by(out_trade_no: params['out_trade_no'])
       return write_ali_log("------订单未找到---#{params['out_trade_no']}") unless ali
       return write_ali_log("------订单未支付----#{params['trade_status']}") unless params['trade_status'].eql?('TRADE_SUCCESS')
-      if params['total_amount'].to_f == ali.total_fee
+      if params['total_amount'].to_f == ali.total_fee.to_f
+        Orders::Order.find(ali.out_trade_no).order_settle("Alipay")
         return write_ali_log("-----订单已支付----#{params['out_trade_no']}") if ali.update_attributes({status: 'success', status_desc: '订单已支付'})
         write_ali_log("------订单已支付但数据更新失败----原因:#{ali.errors.full_messages.join(',')}")
       else
