@@ -29,8 +29,8 @@ class ::Hospital::Sets::Mtemplate < ApplicationRecord
 			    display: self.location_display
 			},
 			organization: {
-				id: self.organization_id
-			}
+				id: self.org_id
+			},
 			created_at: self.created_at,
 			updated_at: self.updated_at,
 			orders: self.orders.map { |e| e.to_web_front  }
