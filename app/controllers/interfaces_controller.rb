@@ -193,7 +193,7 @@ class InterfacesController < ApplicationController
 	def get_duanxinma
 		# p '~~~~~~~~~~',params[:login]
 		# 图片验证码
-		raise "图片验证码错误" unless verify_rucaptcha?
+		# raise "图片验证码错误" unless verify_rucaptcha?
 		raise "手机号错误" unless params[:login].present?
 		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
 		res = Sms::Message.set_up(args)
