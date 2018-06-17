@@ -88,6 +88,14 @@ Rails.application.routes.draw do
       end
     end
     resources :histories      # 历史列表
+
+    # 诊断
+    resources :diagnoses do
+      collection do
+        get :get_diagnoses_by_encounter_id
+        post :create_by_encounter_id
+      end
+    end
   end
   ########### hospital ##########
   ############################
