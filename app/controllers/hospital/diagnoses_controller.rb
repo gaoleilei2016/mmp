@@ -10,9 +10,9 @@ class Hospital::DiagnosesController < ApplicationController
 	# 只能通过就诊id
 	# /hospital/diagnoses
 	def index
-		@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type).order(:rank)
-		@diagnoses = @diagnoses.map { |e| e.to_web_front  }
-		render json: {flag:true, info: "success", data: @diagnoses}
+		@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
+		ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
+		render json: {flag:true, info: "success", master: ret[:master], slaver: ret[:slaver]}
 	end
 
 
@@ -96,7 +96,9 @@ class Hospital::DiagnosesController < ApplicationController
 	# /hospital/diagnoses/:id
 	def destroy
 		if @diagnose.destroy
-			render json: {flag: true, info: "success", data: @diagnose}
+			@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
+			ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
+			render json: {flag: true, info: "success", master: ret[:master], slaver: ret[:slaver]}
 		else
 			render json: {flag: false, info: @diagnose.errors.message.values.flatten, data: @diagnose.to_web_front}
 		end

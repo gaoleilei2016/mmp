@@ -115,10 +115,12 @@ class Hospital::PrescriptionsController < ApplicationController
     ::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
       prescription_ids = []
       total_price = 0.0
-      orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      _status = []
+      orders = _prescriptions.map { |e| prescription_ids<<e.id;_status<<e.status;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
       cur_org[:prescription_ids] = prescription_ids
       cur_org[:total_price] = total_price
       cur_org[:orders] = orders
+      cur_org[:status] = _status
       cur_org[:first_created_at] = _prescriptions[0].created_at
       ret << cur_org
     end

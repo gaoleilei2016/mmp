@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get :get_orders
       post :pay_order
       post :save_order
+      post :cancel_order
       get :get_prescriptions_cart
       get :set_prescriptions_cart
       get :set_current_pharmacy
@@ -66,6 +67,12 @@ Rails.application.routes.draw do
       resources :inis do
         collection do
           get :cur_org_ini
+        end
+      end
+      resources :departments do 
+        collection do 
+          get :get_active_departments
+          post :set_cur_department
         end
       end
       resources :mtemplates # 医嘱模板管理
@@ -131,7 +138,7 @@ Rails.application.routes.draw do
         get :get_detail
         get :get_search_data    # 未发订单或处方检索
         get :get_order_by_code  # 已发药或已退订单检索  
-        get :operat_order_by_prescription   # 平台处方收费或收费并发药操作
+        post :operat_order_by_prescription   # 平台处方收费或收费并发药操作
         get :return_drug           # 退药
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
@@ -165,5 +172,7 @@ Rails.application.routes.draw do
 
   match '/refund/wechat', to: 'refund#wechat', via: [:post]
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
+
+  match '/wechat/login',  to: 'wechat#login', via: [:get]
   ########### hujun_end   ##########
 end
