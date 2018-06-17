@@ -1,26 +1,22 @@
 <style type="text/css">
-	#sets_mtemplates_index_div .el-tabs__header {
-		margin-bottom: 0;
-	}
 </style>
 <template>
 	<!-- 药品模板管理界面 -->
 	<div id="sets_mtemplates_index_div">
-		<el-breadcrumb separator="/">
+		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
 		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
 		  <el-breadcrumb-item>设置</el-breadcrumb-item>
 		  <el-breadcrumb-item>药品模板管理</el-breadcrumb-item>
 		</el-breadcrumb>
-		<br/>
-		<el-tabs v-model="activeName" type="card" @tab-click="handleTabClick">
+		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
 	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
-			<div style="border-left: 1px solid #eee; border-right: 1px solid #eee; margin-bottom: 1em;">
-				<el-row style="padding: 10px;">
+			<div style="">
+				<el-row :gutter="20" style="margin-bottom: 10px;">
 					<el-col :span="8">
 						<el-input
 					    placeholder="搜索模板名称 / 简拼 / 类型"
 					    prefix-icon="el-icon-search"
-					    size="small"
+					    size="mini"
 					    v-model="search">
 					    <i
 						    class="el-icon-circle-close-outline el-input__icon"
@@ -33,11 +29,11 @@
 						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
 					</el-col>
 					<el-col :span="10" style="text-align: right;">
-						<el-button size="small" @click="openFormModal('create')" type="primary" plain>新建模板</el-button>
+						<el-button size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建模板</el-button>
 					</el-col>
 				</el-row>
 				<el-table
-		      :data="templates"
+		      :data="mtemplates"
 		      :height="tableHeight"
 		      class="thiner-row"
 		      style="width: 100%">
@@ -90,7 +86,7 @@
 			        <el-button
 			        	v-if="scope.row.status!='O'"
 			          type="text"
-			          @click="openFormModal('edit')"
+			          @click="openFormModal({action:'edit', index: scope.$index, row: scope.row})"
 			          size="mini">
 			          编辑
 			        </el-button>
@@ -117,12 +113,44 @@
 		  :visible.sync="isShowFormDialog"
 		  width="90%">
 		  <%= render "hospital/home/render/encounters_orders" %>
-		  
-
-		  <span slot="footer" class="dialog-footer">
-		    <el-button @click="isShowFormDialog = false" size="mini">关 闭</el-button>
-		    <el-button type="primary" @click="quoteOrders(multipleHisOrdersSelection,'batch')" size="mini">引 用<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
-		  </span>
+		  <br/>
+		  <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
+        <el-form-item 
+          label="模板名称" 
+          prop="title">
+          <el-input v-model="mtemplate.title"></el-input>
+        </el-form-item>
+        <el-form-item 
+          label="共享范围" 
+          prop="sharing_scope.code">
+          <el-select v-model="mtemplate.sharing_scope" value-key="code" placeholder="请选择" style="width: 100%;">
+            <el-option
+              v-for="item in ($parent.common_data_sharing_scopes||[])"
+              :key="item.code"
+              :label="item.display"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item 
+          label="病种">
+          <el-autocomplete size="mini" v-model="mtemplate.disease&&mtemplate.disease.display" ref="diagnose" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
+            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="mtemplate.disease={code: '', display: ''}"></i>
+            <template slot-scope="props">
+              <el-col :span="10">{{props.item.code}}</el-col>
+              <el-col :span="14">{{props.item.display}}</el-col>
+            </template>
+          </el-autocomplete>
+        </el-form-item>
+        <el-form-item 
+          label="备注">
+          <el-input v-model="mtemplate.note"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitMTemplateForm('mtemplateForm')">保 存<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+          <el-button @click="isShowFormDialog = false">取 消</el-button>
+        </el-form-item>
+      </el-form>
 		</el-dialog>
 	</div>
 </template>
@@ -132,6 +160,7 @@ window.current_template_obj = {
 		var options = this.$parent.common_data_sharing_scopes;
 		return {
 			mtemplatesResource: Vue.resource('/hospital/sets/mtemplates{/id}.json'),
+			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
      	codeIni: {},
      	cardTabsOptions: options,
      	activeName: options[0].code,
@@ -140,13 +169,22 @@ window.current_template_obj = {
      		{value: "A", label: "启用", type: "warning"},
     		{value: "O", label: "废弃", type: "info"},
      	],
+     	// 药品模板创建规则
+			mtemplateRules: {
+				title: [
+		      { required: true, message: '姓名不能为空'},
+		    ],
+				"sharing_scope.code": [
+		      { required: true, message: '共享范围不能为空'},
+		    ],
+			},
      	multipleSelection: [], // 已经选择的项
-     	templates: [],
+     	mtemplates: [],
      	mtemplate: {}, // 模板对象
      	isShowFormDialog: false, // 显示编辑模板
      	orders: [], // 医嘱列表
      	order: {},
-     	editIndex: -1, // 正在编辑的序号
+     	editIndex: -1, // 正在编辑的医嘱序号
      	// 搜索
     	search: "", // 搜索内容
     	tableHeight: 200, // 表格高度
@@ -171,7 +209,7 @@ window.current_template_obj = {
   		var _this = this;
 
        var clientHeight = document.body.clientHeight;
-      _this.tableHeight = clientHeight - 270;
+      _this.tableHeight = clientHeight - 290;
       _this.getData();
   	},
   	// 获取模板数据
@@ -180,7 +218,7 @@ window.current_template_obj = {
 			_this.mtemplatesResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
-          _this.templates = res.data;
+          _this.mtemplates = res.data;
           _this.dataCount = res.data.length;
   			}else{
   				_this.$message.error(res.info);
@@ -189,6 +227,27 @@ window.current_template_obj = {
       	_this.$message.error("后台出错，获取药品模板失败。");
       })
   	},
+  	// 查询诊断
+  	querySearchDiagnoseAsync: function(queryString, cb) {
+			var _this = this;
+			Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+		    var res = response.data;
+		    if (res.flag) {
+					cb(res.data);
+					// 设置下拉选择的第一项为高亮
+					var el = _this.$refs["diagnose"];
+					if(el) {
+						el.highlightedIndex = 0
+					}
+				}
+		  },function() {
+		  	_this.$message.error("获取诊断列表失败，请联系管理员。");
+		  })
+		},
+		// 选择疾病
+    handleSelectMTempDisease: function (item) {
+    	this.mtemplate.disease = {code: item.code, display: item.display};
+    },
   	// 模板类型切换
   	handleTabClick: function () {
   		this.getData();
@@ -206,9 +265,52 @@ window.current_template_obj = {
     	this.multipleSelection = val;
     	console.log(val)
     },
+    // 聚焦下一个
+  	focusNext: function (now, next) {
+  		var _this = this;
+  		var _now = _this.$refs[now],
+  				_next = _this.$refs[next];
+  		if(_now instanceof Array) { _now = _now[0]; }
+  		if(_next instanceof Array) { _next = _next[0]; }
+			// el-select需要使用blur方法让下拉列表关闭
+			if(next=="encgender"){
+				_this.encounter.gender = _this.$parent.common_data_genders[0];
+			}
+			if(_now.$el.className.indexOf("el-select")>-1) {
+				_now.blur();
+			}
+			// 聚焦保存按钮， 草药添加按钮
+  		if(next.indexOf("save")>-1) {
+  			_next.$el.focus();
+  		} else if (now=="ordtitle") { // 如果是第一个搜索框，判断是否有数据之后，再跳转下一个
+  			if(!_this.order.serialno) {
+  				_this.$message({
+	          message: '请选择药品。',
+	          type: 'warning'
+	        });
+  			} else {
+  				_next.focus();
+  			}
+  		} else {
+  			// 聚焦下一个输入框
+				_next.focus();
+			}
+  	},
     // 打开模态框
-    openFormModal: function (action) {
+    openFormModal: function (json) {
     	var _this = this;
+    	if(json.action=="create") {
+	    	_this.mtemplate = {
+	    		title: "", // 模板名称
+	    		sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
+	    		disease: {code: "", display: ""}, // 病种
+	    		note: "", // 备注
+	    	}
+    	}
+    	if(json.action=="edit") {
+    		_this.mtemplate = json.row;
+    		_this.orders = json.row.orders;
+    	}
     	_this.isShowFormDialog = true;
     },
     // 搜索药品，查询药品
@@ -304,17 +406,17 @@ window.current_template_obj = {
           // 判断是否有id，有id的话，就是编辑，没有id为新建
           var btn = $(_this.$refs["saveorder"].$el);
           btn.attr("disabled", "disabled").find(".fa").show();
-          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order};
+          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order, type: "template"};
           if(!_this.order.id) {
           	_this.ordersResource.save(json).then( function(response) {
-          		_this.handleOrderReturn(response, btn);
+          		_this.handleOrderReturn(response, btn, "save");
           	}, function(response) {
           		btn.removeAttr("disabled").find(".fa").hide();
           		_this.$message.error("创建药品失败，请联系管理员。");
           	})
           } else {
           	_this.ordersResource.update({id: _this.order.id}, json).then( function(response) {
-          		_this.handleOrderReturn(response, btn);
+          		_this.handleOrderReturn(response, btn, "update");
           	}, function(response) {
           		btn.removeAttr("disabled").find(".fa").hide();
           		_this.$message.error("更新药品失败，请联系管理员。");
@@ -330,12 +432,12 @@ window.current_template_obj = {
       });
     },
     // 医嘱保存成功之后的处理
-    handleOrderReturn: function (response, btn) {
+    handleOrderReturn: function (response, btn, action) {
     	this.order = {};
     	btn.removeAttr("disabled").find(".fa").hide();
     	var res = response.data;
     	if(res.flag) {
-	    	if(!this.order.id) {
+	    	if(action=="save") {
 	    		this.orders.push(res.data);
 	    	} else {
 	    		this.orders.splice(this.editIndex, 1); // 修改已经编辑的数据
@@ -345,8 +447,6 @@ window.current_template_obj = {
 	        message: "药品保存成功。",
 	        type: 'success'
 	      });
-	      // 默认勾选新建医嘱
-	      this.defaultCheckNewOrder();
 	      // 聚焦医嘱搜索框
 	      this.$refs["ordtitle"].focus();
     	} else {
@@ -373,8 +473,6 @@ window.current_template_obj = {
 	          type: 'warning'
 	        });
 	        _this.orders.splice(index, 1);
-	        // 默认勾选新建医嘱
-	      	_this.defaultCheckNewOrder();
     		}else{
     			_this.$message.error(res.info);
     		}
@@ -397,13 +495,13 @@ window.current_template_obj = {
     	}
     },
     // 提交药品模板的方法
-    submitTemplateForm: function (formName) {
+    submitMTemplateForm: function (formName) {
     	var _this = this;
     	_this.$refs[formName].validate( function (valid) {
         if (valid) {
         	if(!_this.orders || _this.orders.length==0) {
         		_this.$message({
-		          message: "必须选择医嘱。",
+		          message: "医嘱不能为空。",
 		          type: 'warning'
 		        });
         		return false;
@@ -415,25 +513,22 @@ window.current_template_obj = {
         	_this.mtemplate["order_ids"] = ids;
         	var btn = $(event.target);
         	btn.attr("disabled", "disabled").find(".fa").show();
-        	_this.mtemplatesResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate}).then( function(response) {
-	      		btn.removeAttr("disabled").find(".fa").hide();
-	      		var res = response.data;
-	      		if(res.flag) {
-	      			_this.$message({
-			          message: "生成医嘱模板成功，请在模板列表中查看。",
-			          type: 'success'
-			        });
-	      			// 将创建的模板添加到使用模板列表
-	      			_this.mtemplates.push(res.data);
-	      			// 关闭模态框
-	      			_this.isShowFormDialog = false;
-	      		} else {
-	      			_this.$message.error(res.info);
-	      		}
-	      	}, function(response) {
-	      		btn.removeAttr("disabled").find(".fa").hide();
-	      		_this.$message.error("创建医嘱模板失败，请联系管理员。");
-	      	})
+        	var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate};
+        	if(!_this.mtemplate.id) {
+	        	_this.mtemplatesResource.save(json).then( function(response) {
+	        		_this.handleAfterSave(btn, response);
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("创建医嘱模板失败，请联系管理员。");
+		      	})
+        	} else {
+        		_this.mtemplatesResource.update({id: _this.mtemplate.id}, json).then( function(response) {
+	        		_this.handleAfterSave(btn, response);
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("更新医嘱模板失败，请联系管理员。");
+		      	})
+        	}
 				} else {
           _this.$message({
 	          message: '请按照规范录入数据。',
@@ -442,6 +537,23 @@ window.current_template_obj = {
           return false;
         }
       })
+    },
+    handleAfterSave: function (btn, response) {
+  		btn.removeAttr("disabled").find(".fa").hide();
+  		var res = response.data;
+  		if(res.flag) {
+  			this.$message({
+          message: "生成医嘱模板成功。",
+          type: 'success'
+        });
+  			// 将创建的模板添加到使用模板列表
+  			this.getData();
+  			// 关闭模态框
+  			this.isShowFormDialog = false;
+  		} else {
+  			this.$message.error(res.info);
+  		}
+
     },
     // 作废模板
     abandonTemplate: function (index, row) {
@@ -455,7 +567,7 @@ window.current_template_obj = {
   				var res = response.data;
     			if(res.flag) {
 	          // row.status = res.data.status;
-	          _this.templates.splice(index, 1);
+	          _this.mtemplates.splice(index, 1);
     			}else{
     				_this.$message.error(res.info);
     			}

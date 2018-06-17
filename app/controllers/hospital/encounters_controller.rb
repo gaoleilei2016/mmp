@@ -40,7 +40,7 @@ class Hospital::EncountersController < ApplicationController
       nation: {code: "", display: ""},  # 民族
       marriage: {code: "", display: ""},  # 婚姻
       unit_name: "",  # 工作单位（学校）
-      diagnoses: [{ code: "", display: ""}],  # 诊断
+      diagnoses: [],  # 诊断
       allergens: [],  # 过敏
       blood: {code: "", display: ""},  # 血型
       height: "",  # 身高cm
