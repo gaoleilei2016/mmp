@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get :get_orders
       post :pay_order
       post :save_order
+      post :cancel_order
       get :get_prescriptions_cart
       get :set_prescriptions_cart
       get :set_current_pharmacy

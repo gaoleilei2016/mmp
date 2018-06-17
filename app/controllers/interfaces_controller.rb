@@ -78,7 +78,10 @@ class InterfacesController < ApplicationController
 		params[:order][:user_id] = current_user.id
 		params[:order][:current_user] = current_user
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		raise re[:info] if re[:ret_code]!='0'
+		if re[:ret_code]!='0'
+			flash[:notice] = re[:info]
+			return redirect_to "/customer/portal/settlement"
+		end
 		# p '~~~~~~~~~~~~',re
 		p re
 		if re[:order].payment_type.to_s == '2'
@@ -86,6 +89,10 @@ class InterfacesController < ApplicationController
 		else re[:order].payment_type.to_s == '1'
 			redirect_to "/customer/portal/pay?id=#{re[:order].id}"
 		end
+	end
+	def cancel_order
+		ret = ::Orders::Order.find(params[:id]).cancel_order()
+		render json: ret
 	end
 	# 获取用户购物车
 	def get_prescriptions_cart

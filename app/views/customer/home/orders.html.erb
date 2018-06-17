@@ -90,7 +90,7 @@
 				</li>
 			</ul>
 			<div style="text-align: right;padding-right: 8px;">
-				<button type="button">取消订单</button>
+				<button type="button" @click="$parent.cancel_order(item.id)">取消订单</button>
 			</div>
 		</div>
 	</div>
@@ -113,6 +113,23 @@
 			}
 		},
 		methods:{
+			cancel_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/cancel_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						console.log( json );
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},
