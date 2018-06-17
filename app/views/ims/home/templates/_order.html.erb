@@ -422,9 +422,17 @@ window.current_template_obj = {
 		return_order:function(id){
 			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
 		},
+    //平台搜索  收费
     platform_charging_fun:function(){
+      var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
+      var ids = []
+      $.each(boxs,function(k,v){
+        ids.push($(v).val())
+      })
       console.log("platform_charging_fun")
+      console.log(ids)
     },
+    //平台搜索  收费+发药
     platform_charging_and_out_fun:function(){
       console.log("platform_charging_and_out_fun")
     },    
