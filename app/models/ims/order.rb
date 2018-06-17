@@ -58,7 +58,7 @@ class Ims::Order < ApplicationRecord
 
   	# 未指定药店的订单查询(未在平台上操作的患者也能在药店客户端协助患者自选药品购药)[可能查到]
     def get_prescription_or_order_data args = {}
-      # i_days = 6
+      i_days = 6
       attrs = {search:args[:search],i_days:i_days,org_id:args[:org_id]}
       data = Ims::GetData.find_data attrs
       result = data.map{|e| e.deep_symbolize_keys}
@@ -101,7 +101,7 @@ class Ims::Order < ApplicationRecord
       end
     end
 
-
+    # 处方信息
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
@@ -144,6 +144,77 @@ class Ims::Order < ApplicationRecord
             prescriptions:prescriptions
           }]
         return {flag:true,:data=>data}
+    end
+
+    # 到店患者未在平台操作的处方收费或者收费并发药操作
+    # => args = {org_id:org_id,org_name:org_name,prescription_ids:prescription_ids,status:status,user_id:user_id,user_name:user_name}
+    def operat_order_by_prescription args = {}
+      begin
+        return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
+        attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2'}
+        ::ActiveRecord::Base.transaction  do
+          case args[:status]
+          when '2'
+            result = Orders::Order.create_order_by_presc_ids attrs
+            return (result[:ret_code]="0" ? {flag:false,:info=>"处方收费处理成功！"} : {flag:false,:info=>"处方收费处理失败。",result:result})
+          when '5'
+            result = Orders::Order.create_order_by_presc_ids attrs
+            return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]="0"
+            order = result[:order]
+            att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id]}
+            order_com = Orders::Order.order_completion att
+            return (result[:ret_code]="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
+          else
+            return {flag:false,:info=>"处方暂不做处理。"}
+          end
+        end
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 到店患者未在平台操作的处方收费或者收费并发药操作 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
+    # 退药
+    def return_drug args={}
+      begin
+        order_id = args[:order_id]
+        order = Orders::Order.find order_id rescue nil
+        return {flag:false,:info=>"未找到订单信息"} if order.blank?
+        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
+        order.update_attributes(is_returned:true)
+        new_order = order.dup
+        new_order.order_code = order.order_code.to_s+"_T"
+        new_order.ori_id = order.id
+        new_order.ori_code = order.order_code
+        new_order.drug_user = args[:user_name]
+        new_order.drug_user_id = args[:user_id]
+        new_order.prescriptions = order.prescriptions
+        new_order.status = '7'
+        order.details.each do |detail|
+          dup_detail = detail.dup
+          dup_detail.quantity = -detail.quantity.to_f
+          dup_detail.net_amt = -detail.net_amt.to_f
+          dup_detail.ori_detail_id = detail.id
+          new_order.details << Orders::OrderDetail.create(dup_detail)
+        end
+        Orders::Order.create(new_order) ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。',}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
+    # 下载错误处方返回
+    def prescription_back args = {}
+      begin
+        
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 下载错误处方返回 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
     end
 
     def send_message attrs
