@@ -61,7 +61,10 @@ class Hospital::Order < ApplicationRecord
       },
       factory_name: self.factory_name,
       base_unit: self.base_unit,
-      mul: self.mul
+      mul: self.mul,
+      measure_val: self.measure_val,
+      measure_unit: self.measure_unit,
+      type_type: self.type_type
     }
   end
 
@@ -80,7 +83,6 @@ class Hospital::Order < ApplicationRecord
     def copy_orders(order_ids, encounter_id, cur_user)
       cur_encounter = ::Hospital::Encounter.find(encounter_id)
       cur_orders = ::Hospital::Order.find(order_ids)
-      p cur_orders
       ::ActiveRecord::Base.transaction do 
         cur_orders.each do |_order|
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
@@ -104,7 +106,8 @@ class Hospital::Order < ApplicationRecord
               status: "N",
               encounter_id: encounter_id,
               author_id: cur_user.id,
-              prescription_id: nil
+              prescription_id: nil,
+              type_type: _order.type_type
           }
           new_order_args.merge!(medication_info)
           new_order = ::Hospital::Order.create!(new_order_args)
@@ -116,6 +119,12 @@ class Hospital::Order < ApplicationRecord
       cur_orders = ::Hospital::Order.find(order_ids)
       ::ActiveRecord::Base.transaction do 
         cur_orders.each do |_order|
+          if _order.type_type == "template"
+            # 如果是模板医嘱就直接创建关系  不做复制
+            _order.mtemplate_id = mtemplate_id
+            _order.save!
+            next
+          end
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
           # 查询当前药品使用信息
           cur_medication = ::Dict::Medication.find(_order.serialno)
@@ -136,7 +145,8 @@ class Hospital::Order < ApplicationRecord
               order_type: _order.order_type,
               status: "N",
               author_id: cur_user.id,
-              mtemplate_id: mtemplate_id
+              mtemplate_id: mtemplate_id,
+              type_type:"template"
           }
           new_order_args.merge!(medication_info)
           new_order = ::Hospital::Order.create!(new_order_args)

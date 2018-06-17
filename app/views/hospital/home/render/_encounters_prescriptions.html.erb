@@ -21,5 +21,5 @@
 
 <!-- 用于处方打印的隐藏框 -->
 <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
-	<prescriptionprint :encounter="encounter" :orgname="orgname" :prescription="printPresRow"></prescriptionprint>
+	<prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
 </div>

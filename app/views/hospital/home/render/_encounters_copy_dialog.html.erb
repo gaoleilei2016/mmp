@@ -4,12 +4,13 @@
   class="copy-orders-modal"
   width="90%">
   <el-row :gutter="20">
-	  <el-col :span="4" style="border: 1px solid #999; border-radius: 5px; padding: 0;">
+	  <el-col :span="6" style="border: 1px solid #999; border-radius: 5px; padding: 0;">
   		<div style="padding: 10px; margin-bottom: 1em;">
 	  		<el-input
 			    placeholder="搜索患者"
 			    size="mini"
 			    @change="searchEncounters({search: searchCopyEncStr})"
+          class="search-copy-enc"
 			    v-model="searchCopyEncStr">
 			    <i slot="prefix" class="el-input__icon fa fa-search fa-lg" @click="searchEncounters({search: searchCopyEncStr})"></i>
 			  </el-input>
@@ -27,7 +28,7 @@
   			</ul>
   		</div>
   	</el-col>
-	  <el-col :span="20">
+	  <el-col :span="18">
 	  	<el-table
         :data="encorders"
         :height="465"

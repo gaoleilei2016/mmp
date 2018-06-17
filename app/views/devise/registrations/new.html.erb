@@ -140,12 +140,12 @@
             <span class="mui-icon mui-icon-phone" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
             <input id="login_input" type="text" name="login" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" maxlength="11" style="padding-left: 40px;font-size: 16px;" autocomplete="off">
           </div>
-          <!-- <div class="mui-input-row">
+          <div class="mui-input-row">
             <span class="mui-icon mui-icon-email" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <%#= rucaptcha_input_tag(id:'yzm_input',class: 'form-control', placeholder: '请输入验证码',value:flash[:yzm],style:"padding-left: 40px;font-size: 16px;") %>
+            <%= rucaptcha_input_tag(id:'yzm_input',class: 'form-control', placeholder: '请输入验证码',value:flash[:yzm],style:"padding-left: 40px;font-size: 16px;") %>
             <div id="click_get_yanzhengma" style="height: 40px;position: absolute;right: 0;top: 0;">
             </div>
-          </div> -->
+          </div>
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-email" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
             <input id="dxyz_input" type="text" name="dxyz" class="mui-input-clear mui-input" placeholder="验证码" value="<%= flash[:dxyz] %>" style="padding-left: 40px;font-size: 16px;" maxlength="4" autocomplete="off">
@@ -177,26 +177,26 @@
       </div> -->
     </div>
 <script type="text/javascript">
-  // function get_yzm() {
-  //   $.ajax({
-  //     url:'/interfaces/get_yanzhengma',
-  //     success:function(html) {
-  //       $("#click_get_yanzhengma").html(html);
-  //     }
-  //   })
-  // }
-  // get_yzm();
-  // document.getElementById("click_get_yanzhengma").addEventListener("tap",function(e) {
-  //   get_yzm();
-  // })
+  function get_yzm() {
+    $.ajax({
+      url:'/interfaces/get_yanzhengma',
+      success:function(html) {
+        $("#click_get_yanzhengma").html(html);
+      }
+    })
+  }
+  get_yzm();
+  document.getElementById("click_get_yanzhengma").addEventListener("tap",function(e) {
+    get_yzm();
+  })
   <% unless resource.errors.messages.empty? %>
   mui.toast("<%= resource.errors.messages.values.join rescue nil %>",{duration:8000});
   <% end -%>
   document.getElementById("get_duanxinma").addEventListener("tap",function(e) {
     if ( !/^\w{11}$/.test($("#login_input").val()) ) {
       mui.toast("请输入11位的手机号码");
-    // }else if( !$("#yzm_input").val() ){
-    //   mui.toast("请输入验证码");
+    }else if( !$("#yzm_input").val() ){
+      mui.toast("请输入验证码");
     }else{
       if ($("#get_duanxinma").hasClass("show_time_line")) {
       }else{
@@ -219,7 +219,7 @@
             if (json.flag) {
             }else{
               sec=1;
-              // get_yzm();
+              get_yzm();
               mui.toast(json.info,{duration:5000});
             }
           },
