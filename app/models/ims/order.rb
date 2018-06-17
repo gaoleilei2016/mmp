@@ -145,7 +145,8 @@ class Ims::Order < ApplicationRecord
               }
           }]
           
-          temp = 0;         
+          temp = 0;    
+          p "===========================",prescriptions     
           prescriptions.each{|key,line| data<<{
             type:'处方'+(temp += 1).to_s,
             is_order:false,
@@ -192,12 +193,15 @@ class Ims::Order < ApplicationRecord
     # => args = {org_id:org_id,org_name:org_name,prescription_ids:prescription_ids,status:status,user_id:user_id,user_name:user_name}
     def operat_order_by_prescription args = {}
       begin
+        p "----------------",args
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2'}
         ::ActiveRecord::Base.transaction  do
           case args[:status]
           when '2'
+            p attrs
             result = Orders::Order.create_order_by_presc_ids attrs
+            p result,"111111111111111111111111111111"
             return (result[:ret_code]="0" ? {flag:false,:info=>"处方收费处理成功！"} : {flag:false,:info=>"处方收费处理失败。",result:result})
           when '5'
             result = Orders::Order.create_order_by_presc_ids attrs
