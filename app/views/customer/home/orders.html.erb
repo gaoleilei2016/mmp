@@ -121,6 +121,9 @@
 					data:{id:id},
 					success:function(json) {
 						console.log( json );
+						if (json.ret_code == "0") {
+							
+						}
 					},
 					complete:function() {
 						$("#loading").hide();
