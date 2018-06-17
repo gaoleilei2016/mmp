@@ -151,9 +151,9 @@
 				</el-col>
 			</el-row>
 			<!-- <hr class="info-divider"/> -->
-			<el-row v-for="(diagnose, index) in (encounter.diagnoses||[])" :key="diagnose.code">
+			<el-row>
 				<!-- 医疗信息，诊断，血型，身高，体重，bmi -->
-				<el-col :span="10">
+<!-- 				<el-col :span="10">
 					<el-form-item 
 						:prop="'diagnoses.' + index + '.display'"
 						:label="index==0 ? '诊断' : '第 '+(index+1)+' 诊断'"
@@ -174,8 +174,29 @@
 	      	<el-tooltip v-else effect="dark" content="增加其他诊断" placement="right">
 			      <i class="el-icon-circle-plus-outline text-primary" @click="addDiagnosis()"></i>
 			    </el-tooltip>
+				</el-col> -->
+				<el-col :span="18">
+					<el-form-item label="诊断" class="diagnoses-group" :rules="[{ required: true }]">
+						<el-tag
+						  v-for="(tag, index) in (encounter.diagnoses||[])"
+						  :key="index"
+						  size="medium"
+						  placeholder="诊断"
+						  closable
+						  :disable-transitions="false"
+						  @close="encounter.diagnoses.splice(index, 1)">
+						  {{tag.display}}
+						</el-tag>
+						<el-autocomplete size="mini" v-model="diagnoseInput" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDiagnosis" :debounce="300" style="width: 30%;" ref="encdiagnose" @keyup.enter.stop.native="handleSelectDiagnosis({type:'hand'})" popper-class="diagnoses-dropmenu">
+							<i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="diagnoseInput=''"></i>
+							<template slot-scope="props">
+								<span style="float: left">{{ props.item.display }}</span>
+      					<span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
+							</template>
+						</el-autocomplete>
+					</el-form-item>
 				</el-col>
-				<el-col v-if="index==(encounter.diagnoses.length-1)" :span="12" style="text-align: right;">
+				<el-col :span="6" style="text-align: right;">
 				  <el-form-item>
 				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
 				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
@@ -184,14 +205,13 @@
 				    	<template v-if="!encounter.id">保存</template>
 				    	<template v-else>更新</template>
 				    </el-button>
-				    
 				  </el-form-item>
 				</el-col>
 			</el-row>
 			<el-row v-if="showAllPatInfo">
 				<el-col :span="24">
 					<!-- 过敏信息 -->
-					<el-form-item label="过敏信息">
+					<el-form-item label="过敏信息" class="allergens-group">
 						<el-tag
 						  :key="tag"
 						  v-for="tag in encounter.allergens"
@@ -206,6 +226,7 @@
 						  v-if="inputTagVisible"
 						  v-model="inputTagValue"
 						  ref="saveTagInput"
+						  placeholder="过敏"
 						  style="width: 100px;"
 						  @keyup.enter.native="handleTagInputConfirm"
 						  @blur="handleTagInputConfirm">
@@ -293,19 +314,19 @@
   width="90%">
   <el-row>
   	<el-input
-	    placeholder="搜索姓名 / 手机号 / 身份证号码 / 诊断"
+	    placeholder="搜索姓名 / 手机号 / 身份证号码"
 	    size="mini"
 	    class="search-enc-input"
 	    ref="searchencstr"
-	    @keyup.enter.stop.native="searchEncounters({search: '', modal: 'isShowEncountersDialog'})"
+	    @keyup.enter.stop.native="searchEncounters({search: '', modal: 'isShowEncountersDialog', search: searchencstr})"
 	    @focus="focusEncSearchInp(true)"
 	    @blur="focusEncSearchInp(false)"
 	    v-model="searchencstr">
-	    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr})"></i>
+	    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr, search: searchencstr})"></i>
 	  </el-input>
   </el-row>
   <br/>
-  <div class="spinner-3circle" v-if="!encounters || encounters.length==0">
+  <div class="spinner-3circle" v-if="encmodalloading">
     <div class="bounce1"></div>
     <div class="bounce2"></div>
     <div class="bounce3"></div>
