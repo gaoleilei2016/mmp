@@ -14,7 +14,7 @@ class Orders::Order < ApplicationRecord
 #  updated_at DATETIME NOT NULL '更新时间',
 #  payment_at DATETIME NOT NULL '支付时间',
 #  drug_user varchar(20)  NULL '发药人',
-#  drug_user_id varchar(20)  NULL '发药人',
+#  drug_user_id varchar(20)  NULL '发药人id',
 #  end_time DATETIME NOT NULL '订单完成时间',
 #  close_time DATETIME NOT NULL '订单关闭时间',
 #  target_org_id VARCHAR(32) NOT NULL '目标机构编码',
@@ -32,9 +32,9 @@ class Orders::Order < ApplicationRecord
 #  patient_phone varchar(20)  NULL '患者电话号码',
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
-#  pay_type float NOT NULL '支付类型,1.微信,2.支付宝',
-#  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消',
+#  pay_type float NOT NULL '支付类型,Alipay ,Wechat',
+#  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
+#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
 #  )
 
@@ -54,12 +54,34 @@ class Orders::Order < ApplicationRecord
 
 	#取消订单 Orders::Order.find(id).cancel_order()
 	def cancel_order
-		update_attributes(status:'6')
+		# ['']
+		update_attributes(status:'7')
+		prescriptions.each{|x| x.order = nil;x.save}
+		{ret_code:'0',info:'订单已取消。'}
+	end
+
+	#订单超时自动关闭
+	def close_order
+		update_attributes(status:'6',close_time:Time.now.to_s(:db))
+		prescriptions.each{|x| x.order = nil;x.save}
+		{ret_code:'0',info:'订单已超时，自动关闭。'}
 	end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
-	def order_settle pay_type = '1'
-		update_attributes(pay_type:pay_type,status:'2')
+	def order_settle(pay_type,cur_user)
+		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		args = {
+			# 创建订单人
+			charger: {
+				id: cur_user.id,
+				display: cur_user.name
+				},
+			# 订单创建时间
+			charge_at: created_at.to_s(:db)
+		}
+		##通知处方订单已结算
+	 	::Hospital::Prescription.charged(args, cur_user)
+		{ret_code:'0',info:'订单结算成功！'}
 	end
 
 	class << self
@@ -83,6 +105,7 @@ class Orders::Order < ApplicationRecord
 
 		#获取处方生成订单数据
 		def create_order_by_presc_ids(attrs = {})
+			p attrs
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',order:nil}
 			if attrs[:pharmacy_id].blank?
@@ -109,6 +132,10 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("处方包含有效订单，无法继续生成!")
 			end
+			if ::Hospital::Prescription.where("status = 0 and id in (?)",attrs[:prescription_ids]).present?
+				result[:ret_code] = '-1'
+				result[:info].concat("处方未审核!待医院审核完成后即可生成领药订单。")
+			end
 			if result[:ret_code].to_s == '0'
 			##通过处方拿到订单生成数据
 				presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
@@ -117,7 +144,7 @@ class Orders::Order < ApplicationRecord
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
 				 user_id: attrs[:user_id].to_s,
-				 payment_type: attrs[:payment_type] == 'online' ? 1 : 2,
+				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
 				 patient_age: presc[:patient_age].to_s,
@@ -128,7 +155,7 @@ class Orders::Order < ApplicationRecord
 				 order_code: get_order_code(presc[:hospital_id].to_s),
 				 doctor: presc[:doctor].to_s,
 				 person_id: presc[:person_id].to_s,
-				 status: '1'
+				 status: attrs[:status]||'1'
 		 		)
 				presc[:details].each do |k,details|
 					prescription = ::Hospital::Prescription.find(k)
@@ -141,8 +168,26 @@ class Orders::Order < ApplicationRecord
 					end
 				end
 				order.save
-				result[:info].concat("订单生成成功！请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
+				result[:info].concat("订单生成成功！")
 				result[:order] = order
+				if attrs[:payment_type] == 'online'
+					sch = ::Scheduler.new()
+					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.cancel_order({id:#{order.id.to_s}})")
+					result[:info].concat("请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
+				end
+				#订单创建成功之后改变处方状态
+				args = {
+					# 创建订单人
+					create_bill_opt: {
+						id: attrs[:current_user][:id],
+						display: attrs[:current_user][:name],
+					},
+					# 订单创建时间
+					bill_at: order.created_at.to_s(:db),
+				  	bill_id: order.id,
+				}
+				order.prescriptions.each{|pre| pre.wait_charge(args, attrs[:current_user])}
+
 			end
 			result
 		end
@@ -163,11 +208,13 @@ class Orders::Order < ApplicationRecord
 			{ret_code:'0',info:'更新成功'} 
 		end
 
-		#取消订单
+		#取消订单(自动或者手动)
 		def cancel_order(attrs = {})
 			attrs = attrs.deep_symbolize_keys
 			order = self.where(:id=>attrs[:id]).last
-			order.update_attributes(status:'6')
+			if order.status.to_s == '1'
+				order.update_attributes(status:'6',close_time:Time.now.to_s(:db))
+			end
 		end
 
 		#作废订单明细
@@ -226,17 +273,38 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("订单ID不能为空!")
 			end
-			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id])
+			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
 				result[:ret_code] = '-1'
 				result[:info].concat("当前订单状态异常!")	
 			end
-			if result[:ret_code].to_s == '-1'
+			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
 										end_time:Time.now,
-										status:'5',
+										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
+				args = {
+					# 创建订单人
+					charger: {
+						id: attrs[:current_user].id,
+						display: attrs[:current_user].name
+						},
+					# 订单创建时间
+					charge_at: order.created_at.to_s(:db)
+				}
+				##通知处方订单已结算
+			 	::Hospital::Prescription.charged(args, attrs[:current_user])
+			 	args2 = {
+					# 发药人
+					delivery: {
+						id: attrs[:current_user].id,
+						display: attrs[:current_user].name
+					},
+					# 发药时间
+					delivery_at: order.created_at.to_s(:db)
+				}
+				::Hospital::Prescription.send_drug(args, attrs[:current_user])
 				##更新处方状态。。。。。。
 			end
 			result
@@ -252,21 +320,20 @@ class Orders::Order < ApplicationRecord
 		def get_order_to_medical attrs = {}
 
 			attrs = attrs.deep_symbolize_keys
-			# return [] if attrs[:org_id].blank?
-			# condtion = "target_org_id = #{attrs[:org_id]} "
+			return [] if attrs[:org_id].blank?
+			condtion = "target_org_id = #{attrs[:org_id]} "
 			if attrs[:order_code].present?
-				# condtion.concat("order_code = #{attrs[:order_code]}")
+				condtion.concat("order_code = #{attrs[:order_code]}")
 			else
-			# condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
+			condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
 				case  attrs[:type].to_s
 				when '1'#未付款
-					# condtion.concat(" and payment_type = 1 and status = 2")
+					condtion.concat(" and payment_type = 1 and status = 2")
 				when '2'#已付款
-					# condtion.concat(" and payment_type = 2")
+					condtion.concat(" and payment_type = 2")
 				else#否则查看全部
 				end
 			end
-			condtion = "target_org_id = ''"
 			Orders::Order.where(condtion).map{|order|  
 				{
 					id: order.id,

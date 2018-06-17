@@ -44,10 +44,12 @@ Rails.application.routes.draw do
       collection do
         get :prescriptions
         get :orders
+        get :order
       end
     end
     resources :portal do
       collection do
+        get :map
         get :settlement
         get :pay
       end
@@ -113,6 +115,7 @@ Rails.application.routes.draw do
       collection do
         get :get_orders         # 获取订单
         get :get_order          # 获取订单
+        get :charging_pre       # 收费
         get :dispensing_order   # 发药
         get :return_order       # 退药
         get :oprate_order       # 订单操作(发药/退药、、)
@@ -143,13 +146,16 @@ Rails.application.routes.draw do
   ############################
 
   ########### hujun_start ##########
-  # mount Pay::Api => '/'
-  match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
+  # match '/users/positions/baidu', to: 'positions#baidu', via: [:get]
   match '/pay/wechat', to: 'pay#wechat', via: [:post]
   match '/pay/alipay', to: 'pay#alipay', via: [:post]
 
-  match '/pay/index',  to: 'pay#index',  via: [:get]
-  match '/pay/wx/pay', to: 'pay#wx', via: [:post]
-  match '/pay/ali/pay', to: 'pay#ali', via: [:post]
+  match '/pay/confirm/:id', to: 'pay#confirm', via: [:get]
+  match '/pay/index',       to: 'pay#index',   via: [:get]
+  match '/pay/wx/pay',      to: 'pay#wx',      via: [:post]
+  match '/pay/ali/pay',     to: 'pay#ali',     via: [:post]
+
+  match '/refund/wechat', to: 'refund#wechat', via: [:post]
+  match '/refund/alipay', to: 'refund#alipay', via: [:post]
   ########### hujun_end   ##########
 end

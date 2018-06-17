@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  enable_print_pres: false
+  uoperator_id: 1
+  print_pres_html: MyText
+  org_id: 1
+
+two:
+  enable_print_pres: false
+  uoperator_id: 1
+  print_pres_html: MyText
+  org_id: 1

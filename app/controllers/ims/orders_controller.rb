@@ -1,5 +1,5 @@
 class Ims::OrdersController < ApplicationController
-  before_action :set_ims_order, only: [:show, :edit, :update, :destroy, :dispensing_order, :return_order, :oprate_order]
+  before_action :set_ims_order, only: [:show, :edit, :update, :destroy]
 
   # GET /ims/orders
   # GET /ims/orders.json
@@ -86,35 +86,20 @@ class Ims::OrdersController < ApplicationController
     order_code = ""#取药码  可以没有
     data  = []
     if params[:platform]
-      data = [
-        {id:"12435",code:"08020231",name:"rth",amount:"14.23"},
-        {id:"46876",code:"08020233",name:"fghsr",amount:"16.23"},
-        {id:"67874",code:"08020232",name:"ktys",amount:"52.23"},
-      ]
+      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
     end
 
     #搜索药店的 订单 处方
     if params[:stat]
-      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
-      # @data.map{|line| data<<{
-      #   id:line[:prescriptions_id],
-      #   code:line[:order_code],
-      #   name:line[:patient_name],
-      #   amount:line[:amt],
-      #   pres:line[:prescriptions_id].each_with_index do  { |e| {id:e, title:"处方1",amount:"52.23"} }
-      #   }
-      # }
+      attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
+      @data = Ims::Order.order_search attrs
     end
     render json:@data.to_json
   end
 
   def get_order
-    data = [{id:"12435",code:"08020231",title:"汇总",amount:"14.23"},
-        {id:"67874",code:"08020232",title:"处方1",amount:"52.23"},
-        {id:"46876",code:"08020233",title:"处方2",amount:"16.23"},
-        {id:"12435",code:"08020231",title:"处方3",amount:"14.23"},
-        {id:"12435",code:"08020231",title:"处方4",amount:"14.23"}]
-    render json:data.to_json
+    @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
+    render json:@data.to_json
   end
 
   def get_detail
@@ -147,13 +132,22 @@ class Ims::OrdersController < ApplicationController
   #   render json:new_order
   # end
   
+  #订单收费
+  def charging_pre
+    drug_user = current_user.try(:name)
+    drug_user_id = current_user.try(:id)
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2"})
+    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
+    render json:re_data.to_json
+  end
+
   # 订单发药
   def dispensing_order
-    @reslut = @ims_order.dispensing_order rescue {flag:true,info:"发药成功！"}
-    render json:@reslut.to_json
-    # @reslut = @ims_order.dispensing_order
-    # render json:@reslut.to_json
-    # render json:{flag:true, info:"发药成功！"}
+    drug_user = current_user.try(:name)
+    drug_user_id = current_user.try(:id)
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"5"})
+    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
+    render json:re_data.to_json
   end
 
   # 订单退药

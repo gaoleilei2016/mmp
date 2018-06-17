@@ -24,6 +24,8 @@ class Ims::Order < ApplicationRecord
          query.concat(" and `status`=7 ")
         else
         end
+
+        p query
         # query.concat(" and status =#{ args[:type].to_s}")
         Orders::Order.where(query).map{|order| 
           preson = Person.find order.person_id rescue nil
@@ -107,6 +109,7 @@ class Ims::Order < ApplicationRecord
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
       data = [{
           type:'订单',
+          is_order:true,
           order_id: order.id,
           order_code: order.order_code,
           amt: order.net_amt,
@@ -138,11 +141,50 @@ class Ims::Order < ApplicationRecord
                   img_path: x.img_path
                 }
               }
-          }, 
-          {
-            type:'处方',
-            prescriptions:prescriptions
+          # }, 
+          # {
+          #   type:'处方',
+          #   prescriptions:prescriptions
           }]
+          
+          temp = 0;         
+          prescriptions.each{|key,line| data<<{
+            type:'处方'+(temp += 1).to_s,
+            is_order:false,
+            order_id: line.try(:[],:id),
+            order_code: line.try(:[],:prescription_no),
+            amt: line.try(:[],:price),
+            status: line.try(:[],:status),
+            payment_at: line.try(:[],:payment_at),     # 支付时间
+            created_at: line.try(:[],:created_at).try(:to_s,:db),     # 订单生成时间
+            end_time: line.try(:[],:end_time),     # 订单完成时间
+            close_time: line.try(:[],:close_time),
+            target_org_name: line.try(:[],:target_org_name),
+            source_org_name: line.try(:[],:source_org_name),
+            doctor: line.try(:[],:author).try(:[],:display),
+            prescriptions_id: line.try(:[],:prescription_ids),
+            prescriptions_count: line.try(:[],:prescription_ids).try(:[],:count),
+            patient_name: line.try(:[],:name),
+            patient_sex: preson.try(:gender_display),
+            patient_age: preson.try(:age),
+            patient_iden: preson.try(:iden),
+            patient_phone: line.try(:[],:patient_phone),
+            payment_type: line.try(:[],:payment_type),
+            details: (line.try(:[],:orders)||[]).map{|x| {
+                    name: x.try(:title),
+                    specifications: x.try(:specification),
+                    quantity: x.try(:total_quantity),
+                    unit: x.try(:unit),
+                    dosage: x.try(:dosage),
+                    price: x.try(:price),
+                    net_amt: x.try(:net_amt),
+                    firm: x.try(:firm),
+                    img_path: x.try(:img_path)
+                  }
+                }
+            }
+        }
+
         return {flag:true,:data=>data}
     end
 
