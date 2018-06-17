@@ -47,6 +47,7 @@ class Ims::Order < ApplicationRecord
           patient_iden: order.patient_iden,
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
+          is_returned: order.is_returned,
           }
         }
         return {flag:true,data:data}
@@ -129,6 +130,7 @@ class Ims::Order < ApplicationRecord
           patient_iden: order.patient_iden,
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
+          is_returned: order.is_returned,
           details: order.details.map{|x| {
                   name: x.name,
                   quantity: x.quantity,
@@ -199,15 +201,15 @@ class Ims::Order < ApplicationRecord
             p attrs
             result = Orders::Order.create_order_by_presc_ids attrs
             p result,"111111111111111111111111111111"
-            return (result[:ret_code]="0" ? {flag:false,:info=>"处方收费处理成功！"} : {flag:false,:info=>"处方收费处理失败。",result:result})
+            return (result[:ret_code]=="0" ? {flag:false,:info=>"处方收费处理成功！"} : {flag:false,:info=>"处方收费处理失败。",result:result})
           when '5'
             result = Orders::Order.create_order_by_presc_ids attrs
-            return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]="0"
+            return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]=="0"
             p "================",result,"++++++++++++++++++++++++",result[:order]
             order = result[:order]
             att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user],status:'5'}
             order_com = Orders::Order.order_completion att
-            return (result[:ret_code]="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
+            return (result[:ret_code]=="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
           else
             return {flag:false,:info=>"处方暂不做处理。"}
           end
@@ -226,15 +228,16 @@ class Ims::Order < ApplicationRecord
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.status=="7"
+        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
         return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"
         order.update_attributes(is_returned:true)
         new_order = order.clone.dup
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id
         new_order.ori_code = order.order_code
-        new_order.drug_user = args[:user_name]
-        new_order.drug_user_id = args[:user_id]
+        new_order.returner = args[:user_name]
+        new_order.returner_id = args[:user_id]
+        new_order.return_at = Time.new
         new_order.prescriptions = order.prescriptions
         new_order.status = '7'
         order.details.each do |detail|
