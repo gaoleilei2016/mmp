@@ -26,6 +26,7 @@ class PayController < ApplicationController
       write_log("----收到微信支付通知-----#{xml}")
       res = Hash.from_xml(xml)['xml']
       wx = Pay::Order.find_by(out_trade_no: res['out_trade_no'])
+      return write_log("----------订单已支付：不在修改支付状态---#{xml}") if wx.status.eql?('success')
       return write_log("----订单未找到-#{res['out_trade_no']}----#{xml}") unless wx
       return write_log("----订单支付异常--#{res}---") unless res['return_code'].eql?('SUCCESS') && res['result_code'].eql?('SUCCESS')
       if (wx.total_fee.to_f*100) == res['total_fee'].to_i
@@ -69,6 +70,7 @@ class PayController < ApplicationController
     begin
       write_ali_log("------收到支付宝支付通知-----#{params.inspect}")
       ali = Pay::Order.find_by(out_trade_no: params['out_trade_no'])
+      return write_ali_log("----------订单已支付：不在修改支付状态---#{ali}") if ali.status.eql?('success')
       return write_ali_log("------订单未找到---#{params['out_trade_no']}") unless ali
       return write_ali_log("------订单未支付----#{params['trade_status']}") unless params['trade_status'].eql?('TRADE_SUCCESS')
       if params['total_amount'].to_f == ali.total_fee.to_f

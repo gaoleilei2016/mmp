@@ -30,6 +30,13 @@ class Pay::Refund < ApplicationRecord
       end
     end
 
+    # args={out_refund_no: '退款单号'}
+    def restart(args)
+      write_log_return({state: :start, msg: '重新退款开始'})
+      refund = find_by(out_refund_no: args[:out_refund_no])
+      # return write_log_return({state: :error, msg: '参数错误',})
+    end
+
     def query_res()
     end
 
