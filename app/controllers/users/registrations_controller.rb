@@ -25,6 +25,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     # p '~~~~~~~~~',params
     params[:user] = {
+      openid:session[:openid],
       login:params[:login],
       password:params[:password],
       email:"#{params[:login]}@duanxinzhuce.tm"

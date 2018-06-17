@@ -76,7 +76,7 @@ class Hospital::Encounter < ApplicationRecord
 			},
 			height: self.height,
 			weight: self.weight,
-			diagnoses: self.diagnoses.map { |e| {code: e.code, display: e.display}  },
+			diagnoses: self.diagnoses.select { |e| e.type_code == 0  },
 			allergens: self.person.irritabilities.map { |e| e.display  },
 			person_id: self.person_id,
 			# 历史就诊需要的数据

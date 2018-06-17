@@ -5,8 +5,9 @@ class Hospital::EncountersController < ApplicationController
 	# GET
   # /hospital/encounters
 	def index
-		@encounters = Hospital::Encounter.all.map { |e| e.to_web_front  }
-
+    p "Hospital::EncountersController index", params
+    search = params[:search].to_s
+		@encounters = Hospital::Encounter.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").order(created_at: :desc).page(params[:page]||1).per(params[:per]||25).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @encounters} }
@@ -39,7 +40,7 @@ class Hospital::EncountersController < ApplicationController
       nation: {code: "", display: ""},  # 民族
       marriage: {code: "", display: ""},  # 婚姻
       unit_name: "",  # 工作单位（学校）
-      diagnoses: [{ code: "", display: ""}],  # 诊断
+      diagnoses: [],  # 诊断
       allergens: [],  # 过敏
       blood: {code: "", display: ""},  # 血型
       height: "",  # 身高cm

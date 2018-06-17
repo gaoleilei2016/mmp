@@ -123,5 +123,6 @@ class PayController < ApplicationController
 
   def index
     p 'tttttttttttttttt', request.remote_ip, request.remote_addr
+    @image = Set::QrCode.base64_data('Mynameis|hujun')
   end
 end

@@ -85,6 +85,9 @@
 			.common_red{
 				color: #F55742;
 			}
+			.common_grey{
+				color: #8A8782;
+			}
 		</style>
 		<style type="text/css">
 /* 3个圆圈的加载样式
@@ -189,8 +192,8 @@
 		<%= yield %>
 	</body>
 	<script type="text/javascript">
-		<% if notice.present?||alert.present? %>
-		mui.toast("<%= notice.to_s + alert.to_s %>");
+		<% if notice.present?||alert.present?||flash[:notice].present? %>
+		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
 		<% end -%>
 	</script>
 <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=qPvNQ3ko8Gx0bpVDR89gN42e343emLOF"></script>

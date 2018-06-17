@@ -45,9 +45,6 @@ class Hospital::OrdersController < ApplicationController
   # /hospital/orders
 	def create
     p "Hospital::OrdersController create",params
-    # 验证信息完整程度
-    ret = ::Hospital::Order.can_create?(params[:order][:encounter_id])
-    render json:{flag: false, info: ret[:info]} if !ret[:flag]
 		@order = Hospital::Order.new(format_order_create_args)
     respond_to do |format|
       if @order.save
@@ -81,7 +78,7 @@ class Hospital::OrdersController < ApplicationController
   def destroy
     p "Hospital::OrdersController destroy",params
     respond_to do |format|
-      if @order.status == "N" # 新建状态的可以删除
+      if @order.status == 0 # 新建状态的可以删除
         if @order.destroy
           format.json { render json: {flag: true, info: "删除成功"}  }
         else
@@ -126,10 +123,11 @@ class Hospital::OrdersController < ApplicationController
         unit: args[:unit],
         price: args[:price],
         note: args[:note],
-        status: "N",
+        status: 0,
         order_type: 1, # 默认保存1 是药品医嘱
         encounter_id: args[:encounter_id],
-        author_id: current_user.id
+        author_id: current_user.id,
+        type_type: args[:type]
       }
       ret.merge!(dict_mediaction_info)
       return ret

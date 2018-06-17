@@ -2,7 +2,7 @@
 <div class="prescription-wrapper" style="margin-top: 0.5cm; margin-left: 0.5cm; margin-right: 0.5cm; position: relative; font-size: 12pt !important; font-family: '宋体', 'SimSun';">
 	<span style="position: absolute; right: 10px; top: 10px; border: 1px solid #333; padding: 7px;" v-if="prescription.type">{{prescription.type.display}}</span>
   <h2 style="text-align: center; margin-top: 0; margin-bottom: 10px;">
-    {{orgname}}<br/>处方笺
+    {{prescription.org&&prescription.org.display}}<br/>处方笺
   </h2>
   <p>
   	<span style="display: inline-block; width: 50%; float: left;">处方号：{{prescription.prescription_no}}</span>

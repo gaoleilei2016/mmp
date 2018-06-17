@@ -90,6 +90,21 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+	#待收费转为已审核
+	def back_wait_charge(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 2 # 已审核的处方可以变为待收费
+			self.status = 1
+			self.create_bill_opt_id = nil
+			self.create_bill_opt_display = nil
+			self.bill_at = nil
+			self.bill_id = nil
+			self.orders.update_all(status: 1) if  self.save
+		else
+			false
+		end
+	end
+
 	# 已收费处方  账单收费后更新
 	# {
 	# 	# 创建订单人
@@ -294,12 +309,11 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_org = self.organization
 		cur_doctor = self.doctor
 		price = self.orders.map{|e| e.price }.reduce(:+)
-		total_fee = [price.to_s ,"元"].join(" ")
+		total_fee = price.round(2)
 		url = "http://huaxi.tenmind.com/"
 		#发送短信息
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
-		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: '1111', url: url, phone: cur_encounter.phone}
-		p args
+		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: format("%06d",self.id), url: url, phone: cur_encounter.phone}
 		Sms::Data.send_phone(args)
 	end
 

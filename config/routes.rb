@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get :get_orders
       post :pay_order
       post :save_order
+      post :cancel_order
       get :get_prescriptions_cart
       get :set_prescriptions_cart
       get :set_current_pharmacy
@@ -68,6 +69,12 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :departments do 
+        collection do 
+          get :get_active_departments
+          post :set_cur_department
+        end
+      end
       resources :mtemplates # 医嘱模板管理
     end
     resources :home
@@ -92,6 +99,14 @@ Rails.application.routes.draw do
       end
     end
     resources :histories      # 历史列表
+
+    # 诊断
+    resources :diagnoses do
+      collection do
+        get :get_diagnoses_by_encounter_id
+        post :create_by_encounter_id
+      end
+    end
   end
   ########### hospital ##########
   ############################
@@ -157,5 +172,7 @@ Rails.application.routes.draw do
 
   match '/refund/wechat', to: 'refund#wechat', via: [:post]
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
+
+  match '/wechat/login',  to: 'wechat#login', via: [:get]
   ########### hujun_end   ##########
 end

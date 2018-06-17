@@ -464,10 +464,6 @@
 		<% if flash[:async_weixin] %>
 		$("#async_weixin_info").trigger("tap");
 		<% end -%>
-		// 
-		<% if flash[:notice].present? %>
-		mui.toast("<%= flash[:notice] rescue nil %>",{duration:8000});
-		<% end -%>
 		mui.init();
 		//初始化单页view
 		var viewApi = mui('#app').view({
