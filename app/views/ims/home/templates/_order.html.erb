@@ -409,7 +409,7 @@ window.current_template_obj = {
       });
     },
 
-    //发药  发订单
+    //收费 
     charging_pre:function(id){
       this.oprate_order({id:id,method:"charging_pre",todo:"收费"})
     },
@@ -424,17 +424,37 @@ window.current_template_obj = {
 		},
     //平台搜索  收费
     platform_charging_fun:function(){
+      var _this = this
       var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
       var ids = []
       $.each(boxs,function(k,v){
         ids.push($(v).val())
       })
-      console.log("platform_charging_fun")
-      console.log(ids)
+        data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"2"}
+        Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
+          _this.$message('收费成功');
+          _this.dialogFormVisible = false
+          _this._data.platform_data = []
+        },function(response){
+          _this.$message('收费失败，请重试！');
+        })
     },
     //平台搜索  收费+发药
     platform_charging_and_out_fun:function(){
-      console.log("platform_charging_and_out_fun")
+      var _this = this
+      var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
+      var ids = []
+      $.each(boxs,function(k,v){
+        ids.push($(v).val())
+      })
+        data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"5"}
+        Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
+          _this.$message('收费并发药成功');
+          _this.dialogFormVisible = false
+          _this._data.platform_data = []
+        },function(response){
+          _this.$message('收费并发药失败，请重试！');
+        })
     },    
 		oprate_order:function(data){
       var _this = this
@@ -448,12 +468,14 @@ window.current_template_obj = {
 			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         type = stat ? "success" : "warning";
-        _this._data.pres.forEach(function(x,index,a){
-          if(x.order_id == data.id){
-            _this._data.pres.splica(index,1)
-            return ""
-          }
-        })
+        // _this._data.pres.forEach(function(x,index,a){
+          // if(x.order_id == data.id){
+            // _this._data.pres.splica(index,1)
+            // return ""
+          // }
+        // })
+        $(document).find("div.function_panel.out_order").find(".is-active").click()
+
         _this._data.tab_header_data = []
         _this._data.detail = [{is_order:true}]
         _this.$notify({

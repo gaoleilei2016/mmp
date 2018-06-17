@@ -69,6 +69,9 @@ class Ims::OrdersController < ApplicationController
   end
 
   def get_orders
+    p current_user
+    p current_user.name
+    p current_user.try(:name)
     #搜索平台的 订单 处方
     case params[:stat].to_s
     when '1' #未交费
@@ -134,9 +137,11 @@ class Ims::OrdersController < ApplicationController
   
   #订单收费
   def charging_pre
+    p current_user
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2",current_user:current_user})
+    temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
+    data = Orders::Order.order_completion(temp)
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
@@ -145,7 +150,8 @@ class Ims::OrdersController < ApplicationController
   def dispensing_order
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"})
+    temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"}
+    data = Orders::Order.order_completion(temp)
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
