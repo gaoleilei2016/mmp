@@ -17,6 +17,7 @@ class Pay::Refund < ApplicationRecord
     # args={out_refund_no: '退款单号', refund_fee: '金额', reason: '原因',out_trade_no:'订单号'}
     def carry_out(args)
       begin
+        return write_log_return({state: :error, msg: '无效的金额', desc: '退款金额必须大于等于0.01'}) unless args[:refund_fee].to_f >= 0.01
         ord = Pay::Order.find_by(out_trade_no: args[:out_trade_no])
         return write_log_return({state: :error, msg: '参数错误', desc: '退款对应的订单不存在'}) unless ord
         # return write_log_return({state: :fail, msg: '订单未支付', desc: '原始订单未支付无法退款, 若有异常请联系管理员'}) unless ord.paid?

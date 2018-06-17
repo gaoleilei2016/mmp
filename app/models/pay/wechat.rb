@@ -56,6 +56,7 @@ class Pay::Wechat
     def payment(args)
       begin
         write_log_return({state: :start, msg: '微信付款开始'})
+        return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
         order = Pay::Order.new(args.merge({pay_type: 'wechat'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless order.save
@@ -110,6 +111,27 @@ class Pay::Wechat
       return write_log_return({rec: order, state: :fail, msg: '支付失败', desc: "#{res['return_msg']}:#{res['err_code_des']}"}) unless res['result_code'].eql?('SUCCESS')
       return write_log_return({rec: order, state: :succ, msg: '请求成功, 请转到微信支付',  pay_url: res['mweb_url']}) if order.return_url.empty?
       write_log_return({rec: order, state: :succ, msg: '请求成功, 请转到微信支付',  pay_url: "#{res['mweb_url']}&redirect_url=#{order.return_url}"})
+    end
+
+    def get_openid(code)
+      url = get_openid_url(code)
+      op = get_user_openid(url)
+      return { error: false, openid: op['openid'], msg: '成功获取openid' } if op['openid']
+      { error: true, msg: "无法获取用户的openid: #{op['errmsg']}" }
+    end
+
+    def get_openid_url(code)
+      "https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{wx.appid}&secret=#{wx.appsecret}&code=#{code}&grant_type=authorization_code"
+    end
+
+    def get_user_openid(url)
+      begin
+        JSON.parse(RestClient.get(url).body)
+      rescue SocketError => e
+        { 'errmsg' => '无法连接微信服务器' }      
+      rescue Exception => e
+        { 'errmsg' => e.message }
+      end
     end
 
     # 微信设置
