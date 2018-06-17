@@ -184,6 +184,30 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  # 平台处方收费或收费并发药操作
+  # => 页面需传 prescription_ids(array) , status(string) ['2':收费,'5':收费并发药]
+  def operat_order_by_prescription
+    args= {org_id:current_user.organization_id,org_name:current_user.organization.name,user_id:current_user.id,user_name:current_user.name}
+    @data = Ims::Order.operat_order_by_prescription params.merge(args)
+    render json:@data.to_json
+  end
+
+  # 退药(目前只能线下退药)
+  # => 页面需传 order_id(string) 
+  def return_drug
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    @data = Ims::Order.return_drug params.merge(args)
+    render json:@data.to_json
+  end
+
+  # 下载错误处方返回
+  # => 页面需传 order_id(string) 
+  def prescription_back
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    @data = Ims::Order.prescription_back params.merge(args)
+    render json:@data.to_json
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order

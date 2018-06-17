@@ -418,6 +418,7 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "firm", limit: 50
+    t.string "ori_detail_id"
   end
   create_table "orders_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.time "payment_at"
@@ -448,6 +449,9 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "patient_age", limit: 10
     t.string "patient_iden", limit: 20
     t.string "pay_type", limit: 2
+    t.boolean "is_returned"
+    t.integer "ori_id"
+    t.string "ori_code"
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -618,5 +622,4 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end
