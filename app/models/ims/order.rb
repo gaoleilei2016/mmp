@@ -233,8 +233,9 @@ class Ims::Order < ApplicationRecord
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id
         new_order.ori_code = order.order_code
-        new_order.drug_user = args[:user_name]
-        new_order.drug_user_id = args[:user_id]
+        new_order.returner = args[:user_name]
+        new_order.returner_id = args[:user_id]
+        new_order.return_at = Time.new
         new_order.prescriptions = order.prescriptions
         new_order.status = '7'
         order.details.each do |detail|
