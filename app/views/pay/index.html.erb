@@ -1,0 +1,14 @@
+<%= flash[:notice] %>
+
+<form action="/pay/wx/pay" method="post">
+  First name: <input type="text" name="fname" /><br />
+  Last name: <input type="text" name="lname" /><br />
+  <input type="submit" value="微信" />
+</form>
+
+<br/><br/>
+<form action="/pay/ali/pay" method="post">
+  First name: <input type="text" name="fname" /><br />
+  Last name: <input type="text" name="lname" /><br />
+  <input type="submit" value="支付宝" />
+</form>

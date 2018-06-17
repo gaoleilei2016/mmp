@@ -1,0 +1,33 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  code: MyString
+  string: MyString
+  display: MyString
+  string: MyString
+  system: MyString
+  string: MyString
+  status: MyString
+  code: MyString
+  rank: MyString
+  integer: MyString
+  encounter_id: MyString
+  integer: MyString
+  doctor_id: MyString
+  integer: MyString
+
+two:
+  code: MyString
+  string: MyString
+  display: MyString
+  string: MyString
+  system: MyString
+  string: MyString
+  status: MyString
+  code: MyString
+  rank: MyString
+  integer: MyString
+  encounter_id: MyString
+  integer: MyString
+  doctor_id: MyString
+  integer: MyString

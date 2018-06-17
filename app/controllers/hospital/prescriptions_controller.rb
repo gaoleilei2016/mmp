@@ -46,6 +46,7 @@ class Hospital::PrescriptionsController < ApplicationController
 	def create
     p "Hospital::PrescriptionsController create", params
     args = format_prescription_create_args
+    return render json:{flag: false, info: "医嘱状态不能生成处方"} if !::Hospital::Order.can_to_prescription?(params[:prescription][:ids])
 		@prescription = ::Hospital::Prescription.new(args[:prescription])
     respond_to do |format|
       if @prescription.save
@@ -54,6 +55,15 @@ class Hospital::PrescriptionsController < ApplicationController
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
         p "link_orders save"
+        # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
+        audit_args = {
+          auditor: {
+            id: current_user.id,
+            display: current_user.name
+          },
+          audit_at: Time.now
+        }
+        @prescription.audit(audit_args, current_user)
         # 发送处方消息
         @prescription.send_to_check()
         format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
@@ -83,7 +93,7 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.update_attributes(:status=>"O")
+		@prescription.update_attributes(:status=>7)
 
     respond_to do |format|
       format.html { redirect_to prescriptions_url }
@@ -93,18 +103,44 @@ class Hospital::PrescriptionsController < ApplicationController
 
   # GET
   # /hospital/prescriptions/get_prescriptions_by_phone
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的首页，获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # 获取未取药的有效的处方，并按医院合并后下订单
   def get_prescriptions_by_phone
-    p "get_prescriptions_by_phone", params
+    # p "get_prescriptions_by_phone", params
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
-    ::Hospital::Interface.get_prescription(cur_phone).group_by {|_prescription| {organ_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |key, _prescriptions|
-      cur_org = key
-      p cur_org
-      orders = _prescriptions.map { |e| e.orders}.flatten.map { |k| k.to_web_front  }
-      p orders
+    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
+      prescription_ids = []
+      total_price = 0.0
+      orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      cur_org[:prescription_ids] = prescription_ids
+      cur_org[:total_price] = total_price
       cur_org[:orders] = orders
       ret << cur_org
+    end
+    render json: {flag: true, info: "success", data: ret}
+  end
+  # GET
+  # /hospital/prescriptions/get_prescriptions_by_phone
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  # 获取所有处方以及过期等状态
+  def get_all_prescriptions_by_phone
+    cur_phone = params[:phone]
+    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+    ret = []
+    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).each do |_prescription|
+      re = JSON.parse(_prescription.to_json)
+      total_price = 0.0
+      orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      re[:total_price] = total_price
+      re[:orders] = orders
+      re[:organ] = Admin::Organization.find(_prescription.organization_id)
+      ret << re
     end
     render json: {flag: true, info: "success", data: ret}
   end
@@ -140,7 +176,7 @@ class Hospital::PrescriptionsController < ApplicationController
       diagnoses_args = args[:diagnoses]
       prescription = {
         organization_id: cur_org.id,
-        status: "N",
+        status: 0,
         note: args[:note],
         type_code: args[:type][:code],
         type_display: args[:type][:display],

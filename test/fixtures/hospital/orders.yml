@@ -1,0 +1,45 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  serialno: 1
+  title: MyString
+  specification: MyString
+  single_qty_value: 1.5
+  single_qty_unit: MyString
+  dose_value: 1.5
+  dose_unit: MyString
+  route_code: MyString
+  route_display: MyString
+  frequency_code: MyString
+  frequency_display: MyString
+  course_of_treatment_value: 1
+  course_of_treatment_unit: MyString
+  total_quantity: 1.5
+  unit: MyString
+  price: 1.5
+  note: MyString
+  status: MyString
+  order_type: 1
+  encounter_id: 1
+
+two:
+  serialno: 1
+  title: MyString
+  specification: MyString
+  single_qty_value: 1.5
+  single_qty_unit: MyString
+  dose_value: 1.5
+  dose_unit: MyString
+  route_code: MyString
+  route_display: MyString
+  frequency_code: MyString
+  frequency_display: MyString
+  course_of_treatment_value: 1
+  course_of_treatment_unit: MyString
+  total_quantity: 1.5
+  unit: MyString
+  price: 1.5
+  note: MyString
+  status: MyString
+  order_type: 1
+  encounter_id: 1

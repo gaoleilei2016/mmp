@@ -1,0 +1,62 @@
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/portal/settlement" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">支付订单</h1>
+</header>
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+	}
+	.mui-content{
+		overflow: auto;
+		padding-bottom: 60px;
+	}
+</style>
+<div class="mui-content" id="vue_content">
+	<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
+		<!-- <div style="color: #999;">订单支付超时，请重新下单</div> -->
+		<div style="color: #999;">订单有效期 23:59:59</div>
+		<div style="font-size: 2em;padding: 6px 0;">¥ <%= sprintf("%.2f",@order.net_amt) %></div>
+		<div style="color: #999;font-size: .8em;"><%= "华希订单-#{@order.order_code}" %></div>
+	</div>
+	<ul class="mui-table-view mui-table-view-radio" style="margin-top: 15px;">
+		<li class="mui-table-view-cell mui-selected" data-type="Wechat">
+			<a class="mui-navigate-right">
+				<img class="mui-media-object mui-pull-left" src="/assets/customer/weixin_logo.jpg" style="height: 16px;width: 16px;margin-top: 2px;">
+				微信支付
+			</a>
+		</li>
+		<li class="mui-table-view-cell" data-type="Alipay">
+			<a class="mui-navigate-right">
+				<img class="mui-media-object mui-pull-left" src="/assets/customer/alipay_logo.png" style="height: 16px;width: 16px;margin-top: 2px;">
+				支付宝支付
+			</a>
+		</li>
+	</ul>
+	<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: absolute;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
+		确认支付 ¥ <%= sprintf("%.2f",@order.net_amt) %>
+	</button>
+	<form action="/interfaces/pay_order" method="post">
+		<input type="hidden" id="pay_type" name="pay_type">
+		<input type="hidden" name="order_id" value="<%= @order.id %>">
+	</form>
+</div>
+<script type="text/javascript">
+	$("#bottom_tabs").remove();
+	// document.querySelector('.mui-table-view.mui-table-view-radio').addEventListener('selected',function(e){
+	// 	console.log( e.detail );
+	// });
+	function submit_form() {
+		// alert('xxx')
+		var pay_type = $(".mui-table-view-cell.mui-selected").attr('data-type');
+		if (pay_type) {
+			$("#pay_type").val(pay_type);
+			$("form").submit();
+		}else{
+			mui.toast("请选择付款方式",{duration:8000});
+			return false;
+		}
+	}
+</script>

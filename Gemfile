@@ -10,6 +10,9 @@ end
 gem 'rails', '~> 5.1.6'
 # Use sqlite3 as the database for Active Record
 # gem 'sqlite3'
+gem 'therubyracer'
+
+
 gem 'mysql2', '>= 0.3.18', '< 0.5'
 gem 'devise'
 # Use Puma as the app server
@@ -61,7 +64,9 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 # hujun===========================
 gem 'settingslogic'
+gem 'grape'
 gem 'china_sms'
+gem 'rest-client'
 gem 'alipay'
 gem 'rucaptcha'
 gem 'dalli'

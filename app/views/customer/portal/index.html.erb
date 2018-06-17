@@ -31,14 +31,13 @@
 		padding: 20px 40px 0;
 	}
 	#search_content,#search_content *{
-		transition: all .8s;
+		transition: all .25s;
 	}
-	#search_content .search_header_row{}
 	#search_input{
 		padding-left: 40px;font-size: 12px;border-radius: 18px;margin: 0;
 	}
 	#search_content.on{
-		position: absolute;
+		position: fixed;
 		top: 0;
 		background: #fff;
 		z-index:  999;
@@ -48,20 +47,27 @@
 	#search_content.on .search_results{
 		opacity: 1;
 	}
-	#search_content.on #search_header_row{
-		margin: 0;
-	}
 	#search_content.on #search_input{
 		border-radius: 0;
 	}
 	.mui-table-view-cell.no_background:after{
 		background: none;
 	}
+	#search_content .mui-icon-arrowleft{
+		display: none;
+	}
+	#search_content.on .mui-icon-search{
+		display: none;
+	}
+	#search_content.on .mui-icon-arrowleft{
+		display: block;
+	}
 </style>
 <div class="mui-content" id="vue_content">
 	<div id="search_content">
 		<div class="mui-input-row search_header_row">
-			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></i>
+			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="document.getElementById('search_input').focus();"></i>
+			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
 			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
 		</div>
 		<div class="search_results" style="margin-top: 10px;">
@@ -72,37 +78,45 @@
 							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
 							<div class="mui-media-body">
 								{{item.name}}
-								<p style="float: right;">???m</p>
-								<p class="mui-ellipsis">贵州省贵阳市XXX</p>
+								<p style="float: right;">{{item.distance}}</p>
+								<p class="mui-ellipsis">{{item.addr}}</p>
 							</div>
 						</div>
 					</li>
 				</ul>
 			</template>
 			<template v-else>
-				<p style="margin: 8px;">历史记录</p>
-				<p style="margin: 8px;">大家常用</p>
+				<div style="padding-left: 16px;">
+					<p style="margin: 8px;">历史记录</p>
+					<p style="margin: 8px;">大家常用</p>
+				</div>
 			</template>
 		</div>
 	</div>
-	<p id="order_items" style="margin: 0;padding: 30px 0 8px 12px;">距离当前最近</p>
-	<ul class="mui-table-view" style="margin: 8px;" v-for="item in prescriptions">
+	<p id="order_items" style="margin: 0;padding: 16px 0 8px 12px;">
+		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
+		<span v-else>距离当前最近</span>
+	</p>
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
-				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
-					{{current_pharmacy.name}}
-					<p class="mui-ellipsis">???m</p>
+					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+					<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
+					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
 				</div>
 			</div>
 			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fa fa-map-marker" style="font-size: 20px;"></i>
-				<p style="font-size: 8px;">查看位置</p>
+				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
+				<p style="font-size: 12px;">{{current_pharmacy.distance||"　"}}</p>
 			</div>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
-						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;">
+						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 						<div class="mui-media-body">
 							{{drug.title}}
 							<p class="mui-ellipsis">
@@ -114,8 +128,8 @@
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				合计 <span style="color: #FF376F;">¥ {{format_float(item.price)}}</span>
-				<a href="/customer/portal/settlement" class="mui-btn mui-btn-danger" style="float: right;">去结算</a>
+				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
+				<a href="javascript:;" @click="send_prescription_ids_session(item)" class="mui-btn mui-btn-danger" style="float: right;background: red;color: #fff;">去结算</a>
 			</div>
 		</li>
 	</ul>
@@ -124,6 +138,7 @@
 	new Vue({
 		el:"#vue_content",
 		data:{
+			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
 			search_str:'',
@@ -131,37 +146,104 @@
 		},
 		watch:{
 			search_str:function(val) {
+				// console.log( 'xxxxxxxxxxxxxx',val,val.length );
 				var _this = this;
 				clearTimeout(_this.timer)
 				_this.timer = setTimeout(function() {
+					$("#loading").show();
 					$.ajax({
-						url:'/interfaces/get_pharmacy?search='+val,
+						url:'/interfaces/get_pharmacy?search='+val+'&',
+						data:{lng:_this.point.lng,lat:_this.point.lat},
 						success:function(json) {
-							_this.pharmacys = json.rows;
-						}
+							if (json.flag) {
+								_this.pharmacys = json.rows;
+							}else{
+								mui.toast("请刷新后重试");
+							}
+						},
+						complete:function() {
+							$("#loading").hide();
+						},
+						error:error_fun
 					})
 				},500)
 			},
 		},
 		methods:{
-			get_current_pharmacy:function(item) {
+			send_prescription_ids_session:function(item) {
+				var _this = this;
+				if (_this.current_pharmacy.id) {
+					$("#loading").show();
+					$.ajax({
+						url:"/interfaces/set_prescriptions_cart",
+						data:{
+							ids:item.prescription_ids,
+							pharmacy_id:_this.current_pharmacy.id,
+						},
+						success:function(json) {
+							if (json.flag) {
+								location.href = "/customer/portal/settlement";
+							}else{
+								$("#loading").hide();
+								mui.toast(json.info);
+							}
+						},
+						complete:function() {
+						},
+						error:error_fun
+					})
+				}else{
+					mui.toast("请先选择药房");
+					return false;
+				}
+			},
+			get_c_phar:function(point) {
 				var _this = this;
 				$.ajax({
 					url:"/interfaces/get_current_pharmacy",
+					data:point,
 					success:function(json) {
-						// console.log( json );
-						_this.current_pharmacy = json.pharmacy;
+						if (json.flag) {
+							_this.current_pharmacy = json.pharmacy;
+							_this.current_pharmacy.sele_type = json.type;
+						}else{
+							mui.toast(json.info);
+						}
+					},
+					error:function(e) {
+						if (point) {
+							mui.toast("定位失败，请自选药房");
+						}else{
+							mui.toast("定位错误，请重选药房");
+						}
 					}
 				})
 			},
+			get_current_pharmacy:function(item) {
+				var _this = this;
+				<%# if session[:current_pharmacy_id].present? %>
+				// 如果有自选药房，就先显示药房，延迟定位
+				// _this.get_c_phar();
+				<%# else %>
+				$(function() {
+					addressOverlay('',function(point) {
+						_this.point = point;
+						_this.get_c_phar({lng:point.lng,lat:point.lat});
+					})
+				})
+				<%# end -%>
+			},
 			click_to_save_user_pharmacy:function(item) {
 				var _this = this;
+				$("#loading").show();
 				$.ajax({
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
-						// body...
 						_this.current_pharmacy = item;
-						$(".mui-icon-arrowleft").first().trigger("tap");
+						$(".mui-icon-arrowleft").click();
+					},
+					complete:function() {
+						$("#loading").hide();
 					}
 				})
 				// mui.back();
@@ -180,7 +262,7 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone='+<%= current_user.login %>,
+					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
 							_this.prescriptions = json.data;
@@ -191,24 +273,20 @@
 					complete:function() {
 						$("#loading").hide();
 					},
-					error:error_fun
+					error:function(e) {
+						mui.toast("处方获取失败");
+					}
 				})
 			},
 		},
 		mounted:function() {
+			var _this = this;
+			// _this.search_str = '';
 			this.get_current_pharmacy();
 			this.get_prescriptions();
-			$("#search_input").on("tap",function(e) {
+			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
-				var icon = $(this).siblings("i");
-				if (icon.hasClass("mui-icon-search")) {
-					icon.toggleClass("mui-icon-search mui-icon-arrowleft");
-					icon.on("tap",function(e) {
-						$("#search_content").removeClass("on");
-						icon.toggleClass("mui-icon-search mui-icon-arrowleft");
-						icon.off("tap");
-					})
-				}
+				$("#bottom_tabs").hide(300);
 			})
 		}
 	})
