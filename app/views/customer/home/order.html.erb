@@ -28,7 +28,7 @@
 				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 				<div class="mui-media-body">
 					<span>{{item.organ.name||"　"}}</span>
-					<span style="float: right;color: #F55742;">
+					<span style="float: right;" class="common_red">
 						<span v-if="item.payment_type=='1'">
 							<span v-if="item.status=='1'">未付款</span>
 							<span v-if="item.status=='2'">已付款</span>
@@ -59,7 +59,7 @@
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
+				合计 <span class="common_red">¥ {{format_float(item.total_price)}}</span>
 			</div>
 		</li>
 	</ul>

@@ -63,7 +63,9 @@ class Ims::Order < ApplicationRecord
       i_days = 6
       attrs = {search:args[:search],i_days:i_days,org_id:args[:org_id]}
       data = Ims::GetData.find_data attrs
-      result = data.map{|e| e.deep_symbolize_keys}
+      p "]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+      p data
+      # result = data.map{|e| e.deep_symbolize_keys}
       # result[0]["r_status"]=="-1" ? result : result.group_by{|e| {:r_status=>e[:r_status], :r_info=>e[:r_info], :cfid=>e[:cfid], :iden=>e[:iden], :name=>e[:name], :phone=>e[:phone], :age=>e[:age], :gender_display=>e[:gender_display], :address=>e[:address], :unit_name=>e[:unit_name], :hospital_oid=>e[:hospital_oid], :hospital_name=>e[:hospital_name], :organization_id=>e[:organization_id], :cfstatus=>e[:cfstatus]}} 
       # result = data[0].deep_symbolize_keys
     end
@@ -141,10 +143,6 @@ class Ims::Order < ApplicationRecord
                   img_path: x.img_path
                 }
               }
-          # }, 
-          # {
-          #   type:'处方',
-          #   prescriptions:prescriptions
           }]
           
           temp = 0;         
@@ -165,9 +163,11 @@ class Ims::Order < ApplicationRecord
             prescriptions_id: line.try(:[],:prescription_ids),
             prescriptions_count: line.try(:[],:prescription_ids).try(:[],:count),
             patient_name: line.try(:[],:name),
-            patient_sex: preson.try(:gender_display),
-            patient_age: preson.try(:age),
-            patient_iden: preson.try(:iden),
+
+            patient_sex: line.try(:gender_display),
+            patient_age: line.try(:age),
+            patient_iden: line.try(:iden),
+            
             patient_phone: line.try(:[],:patient_phone),
             payment_type: line.try(:[],:payment_type),
             details: (line.try(:[],:orders)||[]).map{|x| {

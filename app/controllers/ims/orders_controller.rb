@@ -75,12 +75,12 @@ class Ims::OrdersController < ApplicationController
       type = "1"
     when '2' #待发药
       type = "2"
-    when '3' #已发药
-      type = ""
-    when '4' #已退药
-      type = ""
+    when '5' #已发药
+      type = "5"
+    when '7' #已退药
+      type = "7"
     else
-      type = ""
+      type = "9999"
     end
     org_id = ""#current_user.organization_id rescue ""
     order_code = ""#取药码  可以没有
@@ -136,7 +136,7 @@ class Ims::OrdersController < ApplicationController
   def charging_pre
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2"})
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2",current_user:current_user})
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
@@ -145,7 +145,7 @@ class Ims::OrdersController < ApplicationController
   def dispensing_order
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"5"})
+    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"})
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
