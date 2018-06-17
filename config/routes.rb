@@ -166,5 +166,7 @@ Rails.application.routes.draw do
 
   match '/refund/wechat', to: 'refund#wechat', via: [:post]
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
+
+  match '/wechat/login',  to: 'wechat#login', via: [:get]
   ########### hujun_end   ##########
 end
