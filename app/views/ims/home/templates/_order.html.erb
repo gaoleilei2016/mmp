@@ -169,9 +169,16 @@ window.current_template_obj = {
       });
     },
 		show_panel:function(method){
+      var _this = this
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
+      try{
+        $(document).find(str).find(".is-active").click();
+      }catch(e){
+        _this._data.pres = []
+        console.log(e)
+      }
 		},
 		choose_prescription:function(){
 			number = this.tab_header
