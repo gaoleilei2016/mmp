@@ -246,7 +246,7 @@
 								</a>
 							</li>
 							<li class="mui-table-view-cell">
-								<a href="javascript:mui.toast('敬请期待');">
+								<a href="#feedback">
 									<span>意见反馈</span>
 									<i class="fal fa-fw fa-edit" style="font-size: 26px;float: right;"></i>
 								</a>
@@ -365,6 +365,13 @@
 				<h1 class="mui-center mui-title">问题反馈</h1>
 			</div>
 			<div class="mui-page-content">
+				<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+					<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+						<span class="mui-icon mui-icon-left-nav"></span>
+					</button>
+					<button onclick="mui.toast('敬请期待');return false;" id="submit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right">发送</button>
+					<h1 class="mui-center mui-title">问题反馈</h1>
+				</div>
 				<div class="mui-content-padded">
 					<div class="mui-inline">问题和意见</div>
 					<a class="mui-pull-right mui-inline" href="#fast_message_popover">
