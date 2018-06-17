@@ -225,7 +225,7 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         order.update_attributes(is_returned:true)
-        new_order = order.dup
+        new_order = order.clone
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id
         new_order.ori_code = order.order_code
@@ -234,7 +234,7 @@ class Ims::Order < ApplicationRecord
         new_order.prescriptions = order.prescriptions
         new_order.status = '7'
         order.details.each do |detail|
-          dup_detail = detail.dup
+          dup_detail = detail.clone
           dup_detail.quantity = -detail.quantity.to_f
           dup_detail.net_amt = -detail.net_amt.to_f
           dup_detail.ori_detail_id = detail.id
