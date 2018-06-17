@@ -205,7 +205,9 @@
 							</li>
 						</ul> -->
 						<div style="padding: 20px;padding-top: 30px;">
-							<img src="/assets/admin/TM.png" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;">
+							<a href="#account" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;overflow: hidden;">
+								<img src="/assets/admin/TM.png" style="width: 100%;">
+							</a>
 							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;">
 								<div style="position: absolute; bottom: 8px;left: 10px;color: #666;"><%= current_user.name.present? ? current_user.name : current_user.login %></div>
 							</div>
@@ -293,9 +295,16 @@
 					编辑
 				</a>
 			</div>
-			<div class="mui-page-content">
-				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll">
+			<div class="mui-page-content" style="padding-top: 46px;">
+						<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+							<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+								<span class="mui-icon mui-icon-left-nav"></span>
+							</button>
+							<h1 class="mui-center mui-title">账号与安全</h1>
+							<a href="/users/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;">
+								编辑
+							</a>
+						</div>
 						<ul class="mui-table-view">
 							<li class="mui-table-view-cell">
 								<a id="head" class="mui-navigate-right">头像
@@ -328,8 +337,6 @@
 								<a>地址<span class="mui-pull-right"><%#= session[:user]["address"] rescue '未知' %></span></a>
 							</li> -->
 						</ul>
-					</div>
-				</div>
 			</div>
 		</div>
 
