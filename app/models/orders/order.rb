@@ -14,7 +14,7 @@ class Orders::Order < ApplicationRecord
 #  updated_at DATETIME NOT NULL '更新时间',
 #  payment_at DATETIME NOT NULL '支付时间',
 #  drug_user varchar(20)  NULL '发药人',
-#  drug_user_id varchar(20)  NULL '发药人',
+#  drug_user_id varchar(20)  NULL '发药人id',
 #  end_time DATETIME NOT NULL '订单完成时间',
 #  close_time DATETIME NOT NULL '订单关闭时间',
 #  target_org_id VARCHAR(32) NOT NULL '目标机构编码',
@@ -33,8 +33,8 @@ class Orders::Order < ApplicationRecord
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
 #  pay_type float NOT NULL '支付类型,1.微信,2.支付宝',
-#  payment_type float NOT NULL '支付类型,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消',
+#  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
+#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
 #  )
 
@@ -152,11 +152,12 @@ class Orders::Order < ApplicationRecord
 					end
 				end
 				order.save
-				result[:info].concat("订单生成成功！请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
+				result[:info].concat("订单生成成功！")
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
 					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.cancel_order({id:#{order.id.to_s}})")
+					result[:info].concat("请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
 				end
 			end
 			result

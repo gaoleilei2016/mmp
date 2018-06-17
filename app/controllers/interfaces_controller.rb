@@ -14,11 +14,12 @@ class InterfacesController < ApplicationController
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
 	end
+	#支付
 	def pay_order
 		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/pay/confirm/#{order.order_code}?type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/pay/confirm/#{order.order_code}?type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
@@ -26,11 +27,29 @@ class InterfacesController < ApplicationController
 			res = Pay::Wechat.payment(args)
 		end
 		# p '~~~~~~~',res
-		if res[:state]==:succ
+		if res[:state].to_sym==:succ
+			order.order_settle()
 			redirect_to res[:pay_url]
 		else
 			flash[:notice] = res[:desc]
 			redirect_to "/customer/portal/pay"
+		end
+	end
+	#微信，支付宝退款
+	def refund_order
+		order = ::Orders::Order.find(params[:order_id])
+		# order.net_amt ##订单号用机构id+订单号
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", refund_fee: order.net_amt, reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+		res = Pay::Refund.carry_out(args)
+		# p '~~~~~~~',res
+		if [:succ,:success].include?res[:state].to_sym
+			###退款成功
+			order.cancel_order()
+			redirect_to res[:pay_url]
+		else
+			##退款失败
+			flash[:notice] = res[:desc]
+			# redirect_to "/customer/portal/pay"
 		end
 	end
 	def save_order
