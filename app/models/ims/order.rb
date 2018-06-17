@@ -25,7 +25,6 @@ class Ims::Order < ApplicationRecord
         else
         end
 
-        p query
         # query.concat(" and status =#{ args[:type].to_s}")
         Orders::Order.where(query).map{|order| 
           preson = Person.find order.person_id rescue nil
@@ -63,7 +62,7 @@ class Ims::Order < ApplicationRecord
       i_days = 6
       attrs = {search:args[:search],i_days:i_days,org_id:args[:org_id]}
       data = Ims::GetData.find_data attrs
-      p "]]]]]]]]]]]]]]]]]]]]]]]]]]]"
+      p "=============================="
       p data
       # result = data.map{|e| e.deep_symbolize_keys}
       # result[0]["r_status"]=="-1" ? result : result.group_by{|e| {:r_status=>e[:r_status], :r_info=>e[:r_info], :cfid=>e[:cfid], :iden=>e[:iden], :name=>e[:name], :phone=>e[:phone], :age=>e[:age], :gender_display=>e[:gender_display], :address=>e[:address], :unit_name=>e[:unit_name], :hospital_oid=>e[:hospital_oid], :hospital_name=>e[:hospital_name], :organization_id=>e[:organization_id], :cfstatus=>e[:cfstatus]}} 
@@ -79,7 +78,6 @@ class Ims::Order < ApplicationRecord
         query ="target_org_id = #{args[:org_id]} and (status = 5  or (status = 7))"
         query.concat(" and order_code=#{order_code}") unless order_code.blank?
         orders = Orders::Order.where(query)
-        p orders.count
         return {flag:false,:info=>"未找到订单信息"} if orders.count==0
         order = orders.last 
         result = get_order_data order
@@ -146,71 +144,46 @@ class Ims::Order < ApplicationRecord
           }]
           
           temp = 0;    
-          p "===========================",prescriptions     
           prescriptions.each do |k,v|
             p "---------------------",v
+            next if v[:orders].blank?
+            details = v[:orders].map{|x| {
+                    name: x[:title],
+                    specifications: x[:specification],
+                    quantity: x[:total_quantity],
+                    unit: x[:unit],
+                    price: x[:price],
+                    net_amt: (x[:total_quantity].to_f*x[:price].to_f),
+                    firm:x[:firm],
+                  }
+                }
+            amt = details.map{|e| e[:net_amt]}.sum() rescue 0
             data <<{
               :type => '处方'+(temp += 1).to_s,
               :is_order => false,
               :order_id => v[:id],
-              :order_code => v[:order_code],
-              :amt => v[:amt],
+              :order_code => v[:prescription_no],
+              :amt => amt,
               :status => v[:status],
-              :payment_at => v[:payment_at],
-              :created_at => v[:created_at],
-              :end_time => v[:end_time],
-              :close_time => v[:close_time],
-              :target_org_name => v[:target_org_name],
-              :source_org_name => v[:source_org_name],
-              :doctor => v[:doctor],
-              :prescriptions_id => v[:prescriptions_id],
-              :prescriptions_count => v[:prescriptions_count],
+              :phone=>v[:phone],
+              :source_org_name => v[:org][:display],
+              :doctor => v[:author][:display],
+              :prescriptions_id => [],
               :patient_name => v[:patient_name],
-              :patient_sex => v[:patient_sex],
-              :patient_age => v[:patient_age],
-              :patient_iden => v[:patient_iden],
-              :patient_phone => v[:patient_phone],
+              :patient_sex => v[:gender][:display],
+              :patient_age => v[:age],
+              :patient_iden => v[:iden],
+              :patient_phone => v[:phone],
               :payment_type => v[:payment_type],
+              :address => v[:address],
+              :patient_no => v[:patient_no],
+              :encounter_loc => v[:encounter_loc][:display],
+              :note => v[:note],
+              :type => v[:type][:display],
+              :diagnoses => ((v[:diagnoses]||[]).map{|e| e.display}.join(",") rescue nil),
+              details: details
             }
           end
-          
-        #   prescriptions.each{|key,line| data<<{
-        #     type:'处方'+(temp += 1).to_s,
-        #     is_order:false,
-        #     order_id: line.try(:[],:id),
-        #     order_code: line.try(:[],:prescription_no),
-        #     amt: line.try(:[],:price),
-        #     status: line.try(:[],:status),
-        #     payment_at: line.try(:[],:payment_at),     # 支付时间
-        #     created_at: line.try(:[],:created_at).try(:to_s,:db),     # 订单生成时间
-        #     end_time: line.try(:[],:end_time),     # 订单完成时间
-        #     close_time: line.try(:[],:close_time),
-        #     target_org_name: line.try(:[],:target_org_name),
-        #     source_org_name: line.try(:[],:source_org_name),
-        #     doctor: line.try(:[],:author).try(:[],:display),
-        #     prescriptions_id: line.try(:[],:prescription_ids),
-        #     prescriptions_count: line.try(:[],:prescription_ids).try(:[],:count),
-        #     patient_name: line.try(:[],:name),
-        #     patient_sex: line.try(:gender_display),
-        #     patient_age: line.try(:age),
-        #     patient_iden: line.try(:iden),
-        #     patient_phone: line.try(:[],:patient_phone),
-        #     payment_type: line.try(:[],:payment_type),
-        #     details: (line.try(:[],:orders)||[]).map{|x| {
-        #             name: x.try(:title),
-        #             specifications: x.try(:specification),
-        #             quantity: x.try(:total_quantity),
-        #             unit: x.try(:unit),
-        #             dosage: x.try(:dosage),
-        #             price: x.try(:price),
-        #             net_amt: x.try(:net_amt),
-        #             firm: x.try(:firm),
-        #             img_path: x.try(:img_path)
-        #           }
-        #         }
-        #     }
-        # }
-
         return {flag:true,:data=>data}
     end
 
@@ -220,7 +193,7 @@ class Ims::Order < ApplicationRecord
       begin
         p "----------------",args
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
-        attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2'}
+        attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],user_name:args[:user_name],user_id:args[:user_id],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2',current_user:args[:current_user]}
         ::ActiveRecord::Base.transaction  do
           case args[:status]
           when '2'
@@ -232,7 +205,7 @@ class Ims::Order < ApplicationRecord
             result = Orders::Order.create_order_by_presc_ids attrs
             return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]="0"
             order = result[:order]
-            att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id]}
+            att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user]}
             order_com = Orders::Order.order_completion att
             return (result[:ret_code]="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
           else
