@@ -204,6 +204,7 @@ class Ims::Order < ApplicationRecord
           when '5'
             result = Orders::Order.create_order_by_presc_ids attrs
             return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]="0"
+            p "================",result,"++++++++++++++++++++++++",result[:order]
             order = result[:order]
             att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user]}
             order_com = Orders::Order.order_completion att
