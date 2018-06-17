@@ -19,6 +19,7 @@ class Hospital::Diagnose < ApplicationRecord
 
 	def to_web_front
 		ret = {
+			id: self.id,
 			code: self.code,
 			display: self.display,
 			system: self.system,
@@ -31,6 +32,7 @@ class Hospital::Diagnose < ApplicationRecord
 				code: self.type_code,
 				display: self.type_display
 			},
+			status: self.status,
 			note: self.note,
 			fall_ill_at: self.fall_ill_at,
 			created_at: self.created_at,
@@ -66,6 +68,19 @@ class Hospital::Diagnose < ApplicationRecord
 				cur_diagnoses[1].rank = tmp_rank
 				cur_diagnoses[0].save
 				cur_diagnoses[1].save
+			end
+
+			def to_master_and_slaver(cur_diagnoses)
+				master = []
+				slaver = []
+				cur_diagnoses.each do |_diagnose|
+					if _diagnose.type_code == 0
+						master << _diagnose.to_web_front
+					else
+						slaver << _diagnose.to_web_front
+					end
+				end
+				return {master: master, slaver: slaver}
 			end
 	end
 end
