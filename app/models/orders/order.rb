@@ -41,7 +41,7 @@ class Orders::Order < ApplicationRecord
 # rails generate model Orders::Order payment_at:time end_time:time close_time:time target_org_id:string target_org_name:string source_org_id:string source_org_name:string order_code:string user_id:string shipping_name:string shipping_code:string payment_type:float status:string
 	#订单金额
 	def net_amt
-		details.sum(:net_amt)
+		details.sum(:net_amt).to_f.round(2)
 	end
 	#药房
 	def pharmacy
@@ -204,8 +204,8 @@ class Orders::Order < ApplicationRecord
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
-					sch.timer_at(Time.now + 10.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
-					result[:info].concat("请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
+					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
+					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
 				end
 				#订单创建成功之后改变处方状态
 				args = {
