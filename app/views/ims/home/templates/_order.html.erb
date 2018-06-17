@@ -174,7 +174,7 @@ window.current_template_obj = {
       var str = "div.function_panel."+method
       $(document).find(str).show();
       try{
-        $(document).find(str).find(".is-active").click();
+        $(document).find(str).find(".prescription_list_panel .is-active").click();
       }catch(e){
         _this._data.pres = []
         console.log(e)
@@ -355,15 +355,16 @@ window.current_template_obj = {
       });
 		},
     get_pres:function (stat,e) {
+      var _this = this
       $(".prescription_list").find(".active").removeClass("active")
-      this._data.tab_header_data = []
-      this._data.detail = [{is_order:true}]
+      _this._data.tab_header_data = []
+      _this._data.detail = [{is_order:true}]
     	if (!stat) {stat=""};
-      this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
-        if(response.data.data&&response.data.data.length>0){this.set_pres(response.data.data)}else{this.set_pres([])}
+      _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
+        if(response.data.data&&response.data.data.length>0){_this.set_pres(response.data.data)}else{_this.set_pres([])}
       },function(response){
-        this.set_pres()
-        this.$notify({
+        _this.set_pres()
+        _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
           duration: 0
