@@ -487,6 +487,7 @@ window.current_template_obj = {
 			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         info = response.data.info
+        type = stat ? "success" : "warning";
         if (info) {
           _this.$notify({
             title: '提示',
@@ -495,7 +496,6 @@ window.current_template_obj = {
             duration:(stat ? 4500 : 0)
           })          
         };
-        type = stat ? "success" : "warning";
         try{
           method = ""
           if(data.method == "charging_pre"||data.method == "dispensing_order"){
@@ -510,12 +510,12 @@ window.current_template_obj = {
         }
         _this._data.tab_header_data = []
         _this._data.detail = [{is_order:true}]
-        _this.$notify({
-          title: '提示',
-          message: data.todo+(stat ? "成功" : "失败"),
-          type:type,
-          // duration:(stat ? 4500 : 0)
-        })
+        // _this.$notify({
+        //   title: '提示',
+        //   message: data.todo+(stat ? "成功" : "失败"),
+        //   type:type,
+        //   // duration:(stat ? 4500 : 0)
+        // })
       },function(response){
         _this.$notify({
           title: '提示',
