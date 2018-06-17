@@ -301,6 +301,11 @@ class ::Hospital::Prescription < ApplicationRecord
 		return ret
 	end
 
+	def set_tookcode
+		self.tookcode = format("%06d", self.id)
+		self.save
+	end
+
 	def send_to_check
 		self.reload
 		# 审核成功 自动审核
@@ -313,7 +318,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		url = "http://huaxi.tenmind.com/"
 		#发送短信息
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
-		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: format("%06d",self.id), url: url, phone: cur_encounter.phone}
+		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: self.tookcode, url: url, phone: cur_encounter.phone}
 		Sms::Data.send_phone(args)
 	end
 

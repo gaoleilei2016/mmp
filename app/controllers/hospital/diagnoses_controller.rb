@@ -12,7 +12,8 @@ class Hospital::DiagnosesController < ApplicationController
 	def index
 		@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 		ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
-		render json: {flag:true, info: "success", master: ret[:master], slaver: ret[:slaver]}
+		@all_diagnoses = ret[:master] + ret[:slaver]
+		render json: {flag:true, info: "success", master: ret[:master], slaver: ret[:slaver], data: @all_diagnoses}
 	end
 
 
@@ -98,7 +99,8 @@ class Hospital::DiagnosesController < ApplicationController
 		if @diagnose.destroy
 			@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 			ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
-			render json: {flag: true, info: "success", master: ret[:master], slaver: ret[:slaver]}
+			@all_diagnoses = ret[:master] + ret[:slaver]
+			render json: {flag: true, info: "success", master: ret[:master], slaver: ret[:slaver], data: @all_diagnoses}
 		else
 			render json: {flag: false, info: @diagnose.errors.message.values.flatten, data: @diagnose.to_web_front}
 		end
