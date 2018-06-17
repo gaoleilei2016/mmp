@@ -29,17 +29,16 @@ class InterfacesController < ApplicationController
 	def pay_order
 		order = ::Orders::Order.find(params[:order_id])
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
-		p '~~~~~~~~~',args
+		args = {out_trade_no: "#{order.id}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+		# p '~~~~~~~~~',args
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
 		when "Wechat"
 			res = Pay::Wechat.payment(args)
 		end
-		p '~~~~~~~ 2',res
+		# p '~~~~~~~ 2',res
 		if res[:state].to_sym==:succ
-			order.order_settle(params[:pay_type],current_user)
 			redirect_to res[:pay_url]
 		else
 			flash[:notice] = res[:desc]
@@ -77,7 +76,7 @@ class InterfacesController < ApplicationController
 	def save_order
 		params[:order][:user_id] = current_user.id
 		params[:order][:current_user] = current_user
-		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
+		re = Orders::Order.create_order_by_presc_ids(params[:order])
 		if re[:ret_code]!='0'
 			flash[:notice] = re[:info]
 			return redirect_to "/customer/portal/settlement"
@@ -92,9 +91,6 @@ class InterfacesController < ApplicationController
 	end
 	def cancel_order
 		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
-		p '~~~~~~~~ cancel_order ',ret
-		unless ret[:ret_code] == "0"
-		end
 		render json: ret
 	end
 	# 获取用户购物车
@@ -149,7 +145,7 @@ class InterfacesController < ApplicationController
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
 			recents = ::Admin::Organization.recent_lists(args)
-			p '~~~~~~~~~~',recents
+			# p '~~~~~~~~~~',recents
 			if recents[:state] == :succ
 				re = JSON.parse(recents[:res][0][:org].to_json)
 				re['distance'] = recents[:res][0][:distance]
