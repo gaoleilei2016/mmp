@@ -121,6 +121,8 @@ Rails.application.routes.draw do
         get :oprate_order       # 订单操作(发药/退药、、)
         get :order_settings
         get :get_detail
+        get :get_search_data    # 未发订单或处方检索
+        get :get_order_by_code  # 已发药或已退订单检索  
         post :create_order  #生成订单
       end
     end
