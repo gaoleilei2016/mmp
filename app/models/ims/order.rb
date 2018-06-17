@@ -225,7 +225,7 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         order.update_attributes(is_returned:true)
-        new_order = order.clone
+        new_order = order.clone.dup
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id
         new_order.ori_code = order.order_code
@@ -234,13 +234,14 @@ class Ims::Order < ApplicationRecord
         new_order.prescriptions = order.prescriptions
         new_order.status = '7'
         order.details.each do |detail|
-          dup_detail = detail.clone
+          dup_detail = detail.clone.dup
           dup_detail.quantity = -detail.quantity.to_f
           dup_detail.net_amt = -detail.net_amt.to_f
           dup_detail.ori_detail_id = detail.id
-          new_order.details << Orders::OrderDetail.create(dup_detail)
+          dup_detail.save
+          new_order.details << dup_detail
         end
-        Orders::Order.create(new_order) ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。',}
+        new_order.save ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。',}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
