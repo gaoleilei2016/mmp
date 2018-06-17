@@ -18,6 +18,10 @@ class Ims::Order < ApplicationRecord
          query.concat(" and payment_type = 2 and `status`=1 ")
         when '2'#已付款
          query.concat(" and `status`=2 ")
+        when '5'#已发药
+         query.concat(" and `status`=5 ")
+        when '7'#已发药
+         query.concat(" and `status`=7 ")
         else
         end
 

@@ -75,12 +75,12 @@ class Ims::OrdersController < ApplicationController
       type = "1"
     when '2' #待发药
       type = "2"
-    when '3' #已发药
-      type = ""
-    when '4' #已退药
-      type = ""
+    when '5' #已发药
+      type = "5"
+    when '7' #已退药
+      type = "7"
     else
-      type = ""
+      type = "9999"
     end
     org_id = ""#current_user.organization_id rescue ""
     order_code = ""#取药码  可以没有

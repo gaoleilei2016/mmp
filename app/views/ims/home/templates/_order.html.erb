@@ -82,7 +82,7 @@ window.current_template_obj = {
       activeName2:"first",
       return_activeName2:"first",
       tab_header: '0', return_tab_header: '0',
-      tab_header_data: [],return_tab_header_data: [],
+      tab_header_data: [],
       input21: '',
       setting: {},
       options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
@@ -155,10 +155,9 @@ window.current_template_obj = {
     },
     return_handleClick:function(tab, event) {
       if (tab.index == "0") {
-        this.get_pres('3')
-        return_pres
+        this.get_pres('5')
       }else if (tab.index == "1") {
-        this.get_pres('4')
+        this.get_pres('7')
       };      
     },
     errorCallback:function(response){
@@ -172,20 +171,21 @@ window.current_template_obj = {
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
+      $(document).find(".is-active").click()
       // this._data.tab_header_data = []
       // this._data.detail = []
 		},
 		choose_prescription:function(){
 			number = this.tab_header
-      console.log(number)
 			tab_val = this.tab_header_data[number]
       this._data.detail = [tab_val]
-			// console.log(tab_val)
-			// this.get_detail(tab_val.id)
-		},
+      // console.log(tab_val)
+      // this.get_detail(tab_val.id)
+    },
     return_choose_prescription:function(){
-      number = this.tab_header
+      number = this.return_tab_header
       tab_val = this.tab_header_data[number]
+      this._data.detail = [tab_val]
       // console.log(tab_val.id)
       // this.get_detail(tab_val.id)
     },    
@@ -251,7 +251,6 @@ window.current_template_obj = {
       });
 		},
     get_pres:function (stat,e) {
-    	// $(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       $(".prescription_list").find(".active").removeClass("active")
       this._data.tab_header_data = []
       this._data.detail = [{}] 
@@ -268,7 +267,11 @@ window.current_template_obj = {
       });
     },
     set_pres:function(data){
-    	this._data.pres = data
+      if (data) {
+        this._data.pres = data
+      }else{
+      	this._data.pres = []
+      }
     	// setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (id,e) {
