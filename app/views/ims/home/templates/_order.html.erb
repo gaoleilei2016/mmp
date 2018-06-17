@@ -172,23 +172,16 @@ window.current_template_obj = {
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
-      // $(document).find(str).find(".is-active").click()
-      // this._data.tab_header_data = []
-      // this._data.detail = []
 		},
 		choose_prescription:function(){
 			number = this.tab_header
 			tab_val = this.tab_header_data[number]
       this._data.detail = [tab_val]
-      // console.log(tab_val)
-      // this.get_detail(tab_val.id)
     },
     return_choose_prescription:function(){
       number = this.return_tab_header
       tab_val = this.tab_header_data[number]
       this._data.detail = [tab_val]
-      // console.log(tab_val.id)
-      // this.get_detail(tab_val.id)
     },    
       handleOpen:function(key, keyPath) {
         console.log(key, keyPath);
@@ -247,11 +240,15 @@ window.current_template_obj = {
         flag_arr = []
         flag = true
         ori_data = response.data
+        
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
           temp.push({
             id:data1.cfid,
+            order_id:data1.order_id,
+            order_type:data1.order_type,
+            order_code:data1.order_code,
             pre_code:data1.prescription_no,
             name:data1.name,
             age:data1.age,
@@ -285,6 +282,9 @@ window.current_template_obj = {
                   if (j == temp.length-1) {
                     temp.push({
                       id:for_data.cfid,
+                      order_id:for_data.order_id,
+                      order_type:for_data.order_type,
+                      order_code:for_data.order_code,                      
                       pre_code:for_data.prescription_no,
                       name:for_data.name,
                       age:for_data.age,
@@ -307,16 +307,18 @@ window.current_template_obj = {
             }
           };
 
+          console.log(flag_arr)
+
           if (flag_arr.indexOf(1)>=0) {
             temp2 = []
             stat = _this.activeName2
             temp.map(function(itme){
               if (item.status == stat) {
                 temp2<<{
-                  order_id:item.id,
-                  order_code:"未知",
-                  patient_name:"未知",
-                  amt:"未知"
+                  order_id:item.order_id,
+                  order_code:item.order_type,
+                  patient_name:item.name,
+                  amt:""
                 }
               };
             })
@@ -325,15 +327,12 @@ window.current_template_obj = {
             _this._data.platform_data = temp
             _this._data.dialogFormVisible = true
           }
-          // console.log
-          // $.each(response.data,function(){})
         }else{
           _this.$notify({
             title: '提示',
             message: '没有数据！',
           });          
         }
-        // this._data.tableData_plat = response.data
       },function(response){
         _this.$notify({
           title: '提示',
@@ -364,7 +363,6 @@ window.current_template_obj = {
       }else{
       	this._data.pres = []
       }
-    	// setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (id,e) {
     	var _this = this;
@@ -468,14 +466,7 @@ window.current_template_obj = {
 			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         type = stat ? "success" : "warning";
-        // _this._data.pres.forEach(function(x,index,a){
-          // if(x.order_id == data.id){
-            // _this._data.pres.splica(index,1)
-            // return ""
-          // }
-        // })
         $(document).find("div.function_panel.out_order").find(".is-active").click()
-
         _this._data.tab_header_data = []
         _this._data.detail = [{is_order:true}]
         _this.$notify({
