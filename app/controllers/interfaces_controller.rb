@@ -28,7 +28,7 @@ class InterfacesController < ApplicationController
 		end
 		# p '~~~~~~~',res
 		if res[:state].to_sym==:succ
-			order.order_settle()
+			order.order_settle(params[:pay_type],current_user)
 			redirect_to res[:pay_url]
 		else
 			flash[:notice] = res[:desc]
@@ -54,6 +54,7 @@ class InterfacesController < ApplicationController
 	end
 	def save_order
 		params[:order][:user_id] = current_user.id
+		params[:order][:current_user] = current_user
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
 		raise re[:info] if re[:ret_code]!='0'
 		# p '~~~~~~~~~~~~',re

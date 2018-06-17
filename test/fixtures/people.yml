@@ -1,0 +1,85 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  health_file_no: MyString
+  iden: MyString
+  health_card_no: MyString
+  name: MyString
+  birth_date: 2018-06-09 17:06:08
+  age: 
+  gender_code: MyString
+  gender_display: MyString
+  nationality_code: MyString
+  nationality_display: MyString
+  home_town_province: MyString
+  home_town_city: MyString
+  nation_code: MyString
+  nation_display: MyString
+  marriage_code: MyString
+  marriage_display: MyString
+  education_code: MyString
+  education_display: MyString
+  occupation_code: MyString
+  occupation_display: MyString
+  phone: MyString
+  email: MyString
+  pa_post_code: MyString
+  pa_address: MyString
+  ha_post_code: MyString
+  ha_address: MyString
+  unit_name: MyString
+  unit_phone: MyString
+  ua_post_code: MyString
+  ua_address: MyString
+  contact_name: MyString
+  contact_relation_code: MyString
+  contact_relation_display: MyString
+  contact_phone: MyString
+  ca_post_code: MyString
+  ca_address: MyString
+  input_date: 2018-06-09 17:06:08
+  input_organ_code: MyString
+  input_organ_name: MyString
+  input_name: MyString
+
+two:
+  health_file_no: MyString
+  iden: MyString
+  health_card_no: MyString
+  name: MyString
+  birth_date: 2018-06-09 17:06:08
+  age: 
+  gender_code: MyString
+  gender_display: MyString
+  nationality_code: MyString
+  nationality_display: MyString
+  home_town_province: MyString
+  home_town_city: MyString
+  nation_code: MyString
+  nation_display: MyString
+  marriage_code: MyString
+  marriage_display: MyString
+  education_code: MyString
+  education_display: MyString
+  occupation_code: MyString
+  occupation_display: MyString
+  phone: MyString
+  email: MyString
+  pa_post_code: MyString
+  pa_address: MyString
+  ha_post_code: MyString
+  ha_address: MyString
+  unit_name: MyString
+  unit_phone: MyString
+  ua_post_code: MyString
+  ua_address: MyString
+  contact_name: MyString
+  contact_relation_code: MyString
+  contact_relation_display: MyString
+  contact_phone: MyString
+  ca_post_code: MyString
+  ca_address: MyString
+  input_date: 2018-06-09 17:06:08
+  input_organ_code: MyString
+  input_organ_name: MyString
+  input_name: MyString

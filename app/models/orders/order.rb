@@ -32,7 +32,7 @@ class Orders::Order < ApplicationRecord
 #  patient_phone varchar(20)  NULL '患者电话号码',
 #  shipping_name varchar(20)  NULL '物流名称',
 #  shipping_code varchar(20)  NULL '物流单号',
-#  pay_type float NOT NULL '支付类型,1.微信,2.支付宝',
+#  pay_type float NOT NULL '支付类型,Alipay ,Wechat',
 #  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
 #  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
@@ -68,8 +68,19 @@ class Orders::Order < ApplicationRecord
 	end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
-	def order_settle pay_type = '1'
+	def order_settle(pay_type,cur_user)
 		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		args = {
+			# 创建订单人
+			charger: {
+				id: cur_user.id,
+				display: cur_user.name
+				},
+			# 订单创建时间
+			charge_at: created_at.to_s(:db)
+		}
+		##通知处方订单已结算
+	 	::Hospital::Prescription.charged(args, cur_user)
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
@@ -159,6 +170,19 @@ class Orders::Order < ApplicationRecord
 					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.cancel_order({id:#{order.id.to_s}})")
 					result[:info].concat("请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
 				end
+				#订单创建成功之后改变处方状态
+				args = {
+					# 创建订单人
+					create_bill_opt: {
+						id: attrs[:current_user].id,
+						display: attrs[:current_user].name,
+					},
+					# 订单创建时间
+					bill_at: order.created_at.to_s(:db),
+				  	bill_id: order.id,
+				}
+				::Hospital::Prescription.wait_charge(args, attrs[:current_user])
+
 			end
 			result
 		end
@@ -255,6 +279,27 @@ class Orders::Order < ApplicationRecord
 										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
+				args = {
+					# 创建订单人
+					charger: {
+						id: attrs[:current_user].id,
+						display: attrs[:current_user].name
+						},
+					# 订单创建时间
+					charge_at: order.created_at.to_s(:db)
+				}
+				##通知处方订单已结算
+			 	::Hospital::Prescription.charged(args, attrs[:current_user])
+			 	args2 = {
+					# 发药人
+					delivery: {
+						id: attrs[:current_user].id,
+						display: attrs[:current_user].name
+					},
+					# 发药时间
+					delivery_at: order.created_at.to_s(:db)
+				}
+				::Hospital::Prescription.send_drug(args, attrs[:current_user])
 				##更新处方状态。。。。。。
 			end
 			result
