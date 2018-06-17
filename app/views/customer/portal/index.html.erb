@@ -112,7 +112,7 @@
 				</div>
 			</div>
 			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
+				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
@@ -131,8 +131,15 @@
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				<a href="javascript:;" @click="send_prescription_ids_session(item)" style="float: right;width: 130px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
-				<div style="overflow: hidden;text-align: right;padding-right: 10px;">合计 <span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(item.total_price)}}</span></span></div>
+				<a href="javascript:;" @click="send_prescription_ids_session(item)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<div style="overflow: hidden;padding-right: 10px;">
+					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(item.first_created_at).pattern("MM月dd日")}}</span>
+					<span style="color: #F55742;float: right;">
+						<span>¥</span>
+						<span style="font-size: 1.5em;">{{format_float(item.total_price)}}</span>
+					</span>
+					<span style="float: right;margin-right: 6px;">合计</span>
+				</div>
 			</div>
 		</li>
 	</ul>
@@ -187,11 +194,11 @@
 							if (json.flag) {
 								location.href = "/customer/portal/settlement";
 							}else{
-								$("#loading").hide();
 								mui.toast(json.info);
 							}
 						},
 						complete:function() {
+							$("#loading").hide();
 						},
 						error:error_fun
 					})

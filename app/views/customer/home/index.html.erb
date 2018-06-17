@@ -166,6 +166,9 @@
 			body {
 				color: #666;
 			}
+			.mui-table-view:after,.mui-table-view:before{
+				height: 0;
+			}
 		</style>
 		<link rel="stylesheet" type="text/css" href="/assets/plugins/mui/feedback.css" />
 
@@ -203,7 +206,9 @@
 						</ul> -->
 						<div style="padding: 20px;padding-top: 30px;">
 							<img src="/assets/admin/TM.png" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;">
-							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;"><div style="position: absolute; bottom: 8px;left: 10px;"><%= current_user.name.present? ? current_user.name : current_user.login %></div></div>
+							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;">
+								<div style="position: absolute; bottom: 8px;left: 10px;color: #666;"><%= current_user.name.present? ? current_user.name : current_user.login %></div>
+							</div>
 						</div>
 						<!-- <ul class="mui-table-view mui-table-view-chevron">
 							<li class="mui-table-view-cell">
