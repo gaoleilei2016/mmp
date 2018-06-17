@@ -132,6 +132,10 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("处方包含有效订单，无法继续生成!")
 			end
+			if ::Hospital::Prescription.where("status = 0 and id in (?)",attrs[:prescription_ids]).present?
+				result[:ret_code] = '-1'
+				result[:info].concat("处方未审核!待医院审核完成后即可生成领药订单。")
+			end
 			if result[:ret_code].to_s == '0'
 			##通过处方拿到订单生成数据
 				presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
@@ -140,7 +144,7 @@ class Orders::Order < ApplicationRecord
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
 				 user_id: attrs[:user_id].to_s,
-				 payment_type: attrs[:payment_type] == 'online' ? 1 : 2,
+				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
 				 patient_age: presc[:patient_age].to_s,
@@ -151,7 +155,7 @@ class Orders::Order < ApplicationRecord
 				 order_code: get_order_code(presc[:hospital_id].to_s),
 				 doctor: presc[:doctor].to_s,
 				 person_id: presc[:person_id].to_s,
-				 status: '1'
+				 status: attrs[:status]||'1'
 		 		)
 				presc[:details].each do |k,details|
 					prescription = ::Hospital::Prescription.find(k)
@@ -269,11 +273,11 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("订单ID不能为空!")
 			end
-			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id])
+			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
 				result[:ret_code] = '-1'
 				result[:info].concat("当前订单状态异常!")	
 			end
-			if result[:ret_code].to_s == '-1'
+			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
 										end_time:Time.now,
@@ -314,13 +318,14 @@ class Orders::Order < ApplicationRecord
 
 		#药房查询 attrs = {type:'1/2',order_code:'',org_id:''}
 		def get_order_to_medical attrs = {}
+
 			attrs = attrs.deep_symbolize_keys
 			return [] if attrs[:org_id].blank?
 			condtion = "target_org_id = #{attrs[:org_id]} "
 			if attrs[:order_code].present?
 				condtion.concat("order_code = #{attrs[:order_code]}")
 			else
-			# condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
+			condtion = "(payment_type = 1 and status = 2 ) or (payment_type = 2)"
 				case  attrs[:type].to_s
 				when '1'#未付款
 					condtion.concat(" and payment_type = 1 and status = 2")

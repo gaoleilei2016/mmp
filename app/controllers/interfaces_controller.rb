@@ -59,7 +59,7 @@ class InterfacesController < ApplicationController
 		end
 	end
 
-	{"order"=>{"payment_type"=>"offline", "hospital_id"=>"33", "hospital_name"=>"第一个医院", "pharmacy_id"=>"37", "pharmacy_name"=>"摇啊摇", "prescription_ids"=>["63"]}}
+	# {"order"=>{"payment_type"=>"offline", "hospital_id"=>"33", "hospital_name"=>"第一个医院", "pharmacy_id"=>"37", "pharmacy_name"=>"摇啊摇", "prescription_ids"=>["63"]}}
 
 
 
@@ -69,9 +69,10 @@ class InterfacesController < ApplicationController
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
 		raise re[:info] if re[:ret_code]!='0'
 		# p '~~~~~~~~~~~~',re
+		p re
 		if re[:order].payment_type.to_s == '2'
 			redirect_to "/customer/home/order?id=#{re[:order].id}"
-		elsif re[:order].payment_type.to_s == '1'
+		else re[:order].payment_type.to_s == '1'
 			redirect_to "/customer/portal/pay?id=#{re[:order].id}"
 		end
 	end

@@ -76,13 +76,22 @@
 			p{
 				font-size: 12px;
 			}
+			.mui-table-view-cell{
+				padding: 13px 15px;
+			}
+			.mui-table-view:after,.mui-table-view:before{
+				height: 0;
+			}
+			.mui-table-view-cell:after{
+				background: rgba(200, 199, 204, 0.65);
+			}
 		</style>
 	</head>
 
 	<body>
 		<div id="loading" style="position: fixed;height: 100%;width: 100%;z-index: 9999;display: none;">
 			<!-- <img src="/assets/admin/load.gif" style="position: absolute;top: calc(50% - 50px);left: calc(50% - 50px);"/> -->
-			<i class="fa fa-spinner fa-spin" style="font-size: 50px;color:#59B99D;position: absolute;top: calc(50% - 25px);left: calc(50% - 25px);"></i>
+			<i class="fa fa-spinner fa-spin" style="font-size: 50px;color: #F55742;position: absolute;top: calc(50% - 25px);left: calc(50% - 25px);"></i>
 		</div>
 		<%# p '~~~~~~~~~~~~~~~',[controller_path,action_name] %>
 		<% unless [["users/sessions",'new'],["users/sessions",'sign_up'],["users/registrations",'new'],["users/registrations",'create']].index([controller_path,action_name]) %>

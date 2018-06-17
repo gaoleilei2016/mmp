@@ -21,8 +21,8 @@
 	<h1 class="mui-title"><%= params[:name] %></h1>
 </header>
 <div class="mui-content" id="vue_content">
-	<div style="height: calc( 100% );padding: 6px;">
-		<div id="map_use_div" style="height: 100%;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
+	<div style="height: calc( 100% );">
+		<div id="map_use_div" style="height: 100%;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
 	</div>
 </div>
 <script type="text/javascript">
@@ -48,6 +48,17 @@
 		// 添加定位控件
 		var geolocationControl = new BMap.GeolocationControl();
 		geolocationControl.addEventListener("locationSuccess", function(e){
+			// console.log( 'xxxxxxxxxxxxxxxxx',e.point );
+			// return false;
+			// console.log( e.point );
+			if (e.point.lat==26.62990674&&e.point.lng==106.7091771) {
+				mui.toast("未知的当前位置");
+				map.centerAndZoom(new_point,14);
+			}else{
+				// var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+				var walking = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+				walking.search(e.point,new_point);
+			}
 			// // 定位成功事件
 			// var address = '';
 			// address += e.addressComponent.province;
@@ -59,9 +70,13 @@
 		});
 		geolocationControl.addEventListener("locationError",function(e){
 			// 定位失败事件
-			alert(e.message);
+			// alert(e.message);
+			mui.toast(e.message,{duration:5000});
 		});
 		map.addControl(geolocationControl);
+		setTimeout(function() {
+			$('.BMap_geolocationIcon').click()
+		})
 
 		// map.panTo(new_point);  
 		// var myGeo = new BMap.Geocoder();    
