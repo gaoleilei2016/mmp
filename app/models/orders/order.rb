@@ -103,6 +103,7 @@ class Orders::Order < ApplicationRecord
 		# when "Wechat" #查询微信订单是否支付成功
 		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
 		# end
+		return {ret_code:'-1',info:'当前订单状态异常，不允许结算。'}if status.to_s != '1'
 		args = {
 			# 创建订单人
 			charger: {
