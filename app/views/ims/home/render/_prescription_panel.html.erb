@@ -122,8 +122,8 @@
 			<span v-if="info.is_order&&info.status === '2' ">
 			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">发药</button>
 			</span>
-			<span v-if="info.is_order&&info.status === '5' ">
-			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
+			<span v-if="info.is_order&&info.status === '5'&&!info.is_returned">
+			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_drug(info.order_id)">退药</button>
 			</span>				
 		</div>
 	</div>
