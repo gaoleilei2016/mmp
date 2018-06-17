@@ -96,7 +96,7 @@
   }
 
   thead {
-    color: $--mmp-theme-text-greener;
+    color: $--table-header-color;
     font-weight: 500;
 
     &.is-group {
@@ -113,8 +113,7 @@
     text-overflow: ellipsis;
     vertical-align: middle;
     position: relative;
-    font-weight: normal;
-    
+
     @include when(center) {
       text-align: center;
     }

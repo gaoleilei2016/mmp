@@ -9,9 +9,10 @@
   line-height: 30px;
   font-size: $--tag-font-size;
   color: $--tag-color;
+  // border-radius: $--tag-border-radius; 2018/06/16 dujuan
   border-radius: $--tag-border-radius;
   box-sizing: border-box;
-  border: 1px solid $--tag-border;
+  // border: 1px solid $--tag-border; 2018/06/16 dujuan
   white-space: nowrap;
 
   .el-icon-close {

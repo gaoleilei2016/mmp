@@ -6,15 +6,20 @@ $gray:         lighten(#000, 33.5%); // #555
 $gray-light:   lighten(#000, 46.7%); // #777
 $gray-lighter: lighten(#000, 93.5%); // #eee
 
-$brand-primary: darken(#428bca, 6.5%); // #337ab7
+// $brand-primary: darken(#428bca, 6.5%); // #337ab7
 $brand-success: #5cb85c;
 $brand-info:    #5bc0de;
 $brand-warning: #f0ad4e;
-$brand-danger:  #d9534f;
+// $brand-danger:  #d9534f;
+$brand-primary:  $--mmp-theme-bg-deep;
+$brand-danger:  #F44868;
 
 $bg-purple-dark: #99a9bf;
 $bg-purple: #d3dce6;
 $bg-purple-light: #e5e9f2;
+
+//页面模块默认圆角力度
+$card-border-radius: 2px; 
 
 
 .text-muted {
@@ -24,7 +29,7 @@ $bg-purple-light: #e5e9f2;
 	color: #999;
 }
 .text-mmp-lighter {
-	color: $--mmp-theme-text-lighter;
+	color: $--mmp-theme-text-greener;
 }
 .text-mmp-white {
 	color: $--mmp-theme-text-white;
@@ -128,6 +133,62 @@ $bg-purple-light: #e5e9f2;
 		vertical-align: middle;
 	}
 }
+
+
+/* 3个圆圈的加载样式
+ 使用代码：<div class="spinner-3circle">
+   <div class="bounce1"></div>
+   <div class="bounce2"></div>
+   <div class="bounce3"></div>
+ </div>
+*/
+.spinner-3circle {
+  margin: 100px auto 0;
+  width: 150px;
+  text-align: center;
+}
+ 
+.spinner-3circle > div {
+  width: 20px;
+  height: 20px;
+  // background-color: #67CF22;
+  background-color: #428bca;
+ 
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
+  animation: bouncedelay 1.4s infinite ease-in-out;
+  /* Prevent first frame from flickering when animation starts */
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+}
+ 
+.spinner-3circle .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+ 
+.spinner-3circle .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+ 
+@-webkit-keyframes bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0.0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+ 
+@keyframes bouncedelay {
+  0%, 80%, 100% {
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 40% {
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}
+// 3个圆圈的加载样式  end
+
 // 表头背景颜色
 // .bg-purple-light-thead > th {
 // 	background-color: $bg-purple-light;
@@ -142,6 +203,11 @@ $bg-purple-light: #e5e9f2;
 // 			color: #fff;
 // 		}
 
+// 表头为浅绿色
+.el-table th {
+  background-color: #E2F6F4 !important;
+}
+
 #encounters_new_div {
 	// 
 	.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
@@ -150,12 +216,31 @@ $bg-purple-light: #e5e9f2;
 	.el-collapse.patient-info {
 		margin-bottom: 10px;
 		// border: 1px solid #ddd;
+		// 填写基本信息中的性别
+		.info-gender {
+			.gender-icon {
+				position: absolute;
+		    height: 100%;
+		    left: 12.5px;
+		    top: 6px;
+		    text-align: center;
+		    color: #c0c4cc;
+		    transition: all .3s;
+		    z-index: 9;
+			}
+	    input[type="text"] {
+	    	padding-left: 30px;
+	    }
+		}
 		// 刷新按钮
 		.refresh-btn {
-			color: #fff;
+			color: $--mmp-theme-text-greener;
 			font-size: 110%;
 			&:hover {
-				color: $--mmp-theme-text-greener;
+				color: #fff;
+				&:after {
+	    		content: " 刷新" !important;
+				}
 			}
 		}
 		.el-collapse-item__arrow {
@@ -169,10 +254,14 @@ $bg-purple-light: #e5e9f2;
 			line-height: 36px;
 			padding-left: 10px; 
 			padding-right: 10px; 
+			border-top-left-radius: $card-border-radius;
+      border-top-right-radius: $card-border-radius;
 		}
 		.el-collapse-item__wrap {
 			padding-top: 10px;
     	padding-right: 10px;
+    	border-bottom-left-radius: $card-border-radius;
+      border-bottom-right-radius: $card-border-radius;
 		}
 		.el-collapse-item__content {
 			padding-bottom: 0;
@@ -193,17 +282,6 @@ $bg-purple-light: #e5e9f2;
 			border-top: 1px solid #faf8f8;
 			margin-left: 10px;
 		}
-		.search-enc-input {
-			width: 120px;
-			input {
-				border-radius: 15px;
-				// border: 1px solid #409eff;
-				transition: .3s linear;
-				background-color: #F5FEFE; // 非常浅的绿色
-    		border: 1px solid $--mmp-theme-bg-deep;
-			}
-			&.addlarge { width: 300px; }
-		}
 	}
 
 	#pane-orders {
@@ -213,14 +291,15 @@ $bg-purple-light: #e5e9f2;
 		}
 		.el-input-group__append {
 			padding: 0 7.5px;
+			background: none;
 		}
 		.el-form-item__content > .el-input--mini > input[type="text"] {
 			padding-left: 5px; 
 			padding-right: 5px; 
 		}
-		.el-form-item__content > .el-input--mini > input[readonly="readonly"] {
-			background-color: #FAF8F8;
-		}
+		// .el-form-item__content > .el-input--mini > input[readonly="readonly"] {
+		// 	background-color: #FAF8F8;
+		// }
 		.orders-table {
 			.inactive-row {
 				color: #999;
@@ -281,6 +360,17 @@ $bg-purple-light: #e5e9f2;
 		}
 	}
 }
+.search-enc-input {
+	width: 20%;
+	input {
+		border-radius: 15px;
+		// border: 1px solid #409eff;
+		transition: .3s linear;
+		// background-color: #F5FEFE; // 非常浅的绿色
+		border: 1px solid $--mmp-theme-bg-deep;
+	}
+	&.addlarge { width: 50%; }
+}
 // 药品下拉框
 .order-autocomplete {
 	width: 600px !important;
@@ -334,3 +424,33 @@ $bg-purple-light: #e5e9f2;
 		}
 	}
 }
+
+
+/* 定义页面公共样式 -- start */ 
+.el-input__inner {
+	border: none;
+	border-radius: 0;
+	border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #ccc;
+}
+.el-form-item .el-input-group {
+	display: inline-table;
+}
+.el-input-group__append {
+	border: none;
+	border-radius: 0;
+	border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: #ccc;
+}
+
+.card-wrapper {
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: 1px solid transparent;
+  border-radius: $card-border-radius;
+  padding: 15px;
+}
+/* 定义页面公共样式 -- end */ 
