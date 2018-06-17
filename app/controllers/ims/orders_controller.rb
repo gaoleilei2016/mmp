@@ -169,11 +169,18 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  # 未发订单或处方检索
   def get_search_data
     # @yd = Ims::Order.get_order_by_code params.merge({org_id:current_user.organization_id})
     attrs = {search:params[:search],org_id:current_user.organization_id}
     @data = Ims::Order.get_prescription_or_order_data attrs #unless @data[:flag]
-    
+    render json:@data.to_json
+  end
+
+  # 已发药或已退订单检索
+  def get_order_by_code
+    # params = {search:search}
+    @data = Ims::Order.get_order_by_code params.merge({org_id:current_user.organization_id})
     render json:@data.to_json
   end
 
