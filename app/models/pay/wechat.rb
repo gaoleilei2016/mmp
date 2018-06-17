@@ -138,7 +138,7 @@ class Pay::Wechat
     # args = {out_trade_no: '', total_fee: 0.0, title: '', cost_name: '', openid: ''}
     def public_pay(args)
       begin
-        write_log_return({state: :start, msg: '微信公众号付款开始'})
+        write_log_return({state: :start, msg: '微信公众号付款开始', desc: args.to_s})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))

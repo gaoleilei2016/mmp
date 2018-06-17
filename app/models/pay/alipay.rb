@@ -31,7 +31,7 @@ class Pay::Alipay
     #   total_fee:'支付金额单位元(String)'}
     def payment(args)
       begin
-        write_log_return({state: :start, msg: '支付宝付款开始'})
+        write_log_return({state: :start, msg: '支付宝付款开始', desc: args.to_s})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alibaba.usable
         order = Pay::Order.new(args.merge({pay_type: 'alipay', trade_type: 'WEB'}))
