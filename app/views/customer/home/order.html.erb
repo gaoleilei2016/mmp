@@ -73,10 +73,13 @@
 			<div class="common_grey">下单时间：{{new Date(order.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
 		</div>
 		<div style="text-align: center;padding-bottom: 30px;">
-			<img :src="order.base64_img" style="width: 100%;max-width: 222px;">
-			<div class="common_red">
-				请向药店药师出示该二维码或订单编号
-			</div>
+			<template v-if="false">
+				<img :src="order.base64_img" style="width: 100%;max-width: 222px;">
+				<div class="common_red">
+					请向药店药师出示该二维码或订单编号
+				</div>
+			</template>
+			<template v-else></template>
 		</div>
 	</div>
 </div>
