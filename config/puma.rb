@@ -5,7 +5,7 @@ environment 'development'
 #threads 2, 16 # minimum 2 threads, maximum 64 threads
 #workers 8
 
-# app_name = 'mmp'
+app_name = 'mmp'
 
 application_path = "/home/tenmind/#{app_name}"
 

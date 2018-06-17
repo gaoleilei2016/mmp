@@ -8,6 +8,11 @@ class Hospital::Order < ApplicationRecord
   belongs_to :mtemplate, class_name: '::Hospital::Sets::Mtemplate', foreign_key: 'mtemplate_id', optional: true
   # order_type 医嘱类型 1 药品医嘱
 
+  def initialize args = {}
+    super args
+    self.status = "N"
+  end
+
 
   def dict_medication
     ::Dict::Medication.find(self.serialno)
@@ -53,11 +58,25 @@ class Hospital::Order < ApplicationRecord
       author: {
         id: self.author.id,
         display: self.author.name
-      }
+      },
+      factory_name: self.factory_name,
+      base_unit: self.base_unit,
+      mul: self.mul
     }
   end
 
   class<<self
+    def can_to_prescription?(order_ids)
+      cur_order_status = ::Hospital::Order.find(order_ids).map { |e| e.status  }
+      cur_order_status.uniq! 
+      p cur_order_status
+      if cur_order_status.size == 1 && cur_order_status[0] == "N" # 还是新建状态的医嘱就能创建处方
+        true
+      else
+        false
+      end
+    end
+
     def copy_orders(order_ids, encounter_id, cur_user)
       cur_encounter = ::Hospital::Encounter.find(encounter_id)
       cur_orders = ::Hospital::Order.find(order_ids)
@@ -85,7 +104,7 @@ class Hospital::Order < ApplicationRecord
               status: "N",
               encounter_id: encounter_id,
               author_id: cur_user.id,
-              prescription_id: nil,
+              prescription_id: nil
           }
           new_order_args.merge!(medication_info)
           new_order = ::Hospital::Order.create!(new_order_args)

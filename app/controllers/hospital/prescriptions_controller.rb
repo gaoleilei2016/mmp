@@ -46,6 +46,7 @@ class Hospital::PrescriptionsController < ApplicationController
 	def create
     p "Hospital::PrescriptionsController create", params
     args = format_prescription_create_args
+    return render json:{flag: false, info: "医嘱状态不能生成处方"} if !::Hospital::Order.can_to_prescription?(params[:prescription][:ids])
 		@prescription = ::Hospital::Prescription.new(args[:prescription])
     respond_to do |format|
       if @prescription.save
@@ -54,6 +55,15 @@ class Hospital::PrescriptionsController < ApplicationController
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
         p "link_orders save"
+        # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
+        audit_args = {
+          auditor: {
+            id: current_user.id,
+            display: current_user.name
+          },
+          audit_at: Time.now
+        }
+        @prescription.audit(audit_args, current_user)
         # 发送处方消息
         @prescription.send_to_check()
         format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
@@ -83,7 +93,7 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.update_attributes(:status=>"O")
+		@prescription.update_attributes(:status=>7)
 
     respond_to do |format|
       format.html { redirect_to prescriptions_url }
@@ -168,7 +178,7 @@ class Hospital::PrescriptionsController < ApplicationController
       diagnoses_args = args[:diagnoses]
       prescription = {
         organization_id: cur_org.id,
-        status: "N",
+        status: 0,
         note: args[:note],
         type_code: args[:type][:code],
         type_display: args[:type][:display],

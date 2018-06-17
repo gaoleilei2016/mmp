@@ -7,8 +7,7 @@ class PayController < ApplicationController
   
   def confirm
     if params[:id]
-      rec = Pay::Alipay.find_by(out_trade_no: params[:id]) if params[:type].eql?('Alipay')
-      rec = Pay::Wechat.find_by(out_trade_no: params[:id]) if params[:type].eql?('Wechat')
+      rec = Pay::Order.find_by(out_trade_no: params[:id])
       if rec&.paid?
         flash[:notice] = '订单已支付'
         redirect_to '/'
@@ -26,10 +25,10 @@ class PayController < ApplicationController
       xml = request.body.string
       write_log("----收到微信支付通知-----#{xml}")
       res = Hash.from_xml(xml)['xml']
-      wx = Pay::Wechat.find_by(out_trade_no: res['out_trade_no'])
+      wx = Pay::Order.find_by(out_trade_no: res['out_trade_no'])
       return write_log("----订单未找到-#{res['out_trade_no']}----#{xml}") unless wx
       return write_log("----订单支付异常--#{res}---") unless res['return_code'].eql?('SUCCESS') && res['result_code'].eql?('SUCCESS')
-      if wx.total_fee == res['total_fee'].to_i
+      if (wx.total_fee*100) == res['total_fee'].to_i
         return write_log("-----订单已支付----#{res['out_trade_no']}") if wx.update_attributes({status: 'success', status_desc: '订单已支付'})
         write_log("------订单已支付但数据更新失败----原因:#{wx.errors.full_messages.join(',')}")
       else
@@ -37,7 +36,7 @@ class PayController < ApplicationController
         wx.update_attributes({status: :fail, status_desc: '订单金额不等'})
       end
     rescue Exception => e
-      write_log.info("----处理通知出错-----#{e.message}")
+      write_log("----处理通知出错-----#{e.message}")
     end
     # respond_to do |f|
     #   f.json{ render json: 'true'}
@@ -68,18 +67,18 @@ class PayController < ApplicationController
   def alipay
     begin
       write_ali_log("------收到支付宝支付通知-----#{params.inspect}")
-      ali = Pay::Alipay.find_by(out_trade_no: params['out_trade_no'])
+      ali = Pay::Order.find_by(out_trade_no: params['out_trade_no'])
       return write_ali_log("------订单未找到---#{params['out_trade_no']}") unless ali
       return write_ali_log("------订单未支付----#{params['trade_status']}") unless params['trade_status'].eql?('TRADE_SUCCESS')
       if params['total_amount'].to_f == ali.total_fee
-        return write_log("-----订单已支付----#{params['out_trade_no']}") if ali.update_attributes({status: 'success', status_desc: '订单已支付'})
-        write_log("------订单已支付但数据更新失败----原因:#{ali.errors.full_messages.join(',')}")
+        return write_ali_log("-----订单已支付----#{params['out_trade_no']}") if ali.update_attributes({status: 'success', status_desc: '订单已支付'})
+        write_ali_log("------订单已支付但数据更新失败----原因:#{ali.errors.full_messages.join(',')}")
       else
-        write_log("-----订单金额不等----#{params['out_trade_no']}----#{res['total_amount']}")
+        write_ali_log("-----订单金额不等----#{params['out_trade_no']}----#{res['total_amount']}")
         wx.update_attributes({status: :fail, status_desc: '订单金额不等'})
       end
     rescue Exception => e
-      write_log.info("----处理通知出错-----#{e.message}")
+      write_ali_log("----处理通知出错-----#{e.message}")
     end
     render json: 'true'
   end
@@ -99,7 +98,8 @@ class PayController < ApplicationController
   end
 
   def ali
-    args = {cost_name: '测试费', out_trade_no: '201806134', total_fee: 0.01, title: '花溪',
+    num = rand(10000000)
+    args = {cost_name: '测试费', out_trade_no: "20180615#{num}", total_fee: 0.01, title: '花溪',
       return_url: 'http://mmp.tenmind.com/pay/index'}
     res = Pay::Alipay.payment(args)
     if res[:state].eql?(:succ)
@@ -109,6 +109,17 @@ class PayController < ApplicationController
       redirect_to '/pay/index'
     end
   end
+
+  # def refund
+  #   args = {out_refund_no: '20180615001', refund_fee: 0.01, reason: '原因',out_trade_no: "201806158755843"}
+  #   res = Pay::Refund.carry_out(args)
+  #   if res[:state].eql?(:succ)
+  #     redirect_to res[:url]
+  #   else
+  #     flash[:notice] = res[:msg]
+  #     redirect_to '/pay/index'
+  #   end    
+  # end
 
   def index
     p 'tttttttttttttttt', request.remote_ip, request.remote_addr
