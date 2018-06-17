@@ -27,7 +27,7 @@ class InterfacesController < ApplicationController
 	end
 	#支付
 	def pay_order
-		# p '~~~~~~~~~',params
+		p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
 		# order.net_amt ##订单号用机构id+订单号
 		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
@@ -37,7 +37,7 @@ class InterfacesController < ApplicationController
 		when "Wechat"
 			res = Pay::Wechat.payment(args)
 		end
-		# p '~~~~~~~',res
+		p '~~~~~~~ 2',res
 		if res[:state].to_sym==:succ
 			order.order_settle(params[:pay_type],current_user)
 			redirect_to res[:pay_url]
@@ -83,7 +83,7 @@ class InterfacesController < ApplicationController
 			return redirect_to "/customer/portal/settlement"
 		end
 		# p '~~~~~~~~~~~~',re
-		p re
+		# p re
 		if re[:order].payment_type.to_s == '2'
 			redirect_to "/customer/home/order?id=#{re[:order].id}"
 		else re[:order].payment_type.to_s == '1'
@@ -92,7 +92,7 @@ class InterfacesController < ApplicationController
 	end
 	def cancel_order
 		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
-		p ret
+		p '~~~~~~~~ cancel_order ',ret
 		unless ret[:ret_code] == "0"
 		end
 		render json: ret

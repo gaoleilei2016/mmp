@@ -129,7 +129,7 @@ class Orders::Order < ApplicationRecord
 
 		#获取处方生成订单数据
 		def create_order_by_presc_ids(attrs = {})
-			p attrs
+			# p attrs
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',order:nil}
 			if attrs[:pharmacy_id].blank?

@@ -83,7 +83,7 @@
               <img src="/assets/admin/TM.png" style="width: 40px;">
               <span style="margin-left: 10px;"></span>
             </h3>
-            <el-input placeholder="用户名" name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
+            <el-input autofocus placeholder="用户名" name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
               <template slot="prepend"><i class="fa fa-user fa-lg fa-fw" style="color:#636363;"></i></template>
             </el-input>
             <el-input type="password" placeholder="密　码" name="user[password]" style="margin-top: 10px;" autocomplete="off">
