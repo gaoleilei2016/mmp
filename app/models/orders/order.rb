@@ -105,6 +105,7 @@ class Orders::Order < ApplicationRecord
 
 		#获取处方生成订单数据
 		def create_order_by_presc_ids(attrs = {})
+			p attrs
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',order:nil}
 			if attrs[:pharmacy_id].blank?
@@ -174,14 +175,14 @@ class Orders::Order < ApplicationRecord
 				args = {
 					# 创建订单人
 					create_bill_opt: {
-						id: attrs[:current_user].id,
-						display: attrs[:current_user].name,
+						id: attrs[:current_user][:id],
+						display: attrs[:current_user][:name],
 					},
 					# 订单创建时间
 					bill_at: order.created_at.to_s(:db),
 				  	bill_id: order.id,
 				}
-				::Hospital::Prescription.wait_charge(args, attrs[:current_user])
+				order.prescriptions.each{|pre| pre.wait_charge(args, attrs[:current_user])}
 
 			end
 			result
