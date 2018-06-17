@@ -18,6 +18,10 @@ class Ims::Order < ApplicationRecord
          query.concat(" and payment_type = 2 and `status`=1 ")
         when '2'#已付款
          query.concat(" and `status`=2 ")
+        when '5'#已发药
+         query.concat(" and `status`=5 ")
+        when '7'#已退药
+         query.concat(" and `status`=7 ")
         else
         end
         # query.concat(" and status =#{ args[:type].to_s}")
@@ -62,14 +66,14 @@ class Ims::Order < ApplicationRecord
       # result = data[0].deep_symbolize_keys
     end
 
-    # 订单明细信息及处方信息查询
+    # 已发已退药订单查询
     # args = {org_id:org_id,search:search}
     def get_order_by_code args={}
       begin
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         order_code = args[:search]
-        query ="target_org_id = #{args[:org_id]} and ((payment_type = 2 and status = 1 ) or (status = 2))"
-        query.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
+        query ="target_org_id = #{args[:org_id]} and (status = 5  or (status = 7))"
+        query.concat(" and order_code=#{order_code}") unless order_code.blank?
         orders = Orders::Order.where(query)
         p orders.count
         return {flag:false,:info=>"未找到订单信息"} if orders.count==0
@@ -77,7 +81,7 @@ class Ims::Order < ApplicationRecord
         result = get_order_data order
       rescue Exception => e
         print e.message rescue "  e.messag----"
-        print "laaaaaaaaaaaaaaaaaaaa 订单明细信息及处方信息查询 出错: " + e.backtrace.join("\n")
+        print "laaaaaaaaaaaaaaaaaaaa 已发已退药订单查询 出错: " + e.backtrace.join("\n")
         result = {flag:false,:info=>"药店系统出错。"}
       end
     end
