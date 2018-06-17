@@ -269,9 +269,9 @@ window.current_template_obj = {
           })
           if (ori_data.length>1) {
             for(i=1;i<ori_data.length;i++){
-              // tita:
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
+              inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
                   temp[j].lines.push({
@@ -280,7 +280,7 @@ window.current_template_obj = {
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
                   })
-                  // break tita
+                  break inter;
                 }else{
                   if (j == temp.length-1) {
                     temp.push({
