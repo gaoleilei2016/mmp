@@ -45,9 +45,6 @@ class Hospital::OrdersController < ApplicationController
   # /hospital/orders
 	def create
     p "Hospital::OrdersController create",params
-    # 验证信息完整程度
-    ret = ::Hospital::Order.can_create?(params[:order][:encounter_id])
-    render json:{flag: false, info: ret[:info]} if !ret[:flag]
 		@order = Hospital::Order.new(format_order_create_args)
     respond_to do |format|
       if @order.save
@@ -129,7 +126,8 @@ class Hospital::OrdersController < ApplicationController
         status: "N",
         order_type: 1, # 默认保存1 是药品医嘱
         encounter_id: args[:encounter_id],
-        author_id: current_user.id
+        author_id: current_user.id,
+        type_type: args[:type]
       }
       ret.merge!(dict_mediaction_info)
       return ret

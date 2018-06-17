@@ -90,6 +90,21 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+	#待收费转为已审核
+	def back_wait_charge(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 2 # 已审核的处方可以变为待收费
+			self.status = 1
+			self.create_bill_opt_id = nil
+			self.create_bill_opt_display = nil
+			self.bill_at = nil
+			self.bill_id = nil
+			self.orders.update_all(status: 1) if  self.save
+		else
+			false
+		end
+	end
+
 	# 已收费处方  账单收费后更新
 	# {
 	# 	# 创建订单人

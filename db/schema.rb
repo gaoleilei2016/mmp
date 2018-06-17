@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180616124118) do
+ActiveRecord::Schema.define(version: 20180617095501) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -152,13 +152,18 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "code"
     t.string "display"
     t.string "system"
-    t.string "status"
+    t.string "status", default: "A"
     t.string "rank"
     t.string "encounter_id"
     t.string "doctor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "prescription_id"
+    t.integer "type"
+    t.string "note"
+    t.datetime "fall_ill_at"
+    t.integer "type_code"
+    t.string "type_display"
   end
 
   create_table "hospital_encounters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -233,7 +238,7 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "unit"
     t.float "price", limit: 24
     t.string "note"
-    t.integer "status", default: 0
+    t.string "status"
     t.integer "order_type", default: 1
     t.integer "encounter_id"
     t.datetime "created_at", null: false
@@ -263,7 +268,7 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.datetime "updated_at", null: false
     t.string "type_display", collation: "utf8_general_ci", comment: "处分类型名称"
     t.string "confidentiality_display", collation: "utf8_general_ci", comment: " 权限描述"
-    t.string "prescription_no", collation: "utf8_general_ci", comment: "处方号"
+    t.integer "prescription_no", comment: "处方号"
     t.boolean "specialmark", default: false, comment: "特殊处方标记"
     t.integer "drug_store_id"
     t.integer "order_id"
@@ -422,7 +427,7 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "user_id"
     t.string "shipping_name"
     t.string "shipping_code"
-    t.float "payment_type", limit: 24
+    t.string "payment_type"
     t.string "status"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -437,7 +442,7 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "patient_sex", limit: 10
     t.string "patient_age", limit: 10
     t.string "patient_iden", limit: 20
-    t.string "pay_type", limit: 2
+    t.string "pay_type", limit: 20
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -603,6 +608,8 @@ ActiveRecord::Schema.define(version: 20180616124118) do
     t.string "sex"
     t.string "birth"
     t.string "pharmacy_id"
+    t.string "openid"
+    t.string "headimgurl"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
