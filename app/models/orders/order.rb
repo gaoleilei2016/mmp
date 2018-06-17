@@ -84,15 +84,22 @@ class Orders::Order < ApplicationRecord
 		result
 	end
 
-	#订单超时自动关闭
-	def close_order
-		update_attributes(status:'6',close_time:Time.now.to_s(:db))
-		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
-		{ret_code:'0',info:'订单已超时，自动关闭。'}
-	end
+	# #订单超时自动关闭
+	# def close_order
+	# 	update_attributes(status:'6',close_time:Time.now.to_s(:db))
+	# 	prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+	# 	{ret_code:'0',info:'订单已超时，自动关闭。'}
+	# end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
 	def order_settle(pay_type,cur_user)
+		result = {ret_code:'0',info:''}
+		case pay_type.to_s
+		when "Alipay"
+			Pay::Alipay.find_by(out_trade_no: "#{source_org_id}#{order_code}") && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		when "Wechat" #查询微信订单是否支付成功
+			Pay::Wechat.find_by(out_trade_no: "#{source_org_id}#{order_code}") && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		end
 		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 		args = {
 			# 创建订单人
@@ -129,7 +136,6 @@ class Orders::Order < ApplicationRecord
 
 		#获取处方生成订单数据
 		def create_order_by_presc_ids(attrs = {})
-			p attrs
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',order:nil}
 			if attrs[:pharmacy_id].blank?
