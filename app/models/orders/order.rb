@@ -54,17 +54,33 @@ class Orders::Order < ApplicationRecord
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)
 	def cancel_order(cur_user)
+		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
-
+			result = {ret_code:'0',info:'订单已取消。'}
+			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
 		when '2'
-			{ret_code:'0',info:'取消成功，处方已失效。'}
+			arg = {
+				# 退费人
+				return_charge_opt: {
+					id: cur_user.id.to_s,
+					display: cur_user.name.to_s
+				},
+				# 退费时间
+				return_charge_at: Time.now.to_s(:db)
+			}
+			prescriptions.each{|x|x.return_charge(arg, cur_user)}
+			result = {ret_code:'0',info:'取消成功，处方已失效。'}
 		when '5'
 			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
+		when '6'
+			return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
+		when '7'
+			return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
 		end
-		update_attributes(status:'7')
-		prescriptions.each{|x| x.order = nil;x.save}
-		{ret_code:'0',info:'订单已取消。'}
+		update_attributes(status:'7',end_time:Time.now.to_s(:db))
+		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+		result
 	end
 
 	#订单超时自动关闭
@@ -298,7 +314,7 @@ class Orders::Order < ApplicationRecord
 			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
-										end_time:Time.now,
+										end_time:Time.now.to_s(:db),
 										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
