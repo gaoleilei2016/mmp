@@ -6,12 +6,12 @@
 		    size="mini"
 		    class="search-enc-input"
 		    @click.stop.native=""
-		    @keyup.enter.stop.native="searchEncounters(searchencstr)"
+		    @keyup.enter.stop.native="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"
 		    ref="searchencstr"
 		    @focus="focusEncSearchInp(true)"
 		    @blur="focusEncSearchInp(false)"
 		    v-model="searchencstr">
-		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters(searchencstr)"></i>
+		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
 		  </el-input>&#12288;
       <b v-if="encounter.name">{{ encounter.name }}</b><b v-else class="text-mmp-lighter">[ 姓名 ]</b>&#12288;
       <i v-html="judgeGender(encounter.gender&&encounter.gender.display)"></i>&#12288;

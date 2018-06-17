@@ -2,11 +2,24 @@ class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	def get_orders
+		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
+		ret = []
+		orders.each{|o|
+			re = JSON.parse(o.to_json)
+			re[:drugs] = o.details
+			re[:organ] = ::Admin::Organization.find(o.target_org_id)
+			re[:total_price] = o.net_amt
+			ret<<re
+		}
+		render json:{flag:true,rows:ret,total:orders.total_count}
+	end
+	#支付
 	def pay_order
 		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
-		# order.net_amt
-		args = {out_trade_no: Time.now.to_i.to_s, total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '', return_url: "#{Set::Alibaba.domain_name}/pay/confirm/#{order.order_code}?type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+		# order.net_amt ##订单号用机构id+订单号
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
@@ -14,18 +27,54 @@ class InterfacesController < ApplicationController
 			res = Pay::Wechat.payment(args)
 		end
 		# p '~~~~~~~',res
-		if res[:state]==:succ
+		if res[:state].to_sym==:succ
+			order.order_settle(params[:pay_type],current_user)
 			redirect_to res[:pay_url]
 		else
 			flash[:notice] = res[:desc]
-			redirect_to "/customer/portal/pay"
+			redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
 		end
 	end
+
+	def show_order
+		order = ::Orders::Order.find(params[:id])
+		qr_code_img = Set::QrCode.base64_data(order.order_code)
+		render json:{flag:true,order:order,qr_code_img:qr_code_img}
+	end
+	#微信，支付宝退款
+	def refund_order
+		order = ::Orders::Order.find(params[:order_id])
+		# order.net_amt ##订单号用机构id+订单号
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", refund_fee: order.net_amt, reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+		res = Pay::Refund.carry_out(args)
+		# p '~~~~~~~',res
+		if [:succ,:success].include?res[:state].to_sym
+			###退款成功
+			order.cancel_order()
+			redirect_to res[:pay_url]
+		else
+			##退款失败
+			flash[:notice] = res[:desc]
+			# redirect_to "/customer/portal/pay"
+		end
+	end
+
+	# {"order"=>{"payment_type"=>"offline", "hospital_id"=>"33", "hospital_name"=>"第一个医院", "pharmacy_id"=>"37", "pharmacy_name"=>"摇啊摇", "prescription_ids"=>["63"]}}
+
+
+
 	def save_order
-		p '~~~~~~~~~',params
+		params[:order][:user_id] = current_user.id
+		params[:order][:current_user] = current_user
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		p '~~~~~~~~~~',re
-		redirect_to "/customer/portal/pay?id=#{re.id}"
+		raise re[:info] if re[:ret_code]!='0'
+		# p '~~~~~~~~~~~~',re
+		p re
+		if re[:order].payment_type.to_s == '2'
+			redirect_to "/customer/home/order?id=#{re[:order].id}"
+		else re[:order].payment_type.to_s == '1'
+			redirect_to "/customer/portal/pay?id=#{re[:order].id}"
+		end
 	end
 	# 获取用户购物车
 	def get_prescriptions_cart
@@ -79,13 +128,14 @@ class InterfacesController < ApplicationController
 			raise "定位错误，请自选药房" unless params[:lat].present?&&params[:lng].present?
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f, num: 1}
 			recents = ::Admin::Organization.recent_lists(args)
+			p '~~~~~~~~~~',recents
 			if recents[:state] == :succ
 				re = JSON.parse(recents[:res][0][:org].to_json)
 				re['distance'] = recents[:res][0][:distance]
 				# p '~~~~~~~~~~~',re
 				render json:{flag:true,pharmacy:re,type:"near"}
 			else
-				render json:{flag:false,info:"定位错误，请自选药房",type:"near"}
+				render json:{flag:false,info:recents[:desc],type:"near"}
 			end
 		end
 	end
@@ -125,7 +175,7 @@ class InterfacesController < ApplicationController
 	def get_duanxinma
 		# p '~~~~~~~~~~',params[:login]
 		# 图片验证码
-		# raise "图片验证码错误" unless verify_rucaptcha?
+		raise "图片验证码错误" unless verify_rucaptcha?
 		raise "手机号错误" unless params[:login].present?
 		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
 		res = Sms::Message.set_up(args)

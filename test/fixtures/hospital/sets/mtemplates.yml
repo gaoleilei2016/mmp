@@ -1,0 +1,31 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  org_id: 1
+  status: MyString
+  title: MyString
+  note: MyString
+  sharing_scope_code: MyString
+  sharing_scope_display: MyString
+  disease_code: MyString
+  disease_display: MyString
+  author_id: 1
+  author_display: MyString
+  location_id: 1
+  location_display: MyString
+  search_str: MyString
+
+two:
+  org_id: 1
+  status: MyString
+  title: MyString
+  note: MyString
+  sharing_scope_code: MyString
+  sharing_scope_display: MyString
+  disease_code: MyString
+  disease_display: MyString
+  author_id: 1
+  author_display: MyString
+  location_id: 1
+  location_display: MyString
+  search_str: MyString

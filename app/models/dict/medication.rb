@@ -16,15 +16,19 @@ class ::Dict::Medication < ApplicationRecord
   		self.status == "A" ? true : false
   	end
 
+    # 对应的字段都是医嘱的字段
   	def to_order_info
   		{
   			serialno: self.serialno,
   			title: self.name,
   			specification: self.spec,
   			unit: self.unit,
-			price: self.price,
-			formul_code: self.formul_code,
-			formul_display: self.formul_name
-  		}
+  			price: self.price,
+  			formul_code: self.formul_code,
+  			formul_display: self.formul_name,
+        factory_name: self.produce_name,
+        base_unit: self.base_unit,
+        mul: self.mul
+    	}
   	end
 end

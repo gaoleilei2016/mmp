@@ -5,8 +5,13 @@ class Hospital::Order < ApplicationRecord
 
   belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
   belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
-
+  belongs_to :mtemplate, class_name: '::Hospital::Sets::Mtemplate', foreign_key: 'mtemplate_id', optional: true
   # order_type 医嘱类型 1 药品医嘱
+
+  def initialize args = {}
+    super args
+    self.status = "N"
+  end
 
 
   def dict_medication
@@ -53,10 +58,25 @@ class Hospital::Order < ApplicationRecord
       author: {
         id: self.author.id,
         display: self.author.name
-      }
+      },
+      factory_name: self.factory_name,
+      base_unit: self.base_unit,
+      mul: self.mul
     }
   end
+
   class<<self
+    def can_to_prescription?(order_ids)
+      cur_order_status = ::Hospital::Order.find(order_ids).map { |e| e.status  }
+      cur_order_status.uniq! 
+      p cur_order_status
+      if cur_order_status.size == 1 && cur_order_status[0] == "N" # 还是新建状态的医嘱就能创建处方
+        true
+      else
+        false
+      end
+    end
+
     def copy_orders(order_ids, encounter_id, cur_user)
       cur_encounter = ::Hospital::Encounter.find(encounter_id)
       cur_orders = ::Hospital::Order.find(order_ids)
@@ -84,7 +104,39 @@ class Hospital::Order < ApplicationRecord
               status: "N",
               encounter_id: encounter_id,
               author_id: cur_user.id,
-              prescription_id: nil,
+              prescription_id: nil
+          }
+          new_order_args.merge!(medication_info)
+          new_order = ::Hospital::Order.create!(new_order_args)
+        end
+      end
+    end
+
+    def to_template_order(order_ids, mtemplate_id, cur_user)
+      cur_orders = ::Hospital::Order.find(order_ids)
+      ::ActiveRecord::Base.transaction do 
+        cur_orders.each do |_order|
+          # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
+          # 查询当前药品使用信息
+          cur_medication = ::Dict::Medication.find(_order.serialno)
+          raise "创建失败  有药品不能使用" unless cur_medication.can_create?
+          medication_info = cur_medication.to_order_info
+          new_order_args = {
+              single_qty_value: _order.single_qty_value,
+              single_qty_unit: _order.single_qty_unit,
+              dose_value: _order.dose_value,
+              dose_unit: _order.dose_unit,
+              route_code: _order.route_code,
+              route_display: _order.route_display,
+              frequency_code: _order.frequency_code,
+              frequency_display: _order.frequency_display,
+              course_of_treatment_value: _order.course_of_treatment_value,
+              course_of_treatment_unit: _order.course_of_treatment_unit,
+              total_quantity: _order.total_quantity,
+              order_type: _order.order_type,
+              status: "N",
+              author_id: cur_user.id,
+              mtemplate_id: mtemplate_id
           }
           new_order_args.merge!(medication_info)
           new_order = ::Hospital::Order.create!(new_order_args)
