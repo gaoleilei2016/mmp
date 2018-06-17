@@ -10,14 +10,28 @@ $gray_border:#ddd;
 	}
 	.el-menu{border-right: 1px solid $lightgreen_border;}
 	#prescription_menu{
-		width: 120px;
+		width: 64px;
 		height: 100%;
+		background-color: rgb(56,73,91);
 	}
 	#prescription_panel{
 		float: left;
-		width: calc(100% - 120px);
+		width: calc(100% - 64px);
 		height: 100%;
 
+		.prescription_list_panel{
+			.el-tabs__header{
+				margin-bottom: 0px;
+			}
+			.el-tabs__nav{
+				width: 100%;
+
+				.el-tabs__item{
+					width:50%;
+					text-align: center;
+				}
+			}
+		}
 		#prescription_body{
 			height:100%;
 		}
@@ -29,9 +43,9 @@ $gray_border:#ddd;
 	height: 80px;
 }
 
-.list_fun_panel{border:1px solid $gray_border; text-align: center; padding:8px;}
-.list_fun_panel.active{background:#99D2CC !important;}
-.list_fun_panel:hover{background:#ecf0f1;}
+.list_fun_panel{border:1px solid $gray_border; background-color:$gray_border;  text-align: center; padding:8px;}
+.list_fun_panel.active{background:white !important;}
+.list_fun_panel:hover{background:#ecf0f1;border-bottom:1px solid $gray_border}
 
 .text-left{text-align: left;}
 .text-right{text-align: right;}
@@ -46,7 +60,7 @@ $gray_border:#ddd;
 }
 
 .prescription_list{
-	height:calc(100% - 80px);
+	height:calc(100% - 81px);
 	overflow-y:auto;
 	border:1px solid $gray_border;
 	border-top:none;
