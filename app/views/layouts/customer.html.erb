@@ -192,81 +192,83 @@
 		<%= yield %>
 	</body>
 	<script type="text/javascript">
-		<% if notice.present?||alert.present? %>
-		mui.toast("<%= notice.to_s + alert.to_s %>");
+		<% if notice.present?||alert.present?||flash[:notice].present? %>
+		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
 		<% end -%>
 	</script>
-<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=qPvNQ3ko8Gx0bpVDR89gN42e343emLOF"></script>
-<script type="text/javascript">
-	// 根据用户的经纬度绘出用户在地图上的位置
-	function addressOverlay(div_id_name,callback){
-		if (div_id_name) {
-			var map = new BMap.Map(div_id_name);
-			var point = new BMap.Point(106.7091771,26.62990674);
-			map.centerAndZoom(point,12);
-			map.enableScrollWheelZoom(true);    
-		}
+	<% if [["customer/portal", "index"],["customer/portal", "map"]].index([controller_path,action_name]) %>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=qPvNQ3ko8Gx0bpVDR89gN42e343emLOF"></script>
+	<script type="text/javascript">
+		// 根据用户的经纬度绘出用户在地图上的位置
+		function addressOverlay(div_id_name,callback){
+			if (div_id_name) {
+				var map = new BMap.Map(div_id_name);
+				var point = new BMap.Point(106.7091771,26.62990674);
+				map.centerAndZoom(point,12);
+				map.enableScrollWheelZoom(true);    
+			}
+			var geolocation = new BMap.Geolocation();
+			geolocation.getCurrentPosition(function(r){
+				if(this.getStatus() == BMAP_STATUS_SUCCESS){
+					var mk = new BMap.Marker(r.point);
+					if (div_id_name) {
+						map.addOverlay(mk);
+						map.panTo(r.point);
+					}
+					console.log( '您的位置：'+r.point.lng+','+r.point.lat );
+					callback&&callback(r.point);
+				}
+				else {
+					alert('failed'+this.getStatus());
+				}        
+			},{enableHighAccuracy: true})
+		};
+
+		// 根据经纬度转换成地址
+		function pointToAddress(div_id_name){
+		var map = new BMap.Map(div_id_name);
+		var point = new BMap.Point(106.7091771,26.62990674); //默认已腾迈为起点
+		map.centerAndZoom(point,12);
+		map.enableScrollWheelZoom(true);
+
 		var geolocation = new BMap.Geolocation();
 		geolocation.getCurrentPosition(function(r){
-			if(this.getStatus() == BMAP_STATUS_SUCCESS){
-				var mk = new BMap.Marker(r.point);
-				if (div_id_name) {
-					map.addOverlay(mk);
-					map.panTo(r.point);
-				}
-				console.log( '您的位置：'+r.point.lng+','+r.point.lat );
-				callback&&callback(r.point);
-			}
-			else {
-				alert('failed'+this.getStatus());
-			}        
+		if(this.getStatus() == BMAP_STATUS_SUCCESS){
+		var pt = r.point;
+		console.log( '~~~~~~~',pt );
+		var geoc = new BMap.Geocoder();
+		geoc.getLocation(pt, function(rs){
+		var addComp = rs.addressComponents;
+		var address = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
+		alert(address);
+		});        
+		}
+		else {
+		alert('failed'+this.getStatus());
+		}        
 		},{enableHighAccuracy: true})
-	};
+		};
 
-// 根据经纬度转换成地址
-function pointToAddress(div_id_name){
-var map = new BMap.Map(div_id_name);
-var point = new BMap.Point(106.7091771,26.62990674); //默认已腾迈为起点
-map.centerAndZoom(point,12);
-map.enableScrollWheelZoom(true);
+		// 根据输入的名称在地图上标注
+		function addressToPoint(div_id_name, name,callback){
+		var map = new BMap.Map(div_id_name);
+		var point = new BMap.Point(106.7091771,26.62990674); //默认已腾迈为起点
+		map.centerAndZoom(point,12);
+		map.enableScrollWheelZoom(true);
 
-var geolocation = new BMap.Geolocation();
-geolocation.getCurrentPosition(function(r){
-if(this.getStatus() == BMAP_STATUS_SUCCESS){
-var pt = r.point;
-console.log( '~~~~~~~',pt );
-var geoc = new BMap.Geocoder();
-geoc.getLocation(pt, function(rs){
-var addComp = rs.addressComponents;
-var address = addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber;
-alert(address);
-});        
-}
-else {
-alert('failed'+this.getStatus());
-}        
-},{enableHighAccuracy: true})
-};
+		var myGeo = new BMap.Geocoder();
+		myGeo.getPoint(name, function(point){
+		if (point) {
+		map.centerAndZoom(point, 16);
+		map.addOverlay(new BMap.Marker(point));
+		// console.log( '~~~~~~',point );
+		callback&&callback(point);
+		}else{
+		// alert("您选择地址没有解析到结果!");
+		}
+		}, "贵阳市");
+		};
 
-// 根据输入的名称在地图上标注
-function addressToPoint(div_id_name, name,callback){
-var map = new BMap.Map(div_id_name);
-var point = new BMap.Point(106.7091771,26.62990674); //默认已腾迈为起点
-map.centerAndZoom(point,12);
-map.enableScrollWheelZoom(true);
-
-var myGeo = new BMap.Geocoder();
-myGeo.getPoint(name, function(point){
-if (point) {
-map.centerAndZoom(point, 16);
-map.addOverlay(new BMap.Marker(point));
-// console.log( '~~~~~~',point );
-callback&&callback(point);
-}else{
-// alert("您选择地址没有解析到结果!");
-}
-}, "贵阳市");
-};
-
-</script>
+	</script>
+	<% end -%>
 </html>

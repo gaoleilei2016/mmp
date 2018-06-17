@@ -21,10 +21,10 @@ class Pay::Wechat
       {
         appid: wx.appid, mch_id: wx.mchid, nonce_str: new_pass(32), sign_type: 'MD5',
         out_refund_no: ref.out_refund_no, out_trade_no: ref.order.out_trade_no, 
-        total_fee: handle_order_total_fee(ref.order.total_fee), refund_fee: handle_order_total_fee(ref.refund_fee),
+        total_fee: handle_order_total_fee(ref.order.total_fee.to_f), refund_fee: handle_order_total_fee(ref.refund_fee.to_f),
         refund_desc: ref.reason, notify_url: wx.refund_notify_url
       }
-    end    
+    end
 
     # 在服务器上导出
     # openssl pkcs12 -clcerts -nokeys -in apiclient_cert.p12 -out apiclient_cert.pem
@@ -56,10 +56,11 @@ class Pay::Wechat
     def payment(args)
       begin
         write_log_return({state: :start, msg: '微信付款开始'})
+        return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
-        order = Pay::Order.new(args.merge({pay_type: 'wechat'}))
-        return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless order.save
-        get_payment_url(order)     
+        order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'WEB'}))
+        return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
+        get_payment_url(order)
       rescue Exception => e
         write_log_return({state: :fail, msg: "系统错误", desc: e.message})
       end
@@ -98,7 +99,7 @@ class Pay::Wechat
         sign_type: wx.sign_type,
         body: order.title,
         out_trade_no: order.out_trade_no,
-        total_fee: handle_order_total_fee(order.total_fee),
+        total_fee: handle_order_total_fee(order.total_fee.to_f),
         spbill_create_ip: wx.spbill_ip,
         notify_url: wx.notify_url,
         trade_type: wx.trade_type,
@@ -110,6 +111,85 @@ class Pay::Wechat
       return write_log_return({rec: order, state: :fail, msg: '支付失败', desc: "#{res['return_msg']}:#{res['err_code_des']}"}) unless res['result_code'].eql?('SUCCESS')
       return write_log_return({rec: order, state: :succ, msg: '请求成功, 请转到微信支付',  pay_url: res['mweb_url']}) if order.return_url.empty?
       write_log_return({rec: order, state: :succ, msg: '请求成功, 请转到微信支付',  pay_url: "#{res['mweb_url']}&redirect_url=#{order.return_url}"})
+    end
+
+    def get_openid(code)
+      url = get_openid_url(code)
+      op = get_user_openid(url)
+      return { error: false, openid: op['openid'], msg: '成功获取openid' } if op['openid']
+      { error: true, msg: "无法获取用户的openid: #{op['errmsg']}" }
+    end
+
+    def get_openid_url(code)
+      "https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{wx.appid}&secret=#{wx.appsecret}&code=#{code}&grant_type=authorization_code"
+    end
+
+    def get_user_openid(url)
+      begin
+        JSON.parse(RestClient.get(url).body)
+      rescue SocketError => e
+        { 'errmsg' => '无法连接微信服务器' }      
+      rescue Exception => e
+        { 'errmsg' => e.message }
+      end
+    end
+
+    #公众号支付
+    # args = {out_trade_no: '', total_fee: 0.0, title: '', cost_name: '', openid: ''}
+    def public_pay(args)
+      begin
+        write_log_return({state: :start, msg: '微信公众号付款开始', desc: args.to_s})
+        return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
+        return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
+        order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
+        return write_log_return({state: :error, msg: '创建支付记录报错', desc: order.errors.full_messages.join(',')}) unless order.save
+        public_info(order)
+      rescue Exception => e
+        write_log_return({state: :error, msg: '系统错误', desc: e.message})
+      end
+    end
+
+    def public_info(order)
+      datas = {appid: wx.appid, mch_id: wx.mchid, nonce_str: new_pass(32), sign_type: 'MD5', body: order.title,
+        out_trade_no: order.out_trade_no, total_fee: handle_order_total_fee(order.total_fee.to_f), spbill_create_ip: wx.spbill_ip, notify_url: wx.notify_url,
+      openid: order.openid, trade_type: 'JSAPI'}
+
+      ret = handle_send_datas(datas)
+      res = Hash.from_xml(RestClient.post(wx.pay_url, ret).body)['xml']
+      p '2222222222222222222222222222', res
+      data = ''
+      if res['err_code_des'].eql?('该订单已支付')
+        data = { state: :success, msg: '支付成功', desc: '支付已完成'}
+      elsif res['return_code'].eql?('SUCCESS')
+        if res['result_code'].eql?('SUCCESS')
+          data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
+        else
+          data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
+        end
+      else
+        data = { state: :fail, msg: '请求失败', desc: "#{res['return_msg']}" }
+      end
+      write_log_return(data)
+      if order.update_attributes({status: data[:state], status_desc: data[:desc]})
+        if data[:state].eql?(:succ)
+          pay = {appId: wx.appid, timeStamp: Time.now.to_i, nonceStr: new_pass(32), package: "prepay_id=#{prepay_id}", signType: 'MD5'}
+          data.merge(pay).merge({sign: handle_jsapi_datas(pay)})
+        else
+          data
+        end
+      else
+        { state: :error, msg: '保存报错', desc: "#{order.errors.full_messages.join(',')}" }
+      end
+    end
+
+    def handle_jsapi_datas(data)
+      data = data.sort.to_h
+      arr_data = []
+      data.each do |key, value|
+        next if value.nil? || value.blank?
+        arr_data << "#{key}=#{value}"
+      end
+      md5_sign(arr_data.join('&'))
     end
 
     # 微信设置

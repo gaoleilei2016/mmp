@@ -12,7 +12,7 @@ class Pay::Alipay
               biz_content: {
                 out_trade_no: ref.order.out_trade_no,
                 out_request_no: ref.out_refund_no,
-                refund_amount: ref.refund_fee,
+                refund_amount: ref.refund_fee.to_f,
                 notify_url: ali.refund_notify_url
               }.to_json(ascii_only: true)
             )
@@ -31,9 +31,10 @@ class Pay::Alipay
     #   total_fee:'支付金额单位元(String)'}
     def payment(args)
       begin
-        write_log_return({state: :start, msg: '支付宝付款开始'})
+        write_log_return({state: :start, msg: '支付宝付款开始', desc: args.to_s})
+        return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alibaba.usable
-        order = Pay::Order.new(args.merge({pay_type: 'alipay'}))
+        order = Pay::Order.new(args.merge({pay_type: 'alipay', trade_type: 'WEB'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
         get_payment_url(order)
       rescue Exception => e
@@ -63,7 +64,7 @@ class Pay::Alipay
       client   
     end
 
-    def get_payment_url(order)
+    def get_payment_url(order)#order.return_url
       begin
         client = get_client
         payment_url = client.page_execute_url(
@@ -73,9 +74,9 @@ class Pay::Alipay
           biz_content: {
             out_trade_no: order.out_trade_no,
             product_code: ali.product_code,
-            total_amount: order.total_fee,
-            subject: order.title
-            # quit_url: get_return_url
+            total_amount: order.total_fee.to_f,
+            subject: order.title,
+            quit_url: order.return_url
           }.to_json(ascii_only: true),
           timestamp: current_time
         )

@@ -36,7 +36,7 @@ body > .container{
 		    <span slot="title">发药</span>  
 		  </el-menu-item>
 
-		  <el-menu-item index="2" @click="show_panel('return_order')">
+		  <el-menu-item index="2" @click="show_panel('return_drug')">
 		    <i class="el-icon-sold-out"></i>
 		    <span slot="title">退药</span>  
 		  </el-menu-item>
@@ -57,7 +57,7 @@ body > .container{
 			<%= render "ims/home/render/out_order"%>
 		</div>
 
-		<div class="function_panel return_order" style="height:100%;display:none;">
+		<div class="function_panel return_drug" style="height:100%;display:none;">
 			<%= render "ims/home/render/return_order"%>
 		</div>
 
@@ -169,26 +169,26 @@ window.current_template_obj = {
       });
     },
 		show_panel:function(method){
+      var _this = this
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
-      // $(document).find(str).find(".is-active").click()
-      // this._data.tab_header_data = []
-      // this._data.detail = []
+      try{
+        $(document).find(str).find(".is-active").click();
+      }catch(e){
+        _this._data.pres = []
+        console.log(e)
+      }
 		},
 		choose_prescription:function(){
 			number = this.tab_header
 			tab_val = this.tab_header_data[number]
       this._data.detail = [tab_val]
-      // console.log(tab_val)
-      // this.get_detail(tab_val.id)
     },
     return_choose_prescription:function(){
       number = this.return_tab_header
       tab_val = this.tab_header_data[number]
       this._data.detail = [tab_val]
-      // console.log(tab_val.id)
-      // this.get_detail(tab_val.id)
     },    
       handleOpen:function(key, keyPath) {
         console.log(key, keyPath);
@@ -247,11 +247,21 @@ window.current_template_obj = {
         flag_arr = []
         flag = true
         ori_data = response.data
+        if (ori_data[0]&&ori_data[0].r_status<0) {
+          _this.$notify({
+            title: '提示',
+            message: '没有数据！',
+          });
+          return ""
+        };
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
           temp.push({
             id:data1.cfid,
+            order_id:data1.order_id,
+            order_type:data1.order_type,
+            order_code:data1.order_code,
             pre_code:data1.prescription_no,
             name:data1.name,
             age:data1.age,
@@ -285,6 +295,9 @@ window.current_template_obj = {
                   if (j == temp.length-1) {
                     temp.push({
                       id:for_data.cfid,
+                      order_id:for_data.order_id,
+                      order_type:for_data.order_type,
+                      order_code:for_data.order_code,                      
                       pre_code:for_data.prescription_no,
                       name:for_data.name,
                       age:for_data.age,
@@ -307,16 +320,18 @@ window.current_template_obj = {
             }
           };
 
+          console.log(flag_arr)
+
           if (flag_arr.indexOf(1)>=0) {
             temp2 = []
             stat = _this.activeName2
-            temp.map(function(itme){
+            temp.map(function(item){
               if (item.status == stat) {
                 temp2<<{
-                  order_id:item.id,
-                  order_code:"未知",
-                  patient_name:"未知",
-                  amt:"未知"
+                  order_id:item.order_id,
+                  order_code:item.order_type,
+                  patient_name:item.name,
+                  amt:""
                 }
               };
             })
@@ -325,15 +340,12 @@ window.current_template_obj = {
             _this._data.platform_data = temp
             _this._data.dialogFormVisible = true
           }
-          // console.log
-          // $.each(response.data,function(){})
         }else{
           _this.$notify({
             title: '提示',
             message: '没有数据！',
           });          
         }
-        // this._data.tableData_plat = response.data
       },function(response){
         _this.$notify({
           title: '提示',
@@ -364,7 +376,6 @@ window.current_template_obj = {
       }else{
       	this._data.pres = []
       }
-    	// setTimeout(function(){$(".prescription_list").find("p:first").click()},300)
     },
     get_pre:function (id,e) {
     	var _this = this;
@@ -409,7 +420,7 @@ window.current_template_obj = {
       });
     },
 
-    //发药  发订单
+    //收费 
     charging_pre:function(id){
       this.oprate_order({id:id,method:"charging_pre",todo:"收费"})
     },
@@ -419,14 +430,50 @@ window.current_template_obj = {
     },
 
 		//退药
-		return_order:function(id){
-			this.oprate_order({id:id,method:"return_order",todo:"退药"})	
+		return_drug:function(id){
+			this.oprate_order({id:id,method:"return_drug",todo:"退药"})	
 		},
+    //平台搜索  收费
     platform_charging_fun:function(){
-      console.log("platform_charging_fun")
+      var _this = this
+      var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
+      var ids = []
+      $.each(boxs,function(k,v){
+        ids.push($(v).val())
+      })
+      if(ids&&ids.length>0){}else{
+        _this.$message('没有数据！');
+        return false;
+      }
+        data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"2"}
+        Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
+          _this.$message('收费成功');
+          _this.dialogFormVisible = false
+          _this._data.platform_data = []
+        },function(response){
+          _this.$message('收费失败，请重试！');
+        })
     },
+    //平台搜索  收费+发药
     platform_charging_and_out_fun:function(){
-      console.log("platform_charging_and_out_fun")
+      var _this = this
+      var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
+      var ids = []
+      $.each(boxs,function(k,v){
+        ids.push($(v).val())
+      })
+      if(ids&&ids.length>0){}else{
+        _this.$message('没有数据！');
+        return false;
+      }      
+        data = {authenticity_token:"<%= form_authenticity_token %>",prescription_ids:ids,status:"5"}
+        Vue.http.post("/ims/orders/operat_order_by_prescription",data).then(function(response){
+          _this.$message('收费并发药成功');
+          _this.dialogFormVisible = false
+          _this._data.platform_data = []
+        },function(response){
+          _this.$message('收费并发药失败，请重试！');
+        })
     },    
 		oprate_order:function(data){
       var _this = this
@@ -440,12 +487,18 @@ window.current_template_obj = {
 			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
         stat = response.data.flag ? true : false
         type = stat ? "success" : "warning";
-        _this._data.pres.forEach(function(x,index,a){
-          if(x.order_id == data.id){
-            _this._data.pres.splica(index,1)
-            return ""
+        try{
+          method = ""
+          if(data.method == "charging_pre"||data.method == "dispensing_order"){
+            method = "out_order"
+          }else{
+            method = data.method
           }
-        })
+          str = "div.function_panel."+method
+          $(document).find(str).find(".is-active").click()
+        }catch(e){
+          console.log(e)
+        }
         _this._data.tab_header_data = []
         _this._data.detail = [{is_order:true}]
         _this.$notify({
