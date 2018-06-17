@@ -1,0 +1,37 @@
+<div class="prescription-info">
+  <div v-for="pre in platform_data">
+    <div class="" style="padding:8px;">
+    	<input type="checkbox" v-bind:value="pre.id">
+    	<span style="display:none;" class="pre_id">{{pre.id}}</span>
+	    <span class="padding"><b>{{pre.name}}</b></span>
+	    <span class="padding"><b>{{pre.sex}}</b></span>
+	    <span class="padding"><b>{{pre.age}}岁</b></span>
+	    <span class="padding"><b>地址：{{pre.address}}</b></span>
+	    <span class="padding"><b>身份证号：{{pre.iden}}</b></span>
+	  </div>
+
+    <el-table
+      :data="pre.lines"
+      style="width: 100%">
+      <el-table-column
+        prop="name"
+        label="名称"
+        width="30%">
+      </el-table-column>
+      <el-table-column
+        prop="specification"
+        label="规格"
+        width="30%">
+      </el-table-column>
+      <el-table-column
+        prop="qty"
+        label="数量">
+      </el-table-column>
+      <el-table-column
+        prop="unit"
+        label="单位">
+      </el-table-column>
+    </el-table>
+
+  </div>
+</div>

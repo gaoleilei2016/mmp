@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Ims Settings</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Ii root</th>
+      <th>Returned at</th>
+      <th>Payment expired</th>
+      <th>Unpaid expired</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @ims_settings.each do |ims_setting| %>
+      <tr>
+        <td><%= ims_setting.ii_root %></td>
+        <td><%= ims_setting.returned_at %></td>
+        <td><%= ims_setting.payment_Expired %></td>
+        <td><%= ims_setting.unpaid_expired %></td>
+        <td><%= link_to 'Show', ims_setting %></td>
+        <td><%= link_to 'Edit', edit_ims_setting_path(ims_setting) %></td>
+        <td><%= link_to 'Destroy', ims_setting, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Ims Setting', new_ims_setting_path %>

@@ -68,37 +68,37 @@
 				<!-- <div id="chart_div_leida" style="height: 240px;"></div> -->
 
 				<ul class="mui-table-view mui-grid-view mui-grid-9" style="background: #fff;">
-					<router-link :to="{name:'ws_ecg_heart'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
-						<a href="javascript:;">
-							<span class="mui-icon fa fa-heartbeat" style="color: #ff5722;"></span>
-							<div class="mui-media-body values">心电检测史</div>
-							<div class="mui-media-body">情绪压力</div>
-						</a>
-					</router-link>
-					<router-link :to="{name:'ws_ring'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
-						<a href="javascript:;">
-							<span class="mui-icon fa fa-bar-chart" style="color: #4caf50;"></span>
-							<div class="mui-media-body values">{{member_data.ws_ring&&$parent.number_with_one_point(member_data.ws_ring.footSteps)}} 步</div>
-							<div class="mui-media-body">运动</div>
-						</a>
-					</router-link>
-					<router-link :to="{name:'ws_heart_v2'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
-						<a href="javascript:;">
-							<span class="mui-icon fa fa-heart" style="color: #cddc39;"></span>
-							<div class="mui-media-body values">{{member_data.ws_heart_v2&&$parent.number_with_one_point(member_data.ws_heart_v2.HRValue)}} 次/分</div>
-							<div class="mui-media-body">心率</div>
-						</a>
-					</router-link>
 					<router-link :to="{name:'ws_weight'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
 						<a href="javascript:;">
-							<span class="mui-icon fa fa-line-chart" style="color: #ff5722;"></span>
+							<span class="mui-icon fal fa-weight" style="color: #cddc39;"></span>
 							<div class="mui-media-body values">{{member_data.ws_weight&&$parent.number_with_one_point(member_data.ws_weight.floWeight)}} kg</div>
 							<div class="mui-media-body">体重</div>
 						</a>
 					</router-link>
+					<router-link :to="{name:'ws_ecg_heart'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
+						<a href="javascript:;">
+							<span class="mui-icon fal fa-heartbeat" style="color: #ff5722;"></span>
+							<div class="mui-media-body values">心电检测史</div>
+							<div class="mui-media-body">情绪压力</div>
+						</a>
+					</router-link>
+					<!-- <router-link :to="{name:'ws_ring'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
+						<a href="javascript:;">
+							<span class="mui-icon fal fa-walking" style="color: #4caf50;"></span>
+							<div class="mui-media-body values">{{member_data.ws_ring&&$parent.number_with_one_point(member_data.ws_ring.footSteps)}} 步</div>
+							<div class="mui-media-body">运动</div>
+						</a>
+					</router-link> -->
+					<!-- <router-link :to="{name:'ws_heart_v2'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
+						<a href="javascript:;">
+							<span class="mui-icon fal fa-heart" style="color: #ff5722;"></span>
+							<div class="mui-media-body values">{{member_data.ws_heart_v2&&$parent.number_with_one_point(member_data.ws_heart_v2.HRValue)}} 次/分</div>
+							<div class="mui-media-body">心率</div>
+						</a>
+					</router-link> -->
 					<router-link :to="{name:'ws_blood'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
 						<a href="javascript:;">
-							<span class="mui-icon fa fa-area-chart" style="color: #4caf50;"></span>
+							<span class="mui-icon fal fa-chart-area" style="color: #4caf50;"></span>
 							<div class="mui-media-body values">{{member_data.ws_blood&&$parent.number_with_one_point(member_data.ws_blood.intDiastolic)}} mmHg / {{member_data.ws_blood&&member_data.ws_blood.intSystolic}} mmHg</div>
 							<div class="mui-media-body">血压</div>
 						</a>
@@ -110,16 +110,16 @@
 							<div class="mui-media-body">耳温</div>
 						</a>
 					</router-link> -->
-					<router-link :to="{name:'ws_blood_sugar'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
+					<!-- <router-link :to="{name:'ws_blood_sugar'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
 						<a href="javascript:;">
-							<span class="mui-icon fa fa-tint" style="color: #cddc39;"></span>
+							<span class="mui-icon fal fa-tint" style="color: #cddc39;"></span>
 							<div class="mui-media-body values">
 								<span v-if="member_data.ws_blood_sugar">{{$parent.number_with_one_point(member_data.ws_blood_sugar.intConsistency)}}</span> mg/dL
 								<span v-if="member_data.ws_blood_sugar">({{member_data.ws_blood_sugar.intTypeID}})</span>
 							</div>
 							<div class="mui-media-body">血糖</div>
 						</a>
-					</router-link>
+					</router-link> -->
 				</ul>
 				<!-- <div>
 					<div class="advise_text">健康建议：一天吃2份以上的奶制品并不补钙，反而对健康不利。因为人类并不适合消化牛奶，全球75%的人胃中缺乏一种消化牛奶中乳糖的酶。大量饮用牛奶就容易患上关节炎、过敏、哮喘和各种胃病。如果真的喜欢喝牛奶，每天喝1杯就够了，想补钙，不妨隔三差五地吃沙丁鱼、杏仁和虾。</div>
@@ -1834,8 +1834,4 @@
 </script>
 
 <script type="text/javascript">
-	// 
-	<% if flash[:notice].present? %>
-	mui.toast("<%= flash[:notice] rescue nil %>",{duration:8000});
-	<% end -%>
 </script>

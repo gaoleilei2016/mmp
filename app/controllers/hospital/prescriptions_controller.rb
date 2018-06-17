@@ -112,13 +112,16 @@ class Hospital::PrescriptionsController < ApplicationController
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
-    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
+    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
       prescription_ids = []
       total_price = 0.0
-      orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      _status = []
+      orders = _prescriptions.map { |e| prescription_ids<<e.id;_status<<e.status;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
       cur_org[:prescription_ids] = prescription_ids
       cur_org[:total_price] = total_price
       cur_org[:orders] = orders
+      cur_org[:status] = _status
+      cur_org[:first_created_at] = _prescriptions[0].created_at
       ret << cur_org
     end
     render json: {flag: true, info: "success", data: ret}
@@ -134,13 +137,14 @@ class Hospital::PrescriptionsController < ApplicationController
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
     ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).each do |_prescription|
-      re = JSON.parse(_prescription.to_json)
-      total_price = 0.0
-      orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      re[:total_price] = total_price
-      re[:orders] = orders
-      re[:organ] = Admin::Organization.find(_prescription.organization_id)
-      ret << re
+      # re = JSON.parse(_prescription.to_json)
+      # total_price = 0.0
+      # orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      # re[:total_price] = total_price
+      # re[:orders] = orders
+      # re[:organ] = Admin::Organization.find(_prescription.organization_id)
+      # ret << re
+      ret << _prescription.to_web_front
     end
     render json: {flag: true, info: "success", data: ret}
   end

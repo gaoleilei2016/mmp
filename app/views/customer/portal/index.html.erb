@@ -51,7 +51,7 @@
 		border-radius: 0;
 	}
 	.mui-table-view-cell.no_background:after{
-		background: none;
+		/*background: none;*/
 	}
 	#search_content .mui-icon-arrowleft{
 		display: none;
@@ -61,6 +61,9 @@
 	}
 	#search_content.on .mui-icon-arrowleft{
 		display: block;
+	}
+	.mui-table-view:after,.mui-table-view:before{
+		height: 1px;
 	}
 </style>
 <div class="mui-content" id="vue_content">
@@ -87,7 +90,7 @@
 			</template>
 			<template v-else>
 				<div style="padding-left: 16px;">
-					<p style="margin: 8px;">历史记录</p>
+					<p style="margin: 8px;min-height: 100px;">历史记录</p>
 					<p style="margin: 8px;">大家常用</p>
 				</div>
 			</template>
@@ -100,36 +103,43 @@
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
-				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
-				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+				<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 				<div class="mui-media-body">
 					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
 					<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
 					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
 				</div>
 			</div>
-			<div style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #8A8782;"></i>
-				<p style="font-size: 12px;">{{current_pharmacy.distance||"　"}}</p>
-			</div>
+			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
+				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
+			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
-						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
+						<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 						<div class="mui-media-body">
 							{{drug.title}}
 							<p class="mui-ellipsis">
-								{{drug.specification}}
-								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+								<p style="padding-top: 6px;">{{drug.specification}}</p>
+								<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
 							</p>
 						</div>
 					</div>
 				</li>
 			</ul>
 			<div style="line-height: 33px;">
-				合计 <span style="color: #FF376F;">¥ {{format_float(item.total_price)}}</span>
-				<a href="javascript:;" @click="send_prescription_ids_session(item)" class="mui-btn mui-btn-danger" style="float: right;background: red;color: #fff;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(item)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<div style="overflow: hidden;padding-right: 10px;">
+					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(item.first_created_at).pattern("MM月dd日")}}</span>
+					<span style="color: #F55742;float: right;">
+						<span>¥</span>
+						<span style="font-size: 1.5em;">{{format_float(item.total_price)}}</span>
+					</span>
+					<span style="float: right;margin-right: 6px;">合计</span>
+				</div>
 			</div>
 		</li>
 	</ul>
@@ -184,11 +194,11 @@
 							if (json.flag) {
 								location.href = "/customer/portal/settlement";
 							}else{
-								$("#loading").hide();
 								mui.toast(json.info);
 							}
 						},
 						complete:function() {
+							$("#loading").hide();
 						},
 						error:error_fun
 					})
@@ -207,6 +217,7 @@
 							_this.current_pharmacy = json.pharmacy;
 							_this.current_pharmacy.sele_type = json.type;
 						}else{
+							_this.current_pharmacy = {name:"定位失败"};
 							mui.toast(json.info);
 						}
 					},
@@ -240,6 +251,7 @@
 					url:"/interfaces/set_current_pharmacy?id="+item.id,
 					success:function(json) {
 						_this.current_pharmacy = item;
+						_this.current_pharmacy.sele_type = "self";
 						$(".mui-icon-arrowleft").click();
 					},
 					complete:function() {
