@@ -156,12 +156,7 @@ class Ims::OrdersController < ApplicationController
     render json:re_data.to_json
   end
 
-  # 订单退药
-  def return_order
-    @reslut = @ims_order.return_order rescue {flag:true,info:"发药成功！"}
-    render json:@reslut.to_json
-  end
-
+  
   # 获取已发送到该药店的订单
   # def get_orders
   # 	# p IPSocket.getaddress(Socket.gethostname)
@@ -199,7 +194,7 @@ class Ims::OrdersController < ApplicationController
   end
 
   # 退药(目前只能线下退药)
-  # => 页面需传 order_id(string) 
+  # => 页面需传 订单 id(string) 
   def return_drug
     args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
     @data = Ims::Order.return_drug params.merge(args)
@@ -207,7 +202,7 @@ class Ims::OrdersController < ApplicationController
   end
 
   # 下载错误处方返回
-  # => 页面需传 order_id(string) 
+  # => 页面需传 订单 id(string) 
   def prescription_back
     args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
     @data = Ims::Order.prescription_back params.merge(args)

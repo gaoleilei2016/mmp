@@ -157,19 +157,18 @@ class Ims::Order < ApplicationRecord
                     firm:x[:firm],
                   }
                 }
-            amt = details.map{|e| e[:net_amt]}.sum() rescue 0
             data <<{
               :type => '处方'+(temp += 1).to_s,
               :is_order => false,
               :order_id => v[:id],
               :order_code => v[:prescription_no],
-              :amt => amt,
+              :amt => v[:price],
               :status => v[:status],
               :phone=>v[:phone],
               :source_org_name => v[:org][:display],
               :doctor => v[:author][:display],
               :prescriptions_id => [],
-              :patient_name => v[:patient_name],
+              :patient_name => v[:name],
               :patient_sex => v[:gender][:display],
               :patient_age => v[:age],
               :patient_iden => v[:iden],
@@ -179,7 +178,7 @@ class Ims::Order < ApplicationRecord
               :patient_no => v[:patient_no],
               :encounter_loc => v[:encounter_loc][:display],
               :note => v[:note],
-              :type => v[:type][:display],
+              :pre_type => v[:type][:display],
               :diagnoses => ((v[:diagnoses]||[]).map{|e| e.display}.join(",") rescue nil),
               details: details
             }
@@ -206,7 +205,7 @@ class Ims::Order < ApplicationRecord
             return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]="0"
             p "================",result,"++++++++++++++++++++++++",result[:order]
             order = result[:order]
-            att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user]}
+            att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user],status:'5'}
             order_com = Orders::Order.order_completion att
             return (result[:ret_code]="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
           else
@@ -223,7 +222,7 @@ class Ims::Order < ApplicationRecord
     # 退药
     def return_drug args={}
       begin
-        order_id = args[:order_id]
+        order_id = args[:id]
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息"} if order.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]

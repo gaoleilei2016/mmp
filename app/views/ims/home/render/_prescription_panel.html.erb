@@ -62,7 +62,7 @@
 					<b class="prescription_source_type">{{info.source_org_name}}</b><br>
 					<b>药品处方</b>
 				</h3>
-				<span class="prescription_reg_style">{{info.type_display}}</span>
+				<span class="prescription_reg_style">{{info.pre_type}}</span>
 			 	<div class="el-row" style="font-size:15px; overflow:hidden; padding:6px;">
 			  	<div class="el-col-12 prescription_code text-left">NO：<span>{{info.order_code}}</span></b></div>
 			  	<!-- <div class="el-col-12 invoice_no text-right">发票号:&nbsp;&nbsp;<span>{{info.invoice_no}}</span></div> -->
@@ -72,33 +72,36 @@
 			<div class="prescription_basic_info separate">
 			 	<div class="el-row">
 					<div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{info.patient_name}}</span></div>
-					<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{info.patient_gender_name}}</span></div>
+					<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{info.patient_sex}}</span></div>
 					<div class="el-col el-col-10 text-left patient_age" style="word-break:keep-all;">年龄:<span style="font-weight:bold;">{{info.patient_age}}</span></div>
 			 	</div> 
 
 			 	<div class="el-row">
-					<div class="el-col el-col-14 text-left">病历号:<span>{{info.encounter_ii}}</span></div>
+					<div class="el-col el-col-14 text-left">病历号:<span>{{info.patient_no}}</span></div>
 					<div class="el-col el-col-10 text-left patient_nature">医疗类别: <span>{{info.patient_nature}}</span></div>					
 			 	</div>
 
 			 	<div class="el-row">
 					<div class="el-col el-col-14 text-left patient_addr biller_loc_name">科室/地址:{{info.biller_loc_name}}</div>
-					<div class="el-col el-col-10 text-left billing_at">开单时间: <span>{{format_time(info.billing_at)}}</span></div>				
+					<div class="el-col el-col-10 text-left billing_at">开单时间: <span>{{format_time(info.address)}}</span></div>				
 			 	</div>
 
 			 	<div class="el-row">
-			 		<div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{fix_diagnoses(info.diagnoses)}}</span></div>
+			 		<div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{info.diagnoses}}</span></div>
 			   	<div class="el-col-10 text-left patient_iden">身份证: <span>{{info.patient_iden}}</span></div>
 			 	</div>
 			</div>
 
-			<div class="prescription_item_info separate" style="height: calc(100% - 220px);">
+			<div class="prescription_item_info separate" style="height: calc(100% - 230px);">
 				<div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R</div>
 				<div class="item_list" v-for="(line,index) in info.details">
 					<div class="el-row" style="margin-left:1px;"> 
-						<div class="text el-col-14 text-left">{{line.name}}</div>
-						<div class="total_quantity el-col-5 text-right">{{line.quantity}}</div>
-						<div class="unit el-col-5 text-center">{{line.unit}}</div>
+						<div class="text el-col-7 text-left">{{line.name}}</div>
+						<div class="text el-col-5 text-left">{{line.specifications}}</div>
+						<!-- <div class="text el-col-3 text-left">{{line.price}}</div> -->
+						<div class="total_quantity el-col-4 text-right">{{line.quantity}}{{line.unit}}</div>
+						<div class="unit el-col-5 text-center">{{line.net_amt}}</div>
+						<div class="unit el-col-5 text-center">{{line.firm}}</div>
 					</div>
 			  </div>
 			  <div class="text-right" style="padding-right:8px;" v-if="info.reason_code_name == '中草药'">小计：{{format_price(info.total_amount/info.repeat_number)}} × {{info.repeat_number}}副</div>
