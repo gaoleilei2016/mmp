@@ -10,11 +10,12 @@ class Hospital::Sets::MtemplatesController < ApplicationController
     when "0" # 自己创建的 
       @mtemplates = Hospital::Sets::Mtemplate.where("author_id=? AND title LIKE ?", current_user.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
     when "1" # 科室共享的
-      cur_dep = current_user.current_dep
-      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='1' AND location_id=? AND title LIKE ?", cur_dep.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      # cur_dep = current_user.current_dep
+      # @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='1' AND location_id=? AND title LIKE ?", cur_dep.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      @mtemplates = []
     when "2" # 医院共享的
-      cur_org = current_user.organizations
-      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='2' AND organization_id=? AND title LIKE ?", cur_org.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
+      cur_org = current_user.organization
+      @mtemplates = Hospital::Sets::Mtemplate.where("sharing_scope_code='2' AND org_id=? AND title LIKE ?", cur_org.id,"%#{search_str}%").page(params[:page]||1).per(params[:per]||25)
     when "avaliable" # 可以使用的
       @mtemplates = Hospital::Sets::Mtemplate.all.page(params[:page]||1).per(params[:per]||25)
     else
@@ -56,8 +57,8 @@ class Hospital::Sets::MtemplatesController < ApplicationController
   # /hospital/sets/mtemplates
   def create
     p "/hospital/sets/mtemplates create", params
-    create_data = format_mteplate_create_args
-    @mtemplate = Hospital::Sets::Mtemplate.new(create_data[:mteplate])
+    create_data = format_mtemplate_create_args
+    @mtemplate = Hospital::Sets::Mtemplate.new(create_data[:mtemplate])
     respond_to do |format|
       if @mtemplate.save
         ::Hospital::Order.to_template_order(create_data[:order_ids], @mtemplate.id, current_user)
@@ -73,9 +74,11 @@ class Hospital::Sets::MtemplatesController < ApplicationController
   # PUT
   # PUT /hospital/sets/mtemplates/:id
   def update
-
+    p "/hospital/sets/mtemplates create", params
+    update_data = format_mtemplate_update_args
     respond_to do |format|
-      if @mtemplate.update_attributes(params[:mtemplate])
+      if @mtemplate.update_attributes(update_data[:mtemplate])
+        ::Hospital::Order.to_template_order(update_data[:order_ids], @mtemplate.id, current_user)
         format.html { redirect_to @mtemplate, notice: 'mtemplate was successfully updated.' }
         format.json { render json: {flag: true, info:"", data: @mtemplate} }
       else
@@ -105,9 +108,9 @@ class Hospital::Sets::MtemplatesController < ApplicationController
       params[:mtemplate]
     end
 
-    def format_mteplate_create_args
+    def format_mtemplate_create_args
       args = mtemplate_params
-      mteplate_info = {
+      mtemplate_info = {
         org_id: current_user.organization.id,
         status: "A",
         title: args[:title],
@@ -122,7 +125,29 @@ class Hospital::Sets::MtemplatesController < ApplicationController
         location_display: "酱油科"
       }
       ret = {
-        mteplate: mteplate_info,
+        mtemplate: mtemplate_info,
+        order_ids: args[:order_ids]
+      }
+    end
+
+    def format_mtemplate_update_args
+      args = mtemplate_params
+      mtemplate_info = {
+        org_id: current_user.organization.id,
+        status: "A",
+        title: args[:title],
+        note: args[:note],
+        sharing_scope_code: args[:sharing_scope][:code],
+        sharing_scope_display: args[:sharing_scope][:display],
+        disease_code: args[:disease][:code],
+        disease_display: args[:disease][:display],
+        author_id: current_user.id,
+        author_display: current_user.name,
+        location_id: 1,
+        location_display: "酱油科"
+      }
+      ret = {
+        mtemplate: mtemplate_info,
         order_ids: args[:order_ids]
       }
     end
