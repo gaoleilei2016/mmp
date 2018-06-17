@@ -19,7 +19,7 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
