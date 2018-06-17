@@ -74,9 +74,10 @@ class InterfacesController < ApplicationController
 
 
 	def save_order
-		params[:order][:user_id] = current_user.id
-		params[:order][:current_user] = current_user
-		re = Orders::Order.create_order_by_presc_ids(params[:order])
+		# params[:order][:user_id] = current_user.id
+		order = JSON.parse(params[:order].to_json)
+		order[:current_user] = current_user
+		re = Orders::Order.create_order_by_presc_ids(order)
 		if re[:ret_code]!='0'
 			flash[:notice] = re[:info]
 			return redirect_to "/customer/portal/settlement"
