@@ -52,18 +52,41 @@ class Orders::Order < ApplicationRecord
 		::Admin::Organization.find(source_org_id) rescue nil
 	end
 
-	#取消订单 Orders::Order.find(id).cancel_order()
-	def cancel_order
-		# ['']
-		update_attributes(status:'7')
-		prescriptions.each{|x| x.order = nil;x.save}
-		{ret_code:'0',info:'订单已取消。'}
+	#取消订单 Orders::Order.find(id).cancel_order(cur_user)
+	def cancel_order(cur_user)
+		result = {ret_code:'0',info:''}
+		case status.to_s
+		when '1'
+			result = {ret_code:'0',info:'订单已取消。'}
+			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
+		when '2'
+			arg = {
+				# 退费人
+				return_charge_opt: {
+					id: cur_user.id.to_s,
+					display: cur_user.name.to_s
+				},
+				# 退费时间
+				return_charge_at: Time.now.to_s(:db)
+			}
+			prescriptions.each{|x|x.return_charge(arg, cur_user)}
+			result = {ret_code:'0',info:'取消成功，处方已失效。'}
+		when '5'
+			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
+		when '6'
+			return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
+		when '7'
+			return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
+		end
+		update_attributes(status:'7',end_time:Time.now.to_s(:db))
+		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+		result
 	end
 
 	#订单超时自动关闭
 	def close_order
 		update_attributes(status:'6',close_time:Time.now.to_s(:db))
-		prescriptions.each{|x| x.order = nil;x.save}
+		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 		{ret_code:'0',info:'订单已超时，自动关闭。'}
 	end
 
@@ -152,7 +175,7 @@ class Orders::Order < ApplicationRecord
 				 source_org_name: presc[:hospital_name].to_s,
 				 patient_name: presc[:person_name].to_s,
 				 patient_phone: presc[:phone].to_s,
-				 order_code: get_order_code(presc[:hospital_id].to_s),
+				 order_code: get_order_code(presc[:pharmacy_id].to_s),
 				 doctor: presc[:doctor].to_s,
 				 person_id: presc[:person_id].to_s,
 				 status: attrs[:status]||'1'
@@ -214,6 +237,17 @@ class Orders::Order < ApplicationRecord
 			order = self.where(:id=>attrs[:id]).last
 			if order.status.to_s == '1'
 				order.update_attributes(status:'6',close_time:Time.now.to_s(:db))
+				args = {
+					# 创建订单人
+					create_bill_opt: {
+						id: attrs[:current_user][:id],
+						display: attrs[:current_user][:name],
+					},
+					# 订单创建时间
+					bill_at: order.created_at.to_s(:db),
+				  	bill_id: order.id,
+				}
+				order.prescriptions.each{|pre| pre.back_wait_charge(args, attrs[:current_user])}
 			end
 		end
 
@@ -280,7 +314,7 @@ class Orders::Order < ApplicationRecord
 			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
 										drug_user_id:attrs[:drug_user_id],
-										end_time:Time.now,
+										end_time:Time.now.to_s(:db),
 										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
@@ -368,11 +402,11 @@ class Orders::Order < ApplicationRecord
 
 		# private
 		##获取订单号，私有调用
-		def get_order_code source_org_id
+		def get_order_code target_org_id
 			t = Time.now.beginning_of_day
 			y = t.year.to_s[2,2]
 			d = ("00" + t.yday.to_s)[-3,3]
-			ser = ("000" + Orders::Order.where("source_org_id = ? AND created_at > ?",source_org_id,t).count.to_s)[-4,4]
+			ser = ("000" + Orders::Order.where("target_org_id = ? AND created_at > ?",target_org_id,t).count.to_s)[-4,4]
 			"#{y}#{d}#{ser}"
 			# while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 			# 	code = get_order_code
