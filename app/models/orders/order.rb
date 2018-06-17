@@ -96,9 +96,9 @@ class Orders::Order < ApplicationRecord
 		result = {ret_code:'0',info:''}
 		case pay_type.to_s
 		when "Alipay"
-			Pay::Alipay.find_by(out_trade_no: "#{source_org_id}#{order_code}") && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
 		when "Wechat" #查询微信订单是否支付成功
-			Pay::Wechat.find_by(out_trade_no: "#{source_org_id}#{order_code}") && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
 		end
 		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 		args = {
