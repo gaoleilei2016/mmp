@@ -55,6 +55,15 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data: function(){
+		var statusOptions = [
+			{value: "0", label: "未审核", type: "primary"},
+			{value: "1", label: "已审核", type: "primary"},
+			{value: "2", label: "待收费", type: "warning"},
+			{value: "3", label: "已收费", type: "success"},
+			{value: "4", label: "已发药", type: "success"},
+			{value: "7", label: "废弃", type: "info"},
+			{value: "9", label: "已退费", type: "info"},
+		];
 		return {
 			/* 基础设置 --- start */ 
 				orgname: "", // 机构名称
@@ -105,7 +114,7 @@ window.current_template_obj = {
 			    ],
 			    phone: [
 			    	{ required: true, message: '手机号码不能为空'},
-			    	{ pattern: /^1[34578]\d{9}$/, message: '手机号码格式不正确'}
+			    	{ pattern: /^1[34578]\d{9}$/, message: '手机号码不完整'}
 			    ],
 			    iden: [
 			    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
@@ -159,6 +168,7 @@ window.current_template_obj = {
 					drugs: [],
 					editIndex: -1, // 正在编辑的医嘱序号
 					multipleOrdersSelection: [], // 已经勾选的医嘱
+					ordersStatus: statusOptions,
 				/* 药品 --- end */ 
 
 				/* 药品模板 --- start */ 
@@ -195,6 +205,7 @@ window.current_template_obj = {
 					}, // 新建处方验证规则
 					prescription: {}, // 处方模型
 					printPresRow: {}, // 打印处方行
+					prescriptionsStatus: statusOptions,
 				/* 处方 --- end */ 
 
 			/* 主业务  ----- end */ 
@@ -360,7 +371,7 @@ window.current_template_obj = {
 	          if(!_this.encounter.id) {
 	          	_this.encountersResource.save(json).then( function(response) {
 	          		_this.handleEncounterReturn(response, btn);
-	          		_this.getOrders();
+	          		_this.handleTabClick();
 	          	}, function(response) {
 	          		btn.removeAttr("disabled").find(".fa").hide();
 	          		_this.$message.error("创建就诊信息失败，请联系管理员。");
@@ -508,7 +519,9 @@ window.current_template_obj = {
 				    code = item.code;
 				    display = item.display;
 					}
+					console.log('============111111111')
 					_this.diagnosis = {
+						id: _this.diagnosis.id,
 						code: code,
 						display: display,
 						type: _this.$parent.common_data_diagnosis_types[0],
@@ -571,7 +584,7 @@ window.current_template_obj = {
 		          		_this.$message.error("创建诊断失败，请联系管理员。");
 		          	})
 		          } else {
-		          	_this.diagnosesResource.update({id: _this.encounter.id}, json).then( function(response) {
+		          	_this.diagnosesResource.update({id: _this.diagnosis.id}, json).then( function(response) {
 		          		_this.handleDiagReturn({res: response, btn: btn, action: "update"});
 		          	}, function(response) {
 		          		btn.removeAttr("disabled").find(".fa").hide();
@@ -591,12 +604,13 @@ window.current_template_obj = {
 		    	json.btn.removeAttr("disabled").find(".fa").hide();
 		    	var res = json.res.data;
 		      if(res.flag) {
-			    	if(json=="save") {
+			    	if(json.action=="save") {
 			    		this.diagnoses.push(res.data);
 			    	} else {
 			    		this.diagnoses.splice(this.editDiaIndex, 1); // 修改已经编辑的数据
 				      this.diagnoses.splice(this.editDiaIndex, 0, res.data); // 修改已经编辑的数据
 			    	}
+			    	this.encounter.diagnoses = res.master;
 			    	this.$message({
 			        message: "诊断保存成功。",
 			        type: 'success'
@@ -610,6 +624,27 @@ window.current_template_obj = {
 		    editDiagnoses: function (index, row) {
 		    	this.editDiaIndex = index;
 		    	this.diagnosis = row;
+		    },
+		    deleteDiagnoses: function (index, row) {
+		    	var _this = this, $target = $(event.target);
+		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
+		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	      		var res = response.data;
+	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+	      		if(res.flag) {
+	      			_this.$message({
+			          message: "删除诊断成功",
+			          type: 'success'
+			        });
+			        _this.diagnoses.splice(index, 1);
+			        _this.encounter.diagnoses = res.master;
+	      		}else{
+	      			_this.$message.error(res.info);
+	      		}
+	      	}, function(response) {
+	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+	      		_this.$message.error("删除诊断失败，请联系管理员。");
+	      	})
 		    },
 			/* encounter 诊断编辑 ----end */ 
 
@@ -641,16 +676,17 @@ window.current_template_obj = {
 
     // 切换主业务区域tab
     handleTabClick: function (tab, event) {
-    	if(tab.name=="orders") {
+    	var name = tab.name || this.activeTab
+    	if(name=="orders") {
     		this.getOrders();
     	}
-    	if(tab.name=="prescriptions") {
+    	if(name=="prescriptions") {
     		this.getPrescriptions();
     	}
-    	if(tab.name=="histories") {
+    	if(name=="histories") {
     		this.getHistories();
     	}
-    	if(tab.name=="diagnoses") {
+    	if(name=="diagnoses") {
     		this.getDiagnoses();
     	}
     },
@@ -847,7 +883,7 @@ window.current_template_obj = {
 	    	var _this = this;
 	    	_this.$nextTick(function(){
 		    	(_this.orders||[]).forEach(function (item, index) {
-		    		if(item.status=="N") {
+		    		if(item.status=="0") {
 		    			_this.$refs["ordersTable"].toggleRowSelection(item, true);
 		    		} else {
 		    			_this.$refs["ordersTable"].clearSelection();
@@ -892,7 +928,7 @@ window.current_template_obj = {
       // 已经发送的医嘱（待交费、完成）和作废的医嘱显示非激活状态灰色{row, rowIndex}
       judgeOrderRow: function (obj) {
       	var row = obj.row;
-      	if(row.status=='N'){
+      	if(row.status=='0'){
       		return "";
       	} else {
       		return "inactive-row";
@@ -1052,7 +1088,7 @@ window.current_template_obj = {
 		      return false;
     		}
     		(orders||[]).forEach(function(item, index){
-    			if(item.status=="N") {
+    			if(item.status=="0") {
     				ids.push(item.id);
     			}
     		})
@@ -1101,7 +1137,7 @@ window.current_template_obj = {
     		var orders = _this.multipleOrdersSelection;
     		_this.sendOrders = [];
     		(orders||[]).forEach(function(item, index){
-    			if(item.status=="N") {
+    			if(item.status=="0") {
     				_this.sendOrders.push(item);
     			}
     		})
