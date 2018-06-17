@@ -192,7 +192,10 @@
 		<%= yield %>
 	</body>
 	<script type="text/javascript">
-		<% if notice.present?||alert.present?||flash[:notice].present? %>
+		<%# p '~~~~~~~~~~~~~~~~~', notice, alert, flash[:notice] %>
+		<% if flash[:notice].present? %>
+		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>");
+		<% elsif notice.present?||alert.present? %>
 		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
 		<% end -%>
 	</script>

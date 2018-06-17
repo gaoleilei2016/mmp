@@ -66,7 +66,10 @@
 			</li>
 		</ul>
 		<div style="text-align: right;padding-right: 8px;margin-bottom: 8px;">
-			<button type="button" v-if="order.status=='2'">申请退款</button>
+			<!-- <button type="button" v-if="order.status=='2'">申请退款</button> -->
+				<button type="button" @click="cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
+				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">重新支付</button>
+				<button type="button" @click="refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
 		</div>
 		<div style="padding-left: 12px;">
 			<div class="common_grey">订单编号：{{order.order_code}}</div>
@@ -90,6 +93,48 @@
 			order:null,
 		},
 		methods:{
+			refund_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/refund_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.flag) {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
+			cancel_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/cancel_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.ret_code == "0") {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},
