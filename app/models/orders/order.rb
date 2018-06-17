@@ -23,6 +23,7 @@ class Orders::Order < ApplicationRecord
 #  source_org_name VARCHAR(32) NOT NULL '来源机构名称',
 #  order_code VARCHAR(32) NOT NULL '订单号',
 #  user_id VARCHAR(32) NOT NULL '用户id',
+#  reason VARCHAR(32) NOT NULL '原因',
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
 #  patient_name varchar(20)  NULL '患者名字',
@@ -53,13 +54,13 @@ class Orders::Order < ApplicationRecord
 	end
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
-	def cancel_order(cur_user=nil)
+	def cancel_order(cur_user=nil,reason='')
 		cur_user ||= User.find(user_id)
 		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
 			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
-			update_attributes(status:'6',close_time:Time.now.to_s(:db))
+			update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 			result = {ret_code:'0',info:'订单已取消。'}
 		when '2'
 			arg = {
@@ -72,7 +73,7 @@ class Orders::Order < ApplicationRecord
 				return_charge_at: Time.now.to_s(:db)
 			}
 			prescriptions.each{|x|x.return_charge(arg, cur_user)}
-			update_attributes(status:'7',end_time:Time.now.to_s(:db))
+			update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 			result = {ret_code:'0',info:'取消成功，处方已失效。'}
 		when '5'
 			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -204,7 +205,7 @@ class Orders::Order < ApplicationRecord
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
-					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
+					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
 					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
 				end
 				#订单创建成功之后改变处方状态

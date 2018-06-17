@@ -60,7 +60,7 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~',res
 		if [:succ,:success].include?res[:state].to_sym
 			###退款成功
-			order.cancel_order(current_user)
+			order.cancel_order(current_user,'用户取消')
 			# redirect_to res[:pay_url]
 			render json:{flag:true,info:"操作成功"}
 		else
@@ -93,7 +93,7 @@ class InterfacesController < ApplicationController
 		end
 	end
 	def cancel_order
-		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
+		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user,'用户取消')
 		render json: ret
 	end
 	# 获取用户购物车
