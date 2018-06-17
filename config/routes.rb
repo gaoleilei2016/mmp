@@ -64,6 +64,12 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :departments do 
+        collection do 
+          get :get_active_departments
+          post :set_cur_department
+        end
+      end
       resources :mtemplates # 医嘱模板管理
     end
     resources :home
