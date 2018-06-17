@@ -78,7 +78,7 @@ class Hospital::OrdersController < ApplicationController
   def destroy
     p "Hospital::OrdersController destroy",params
     respond_to do |format|
-      if @order.status == "N" # 新建状态的可以删除
+      if @order.status == 0 # 新建状态的可以删除
         if @order.destroy
           format.json { render json: {flag: true, info: "删除成功"}  }
         else
@@ -123,7 +123,7 @@ class Hospital::OrdersController < ApplicationController
         unit: args[:unit],
         price: args[:price],
         note: args[:note],
-        status: "N",
+        status: 0,
         order_type: 1, # 默认保存1 是药品医嘱
         encounter_id: args[:encounter_id],
         author_id: current_user.id,
