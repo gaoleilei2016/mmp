@@ -423,6 +423,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "firm", limit: 50
+    t.string "ori_detail_id"
   end
   create_table "orders_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.time "payment_at"
@@ -625,5 +626,4 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
-
 end
