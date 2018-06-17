@@ -77,7 +77,7 @@ class InterfacesController < ApplicationController
 	def save_order
 		params[:order][:user_id] = current_user.id
 		params[:order][:current_user] = current_user
-		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
+		re = Orders::Order.create_order_by_presc_ids(params[:order])
 		raise re[:info] if re[:ret_code]!='0'
 		# p '~~~~~~~~~~~~',re
 		p re

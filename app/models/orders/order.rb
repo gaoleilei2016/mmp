@@ -175,7 +175,7 @@ class Orders::Order < ApplicationRecord
 				order = self.create(
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
-				 user_id: attrs[:user_id].to_s,
+				 user_id: attrs[:current_user].id.to_s,
 				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
@@ -211,8 +211,8 @@ class Orders::Order < ApplicationRecord
 				args = {
 					# 创建订单人
 					create_bill_opt: {
-						id: attrs[:current_user][:id],
-						display: attrs[:current_user][:name],
+						id: attrs[:current_user].id.to_s,
+						display: attrs[:current_user].name.to_s,
 					},
 					# 订单创建时间
 					bill_at: order.created_at.to_s(:db),
@@ -249,8 +249,8 @@ class Orders::Order < ApplicationRecord
 		# 		args = {
 		# 			# 创建订单人
 		# 			create_bill_opt: {
-		# 				id: attrs[:current_user][:id],
-		# 				display: attrs[:current_user][:name],
+		# 				id: attrs[:current_user].id,
+		# 				display: attrs[:current_user].name,
 		# 			},
 		# 			# 订单创建时间
 		# 			bill_at: order.created_at.to_s(:db),
