@@ -337,7 +337,7 @@ class Orders::Order < ApplicationRecord
 					charge_at: order.created_at.to_s(:db)
 				}
 				##通知处方订单已结算
-			 	::Hospital::Prescription.charged(args, attrs[:current_user])
+			 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
 			 	args2 = {
 					# 发药人
 					delivery: {
@@ -347,7 +347,7 @@ class Orders::Order < ApplicationRecord
 					# 发药时间
 					delivery_at: order.created_at.to_s(:db)
 				}
-				::Hospital::Prescription.send_drug(args, attrs[:current_user])
+				order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
 				##更新处方状态。。。。。。
 			end
 			result
