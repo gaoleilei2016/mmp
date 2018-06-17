@@ -53,7 +53,8 @@ class Orders::Order < ApplicationRecord
 	end
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
-	def cancel_order(cur_user)
+	def cancel_order(cur_user=nil)
+		cur_user ||= User.find(user_id)
 		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
@@ -92,15 +93,15 @@ class Orders::Order < ApplicationRecord
 	# end
 
 	#订单结算  Orders::Order.find(id).order_settle(1.微信,2.支付宝')
-	def order_settle(pay_type,cur_user)
+	def order_settle(pay_type,cur_user=nil)
 		result = {ret_code:'0',info:''}
-		case pay_type.to_s
-		when "Alipay"
-			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
-		when "Wechat" #查询微信订单是否支付成功
-			Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? && (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
-		end
-		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		cur_user ||= User.find(user_id)
+		# case pay_type.to_s
+		# when "Alipay"
+		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		# when "Wechat" #查询微信订单是否支付成功
+		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
+		# end
 		args = {
 			# 创建订单人
 			charger: {
@@ -112,6 +113,7 @@ class Orders::Order < ApplicationRecord
 		}
 		##通知处方订单已结算
 	 	prescriptions.each{|x|x.charged(args, cur_user)}
+		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
@@ -173,7 +175,7 @@ class Orders::Order < ApplicationRecord
 				order = self.create(
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
-				 user_id: attrs[:user_id].to_s,
+				 user_id: attrs[:current_user].id.to_s,
 				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
@@ -209,8 +211,8 @@ class Orders::Order < ApplicationRecord
 				args = {
 					# 创建订单人
 					create_bill_opt: {
-						id: attrs[:current_user][:id],
-						display: attrs[:current_user][:name],
+						id: attrs[:current_user].id.to_s,
+						display: attrs[:current_user].name.to_s,
 					},
 					# 订单创建时间
 					bill_at: order.created_at.to_s(:db),
@@ -247,8 +249,8 @@ class Orders::Order < ApplicationRecord
 		# 		args = {
 		# 			# 创建订单人
 		# 			create_bill_opt: {
-		# 				id: attrs[:current_user][:id],
-		# 				display: attrs[:current_user][:name],
+		# 				id: attrs[:current_user].id,
+		# 				display: attrs[:current_user].name,
 		# 			},
 		# 			# 订单创建时间
 		# 			bill_at: order.created_at.to_s(:db),
