@@ -3,30 +3,41 @@ class InterfacesController < ApplicationController
 	#############################
 	############ zyz ############
 	def get_orders
+		if params[:id]
+			o = ::Orders::Order.find(params[:id])
+			raise "非法的账单查询，不是你的账单" if o.user_id.to_s != current_user.id.to_s
+			base64_img = Set::QrCode.base64_data(o.order_code)
+			re = JSON.parse(o.to_json)
+			re["base64_img"] = base64_img
+			re["drugs"] = o.details
+			re["organ"] = ::Admin::Organization.find(o.target_org_id)
+			re["total_price"] = o.net_amt
+			return render json:{flag:true,order:re}
+		end
 		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
 		ret = []
 		orders.each{|o|
 			re = JSON.parse(o.to_json)
-			re[:drugs] = o.details
-			re[:organ] = ::Admin::Organization.find(o.target_org_id)
-			re[:total_price] = o.net_amt
+			re["drugs"] = o.details
+			re["organ"] = ::Admin::Organization.find(o.target_org_id)
+			re["total_price"] = o.net_amt
 			ret<<re
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
 	end
 	#支付
 	def pay_order
-		# p '~~~~~~~~~',params
 		order = ::Orders::Order.find(params[:order_id])
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt, title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/order?id=#{order.id}"}#/customer/portal/pay?id=#{order.id}
+		p '~~~~~~~~~',args
 		case params[:pay_type]
 		when "Alipay"
 			res = Pay::Alipay.payment(args)
 		when "Wechat"
 			res = Pay::Wechat.payment(args)
 		end
-		# p '~~~~~~~',res
+		p '~~~~~~~ 2',res
 		if res[:state].to_sym==:succ
 			order.order_settle(params[:pay_type],current_user)
 			redirect_to res[:pay_url]
@@ -50,7 +61,7 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~',res
 		if [:succ,:success].include?res[:state].to_sym
 			###退款成功
-			order.cancel_order()
+			order.cancel_order(current_user)
 			redirect_to res[:pay_url]
 		else
 			##退款失败
@@ -67,14 +78,24 @@ class InterfacesController < ApplicationController
 		params[:order][:user_id] = current_user.id
 		params[:order][:current_user] = current_user
 		re = Orders::Order.create_order_by_presc_ids(JSON.parse(params[:order].to_json))
-		raise re[:info] if re[:ret_code]!='0'
+		if re[:ret_code]!='0'
+			flash[:notice] = re[:info]
+			return redirect_to "/customer/portal/settlement"
+		end
 		# p '~~~~~~~~~~~~',re
-		p re
+		# p re
 		if re[:order].payment_type.to_s == '2'
 			redirect_to "/customer/home/order?id=#{re[:order].id}"
 		else re[:order].payment_type.to_s == '1'
 			redirect_to "/customer/portal/pay?id=#{re[:order].id}"
 		end
+	end
+	def cancel_order
+		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
+		p '~~~~~~~~ cancel_order ',ret
+		unless ret[:ret_code] == "0"
+		end
+		render json: ret
 	end
 	# 获取用户购物车
 	def get_prescriptions_cart
@@ -175,7 +196,7 @@ class InterfacesController < ApplicationController
 	def get_duanxinma
 		# p '~~~~~~~~~~',params[:login]
 		# 图片验证码
-		raise "图片验证码错误" unless verify_rucaptcha?
+		# raise "图片验证码错误" unless verify_rucaptcha?
 		raise "手机号错误" unless params[:login].present?
 		args = {:phone=>params[:login], :data_type=>"verify_code", :name=>""}
 		res = Sms::Message.set_up(args)
