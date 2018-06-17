@@ -3,11 +3,11 @@ class PayRefunds < ActiveRecord::Migration[5.1]
   def change
     create_table :pay_refunds do |t|
       t.column :order_id,      :integer
-      t.column :reason,        :string, default: ''
-      t.column :out_refund_no, :string, default: ''
-      t.column :refund_fee,    :float,  default: 0.0
-      t.column :status,        :string, default: ''
-      t.column :status_desc,   :string, default: ''
+      t.column :reason,        :string,  default: ''
+      t.column :out_refund_no, :string,  default: ''
+      t.column :refund_fee,    :decimal, precision: 15, scale: 2
+      t.column :status,        :string,  default: ''
+      t.column :status_desc,   :string,  default: ''
 
       t.timestamps
     end

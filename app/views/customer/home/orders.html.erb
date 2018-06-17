@@ -46,30 +46,30 @@
 </div>
 <template id="my_template">
 	<div style="">
-		<div v-for="item in orders" style="margin-bottom: 16px;">
+		<div v-for="order in orders" style="margin-bottom: 16px;">
 			<ul class="mui-table-view" style="margin-bottom: 8px;">
 				<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-					<a :href="'/customer/home/order?id='+item.id">
+					<a :href="'/customer/home/order?id='+order.id">
 						<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 						<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 						<div class="mui-media-body">
-							<span>{{item.organ.name||"　"}}</span>
+							<span>{{order.organ.name||"　"}}</span>
 							<span style="float: right;color: #F55742;">
-								<span v-if="item.payment_type=='1'">
-									<span v-if="item.status=='1'">未付款</span>
-									<span v-if="item.status=='2'">已付款</span>
-									<span v-if="item.status=='3'">未发货</span>
-									<span v-if="item.status=='4'">已发货</span>
-									<span v-if="item.status=='5'">交易成功</span>
-									<span v-if="item.status=='6'">交易关闭</span>
-									<span v-if="item.status=='7'">交易取消</span>
+								<span v-if="order.payment_type=='1'">
+									<span v-if="order.status=='1'">未付款</span>
+									<span v-if="order.status=='2'">已付款</span>
+									<span v-if="order.status=='3'">未发货</span>
+									<span v-if="order.status=='4'">已发货</span>
+									<span v-if="order.status=='5'">交易成功</span>
+									<span v-if="order.status=='6'">交易关闭</span>
+									<span v-if="order.status=='7'">交易取消</span>
 								</span>
-								<span v-if="item.payment_type=='2'">到店支付</span>
+								<span v-if="order.payment_type=='2'">到店支付</span>
 							</span>
-							<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{item.organ.addr||"　"}}</p>
+							<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{order.organ.addr||"　"}}</p>
 						</div>
 						<ul class="mui-table-view" style="margin: 15px 0;">
-							<li class="mui-table-view-cell no_background" v-for="drug in item.drugs" style="padding-left: 0;">
+							<li class="mui-table-view-cell no_background" v-for="drug in order.drugs" style="padding-left: 0;">
 								<div href="javascript:;" class="">
 									<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
 									<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
@@ -84,13 +84,15 @@
 							</li>
 						</ul>
 						<div style="line-height: 33px;">
-							合计 <span style="color: #F55742;">¥ {{$parent.format_float(item.total_price)}}</span>
+							合计 <span style="color: #F55742;">¥ {{$parent.format_float(order.total_price)}}</span>
 						</div>
 					</a>
 				</li>
 			</ul>
 			<div style="text-align: right;padding-right: 8px;">
-				<button type="button" @click="$parent.cancel_order(item.id)">取消订单</button>
+				<button type="button" @click="$parent.cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
+				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">重新支付</button>
+				<button type="button" onclick="mui.toast('敬请期待')" v-if="order.status=='2'">申请退款</button>
 			</div>
 		</div>
 	</div>
@@ -120,10 +122,11 @@
 					type:'post',
 					data:{id:id},
 					success:function(json) {
-						console.log( json );
 						if (json.ret_code == "0") {
-							
+							location.reload();
+						}else{
 						}
+						mui.toast(json.info);
 					},
 					complete:function() {
 						$("#loading").hide();

@@ -46,6 +46,7 @@ Rails.application.routes.draw do
         get :prescriptions
         get :orders
         get :order
+        get :confirm_order
       end
     end
     resources :portal do
