@@ -5,35 +5,37 @@
 	<div id="encounters_new_div">
 		<!-- 患者基本信息部分 -->
 		<%= render "hospital/home/render/encounters_info" %>
-		<!-- 主业务区域 -->
-  	<div class="float-right-btns" style="position: relative;">
-  		<div style="position: absolute; top: 0; right: 0; z-index: 999;">
-  			<!-- 历史就诊tab -->
-  			<!-- 药品tab显示模板和生成处方按钮 -->
-  			<div v-if="activeTab=='orders' && encounter.id">
-	  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
-	  			<el-button size="mini" @click="openCopyModal">复制</el-button>
-	  			<el-button size="mini" type="warning" @click="openPrescriptionModal" plain>生成处方</el-button>
-  			</div>
-  			<!-- 处方Tab -->
-  		</div>
-			
-  	</div>
-		<el-tabs v-model="activeTab" type="card" @tab-click="handleTabClick">
-      <el-tab-pane label="历史就诊" name="histories">
-      	<!-- 历史就诊列表 -->
-      	<%= render "hospital/home/render/encounters_histories" %>
-      </el-tab-pane>
-      <el-tab-pane label="药品" name="orders">
-      	<!-- 开药之前提示先保存患者基本信息 -->
-      	<%= render "hospital/home/render/encounters_orders" %>
+		<!-- <div class="card-wrapper"> -->
+			<!-- 主业务区域 -->
+	  	<div class="float-right-btns" style="position: relative;">
+	  		<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
+	  			<!-- 历史就诊tab -->
+	  			<!-- 药品tab显示模板和生成处方按钮 -->
+	  			<div v-if="activeTab=='orders' && encounter.id">
+		  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
+		  			<el-button size="mini" @click="openCopyModal">复制</el-button>
+		  			<el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
+	  			</div>
+	  			<!-- 处方Tab -->
+	  		</div>
+				
+	  	</div>
+			<el-tabs v-model="activeTab" type="border-card" @tab-click="handleTabClick">
+	      <el-tab-pane label="历史就诊" name="histories">
+	      	<!-- 历史就诊列表 -->
+	      	<%= render "hospital/home/render/encounters_histories" %>
+	      </el-tab-pane>
+	      <el-tab-pane label="药品" name="orders">
+	      	<!-- 开药之前提示先保存患者基本信息 -->
+	      	<%= render "hospital/home/render/encounters_orders" %>
 
-      </el-tab-pane>
-      <el-tab-pane label="处方列表" name="prescriptions">
-      	<%= render "hospital/home/render/encounters_prescriptions" %>
+	      </el-tab-pane>
+	      <el-tab-pane label="处方列表" name="prescriptions">
+	      	<%= render "hospital/home/render/encounters_prescriptions" %>
 
-      </el-tab-pane>
-    </el-tabs>
+	      </el-tab-pane>
+	    </el-tabs>
+		<!-- </div> -->
   	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
   	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
   	<!-- 模板弹出框 -->
@@ -186,7 +188,7 @@ window.current_template_obj = {
 	components: {
 		// 处方打印组件
 		'prescriptionprint': {
-			props: ['encounter', 'prescription', 'orgname'],
+			props: ['encounter', 'prescription'],
 		  template: "#prescription-print-template",
 		},
 	},
@@ -278,13 +280,14 @@ window.current_template_obj = {
   		// 搜索患者
   		searchEncounters: function (json) {
   			var _this = this;
+  			_this.encounters = [];
+				if(json.modal){
+					_this[json.modal] = true;
+				}
   			_this.encountersResource.get({search: json.search}).then( function(response) {
   				var res = response.data;
   				if(res.flag) {
   					_this.encounters = res.data;
-  					if(json.modal){
-  						_this[json.modal] = true;
-  					}
   				}
   			}, function(response) {
       		_this.$message.error("搜索就诊失败，请联系管理员。");
@@ -454,11 +457,10 @@ window.current_template_obj = {
 			},
 			// 选择诊断
 			handleSelectDiagnosis: function(item) {
-				var _this = this;
-				var index = _this.focusDiagnosisInputIndex;
-		    _this.encounter.diagnoses[index].code = item.code;
-		    _this.encounter.diagnoses[index].display = item.display;
-		    _this.focusNext('encdiagnose', 'encsave');
+				var index = this.focusDiagnosisInputIndex;
+		    this.encounter.diagnoses[index].code = item.code;
+		    this.encounter.diagnoses[index].display = item.display;
+		    // this.focusNext('encdiagnose', 'encsave');
 			},
 			// 增加诊断
 	  	addDiagnosis: function () {
@@ -768,7 +770,7 @@ window.current_template_obj = {
       	this.mtemplate = {
       		title: "", // 模板名称
       		sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
-      		// disease: {code: "", display: ""}, // 病种
+      		disease: {code: "", display: ""}, // 病种
       		note: "", // 备注
       	}
       	this.mtemplatesResource = Vue.resource('/hospital/sets/mtemplates{/id}.json');
@@ -794,7 +796,7 @@ window.current_template_obj = {
       // 获取药品模板
       getMtemplates: function () {
       	var _this = this;
-      	_this.mtemplatesResource.get().then( function(response) {
+      	_this.mtemplatesResource.get({type: "available"}).then( function(response) {
     			var res = response.data;
     			if(res.flag) {
     				_this.mtemplates = res.data;
@@ -815,7 +817,11 @@ window.current_template_obj = {
 			        });
 	        		return false;
 	        	}
-	        	_this.mtemplate["orders"] = _this.multipleMTempOrdersSelection;
+	        	var ids = [];
+	        	(_this.multipleMTempOrdersSelection||[]).forEach(function (item, index) {
+	        		ids.push(item.id);
+	        	})
+	        	_this.mtemplate["order_ids"] = ids;
 	        	var btn = $(event.target);
 	        	btn.attr("disabled", "disabled").find(".fa").show();
 	        	_this.mtemplatesResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate}).then( function(response) {
@@ -981,6 +987,13 @@ window.current_template_obj = {
     			ids: [], // 药品ids
     		}
     		_this.isShowSendPresDialog = true;
+    	},
+    	// 改变要发送的药品的顺序
+    	sortSeOrderList: function (index, sort) {
+    		var _this = this;
+				var tempOption = _this.sendOrders[index + sort];  
+				Vue.set(_this.sendOrders, index + sort, _this.sendOrders[index]);  
+				Vue.set(_this.sendOrders, index, tempOption); 
     	},
     	// 复制处方
 			copyPrescription: function (index, row) {

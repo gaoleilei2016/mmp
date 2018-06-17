@@ -14,7 +14,8 @@ $--color-transition-base: color .2s cubic-bezier(.645,.045,.355,1) !default;
 $--color-white: #fff !default;
 $--color-black: #000 !default;
 
-$--color-primary: #409EFF !default; // Tiffany蓝
+// $--color-primary: #409EFF !default;   2018/06/16修改颜色 dujuan
+$--color-primary: #0CBDAA !default;
 $--color-primary-light-1: mix($--color-white, $--color-primary, 10%) !default; /* 53a8ff */
 $--color-primary-light-2: mix($--color-white, $--color-primary, 20%) !default; /* 66b1ff */
 $--color-primary-light-3: mix($--color-white, $--color-primary, 30%) !default; /* 79bbff */
@@ -25,9 +26,10 @@ $--color-primary-light-7: mix($--color-white, $--color-primary, 70%) !default; /
 $--color-primary-light-8: mix($--color-white, $--color-primary, 80%) !default; /* d9ecff */
 $--color-primary-light-9: mix($--color-white, $--color-primary, 90%) !default; /* ecf5ff */
 
-$--color-success: #67c23a !default;
+// $--color-success: #67c23a !default;   2018/06/16修改颜色 dujuan
+$--color-success: #28a745 !default;
 $--color-warning: #e6a23c !default;
-$--color-danger: #f56c6c !default;
+$--color-danger: #F44868 !default;
 $--color-info: #909399 !default;
 
 $--color-success-light: mix($--color-white, $--color-success, 80%) !default;
@@ -481,7 +483,7 @@ $--table-text-color: $--color-text-regular !default;
 $--table-header-color: $--color-text-secondary !default;
 $--table-row-hover-background: $--background-color-base !default;
 $--table-current-row-background: $--color-primary-light-9 !default;
-$--table-header-background: #81D8D0 !default; // Tiffany蓝
+$--table-header-background: $--color-white !default;
 $--table-footer-background: $--color-text-placeholder !default;
 $--table-fixed-box-shadow: 0 0 10px rgba(0, 0, 0, .12) !default;
 
