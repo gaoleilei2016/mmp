@@ -48,24 +48,29 @@
 	<div style="">
 		<div v-for="order in orders" style="margin-bottom: 16px;">
 			<ul class="mui-table-view" style="margin-bottom: 8px;">
-				<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+				<li class="mui-table-view-cell">
+					<div>
+						<span>No: {{order.order_code}}</span>
+						<span style="float: right;color: #F55742;">
+							<span v-if="order.payment_type=='1'">
+								<span v-if="order.status=='1'">未付款</span>
+								<span v-if="order.status=='2'">已付款</span>
+								<span v-if="order.status=='3'">未发货</span>
+								<span v-if="order.status=='4'">已发货</span>
+								<span v-if="order.status=='5'">交易成功</span>
+								<span v-if="order.status=='6'">交易关闭</span>
+								<span v-if="order.status=='7'">交易取消</span>
+							</span>
+							<span v-if="order.payment_type=='2'">到店支付</span>
+						</span>
+					</div>
+				</li>
+				<li class="mui-table-view-cell">
 					<a :href="'/customer/home/order?id='+order.id">
 						<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 						<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 						<div class="mui-media-body">
 							<span>{{order.organ.name||"　"}}</span>
-							<span style="float: right;color: #F55742;">
-								<span v-if="order.payment_type=='1'">
-									<span v-if="order.status=='1'">未付款</span>
-									<span v-if="order.status=='2'">已付款</span>
-									<span v-if="order.status=='3'">未发货</span>
-									<span v-if="order.status=='4'">已发货</span>
-									<span v-if="order.status=='5'">交易成功</span>
-									<span v-if="order.status=='6'">交易关闭</span>
-									<span v-if="order.status=='7'">交易取消</span>
-								</span>
-								<span v-if="order.payment_type=='2'">到店支付</span>
-							</span>
 							<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{order.organ.addr||"　"}}</p>
 						</div>
 						<ul class="mui-table-view" style="margin: 15px 0;">
