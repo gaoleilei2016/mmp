@@ -69,6 +69,7 @@ gem 'grape'
 gem 'china_sms'
 gem 'rest-client'
 gem 'alipay'
+gem 'rqrcode'
 gem 'rucaptcha'
 gem 'dalli'
 # hujun===========================

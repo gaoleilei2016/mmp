@@ -2,30 +2,49 @@
 
 require 'alipay'
 
-class Pay::Alipay < ApplicationRecord
-  # self.table_name = 'pay_alipays'
+class Pay::Alipay
 
-  # validates_presence_of :out_trade_no, message: '订单号不能为空'
-  # validates_presence_of :total_fee,    message: '订单金额不能为空'
-  # validates_presence_of :title,        message: '订单标题不能为空'
-
-  # # cost_name(费用类别),
-  # # return_url(支付后返回路径)
-  # # status(订单状态 为success时是已支付)
-  # # status_desc(订单状态描述)
   class << self
+    def refund(ref)
+      client   = get_client
+      res = client.execute(
+              method: ali.refund_api,
+              biz_content: {
+                out_trade_no: ref.order.out_trade_no,
+                out_request_no: ref.out_refund_no,
+                refund_amount: ref.refund_fee,
+                notify_url: ali.refund_notify_url
+              }.to_json(ascii_only: true)
+            )
+      result = JSON.parse(res)['alipay_trade_refund_response']
+      ret = handle_refund_response(result)
+      ref.update_attributes({status: ret[:state], status_desc: ret[:desc]})
+      ret
+    end
+
+    def handle_refund_response(args)
+      return {state: :success, msg: '成功', desc: '退款成功'} if args['code'].eql?('10000')&&args['fund_change'].eql?('Y')
+      {state: :fail, msg: '退款失败', desc: args['msg']}
+    end
+
     # {return_url: '返回url(String)',out_trade_no: '订单号唯一(String)',title:'标题(String)',
     #   total_fee:'支付金额单位元(String)'}
     def payment(args)
       begin
         write_log_return({state: :start, msg: '支付宝付款开始'})
         return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alibaba.usable
-        ali = new(args)
-        return write_log_return({state: :fail, msg: "创建支付记录报错", desc: e.message}) unless ali.save
-        ali.get_payment_url        
+        order = Pay::Order.new(args.merge({pay_type: 'alipay'}))
+        return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
+        get_payment_url(order)
       rescue Exception => e
         write_log_return({state: :fail, msg: "系统错误", desc: e.message})
       end
+    end
+
+    def refund_query()
+    end
+
+    def order_query()
     end
 
     def write_log_return(args)
@@ -33,61 +52,55 @@ class Pay::Alipay < ApplicationRecord
       args[:rec].update_attributes({status: args[:state], status_desc: args[:msg]}) if args[:rec]
       args
     end
-  end
 
-  def get_payment_url
-    begin
+    def get_client
       client = Alipay::Client.new(
           url: ali.url,
           app_id: ali.app_id,
           app_private_key: read_the_file(ali.private_key_root),
           alipay_public_key: read_the_file(ali.public_key_root)
         )
-      payment_url = client.page_execute_url(
-        method: ali.api_name,
-        return_url: get_return_url,
-        notify_url: ali.notify_url,
-        biz_content: {
-          out_trade_no: out_trade_no,
-          product_code: ali.product_code,
-          total_amount: total_fee,
-          subject: title,
-          quit_url: get_return_url
-        }.to_json(ascii_only: true),
-        timestamp: current_time
-      )
-      return self.class.write_log_return({rec: self, state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https')
-      self.class.write_log_return({rec: self, state: :fail, msg: '支付失败', desc: payment_url})
-    rescue Exception => e
-      self.class.write_log_return({rec: self, state: :fail, msg: "支付错误", desc: e.message})
+      client   
     end
-  end
 
-  def paid?
-    status.eql?('success')
-  end
+    def get_payment_url(order)
+      begin
+        client = get_client
+        payment_url = client.page_execute_url(
+          method: ali.api_name,
+          return_url: order.return_url,
+          notify_url: ali.notify_url,
+          biz_content: {
+            out_trade_no: order.out_trade_no,
+            product_code: ali.product_code,
+            total_amount: order.total_fee,
+            subject: order.title
+            # quit_url: get_return_url
+          }.to_json(ascii_only: true),
+          timestamp: current_time
+        )
+        return write_log_return({rec: order, state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https')
+        write_log_return({rec: order, state: :fail, msg: '支付失败', desc: payment_url})
+      rescue Exception => e
+        write_log_return({rec: order, state: :fail, msg: "支付错误", desc: e.message})
+      end
+    end
 
-  private
+    def current_time
+      Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    end
 
-  def get_return_url
-    return return_url if return_url && !return_url.empty?
-    ali.return_url
-  end
+    def ali
+      Set::Alibaba
+    end
 
-  def current_time
-    Time.now.strftime("%Y-%m-%d %H:%M:%S")
-  end
+    def base_set
+      {product_code: ali.product_code, quit_url: ali.notify_url}
+    end
 
-  def ali
-    Set::Alibaba
-  end
-
-  def base_set
-    {product_code: ali.product_code, quit_url: ali.notify_url}
-  end
-
-  def read_the_file(file_root)
-    File.read(file_root)
+    def read_the_file(file_root)
+      File.read(file_root)
+    end
   end
 
   #----------------------------
@@ -130,30 +143,4 @@ class Pay::Alipay < ApplicationRecord
     sign = md5_sign(arr_data.join('&'))
     datas[:sign] = sign
   end
-
-  # def args
-  #   {
-  #     app_id: '2018060860325957',
-  #     method: 'alipay.trade.wap.pay',
-  #     format: 'JSON',
-  #     charset: 'utf-8',
-  #     sign_type: 'RSA2',
-  #     sign: '',
-  #     timestamp: current_time,
-  #     version: '1.0',
-  #     notify_url: 'http://mmp.tenmind.com/pay/alipay',
-  #     biz_content: ''
-  #   }
-  # end
-
-  # def body
-  #   {
-  #     body: '测试一下支付嘛',
-  #     subject: '药品',
-  #     out_trade_no: '123456',
-  #     timeout_express: '1d'
-  #     total_amount: 0.01,
-  #     product_code: '2018060810537243'
-  #   }
-  # end
 end
