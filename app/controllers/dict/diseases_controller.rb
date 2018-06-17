@@ -4,7 +4,7 @@ class ::Dict::DiseasesController < ApplicationController
 	# /dict/diseases
 	def index
 		p "::Dict::DiseasesController index"
-		search = params[:search]
+		search = params[:search].to_s
 		@diseases = ::Dict::Disease.where("ICD10 LIKE ?  OR name LIKE ? OR py LIKE ?", "%#{search}%", "%#{search}%", "%#{search.upcase}%").page(params[:page]||1).per(params[:per]||25)
 		ret = @diseases.map { |e| e.to_ICD10_fhir_type }
 	    respond_to do |format|
