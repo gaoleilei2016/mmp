@@ -54,6 +54,7 @@ class Hospital::PrescriptionsController < ApplicationController
         @prescription.link_diagnoses(args[:diagnoses_args], current_user)
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
+        @prescription.set_tookcode
         p "link_orders save"
         # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
         audit_args = {
