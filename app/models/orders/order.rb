@@ -196,8 +196,8 @@ class Orders::Order < ApplicationRecord
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
-					sch.timer_at(Time.now + 1.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
-					result[:info].concat("请在#{(Time.now + 1.minutes).to_s(:db)}之前完成订单支付")
+					sch.timer_at(Time.now + 10.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
+					result[:info].concat("请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
 				end
 				#订单创建成功之后改变处方状态
 				args = {
