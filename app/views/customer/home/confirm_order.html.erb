@@ -34,6 +34,9 @@
 		<div style="padding: 20px;">
 			<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="display: block;width: 100%;padding: 8px 0;" onclick="location.href='/customer/portal/pay?id=<%= params[:id] %>'">重新支付</button>
 		</div>
+		<div style="padding: 20px;">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="display: block;width: 100%;padding: 8px 0;" @click="cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
+		</div>
 	</div>
 </div>
 <script type="text/javascript">
@@ -43,6 +46,27 @@
 			order:null,
 		},
 		methods:{
+			cancel_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/cancel_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.ret_code == "0") {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
 			confirm_order:function() {
 				this.get_and_confirm_order("show_info");
 			},

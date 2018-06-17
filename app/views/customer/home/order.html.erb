@@ -66,7 +66,7 @@
 			</li>
 		</ul>
 		<div style="text-align: right;padding-right: 8px;margin-bottom: 8px;">
-			<button type="button">申请退款</button>
+			<button type="button" v-if="order.status=='2'">申请退款</button>
 		</div>
 		<div style="padding-left: 12px;">
 			<div class="common_grey">订单编号：{{order.order_code}}</div>
