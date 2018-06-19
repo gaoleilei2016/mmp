@@ -43,7 +43,7 @@
 				    prop="gender.code">
 				    <span v-if="encounter.gender&&encounter.gender.display.indexOf('女')>-1" class="fa fa-venus gender-icon"></span>
 				    <span v-else class="fa fa-mars gender-icon"></span>
-				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" filterable>
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
 					      :key="item.code"
@@ -293,7 +293,7 @@
 					<el-form-item
 				    label="取药点"
 				    prop="drugstore_location">
-				    <el-select v-model="encounter.drugstore_location" value-key="id" placeholder="选择药房" style="width: 100%;" ref="enclocation" @keydown.enter.stop.native="focusNext('enclocation', 'encsave')" clearable>
+				    <el-select v-model="encounter.drugstore_location" value-key="id" placeholder="选择药房" style="width: 100%;" ref="enclocation" @keyup.enter.stop.native="focusNext('enclocation', 'encsave')" clearable>
 					    <el-option
 					      v-for="item in locations"
 					      :key="item.id"
