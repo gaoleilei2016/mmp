@@ -9,9 +9,17 @@
 		<el-row>
 	  	<el-col :span="10">
 	  		<el-form-item
-			    label="订单效期"
+			    label="付费未取药过期天数"
 			    prop="validity">
-			    <el-input v-model="setting.validity" auto-complete="off" name="settings[validity]">
+			    <el-input v-model="setting.validity" auto-complete="off" name="ims_setting[payment_expired]">
+				    <template slot="append">天</template>
+				  </el-input>
+			  </el-form-item>
+
+			<el-form-item
+			    label="未支付订单过期天数"
+			    prop="validity">
+			    <el-input v-model="setting.validity" auto-complete="off" name="ims_setting[unpaid_expired]">
 				    <template slot="append">天</template>
 				  </el-input>
 			  </el-form-item>
@@ -19,7 +27,7 @@
 			  <el-form-item
 			    label="语音提示"
 			    prop="voice">
-			  	<el-select v-model="setting.voice" value-key="code" placeholder="请选择" name="settings[voice]">
+			  	<el-select v-model="setting.voice" value-key="code" placeholder="请选择" name="ims_setting[voice_prompts]">
 				    <el-option
 				      v-for="item in options"
 				      :key="item.value"
@@ -33,7 +41,7 @@
 
 			<el-col :span="24">
 			  <el-form-item>
-			    <el-button id="submit_btn" type="primary" @click="submitForm('settingForm')">提交</el-button>
+			    <el-button id="submit_btn" type="primary" v-on:click="submitForm('settingForm')">提交</el-button>
 			  </el-form-item>
 			</el-col>
 		</el-row>
