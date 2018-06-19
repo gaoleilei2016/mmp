@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180617095501) do
+ActiveRecord::Schema.define(version: 20180617114240) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -251,6 +251,9 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.string "factory_name"
     t.string "base_unit"
     t.decimal "mul", precision: 10
+    t.decimal "measure_val", precision: 10
+    t.string "measure_unit"
+    t.string "type_type", default: "Instance"
   end
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
@@ -414,6 +417,7 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "firm", limit: 50
+    t.bigint "ori_detail_id", comment: "退药情况下记录原单detail_id"
   end
 
   create_table "orders_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -443,6 +447,9 @@ ActiveRecord::Schema.define(version: 20180617095501) do
     t.string "patient_age", limit: 10
     t.string "patient_iden", limit: 20
     t.string "pay_type", limit: 20
+    t.integer "is_returned", limit: 1, comment: "是否已退药"
+    t.bigint "ori_id", comment: "原单id(退药的单子做记录)"
+    t.string "ori_code", comment: "原单code(退药的单子做记录)"
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

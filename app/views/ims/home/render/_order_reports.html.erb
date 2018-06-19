@@ -1,0 +1,46 @@
+<div clas="el-col-20" style="height:calc(100% - 120px);">
+<div class="el-row" style="float:left; width:calc(100% - 120px);">
+
+  <el-row style="padding:8px; border-bottom:1px solid #ddd;">
+  	<el-col :span="4" style="width:60px;"><i class="fa fa-area-chart fa-fw fa-3x"></i></el-col>
+  	<el-col :span="20"><h3>基础报表</h3></el-col>
+	</el-row>
+
+	<el-form size="mini" style="padding-top:8px;" id="setting_form" :rules="rules" :model="setting" ref="settingForm" label-width="100px" url="/ims/settings/save_settings" method="post">
+		<el-row>
+	  	<el-col :span="10">
+			  <div class="block">
+			    <el-date-picker
+			      v-model="value7"
+			      type="daterange"
+			      align="right"
+			      unlink-panels
+			      range-separator="至"
+			      start-placeholder="开始日期"
+			      end-placeholder="结束日期"
+			      :picker-options="pickerOptions2">
+			    </el-date-picker>
+			  </div>
+			</el-col>
+
+			<el-col :span="10">
+			  <el-select v-model="report_type" placeholder="请选择类型">
+			    <el-option
+			      v-for="item in options"
+			      :key="item.value"
+			      :label="item.label"
+			      :value="item.value">
+			    </el-option>
+			  </el-select>
+			</el-col>
+
+			<el-col :span="5">
+			  <el-form-item>
+			    <el-button id="submit_btn" type="primary" @click="submitForm('settingForm')">提交</el-button>
+			  </el-form-item>
+			</el-col>
+			
+		</el-row>
+	</el-form>
+</div>
+</div>

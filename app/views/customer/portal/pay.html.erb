@@ -1,9 +1,3 @@
-<header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/customer/portal/settlement" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-		<span class="mui-icon mui-icon-left-nav"></span>
-	</a>
-	<h1 class="mui-title">支付订单</h1>
-</header>
 <style type="text/css">
 	html,body,.mui-content{
 		height: 100%;
@@ -14,10 +8,16 @@
 		padding-bottom: 60px;
 	}
 </style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/portal/settlement" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">支付订单</h1>
+</header>
 <div class="mui-content" id="vue_content">
 	<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
 		<!-- <div style="color: #999;">订单支付超时，请重新下单</div> -->
-		<div style="color: #999;">订单有效期 23:59:59</div>
+		<div style="color: #999;">订单有效期 <span id="set_time"></span></div>
 		<div style="font-size: 2em;padding: 6px 0;">¥ <%= sprintf("%.2f",@order.net_amt) %></div>
 		<div style="color: #999;font-size: .8em;"><%= "华希订单-#{@order.order_code}" %></div>
 	</div>
@@ -45,6 +45,15 @@
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
+	function set_time(msecond){
+		var minutes = parseInt(msecond/(1000 * 60));
+		var seconds = parseInt(msecond%(1000 * 60)/1000);
+		$("#set_time").text(minutes+':'+seconds);
+	};
+	var deadline = new Date("<%= @order.created_at+30.minutes %>");
+	setInterval(function() {
+		set_time( deadline - new Date() );
+	},1000);
 	// document.querySelector('.mui-table-view.mui-table-view-radio').addEventListener('selected',function(e){
 	// 	console.log( e.detail );
 	// });
