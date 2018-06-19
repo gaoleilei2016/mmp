@@ -41,6 +41,11 @@ body > .container{
 		    <span slot="title">退药</span>  
 		  </el-menu-item>
 
+      <el-menu-item index="2" @click="show_panel('return_drug')">
+        <i class="el-icon-sold-out"></i>
+        <span slot="title">统计</span>  
+      </el-menu-item>
+
 		  <el-menu-item index="3" @click="show_panel('reports')">
 		    <i class="el-icon-document"></i>
 		    <span slot="title">报表</span>
