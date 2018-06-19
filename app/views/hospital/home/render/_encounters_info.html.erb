@@ -350,23 +350,27 @@
 	  </el-table-column>
 	  <el-table-column
 	    prop="gender.display"
+	    align="center"
 	    min-width="50"
 	    label="性别">
 	  </el-table-column>
 	  <el-table-column
 	    prop="age"
+	    align="center"
 	    min-width="50"
 	    label="年龄">
 	  </el-table-column>
 	  <el-table-column
 	    min-width="200"
+	    align="center"
 	    label="身份证号码">
 	    <template slot-scope="scope">
-	    	<i class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
+	    	<i v-if="scope.row.iden" class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
 	    min-width="100"
+	    align="center"
 	    label="出生日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.birth_date | formatDate("yyyy-MM-dd") }}
@@ -374,13 +378,15 @@
 	  </el-table-column>
 	  <el-table-column
 	    min-width="140"
+	    align="center"
 	    label="手机号码">
 	    <template slot-scope="scope">
-	    	<i class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
+	    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
 	    min-width="140"
+	    align="center"
 	    label="就诊日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.created_at | formatDate }}

@@ -45,10 +45,8 @@
     align="center"
     label="药品">
     <template slot-scope="scope">
-      <el-tooltip content="查看药品详情" placement="bottom" effect="light">
-        <el-button v-if="scope.row.orders_count>0" size="mini" type="primary" @click="openHisOrdersDialog(scope.row)" plain>{{scope.row.orders_count}} 个</el-button>
-        <span v-else>0 个</span>
-      </el-tooltip>
+      <el-button v-if="scope.row.orders_count>0" size="mini" type="primary" @click="openHisOrdersDialog(scope.row)" title="查看药品详情" plain>{{scope.row.orders_count}} 个</el-button>
+      <span v-else>0 个</span>
     </template>
   </el-table-column>
   <el-table-column
@@ -56,10 +54,8 @@
     align="center"
     label="处方">
     <template slot-scope="scope">
-      <el-tooltip content="查看处方详情" placement="bottom" effect="light">
-        <el-button v-if="scope.row.prescriptions_count>0" size="mini" type="success" @click="openHisPresDialog(scope.row)" plain>{{scope.row.prescriptions_count}} 张</el-button>
-        <span v-else>0 张</span>
-      </el-tooltip>
+      <el-button v-if="scope.row.prescriptions_count>0" size="mini" type="success" @click="openHisPresDialog(scope.row)" title="查看处方详情" plain>{{scope.row.prescriptions_count}} 张</el-button>
+      <span v-else>0 张</span>
     </template>
   </el-table-column>
 <!--   <el-table-column
