@@ -112,7 +112,7 @@
 		  :title="(!mtemplate.id ? '新建' : '编辑')+'模板'"
 		  :visible.sync="isShowFormDialog"
 		  width="90%">
-		  <%= render "hospital/home/render/encounters_orders" %>
+		  <%= render "hospital/home/render/encounters_orders_partial" %>
 		  <br/>
 		  <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
         <el-form-item 
@@ -137,8 +137,8 @@
           <el-autocomplete size="mini" v-model="mtemplate.disease&&mtemplate.disease.display" ref="diagnose" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
             <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="mtemplate.disease={code: '', display: ''}"></i>
             <template slot-scope="props">
-              <el-col :span="10">{{props.item.code}}</el-col>
-              <el-col :span="14">{{props.item.display}}</el-col>
+              <span style="float: left">{{ props.item.display }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
             </template>
           </el-autocomplete>
         </el-form-item>
