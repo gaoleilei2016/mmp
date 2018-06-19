@@ -81,6 +81,26 @@
 				<div class="mui-switch-handle"></div>
 			</div>
 		</li>
+		<template v-if="fapiao">
+			<li class="mui-table-view-cell">
+				<a href="javascript:$('#xxxxx1,#xxxxx3').show();" class="mui-navigate-right">
+					<span>发票类型</span>
+					<span class='mui-pull-right' style="color: #999;">电子发票</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+					<span>发票内容</span>
+					<span class='mui-pull-right' style="color: #999;">明细</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+					<span>发票抬头</span>
+					<span class='mui-pull-right' style="color: #999;"></span>
+				</a>
+			</li>
+		</template>
 	</ul>
 	<p style="font-size: 10px;padding: 10px 14px;margin: 0;">温馨提示：本平台只对处方药品作信息展示。 所有处方均来源于医院并授权许可，真实有效。 所有药品均由具备资质的药店提供。</p>
 	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 997;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
@@ -98,16 +118,10 @@
 		</select>
 	</form>
 </div>
-<div id="xxxxx1" onclick="$('#xxxxx1,#xxxxx2').hide();" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
+<div id="xxxxx1" onclick="$('#xxxxx1,#xxxxx2,#xxxxx3').hide();" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
 <div id="xxxxx2" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
 	<p style="text-align: center;padding: 12px;font-size: 12px;">支付方式</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
-		<!-- <li class="mui-table-view-cell">
-			<a href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx2').hide();">在线支付</a>
-		</li>
-		<li class="mui-table-view-cell">
-			<a href="javascript:;" onclick="current_app.pay_type='offline';$('#xxxxx1,#xxxxx2').hide();">到店支付</a>
-		</li> -->
 		<li class="mui-table-view-cell mui-selected">
 			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx2').hide();">在线支付</a>
 		</li>
@@ -118,6 +132,22 @@
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
 			<a href="javascript:$('#xxxxx1,#xxxxx2').hide();"><b>关闭</b></a>
+		</li>
+	</ul>
+</div>
+<div id="xxxxx3" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
+	<p style="text-align: center;padding: 12px;font-size: 12px;">支付方式</p>
+	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
+		<li class="mui-table-view-cell mui-selected">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx3').hide();">在线支付</a>
+		</li>
+		<li class="mui-table-view-cell">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='offline';$('#xxxxx1,#xxxxx3').hide();">到店支付</a>
+		</li>
+	</ul>
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
+			<a href="javascript:$('#xxxxx1,#xxxxx3').hide();"><b>关闭</b></a>
 		</li>
 	</ul>
 </div>
