@@ -306,6 +306,10 @@ class Orders::Order < ApplicationRecord
 		def order_completion attrs = {}
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:''}
+			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
+				result[:ret_code] = '-1'
+				result[:info].concat("当前订单状态异常!")	
+			end
 			if attrs[:id].blank?
 				result[:ret_code] = '-1'
 				result[:info].concat("发药人不能为空!")
@@ -317,10 +321,6 @@ class Orders::Order < ApplicationRecord
 			if attrs[:drug_user_id].blank?
 				result[:ret_code] = '-1'
 				result[:info].concat("订单ID不能为空!")
-			end
-			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
-				result[:ret_code] = '-1'
-				result[:info].concat("当前订单状态异常!")	
 			end
 			if result[:ret_code].to_s == '0'
 				order.update_attributes(drug_user:attrs[:drug_user],
