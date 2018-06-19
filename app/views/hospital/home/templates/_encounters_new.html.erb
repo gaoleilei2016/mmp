@@ -119,7 +119,7 @@ window.current_template_obj = {
 			    ],
 				},
 				birthPickerOptions: {
-					disabledDate(time) {
+					disabledDate: function (time) {
 	          return time.getTime() > Date.now();
 	        },
 				},
@@ -544,6 +544,7 @@ window.current_template_obj = {
 	    			var res = response.data;
 	    			if(res.flag) {
 	    				_this.diagnoses = res.data;
+	    				_this.encounter.diagnoses = res.master;
 	    			}
 	    		}, function (response) {
 	    			_this.$message.error("获取诊断列表失败，请联系管理员。");
@@ -642,6 +643,21 @@ window.current_template_obj = {
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		_this.$message.error("删除诊断失败，请联系管理员。");
 	      	})
+		    },
+		    sortDiagnoses: function (index, sort) {
+		    	var _this = this;
+					var tempOption = _this.diagnoses[index + sort];  
+					_this.$http.post('/hospital/diagnoses/sort', {encounter_id: _this.encounter.id, tag_id: _this.diagnoses[index].id, exchange_id: tempOption.id, sort: sort, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	          var res = response.data;
+	          if(res.flag) {
+	      			Vue.set(_this.diagnoses, index + sort, _this.diagnoses[index]);  
+							Vue.set(_this.diagnoses, index, tempOption); 
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	        }, function() {
+	          _this.$message.error("后台出错，调整顺序失败。请联系管理员");
+	        });
 		    },
 			/* encounter 诊断编辑 ----end */ 
 
