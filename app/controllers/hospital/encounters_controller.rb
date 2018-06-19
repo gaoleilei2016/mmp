@@ -105,10 +105,15 @@ class Hospital::EncountersController < ApplicationController
       @encounter = ::Hospital::Encounter.new(create_data[:encounter])
       respond_to do |format|
         ::ActiveRecord::Base.transaction  do
+          cur_person = @encounter.get_or_create_person! # 先查询或者建档
           if @encounter.save! # 保存成功后创建诊断和过敏信息
-            cur_person = @encounter.get_person
-            # p "person_id = #{cur_person.id} name = #{cur_person.name}"
-            @encounter.update_attributes!(::Hospital::Encounter.get_encounter_info_from_person(cur_person.id))
+            # 把就诊和Person相同的信息做合并  以填写的Encounter的信息为准  用Person的数据补全
+            encounter_info_from_person = ::Hospital::Encounter.get_encounter_info_from_person(cur_person.id)
+            need_update_encounter_info =  encounter_info_from_person.delete_if {|key, value| create_data[:encounter][key].present?} # 补全信息
+            p need_update_encounter_info
+            # 更新Encounter信息
+            @encounter.update_attributes!(need_update_encounter_info)
+            cur_person.update_attributes!(@encounter.format_person_args)
             ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
             ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
             format.html { redirect_to @encounter.to_web_front, notice: 'encounter was successfully created.' }
@@ -182,13 +187,13 @@ class Hospital::EncountersController < ApplicationController
       args = encounter_params
       cur_hospital = current_user.organization
       encounter_agrs = {
-        name: args[:name],
+        name: args[:name].to_s.strip,
         gender_code: args[:gender][:code], 
         gender_display: args[:gender][:display], 
         age: args[:age], 
         birth_date: args[:birth_date], 
         iden: args[:iden], 
-        phone: args[:phone], 
+        phone: args[:phone].to_s.strip, 
         address: args[:address], 
         occupation_code: args[:occupation][:code], 
         occupation_display: args[:occupation][:display], 
@@ -210,7 +215,7 @@ class Hospital::EncountersController < ApplicationController
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息
       ret  = {
-        encounter: encounter_agrs,
+        encounter: encounter_agrs.delete_if {|key,value| value.blank?},
         diagnoses: diagnose_args, # ICD10 [{code: '', display: ''}]
         irritabilities: allergen_args # ['过敏一', '过敏二']
       }
@@ -219,13 +224,13 @@ class Hospital::EncountersController < ApplicationController
     def format_encounter_update_params
       args = encounter_params
       encounter_agrs = {
-        name: args[:name],
+        name: args[:name].to_s.strip,
         gender_code: args[:gender][:code], 
         gender_display: args[:gender][:display], 
         age: args[:age], 
         birth_date: args[:birth_date], 
         iden: args[:iden], 
-        phone: args[:phone], 
+        phone: args[:phone].to_s.strip, 
         address: args[:address], 
         occupation_code: args[:occupation][:code], 
         occupation_display: args[:occupation][:display], 
@@ -245,7 +250,7 @@ class Hospital::EncountersController < ApplicationController
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息
       ret  = {
-        encounter: encounter_agrs,
+        encounter: encounter_agrs.delete_if {|key,value| value.blank?},
         diagnoses: diagnose_args, # ICD10 [{code: '', display: ''}]
         irritabilities: allergen_args # ['过敏一', '过敏二']
       }
