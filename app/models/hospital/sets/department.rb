@@ -1,7 +1,8 @@
 class ::Hospital::Sets::Department < ApplicationRecord
 
-	belongs_to :organization,  class_name: "::Admin::Organization",       foreign_key: 'org_id', optional: true
-	# belongs_to :doctors,  class_name: "::User",   foreign_key: 'department_id'
+
+	# 每一个设置的科室必须存在机构
+	belongs_to :organization,  class_name: "::Admin::Organization",       foreign_key: 'org_id'
 
 	class<<self
 	end
