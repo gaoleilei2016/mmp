@@ -96,20 +96,20 @@
 			})
 			$('.BMap_geolocationIcon').click()
 		})
-		$(function() {
-			setInterval(function() {
-				// $('.BMap_geolocationIcon').click()
-				addressOverlay('',function(point) {
-					// var mk = new BMap.Marker(point);
-					// map.addOverlay(mk);
-					// var point = new BMap.Point(106.7091771,26.62990674);
-					last_marker&&last_marker.setPosition(point);
-					// console.log( '~~~~',point );
-					// map.panTo(point);
-				});
-				// console.log( map.getOverlays() );
-			},8000); // 浏览器记录不了同意定位时反复确认？
-		})
+		// $(function() {
+		// 	setInterval(function() {
+		// 		// $('.BMap_geolocationIcon').click()
+		// 		addressOverlay('',function(point) {
+		// 			// var mk = new BMap.Marker(point);
+		// 			// map.addOverlay(mk);
+		// 			// var point = new BMap.Point(106.7091771,26.62990674);
+		// 			last_marker&&last_marker.setPosition(point);
+		// 			// console.log( '~~~~',point );
+		// 			// map.panTo(point);
+		// 		});
+		// 		// console.log( map.getOverlays() );
+		// 	},8000); // 浏览器记录不了同意定位时反复确认？
+		// })
 
 		// map.panTo(new_point);  
 		// var myGeo = new BMap.Geocoder();    

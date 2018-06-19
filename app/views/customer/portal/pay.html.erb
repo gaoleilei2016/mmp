@@ -9,7 +9,7 @@
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/customer/portal/settlement" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
 	</a>
 	<h1 class="mui-title">支付订单</h1>
@@ -47,10 +47,13 @@
 	$("#bottom_tabs").remove();
 	function set_time(msecond){
 		var minutes = parseInt(msecond/(1000 * 60));
+		minutes<10 ? minutes='0'+minutes : '';
 		var seconds = parseInt(msecond%(1000 * 60)/1000);
+		seconds<10 ? seconds='0'+seconds : '';
 		$("#set_time").text(minutes+':'+seconds);
 	};
-	var deadline = new Date("<%= @order.created_at+30.minutes %>");
+	// alert("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>")
+	var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>");
 	setInterval(function() {
 		set_time( deadline - new Date() );
 	},1000);
