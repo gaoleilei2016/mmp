@@ -13,11 +13,11 @@
 	  <el-tabs v-model="out_list_panel" type="card" @tab-click="get_out_pres">
 	    <el-tab-pane label="未交费" name="1"></el-tab-pane>
 	    <el-tab-pane label="待发药" name="2"></el-tab-pane>
-				<el-row :gutter="20" v-for="pre in pres" class="pre_list" @click.native="get_pre(pre.order_id,$event)">
-					<el-col :span="6" style="width:120px;">{{format_time(pre.created_at)}}</el-col>
-					<el-col :span="6" style="width:calc(100% - 280px)">{{pre.order_code}}</el-col>
-					<el-col :span="6" style="width:80px;">{{pre.patient_name}}</el-col>
-					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(pre.amt)}}</el-col>
+				<el-row :gutter="20" v-for="order in order_lists" class="pre_list" @click.native="get_order(order.order_id,$event)">
+					<el-col :span="6" style="width:120px;">{{format_time(order.created_at)}}</el-col>
+					<el-col :span="6" style="width:calc(100% - 280px)">{{order.order_code}}</el-col>
+					<el-col :span="6" style="width:80px;">{{order.patient_name}}</el-col>
+					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(order.amt)}}</el-col>
 				</el-row>
 	  </el-tabs>
 	</div>
@@ -28,3 +28,11 @@
 	</div>
 
 </div>
+
+<el-dialog title="" :visible.sync="dialogFormVisible" class="platform_search_dialog">
+	<%= render "ims/home/render/platform_search"%>
+  <div slot="footer" class="dialog-footer">
+    <el-button size="small" type="primary" @click="platform_charging_fun()">收费</el-button>
+    <el-button size="small" type="primary" @click="platform_charging_and_out_fun()">收费并发药</el-button>
+  </div>
+</el-dialog>

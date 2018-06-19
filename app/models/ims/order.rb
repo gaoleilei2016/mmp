@@ -145,7 +145,9 @@ class Ims::Order < ApplicationRecord
               },
           pres:[]
         }
-          
+          p "++++++++++++++++++++++++++"
+          p prescriptions
+          p "++++++++++++++++++++++++++"
           temp = 0;    
           prescriptions.each do |k,v|
             p "---------------------",v
@@ -158,6 +160,9 @@ class Ims::Order < ApplicationRecord
                     price: x[:price],
                     net_amt: (x[:total_quantity].to_f*x[:price].to_f),
                     firm:x[:firm],
+                    frequency:x[:frequency][:display],
+                    dose:x[:dose][:value].to_s + x[:dose][:unit].to_s,
+                    route:x[:route][:display]
                   }
                 }
             data[:pres] <<{
@@ -183,6 +188,7 @@ class Ims::Order < ApplicationRecord
               :note => v[:note],
               :pre_type => v[:type][:display],
               :diagnoses => ((v[:diagnoses]||[]).map{|e| e.display}.join(",") rescue nil),
+              :created_at => v[:created_at],
               details: details
             }
           end
