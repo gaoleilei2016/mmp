@@ -57,7 +57,7 @@ class Hospital::Encounter < ApplicationRecord
 			  code: self.patient_domain_code,
 			  display: self.patient_domain_display
 			},
-			patient_no: self.outpatient_no,
+			patient_no: self.patient_no,
 			started_at: self.started_at,
 			created_at: self.created_at,
 			updated_at: self.updated_at,
