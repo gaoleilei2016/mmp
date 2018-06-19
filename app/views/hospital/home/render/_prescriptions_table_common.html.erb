@@ -1,6 +1,6 @@
 	<el-table-column type="expand">
     <template slot-scope="props">
-    	<div class="pres-table-presprint-wrapper" style="width: calc( 100% - 150px );">
+    	<div class="pres-table-presprint-wrapper">
     		<prescriptionprint :encounter="encounter" :prescription="props.row" :orgname="orgname"></prescriptionprint>
     	</div>
     </template>
@@ -46,14 +46,6 @@
   </el-table-column>
   <el-table-column
     min-width="80"
-    align="center"
-    label="科室">
-    <template slot-scope="scope">
-    	<span v-if="encounter.encounter_loc">{{encounter.encounter_loc.display}}</span>
-    </template>
-  </el-table-column>
-  <el-table-column
-    min-width="80"
     align="right"
     label="金额">
     <template slot-scope="scope">
@@ -61,7 +53,7 @@
     </template>
   </el-table-column>
   <el-table-column
-    min-width="50"
+    min-width="70"
     align="center"
     label="医生">
     <template slot-scope="scope">

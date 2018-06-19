@@ -109,6 +109,8 @@ Rails.application.routes.draw do
         post :create_by_encounter_id
       end
     end
+
+    resources :patients
   end
   ########### hospital ##########
   ############################

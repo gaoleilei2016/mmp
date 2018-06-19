@@ -3,20 +3,405 @@
 <template>
 	<!-- 接诊管理、统计页面 -->
 	<div id="encounters_index_div">
-		encounters
-		<img src="<%= Set::QrCode.base64_data('My|name|hujun413165') %>" />
-		fnweinfiwfiwenfiwenfiew
+		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+		  <el-breadcrumb-item>接诊统计</el-breadcrumb-item>
+		</el-breadcrumb>
+		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+			<div style="">
+				<el-row :gutter="5" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<el-input
+					    placeholder="搜索患者名称 / 简拼"
+					    prefix-icon="el-icon-search"
+					    size="mini"
+					    v-model="search">
+					    <i
+						    class="el-icon-circle-close-outline el-input__icon"
+						    slot="suffix"
+						    v-on:click="search=''">
+						  </i>
+					  </el-input>
+					</el-col>
+					<el-col :span="6" style="line-height: 30px;">&nbsp;
+						<el-button @click="isShowfilters = !isShowfilters" size="mini">高级搜索<span v-if="isShowfilters" class="fa fa-lg fa-fw fa-angle-double-up"></span><span v-else class="fa fa-lg fa-fw fa-angle-double-down"></span></el-button>
+						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
+					</el-col>
+					<el-col :span="10" style="text-align: right;">
+						<!-- <el-button size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建科室</el-button> -->
+					</el-col>
+				</el-row>
+				<el-row v-if="isShowfilters" :gutter="5" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<small>日期</small>
+						<el-date-picker
+				      v-model="filter.range"
+				      type="datetimerange"
+				      :picker-options="rangePickerOptions"
+				      range-separator="至"
+				      start-placeholder="开始日期"
+				      end-placeholder="结束日期"
+				      size="mini"
+				      style="width: 100%;"
+				      align="right">
+				    </el-date-picker>
+					</el-col>
+					<el-col :span="6">
+						<small>疾病</small>
+						<el-autocomplete size="mini" v-model="filter.disease" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDisease" :debounce="300" style="width: 100%;">
+	            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="filter.disease=''"></i>
+	            <template slot-scope="props">
+	            	<span style="float: left">{{ props.item.display }}</span>
+      					<span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
+	            </template>
+	          </el-autocomplete>
+					</el-col>
+					<el-col :span="2" style="padding-top: 18px;">
+						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+					</el-col>
+				</el-row>
+				<el-table
+		      :data="encounters"
+		      :height="tableHeight"
+		      @selection-change="handleSelectionChange"
+		      class="thiner-row"
+		      style="width: 100%">
+		      <el-table-column
+			      type="selection"
+			      width="30">
+			    </el-table-column>
+		      <el-table-column
+				    min-width="130"
+				    label="患者">
+				    <template slot-scope="scope">
+				      <span v-if="scope.row.name" style="display: inline-block; width: 70px;">{{ scope.row.name }}</span>&#12288;
+				      <i v-html="judgeGender(scope.row.gender&&scope.row.gender.display)"></i>&#12288;
+				      <span v-if="scope.row.age">{{ scope.row.age }}岁</span>
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="200"
+				    align="center"
+				    label="身份证号码">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.iden" class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="100"
+				    align="center"
+				    label="出生日期">
+				    <template slot-scope="scope">
+				    	{{ scope.row.birth_date | formatDate("yyyy-MM-dd") }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="140"
+				    align="center"
+				    label="手机号码">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="140"
+				    align="center"
+				    label="就诊日期">
+				    <template slot-scope="scope">
+				    	{{ scope.row.created_at | formatDate }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="100"
+				    label="过敏">
+				    <template slot-scope="scope">
+				    	<el-tag v-for="(tag,index) in (scope.row.allergens||[])" :key="index" size="mini" type="info">{{tag}}</el-tag>
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="250"
+				    label="诊断">
+				    <template slot-scope="scope">
+				      <el-tag v-for="(tag,index) in (scope.row.diagnoses||[])" :key="index" size="mini" type="info">{{tag.display}}</el-tag>
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="70"
+				    align="center"
+				    label="药品">
+				    <template slot-scope="scope">
+				      <el-button v-if="scope.row.orders_count>0" size="mini" type="primary" @click="openOrdersDialog(scope.row)" title="查看药品详情" plain>{{scope.row.orders_count}} 个</el-button>
+				      <span v-else>0 个</span>
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="70"
+				    align="center"
+				    label="处方">
+				    <template slot-scope="scope">
+				      <el-button v-if="scope.row.prescriptions_count>0" size="mini" type="success" @click="openPresDialog(scope.row)" title="查看处方详情" plain>{{scope.row.prescriptions_count}} 张</el-button>
+				      <span v-else>0 张</span>
+				    </template>
+				  </el-table-column>
+		    </el-table>
+			</div>
+	  </el-tabs>
+	  <!-- 分页标记 -->
+	  <el-pagination
+	  	background
+	    @size-change="handleSizeChange"
+	    @current-change="handleCurrentChange"
+	    :current-page="currentPage"
+	    :page-sizes="[10, 25, 50, 100, 200]"
+	    :page-size="pageSize"
+	    layout="total, sizes, prev, pager, next, jumper"
+	    :total="dataCount">
+	  </el-pagination>
+
+
+	  <el-dialog
+		  title="药品列表"
+		  :visible.sync="isShowOrdersDialog"
+		  width="90%">
+		  <el-table
+		    :data="orders"
+		    class="thiner-row"
+		    style="width: 100%">
+		    <%= render "hospital/home/render/orders_table_common.html" %>
+		  </el-table>
+		  <span slot="footer" class="dialog-footer">
+		    <el-button @click="isShowOrdersDialog = false" size="mini">关 闭</el-button>
+		  </span>
+		</el-dialog>
+
+		<el-dialog
+		  title="处方列表"
+		  :visible.sync="isShowPresDialog"
+		  width="90%">
+		  <el-table
+		    :data="prescriptions"
+		    class="thiner-row"
+		    style="width: 100%">
+		    <%= render "hospital/home/render/prescriptions_table_common.html" %>
+		  </el-table>
+		  <span slot="footer" class="dialog-footer">
+		    <el-button @click="isShowPresDialog = false" size="mini">关 闭</el-button>
+		  </span>
+		</el-dialog>
+
+		<!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+			<prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
+		</div> -->
 	</div>
 </template>
+
+<!-- 处方显示模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
+		var options = [{code: "0", display: "接诊列表"}];
 		return {
+			activeName: options[0].code,
+			cardTabsOptions: options,
+			multipleSelection: [],
+
+			encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
+			encounters: [],
+			prescriptions: [],
+			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+			orders: [],
+			ordersStatus: presStatusOptions,
+			prescriptionsStatus: presStatusOptions,
+
+			encounter: {},
+			orgname: "",
+			isShowfilters: false, // 高级搜索
+			filter: {
+				range: "",
+			},
+
+			rangePickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
+
+			isShowOrdersDialog: false, // 显示医嘱详细模态框
+			isShowPresDialog: false, // 显示处方详细
+			// 搜索
+    	search: "", // 搜索内容
+    	tableHeight: 200, // 表格高度
+    	// 分页相关
+	  	currentPage: 1, // 当前页
+	  	pageSize: 25, // 默认一页显示25条
+	  	dataCount: 100, // 总数据条数
 		}
 	},
-	mounted:function(){
+	components: {
+		// 处方打印组件
+		'prescriptionprint': {
+			props: ['encounter', 'prescription'],
+		  template: "#prescription-print-template",
+		},
 	},
-	methods:{
+	watch: {
+		search: function (newValue, oldValue) {
+    	this.getData();
+    },
+	},
+	mounted: function() {
+		this.$nextTick(function(){
+			this.init();
+		})
+	},
+	methods: {
+		init: function () {
+			var _this = this;
+			_this.orgname = $("#current_org_name").val();
+			// 获取基础设置内容
+			Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+			 	var res = response.data;
+			 	if(res.flag) {
+        	$("#prescription-print-template").html(res.data.print_pres_html)
+        }
+			},function() {
+		  	_this.$message.error("获取初始值失败，请联系管理员。");
+		  })
+      var clientHeight = document.body.clientHeight;
+      _this.tableHeight = clientHeight - 290;
+      _this.getData();
+		},
+		getData: function () {
+			var _this = this;
+			_this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+				var res = response.data;
+  			if(res.flag) {
+          _this.encounters = res.data;
+          _this.dataCount = res.count;
+  			}else{
+  				_this.$message.error(res.info);
+  			}
+      },function(response) {
+      	_this.$message.error("后台出错，获取患者列表失败。");
+      })
+		},
+		// 每页条数改变
+  	handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+    	this.currentPage = val;
+      this.getData();
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+    	this.multipleSelection = val;
+    	console.log(val)
+    },
+    // 选择tab
+		handleTabClick: function (tab, event) {
+
+		},
+		// 判断性别，根据性别显示图标
+  	judgeGender: function (gender) {
+  		if(!gender){ gender = ""; }
+      var html = '';
+  		if(gender.indexOf('男')>-1){
+  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+  		}else if(gender.indexOf('女')>-1){
+  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+  		}else{
+  			html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+  		}
+  		return html;
+	  },
+	  // 显示处方列表模态框
+  	openOrdersDialog: function (row) {
+  		this.isShowOrdersDialog = true;
+  		this.getOrders(row.id);
+  	},
+  	// 显示处方列表模态框
+		openPresDialog: function (row) {
+			this.isShowPresDialog = true;
+  		this.getPrescriptions(row.id);
+		},
+		getOrders: function (encounter_id) {
+  		var _this = this;
+  		_this.orders = [];
+  		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
+  			var res = response.data;
+  			if(res.flag) {
+  				_this.orders = res.data;
+  			} else {
+  				_this.$message.error(res.info);
+  			}
+  		}, function (response) {
+  			_this.$message.error("获取药品列表失败，请联系管理员。");
+  		})
+  	},
+  	// 获取处方列表
+  	getPrescriptions: function (encounter_id) {
+  		var _this = this;
+  		_this.prescriptions = [];
+  		Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
+  			var res = response.data;
+  			if(res.flag) {
+  				_this.prescriptions = res.data;
+  			} else {
+  				_this.$message.error(res.info);
+  			}
+  		}, function (response) {
+  			_this.$message.error("获取处方列表失败，请联系管理员。");
+  		})
+  	},
+  	// 查询诊断
+  	querySearchDiagnoseAsync: function(queryString, cb) {
+			var _this = this;
+			Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+		    var res = response.data;
+		    if (res.flag) {
+					cb(res.data);
+					// 设置下拉选择的第一项为高亮
+					var el = _this.$refs["diagnose"];
+					if(el) {
+						el.highlightedIndex = 0
+					}
+				}
+		  },function() {
+		  	_this.$message.error("获取诊断列表失败，请联系管理员。");
+		  })
+		},
+		// 选择疾病
+    handleSelectDisease: function (item) {
+    	this.filter.disease = item.display;
+    },
 	},
 }
 </script>

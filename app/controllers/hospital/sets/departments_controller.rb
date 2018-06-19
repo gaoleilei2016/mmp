@@ -8,10 +8,12 @@ class Hospital::Sets::DepartmentsController < ApplicationController
 	def index
     p "Hospital::Sets::DepartmentsController index"
     search = params[:search].to_s
-    @departments = Hospital::Sets::Department.where("org_id=? AND name LIKE ?", current_user.organization.id, "%#{search}%") rescue []
+    cur_org =  current_user.organization
+    departments_count = Hospital::Sets::Department.where("org_id=?", cur_org.id).count
+    @departments = Hospital::Sets::Department.where("org_id=? AND name LIKE ?", cur_org.id, "%#{search}%") rescue []
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"success", data: @departments} }
+      format.json { render json: {flag: true, info:"success", data: @departments, count: departments_count} }
     end
 	end
 
@@ -29,7 +31,7 @@ class Hospital::Sets::DepartmentsController < ApplicationController
   # 获取本机构当前有效的科室列表
   def get_active_departments
     search = params[:search].to_s
-    @departments = Hospital::Sets::Department.where("org_id=? AND name LIKE ? AND status=A", current_user.organization.id, "%#{search}%") rescue []
+    @departments = Hospital::Sets::Department.where("org_id=? AND name LIKE ? AND status='A'", current_user.organization.id, "%#{search}%") rescue []
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"success", data: @departments} }
@@ -44,9 +46,10 @@ class Hospital::Sets::DepartmentsController < ApplicationController
   # }
   def set_cur_department
     current_user.cur_loc_id = params[:dep_id]
+    current_user.cur_loc_display = ::Hospital::Sets::Department.find(params[:dep_id]).name
     respond_to do |format|
       if current_user.save
-        format.json { render json: {flag: true, info:"success"} }
+        format.json { render json: {flag: true, info:"success", data: {id: current_user.cur_loc_id, display: current_user.cur_loc_display}} }
       else
         format.json { render json: {flag: false , info: current_user.errors.message.values.flatten} }
       end

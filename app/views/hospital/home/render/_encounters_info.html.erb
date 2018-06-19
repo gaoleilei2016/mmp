@@ -43,7 +43,7 @@
 				    prop="gender.code">
 				    <span v-if="encounter.gender&&encounter.gender.display.indexOf('女')>-1" class="fa fa-venus gender-icon"></span>
 				    <span v-else class="fa fa-mars gender-icon"></span>
-				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')">
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" filterable>
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
 					      :key="item.code"
@@ -293,7 +293,7 @@
 					<el-form-item
 				    label="取药点"
 				    prop="drugstore_location">
-				    <el-select v-model="encounter.drugstore_location" value-key="id" placeholder="选择药房" style="width: 100%;" ref="enclocation" @keydown.enter.stop.native="focusNext('enclocation', 'encsave')" clearable>
+				    <el-select v-model="encounter.drugstore_location" value-key="id" placeholder="选择药房" style="width: 100%;" ref="enclocation" @keyup.enter.stop.native="focusNext('enclocation', 'encsave')" clearable>
 					    <el-option
 					      v-for="item in locations"
 					      :key="item.id"
@@ -350,23 +350,27 @@
 	  </el-table-column>
 	  <el-table-column
 	    prop="gender.display"
+	    align="center"
 	    min-width="50"
 	    label="性别">
 	  </el-table-column>
 	  <el-table-column
 	    prop="age"
+	    align="center"
 	    min-width="50"
 	    label="年龄">
 	  </el-table-column>
 	  <el-table-column
 	    min-width="200"
+	    align="center"
 	    label="身份证号码">
 	    <template slot-scope="scope">
-	    	<i class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
+	    	<i v-if="scope.row.iden" class="fa fa-lg fa-fw fa-id-card-o text-muted-light"></i>&#12288;{{ scope.row.iden }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
 	    min-width="100"
+	    align="center"
 	    label="出生日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.birth_date | formatDate("yyyy-MM-dd") }}
@@ -374,13 +378,15 @@
 	  </el-table-column>
 	  <el-table-column
 	    min-width="140"
+	    align="center"
 	    label="手机号码">
 	    <template slot-scope="scope">
-	    	<i class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
+	    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw fa-phone text-muted-light"></i> {{ scope.row.phone }}
 	    </template>
 	  </el-table-column>
 	  <el-table-column
 	    min-width="140"
+	    align="center"
 	    label="就诊日期">
 	    <template slot-scope="scope">
 	    	{{ scope.row.created_at | formatDate }}

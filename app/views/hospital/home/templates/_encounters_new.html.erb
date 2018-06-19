@@ -46,7 +46,7 @@
   	<%= render "hospital/home/render/encounters_favorite_dialog" %>
   	<!-- 复制弹出框 -->
   	<%= render "hospital/home/render/encounters_copy_dialog" %>
-  	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
+  	
 	</div>
 </template>
 <!-- 处方打印模板 -->
@@ -55,15 +55,7 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data: function(){
-		var statusOptions = [
-			{value: "0", label: "未审核", type: "primary"},
-			{value: "1", label: "已审核", type: "primary"},
-			{value: "2", label: "待收费", type: "warning"},
-			{value: "3", label: "已收费", type: "success"},
-			{value: "4", label: "已发药", type: "success"},
-			{value: "7", label: "废弃", type: "info"},
-			{value: "9", label: "已退费", type: "info"},
-		];
+		
 		return {
 			/* 基础设置 --- start */ 
 				orgname: "", // 机构名称
@@ -154,7 +146,7 @@ window.current_template_obj = {
 				/* 诊断 --- start */
 					formDiagnoseInput: "", // 诊断tab录入框 
 					diagnosis: {}, // 诊断表单
-					diagnosisStatus: [{code: "A", display: "疑是", type: "primary"}, {code: "E", display: "确诊", type: "success"}],
+					diagnosisStatus: [{value: "A", label: "疑是", type: "primary"}, {value: "E", label: "确诊", type: "success"}],
 					diagnosesResource: Vue.resource('/hospital/diagnoses{/id}.json'),
 					diagnoses: [], // 诊断列表
 					editDiaIndex: -1, // 正在编辑的诊断序号
@@ -168,7 +160,7 @@ window.current_template_obj = {
 					drugs: [],
 					editIndex: -1, // 正在编辑的医嘱序号
 					multipleOrdersSelection: [], // 已经勾选的医嘱
-					ordersStatus: statusOptions,
+					ordersStatus: presStatusOptions,
 				/* 药品 --- end */ 
 
 				/* 药品模板 --- start */ 
@@ -205,7 +197,7 @@ window.current_template_obj = {
 					}, // 新建处方验证规则
 					prescription: {}, // 处方模型
 					printPresRow: {}, // 打印处方行
-					prescriptionsStatus: statusOptions,
+					prescriptionsStatus: presStatusOptions,
 				/* 处方 --- end */ 
 
 			/* 主业务  ----- end */ 
@@ -266,20 +258,22 @@ window.current_template_obj = {
 	  		var _this = this;
 	  		var _now = _this.$refs[now],
 	  				_next = _this.$refs[next];
-	  		if(_now instanceof Array) { _now = _now[0]; }
-	  		if(_next instanceof Array) { _next = _next[0]; }
-				// el-select需要使用blur方法让下拉列表关闭
 				if(next=="encgender"){
 					_this.encounter.gender = _this.$parent.common_data_genders[0];
 				}
-				if(_now.$el.className.indexOf("el-select")>-1) {
-					_now.blur();
+				if (_now.handleClose) {
+					_now.handleClose();
 				}
-				// 聚焦保存按钮， 草药添加按钮
-	  		if(next.indexOf("save")>-1) {
-	  			_next.$el.focus();
-	  		} else if (now=="ordtitle") { // 如果是第一个搜索框，判断是否有数据之后，再跳转下一个
-	  			if(!_this.order.serialno) {
+
+				// el-select需要使用blur方法让下拉列表关闭
+				if (_now.handleBlur) {
+					_now.handleBlur();
+				}
+
+				if (next.indexOf("save")>-1) {
+					_next.$el.focus();
+				} else if (now=="ordtitle") {
+					if(!_this.order.serialno) {
 	  				_this.$message({
 		          message: '请选择药品。',
 		          type: 'warning'
@@ -287,10 +281,14 @@ window.current_template_obj = {
 	  			} else {
 	  				_next.focus();
 	  			}
-	  		} else {
-	  			// 聚焦下一个输入框
-					_next.focus();
+				} else {
+					if (next && _next.focus) {
+						_next.focus()
+					} else {
+						_next.$el.focus()
+					}
 				}
+
 	  	},
   	/* 公共方法  ---- end */ 
 
@@ -506,26 +504,25 @@ window.current_template_obj = {
 				// form中选择诊断
 				handleFormSelectDiagnosis: function(item) {
 					var _this = this, code = "", display = _this.diagnosis.display;
-					if(item.type=="hand") {
-						if(!display) {
-							_this.$message({
-			          message: '诊断不能为空。',
-			          type: 'warning'
-			        });
-			        _this.$refs["diadisplay"].focus();
-			        return false;
-						}
-					} else {
-				    code = item.code;
-				    display = item.display;
+					console.log("=============选择诊断",item, display)
+					if(item.code) {
+					  code = item.code;
+					  display = item.display;
 					}
-					console.log('============111111111')
+					if(!display) {
+						_this.$message({
+		          message: '诊断不能为空。',
+		          type: 'warning'
+		        });
+		        _this.$refs["diadisplay"].focus();
+		        return false;
+					}
 					_this.diagnosis = {
 						id: _this.diagnosis.id,
 						code: code,
 						display: display,
 						type: _this.$parent.common_data_diagnosis_types[0],
-						status: _this.diagnosisStatus[0].code,
+						status: _this.diagnosisStatus[0].value,
 						note: "",
 						fall_ill_at: new Date(), // 发病日期
 					}
@@ -1067,7 +1064,7 @@ window.current_template_obj = {
     				_this.prescriptions = res.data;
     			}
     		}, function (response) {
-    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    			_this.$message.error("获取处方列表失败，请联系管理员。");
     		})
     	},
     	// 根据勾选的医嘱生成处方
