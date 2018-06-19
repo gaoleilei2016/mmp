@@ -176,7 +176,7 @@
 				$(".mui-tab-item.users_home").addClass("mui-active");
 			}else{
 				$(".mui-tab-item").each(function(i,v) {
-					if (location.pathname == $(v).attr('data-url')) {
+					if ( location.pathname.indexOf( $(v).attr('data-url') )>-1 ) {
 						$(v).addClass("mui-active");
 					}
 				})
