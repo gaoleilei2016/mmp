@@ -13,6 +13,9 @@
 	.mui-table-view.no_background:after{
 		background: none;
 	}
+	.no_active_background .mui-active{
+		background: none !important;
+	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
 	<a href="/" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
@@ -21,7 +24,7 @@
 	<h1 class="mui-title">确认订单</h1>
 </header>
 <div class="mui-content" id="vue_content">
-	<ul class="mui-table-view">
+	<ul class="mui-table-view no_active_background">
 		<li class="mui-table-view-cell" style="padding: 22px 18px 14px;overflow: visible;">
 			<div>
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
