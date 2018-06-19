@@ -81,14 +81,15 @@ class Hospital::EncountersController < ApplicationController
   # 3：通过扫二维码创建就诊 type: "by_qrcode", qrcode: 
   # 4：手动输入信息后保存创建就诊 （采用姓名、手机号做唯一识别  查询Person信息做关联） type: "by_write"
 	def create
-    p "==========create", params
+    p "Hospital::EncountersController ==========create", params
     # raise "测试"
     case params[:type].to_s
     when "by_person"
       cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
       render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
+      cur_org = current_user.organization
       encounter_info = ::Hospital::Encounter.get_encounter_info_from_person(cur_person.id)
-      encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id)
+      encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id, hospital_oid: cur_org.id, hospital_name: cur_org.name)
       @encounter = ::Hospital::Encounter.new(encounter_info)
       if @encounter.save
         render json: {flag: true, info:"success", data: @encounter.to_web_front}
@@ -179,6 +180,7 @@ class Hospital::EncountersController < ApplicationController
 
     def format_encounter_create_params
       args = encounter_params
+      cur_hospital = current_user.organization
       encounter_agrs = {
         name: args[:name],
         gender_code: args[:gender][:code], 
@@ -190,7 +192,9 @@ class Hospital::EncountersController < ApplicationController
         address: args[:address], 
         occupation_code: args[:occupation][:code], 
         occupation_display: args[:occupation][:display], 
-        contact_name: args[:contact_name], 
+        contact_name: args[:contact_name],
+        hospital_oid: cur_hospital.id,
+        hospital_name: cur_hospital.name,
         nation_code: args[:nation][:code], 
         nation_display: args[:nation][:display], 
         marriage_code: args[:marriage][:code], 

@@ -258,7 +258,7 @@ ActiveRecord::Schema.define(version: 20180617114240) do
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
     t.integer "organization_id"
-    t.integer "status", limit: 1, default: 1, comment: "濠㈣泛瀚弻鐔兼偐閼哥鍋?0 闁哄牜浜滈鎼佸冀?  1:鐎瑰憡褰冮鎼佸冀?  2:鐎垫澘鎳忛弫鍦嫻?  3:鐎圭寮堕弫鍦嫻?  4:鐎瑰憡褰冭ぐ鍌炴嚒?  7:閹煎鍠庣槐?  8:鐎瑰憡鐓￠埀顑藉亾闁? 9:鐎瑰憡鐓￠埀顑藉亾閻?"
+    t.integer "status", limit: 1, default: 1, comment: ""
     t.string "note", collation: "utf8_general_ci"
     t.string "type_code", collation: "utf8_general_ci"
     t.integer "bill_id"
