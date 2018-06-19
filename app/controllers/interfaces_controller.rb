@@ -53,7 +53,8 @@ class InterfacesController < ApplicationController
 	end
 	#微信，支付宝退款
 	def refund_order
-		order = ::Orders::Order.find(params[:id])
+		order = ::Orders::Order.where("id=? AND status = '2'",params[:id]).last
+		return (render json:{flag:false,info:"当前订单状态不允许退费。"})unless order
 		# order.net_amt ##订单号用机构id+订单号
 		args = {out_trade_no: "#{order.id}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
 		res = Pay::Refund.carry_out(args)
