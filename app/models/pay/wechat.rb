@@ -1,6 +1,7 @@
 #encoding: utf-8
 
 require 'rest-client'
+require 'digest/md5'
 
 class Pay::Wechat
 
@@ -24,6 +25,33 @@ class Pay::Wechat
         total_fee: handle_order_total_fee(ref.order.total_fee.to_f), refund_fee: handle_order_total_fee(ref.refund_fee.to_f),
         refund_desc: ref.reason, notify_url: wx.refund_notify_url
       }
+    end
+
+    # {"out_refund_no"=>"1529371940", "out_trade_no"=>"205", "refund_account"=>"REFUND_SOURCE_UNSETTLED_FUNDS", 
+    #   "refund_fee"=>"1", "refund_id"=>"50000207132018061905135218977", "refund_recv_accout"=>"支付用户零钱", 
+    #   "refund_request_source"=>"API", "refund_status"=>"SUCCESS", "settlement_refund_fee"=>"1", 
+    #   "settlement_total_fee"=>"1", "success_time"=>"2018-06-19 09:32:23", "total_fee"=>"1", 
+    #   "transaction_id"=>"4200000134201806198379455778"}
+    def refund_callback_value(req_info)
+      begin
+        str = Base64.decode64(req_info) #先对结果进行base64解码
+        aes_data = aes_ecb_decrypt(str) #得到xml字符串
+        res = Hash.from_xml(aes_data)['root']
+        {error: false, res: res}
+      rescue Exception => e
+        {error: true, state: :fail, msg: e.message}
+      end
+    end
+
+    def aes_ecb_decrypt(req_info)
+      aes = OpenSSL::Cipher::AES.new("256-ECB")
+      aes.decrypt
+      aes.key = md5_pay_key
+      aes.update(req_info) + aes.final
+    end
+
+    def md5_pay_key
+      Digest::MD5.hexdigest(wx.pay_key)
     end
 
     # 在服务器上导出

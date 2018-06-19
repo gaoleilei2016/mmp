@@ -12,7 +12,7 @@ class Pay::Refund < ApplicationRecord
   belongs_to :order, class_name: 'Pay::Order', optional: true
 
   # status:=>{fail: '请求失败',com:'保存成功',succ:'退款提交成功,等待退款',
-  # error: '参数、创建记录、系统错误', success:'已退款'}
+  # error: '参数、创建记录、系统错误', success:'已退款', abnormal: '异常:如金额不等;退款不成功'}
   class << self
     # args={out_refund_no: '退款单号', refund_fee: '金额', reason: '原因',out_trade_no:'订单号'}
     def carry_out(args)
@@ -32,7 +32,7 @@ class Pay::Refund < ApplicationRecord
 
     # args={out_refund_no: '退款单号'}
     def restart(args)
-      write_log_return({state: :start, msg: '重新退款开始'})
+      write_log_return({state: :start, msg: '重新退款开始', desc: args.to_json})
       refund = find_by(out_refund_no: args[:out_refund_no])
       # return write_log_return({state: :error, msg: '参数错误',})
     end

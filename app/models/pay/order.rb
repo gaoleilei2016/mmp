@@ -13,7 +13,7 @@ class Pay::Order < ApplicationRecord
 
   has_many :refunds, class_name: 'Pay::Refund'
   # status:=>{fail: '订单提交时出错或参数错误',succ:'订单提交成功,等待支付',
-  #   success:'已支付',refund:'有退款'}
+  #   success:'已支付',refund:'有退款', abnormal: '异常:如金额不等；未支付'}
   
   # cost_name(费用类别),
   # return_url(支付后返回路径)

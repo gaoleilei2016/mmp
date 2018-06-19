@@ -37,13 +37,10 @@ class PayController < ApplicationController
         write_log("-----订单金额不等----#{res['out_trade_no']}----#{res['total_fee']}")
         wx.update_attributes({status: :fail, status_desc: '订单金额不等'})
       end
+      render json: {return_code: 'SUCCESS', return_msg: 'OK'}.to_json
     rescue Exception => e
       write_log("----处理通知出错-----#{e.message}")
     end
-    # respond_to do |f|
-    #   f.json{ render json: 'true'}
-    # end
-    render json: 'true'
   end
 
   def write_log(msg)
