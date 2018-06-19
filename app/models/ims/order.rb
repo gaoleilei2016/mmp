@@ -11,7 +11,7 @@ class Ims::Order < ApplicationRecord
         data = []
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         # sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
-        query ="target_org_id = #{args[:org_id]}"
+        query ="select * from orders_orders where target_org_id = #{args[:org_id]}"
         query.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
         case  args[:type].to_s
         when '1'#未付款
@@ -24,9 +24,9 @@ class Ims::Order < ApplicationRecord
          query.concat(" and status=7 ")
         else
         end
-        query.concat('order by created_at desc')
+        query.concat(' order by created_at desc')
         # query.concat(" and status =#{ args[:type].to_s}")
-        Orders::Order.where(query).map{|order| 
+        Orders::Order.find_by_sql(query).map{|order| 
           preson = Person.find order.person_id rescue nil
           data <<{
           order_id: order.id,
