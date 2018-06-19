@@ -1,53 +1,30 @@
-		<div id="prescription_panel">
-			<div class="el-row" id="prescription_body">
-
-				<div class="el-col el-col-8 prescription_list_panel" style="height: 100%; overflow: auto; padding:12px; border-right:2px solid #ddd;">
-					<div class="el-input el-input--mini" style="height:40px;">
-						<el-input
-						    placeholder="搜索 取药码 / 订单号 / 手机号"
-						    prefix-icon="el-icon-search"
-						    v-model="input21"
-						    @keyup.enter.native="search"
-						    >
-						  </el-input>					
-					</div>
-
-				  <el-tabs v-model="activeName2" type="card" @tab-click="handleClick">
-				    <el-tab-pane label="未交费" name="1"></el-tab-pane>
-				    <el-tab-pane label="待发药" name="2"></el-tab-pane>
-				  </el-tabs>
-
-					<div class="prescription_list">
-						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.order_id" v-on:click="get_pre(pre.order_id,$event)">
-								<span class="el-col el-col-8" style="overflow:hidden; display:block; float:left;">{{pre.order_code}}</span>
-								<span class="el-col el-col-8 text-center" style="display:block; float:left;">{{pre.patient_name}}</span>
-								<span class="el-col el-col-8 text-right" style="display:block; float:left;">{{format_price(pre.amt)}}</span>
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="el-col el-col-16" style="height: 100%;">
-					<div style="height:30px;">
-						<el-tabs v-model="tab_header" type="card" @tab-click="choose_prescription">
-						  <el-tab-pane
-						    v-for="(item, index) in tab_header_data"
-						    :key="item.id"
-						    :label="item.type"
-						  ></el-tab-pane>
-						</el-tabs>
-					</div>
-					<%= render "ims/home/render/prescription_panel"%>
-				</div>
-			</div>
-
-			<el-dialog title="" :visible.sync="dialogFormVisible" class="platform_search_dialog">
-				<%= render "ims/home/render/platform_search"%>
-			  <div slot="footer" class="dialog-footer">
-			    <el-button size="small" type="primary" @click="platform_charging_fun()">收费</el-button>
-			    <el-button size="small" type="primary" @click="platform_charging_and_out_fun()">收费并发药</el-button>
-			  </div>
-			</el-dialog>
-
+<div id="prescription_main_panel">
+	<div class="prescription_list_panel">
+		<div>订单列表</div>
+		<div class="el-input el-input--mini" style="padding-top:12px; padding-bottom:12px;">
+			<el-input
+			  placeholder="搜索 取药码 / 订单号 / 手机号"
+			  prefix-icon="el-icon-search"
+			  v-model="out_order_search"
+			  @keyup.enter.native="out_order_search_fun"
+			  >
+			</el-input>
 		</div>
+	  <el-tabs v-model="out_list_panel" type="card" @tab-click="get_out_pres">
+	    <el-tab-pane label="未交费" name="1"></el-tab-pane>
+	    <el-tab-pane label="待发药" name="2"></el-tab-pane>
+				<el-row :gutter="20" v-for="pre in pres" class="pre_list" @click.native="get_pre(pre.order_id,$event)">
+					<el-col :span="6" style="width:120px;">{{format_time(pre.created_at)}}</el-col>
+					<el-col :span="6" style="width:calc(100% - 280px)">{{pre.order_code}}</el-col>
+					<el-col :span="6" style="width:80px;">{{pre.patient_name}}</el-col>
+					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(pre.amt)}}</el-col>
+				</el-row>
+	  </el-tabs>
+	</div>
+
+	<div class="prescription_detail_panel">
+		<div>订单详情</div>
+		<%= render "ims/home/render/prescription_panel"%>
+	</div>
+
+</div>

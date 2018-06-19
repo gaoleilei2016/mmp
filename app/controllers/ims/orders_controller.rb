@@ -69,9 +69,6 @@ class Ims::OrdersController < ApplicationController
   end
 
   def get_orders
-    p current_user
-    p current_user.name
-    p current_user.try(:name)
     #搜索平台的 订单 处方
     case params[:stat].to_s
     when '1' #未交费
@@ -114,11 +111,6 @@ class Ims::OrdersController < ApplicationController
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
       lines:[
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
       ]

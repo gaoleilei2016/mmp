@@ -108,7 +108,7 @@ class Ims::Order < ApplicationRecord
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-      data = [{
+      data = {
           type:'订单',
           is_order:true,
           order_id: order.id,
@@ -142,8 +142,9 @@ class Ims::Order < ApplicationRecord
                   firm: x.firm,
                   img_path: x.img_path
                 }
-              }
-          }]
+              },
+          pres:[]
+        }
           
           temp = 0;    
           prescriptions.each do |k,v|
@@ -159,7 +160,7 @@ class Ims::Order < ApplicationRecord
                     firm:x[:firm],
                   }
                 }
-            data <<{
+            data[:pres] <<{
               :type => '处方'+(temp += 1).to_s,
               :is_order => false,
               :order_id => v[:id],
@@ -185,7 +186,7 @@ class Ims::Order < ApplicationRecord
               details: details
             }
           end
-        return {flag:true,:data=>data}
+        return {flag:true,:order=>data}
     end
 
     # 到店患者未在平台操作的处方收费或者收费并发药操作
