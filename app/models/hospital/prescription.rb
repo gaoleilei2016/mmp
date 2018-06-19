@@ -242,7 +242,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_doctor = self.doctor
 		encounter_info = {
 			# 就诊号
-			patient_no: cur_encounter.outpatient_no,
+			patient_no: cur_encounter.patient_no,
 			# 就诊医生
 			author: {
 				id: cur_doctor.id,

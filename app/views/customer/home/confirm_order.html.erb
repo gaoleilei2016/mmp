@@ -82,7 +82,7 @@
 					success:function(json) {
 						if (json.flag) {
 							_this.order = json.order;
-							if (json.status=='2') {
+							if (json.order.status=='2') {
 								if (show_info) {
 									mui.toast("恭喜您已完成支付");
 								}

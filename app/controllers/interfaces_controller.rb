@@ -53,19 +53,21 @@ class InterfacesController < ApplicationController
 	end
 	#微信，支付宝退款
 	def refund_order
-		order = ::Orders::Order.find(params[:order_id])
+		order = ::Orders::Order.find(params[:id])
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.source_org_id}#{order.order_code}", refund_fee: order.net_amt, reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.id}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
 		res = Pay::Refund.carry_out(args)
 		# p '~~~~~~~',res
 		if [:succ,:success].include?res[:state].to_sym
 			###退款成功
-			order.cancel_order(current_user)
-			redirect_to res[:pay_url]
+			order.cancel_order(current_user,'退款')
+			# redirect_to res[:pay_url]
+			render json:{flag:true,info:"操作成功"}
 		else
 			##退款失败
-			flash[:notice] = res[:desc]
+			# flash[:notice] = res[:desc]
 			# redirect_to "/customer/portal/pay"
+			render json:{flag:false,info:res[:desc]}
 		end
 	end
 
@@ -91,7 +93,7 @@ class InterfacesController < ApplicationController
 		end
 	end
 	def cancel_order
-		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user)
+		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user,'用户取消')
 		render json: ret
 	end
 	# 获取用户购物车

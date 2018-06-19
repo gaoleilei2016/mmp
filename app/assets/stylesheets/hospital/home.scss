@@ -26,7 +26,7 @@ $card-border-radius: 2px;
 	color: $gray-light;
 }
 .text-muted-light {
-	color: #999;
+	color: #ccc;
 }
 .text-mmp-lighter {
 	color: $--mmp-theme-text-greener;
@@ -279,19 +279,6 @@ $card-border-radius: 2px;
 		}
 	}
 
-	// 页面上显示的处方
-	.pres-table-presprint-wrapper {
-		.prescription-wrapper {
-			p {
-				line-height: 30px;
-			}
-			td, th {
-				background-color: transparent !important; 
-				padding: 5px 0;
-				border: none;
-			}
-		}
-	}
 
 	.copy-orders-modal {
 		.encounters-list {
@@ -314,6 +301,18 @@ $card-border-radius: 2px;
 	    	}
 	    }
 		}
+	}
+}
+
+// 页面上显示的处方
+.prescription-wrapper {
+	p {
+		line-height: 30px;
+	}
+	td, th {
+		background-color: transparent !important; 
+		padding: 5px 0;
+		border: none;
 	}
 }
 
@@ -402,10 +401,10 @@ $card-border-radius: 2px;
 		padding: 0 15px;
 		height: 35px;
 		line-height: 35px;
-		&.is-active {
-			background-color: $--mmp-theme-bg;
-			color: $--mmp-theme-text-white;
-		}
+		// &.is-active {
+		// 	background-color: $--mmp-theme-bg;
+		// 	color: $--mmp-theme-text-white;
+		// }
 	}
 }
 

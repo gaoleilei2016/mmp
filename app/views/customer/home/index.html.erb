@@ -16,7 +16,7 @@
 				bottom: 0;
 				width: 100%;
 				height: 100%;
-				background-color: #fff;
+				background-color: #efeff4;
 			}
 			.mui-pages {
 				/*top: 46px;*/
@@ -205,7 +205,9 @@
 							</li>
 						</ul> -->
 						<div style="padding: 20px;padding-top: 30px;">
-							<img src="/assets/admin/TM.png" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;">
+							<a href="#account" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;overflow: hidden;">
+								<img src="/assets/admin/TM.png" style="width: 100%;">
+							</a>
 							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;">
 								<div style="position: absolute; bottom: 8px;left: 10px;color: #666;"><%= current_user.name.present? ? current_user.name : current_user.login %></div>
 							</div>
@@ -246,13 +248,13 @@
 								</a>
 							</li>
 							<li class="mui-table-view-cell">
-								<a href="javascript:mui.toast('敬请期待');">
+								<a href="#feedback">
 									<span>意见反馈</span>
 									<i class="fal fa-fw fa-edit" style="font-size: 26px;float: right;"></i>
 								</a>
 							</li>
 							<li class="mui-table-view-cell">
-								<a href="javascript:mui.toast('敬请期待');">
+								<a id="tel">
 									<span>联系客服</span>
 									<i class="fal fa-fw fa-phone" style="font-size: 26px;float: right;"></i>
 								</a>
@@ -293,9 +295,16 @@
 					编辑
 				</a>
 			</div>
-			<div class="mui-page-content">
-				<div class="mui-scroll-wrapper">
-					<div class="mui-scroll">
+			<div class="mui-page-content" style="padding-top: 46px;">
+						<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+							<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+								<span class="mui-icon mui-icon-left-nav"></span>
+							</button>
+							<h1 class="mui-center mui-title">账号与安全</h1>
+							<a href="/users/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;">
+								编辑
+							</a>
+						</div>
 						<ul class="mui-table-view">
 							<li class="mui-table-view-cell">
 								<a id="head" class="mui-navigate-right">头像
@@ -328,12 +337,10 @@
 								<a>地址<span class="mui-pull-right"><%#= session[:user]["address"] rescue '未知' %></span></a>
 							</li> -->
 						</ul>
-					</div>
-				</div>
 			</div>
 		</div>
 
-		<div id="about" class="mui-page">
+		<!-- <div id="about" class="mui-page">
 			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
 				<button type="button" class="mui-left mui-action-back mui-btn  mui-btn-link mui-btn-nav mui-pull-left">
 					<span class="mui-icon mui-icon-left-nav"></span>
@@ -354,7 +361,7 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</div> -->
 
 		<div id="feedback" class="mui-page feedback">
 			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
@@ -364,7 +371,14 @@
 				<button onclick="mui.toast('敬请期待');return false;" id="submit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right">发送</button>
 				<h1 class="mui-center mui-title">问题反馈</h1>
 			</div>
-			<div class="mui-page-content">
+			<div class="mui-page-content" style="padding-top: 46px;">
+				<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+					<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+						<span class="mui-icon mui-icon-left-nav"></span>
+					</button>
+					<button onclick="mui.toast('敬请期待');return false;" id="submit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right">发送</button>
+					<h1 class="mui-center mui-title">问题反馈</h1>
+				</div>
 				<div class="mui-content-padded">
 					<div class="mui-inline">问题和意见</div>
 					<a class="mui-pull-right mui-inline" href="#fast_message_popover">

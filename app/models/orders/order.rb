@@ -23,6 +23,7 @@ class Orders::Order < ApplicationRecord
 #  source_org_name VARCHAR(32) NOT NULL '来源机构名称',
 #  order_code VARCHAR(32) NOT NULL '订单号',
 #  user_id VARCHAR(32) NOT NULL '用户id',
+#  reason VARCHAR(32) NOT NULL '原因',
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
 #  patient_name varchar(20)  NULL '患者名字',
@@ -41,7 +42,7 @@ class Orders::Order < ApplicationRecord
 # rails generate model Orders::Order payment_at:time end_time:time close_time:time target_org_id:string target_org_name:string source_org_id:string source_org_name:string order_code:string user_id:string shipping_name:string shipping_code:string payment_type:float status:string
 	#订单金额
 	def net_amt
-		details.sum(:net_amt)
+		details.sum(:net_amt).to_f.round(2)
 	end
 	#药房
 	def pharmacy
@@ -53,13 +54,13 @@ class Orders::Order < ApplicationRecord
 	end
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
-	def cancel_order(cur_user=nil)
+	def cancel_order(cur_user=nil,reason='')
 		cur_user ||= User.find(user_id)
 		result = {ret_code:'0',info:''}
 		case status.to_s
 		when '1'
 			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
-			update_attributes(status:'6',close_time:Time.now.to_s(:db))
+			update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 			result = {ret_code:'0',info:'订单已取消。'}
 		when '2'
 			arg = {
@@ -72,7 +73,7 @@ class Orders::Order < ApplicationRecord
 				return_charge_at: Time.now.to_s(:db)
 			}
 			prescriptions.each{|x|x.return_charge(arg, cur_user)}
-			update_attributes(status:'7',end_time:Time.now.to_s(:db))
+			update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 			result = {ret_code:'0',info:'取消成功，处方已失效。'}
 		when '5'
 			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -102,6 +103,7 @@ class Orders::Order < ApplicationRecord
 		# when "Wechat" #查询微信订单是否支付成功
 		# 	Pay::Order.find_by(out_trade_no: "#{source_org_id}#{order_code}")&.paid? || (return {ret_code:'-1',info:'未查询到已支付信息，请确认！'})
 		# end
+		return {ret_code:'-1',info:'当前订单状态异常，不允许结算。'}if status.to_s != '1'
 		args = {
 			# 创建订单人
 			charger: {
@@ -204,8 +206,8 @@ class Orders::Order < ApplicationRecord
 				result[:order] = order
 				if attrs[:payment_type] == 'online'
 					sch = ::Scheduler.new()
-					sch.timer_at(Time.now + 10.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({})")
-					result[:info].concat("请在#{(Time.now + 10.minutes).to_s(:db)}之前完成订单支付")
+					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
+					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
 				end
 				#订单创建成功之后改变处方状态
 				args = {
@@ -327,27 +329,31 @@ class Orders::Order < ApplicationRecord
 										status:attrs[:status],
 										)
 				result[:info] = "订单已完成。" 
-				args = {
-					# 创建订单人
-					charger: {
-						id: attrs[:current_user].id,
-						display: attrs[:current_user].name
-						},
-					# 订单创建时间
-					charge_at: order.created_at.to_s(:db)
-				}
-				##通知处方订单已结算
-			 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
-			 	args2 = {
-					# 发药人
-					delivery: {
-						id: attrs[:current_user].id,
-						display: attrs[:current_user].name
-					},
-					# 发药时间
-					delivery_at: order.created_at.to_s(:db)
-				}
-				order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+				if ["2","5"].include?attrs[:status].to_s
+					args = {
+						# 创建订单人
+						charger: {
+							id: attrs[:current_user].id,
+							display: attrs[:current_user].name
+							},
+						# 订单创建时间
+						charge_at: order.created_at.to_s(:db)
+					}
+					##通知处方订单已结算
+				 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
+					if ["5"].include?attrs[:status].to_s
+					 	args2 = {
+							# 发药人
+							delivery: {
+								id: attrs[:current_user].id,
+								display: attrs[:current_user].name
+							},
+							# 发药时间
+							delivery_at: order.created_at.to_s(:db)
+						}
+						order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+					end
+				end
 				##更新处方状态。。。。。。
 			end
 			result

@@ -154,7 +154,7 @@
 				<div class="bounce3"></div>
 			</div>
 		</div>
-		<% p '~~~~~~~~~~~~~~~',[controller_path,action_name] %>
+		<%# p '~~~~~~~~~~~~~~~',[controller_path,action_name] %>
 		<% unless [["users/sessions",'new'],["users/sessions",'sign_up'],["users/registrations",'new'],["users/registrations",'create']].index([controller_path,action_name]) %>
 		<nav id="bottom_tabs" class="mui-bar mui-bar-tab">
 			<a class="mui-tab-item users_home" href="javascript:;" data-url="/customer/portal">
@@ -192,7 +192,10 @@
 		<%= yield %>
 	</body>
 	<script type="text/javascript">
-		<% if notice.present?||alert.present?||flash[:notice].present? %>
+		<%# p '~~~~~~~~~~~~~~~~~', notice, alert, flash[:notice] %>
+		<% if flash[:notice].present? %>
+		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>");
+		<% elsif notice.present?||alert.present? %>
 		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
 		<% end -%>
 	</script>

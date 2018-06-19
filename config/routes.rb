@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      post :refund_order
       get :get_orders
       post :pay_order
       post :save_order
@@ -108,6 +109,8 @@ Rails.application.routes.draw do
         post :create_by_encounter_id
       end
     end
+
+    resources :patients
   end
   ########### hospital ##########
   ############################

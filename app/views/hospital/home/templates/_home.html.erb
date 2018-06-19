@@ -125,6 +125,8 @@ const home = Vue.extend({
 				current_app.$message('无此菜单权限');
 			}
 		})
+		// home跳转到接诊页面
+		router.push("/encounters/new");
 	},
 	activated:function(){
 		window.apps.header_and_footer.header_selected_tab = '#/home';
