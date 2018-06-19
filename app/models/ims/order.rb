@@ -11,22 +11,22 @@ class Ims::Order < ApplicationRecord
         data = []
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         # sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
-        query ="target_org_id = #{args[:org_id]}"
+        query ="select * from orders_orders where target_org_id = #{args[:org_id]}"
         query.concat(" and order_code=#{args[:order_code]}") unless args[:order_code].blank?
         case  args[:type].to_s
         when '1'#未付款
-         query.concat(" and payment_type = 2 and `status`=1 ")
+         query.concat(" and payment_type = 2 and status=1 ")
         when '2'#已付款
-         query.concat(" and `status`=2 ")
+         query.concat(" and status=2 ")
         when '5'#已发药
-         query.concat(" and `status`=5 ")
+         query.concat(" and status=5 ")
         when '7'#已退药
-         query.concat(" and `status`=7 ")
+         query.concat(" and status=7 ")
         else
         end
-
+        query.concat(' order by created_at desc')
         # query.concat(" and status =#{ args[:type].to_s}")
-        Orders::Order.where(query).map{|order| 
+        Orders::Order.find_by_sql(query).map{|order| 
           preson = Person.find order.person_id rescue nil
           data <<{
           order_id: order.id,
@@ -205,14 +205,11 @@ class Ims::Order < ApplicationRecord
         ::ActiveRecord::Base.transaction  do
           case args[:status]
           when '2'
-            p attrs
             result = Orders::Order.create_order_by_presc_ids attrs
-            p result,"111111111111111111111111111111"
             return (result[:ret_code]=="0" ? {flag:false,:info=>"处方收费处理成功！"} : {flag:false,:info=>"处方收费处理失败。",result:result})
           when '5'
             result = Orders::Order.create_order_by_presc_ids attrs
             return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]=="0"
-            p "================",result,"++++++++++++++++++++++++",result[:order]
             order = result[:order]
             att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user],status:'5'}
             order_com = Orders::Order.order_completion att
@@ -233,11 +230,12 @@ class Ims::Order < ApplicationRecord
       begin
         order_id = args[:id]
         order = Orders::Order.find order_id rescue nil
-        return {flag:false,:info=>"未找到订单信息"} if order.blank?
+        return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+        return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
         return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"
-        order.update_attributes(is_returned:true)
+        order.update_attributes(is_returned:true,reason:args[:reason])
         new_order = order.clone.dup
         new_order.order_code = order.order_code.to_s+"_T"
         new_order.ori_id = order.id

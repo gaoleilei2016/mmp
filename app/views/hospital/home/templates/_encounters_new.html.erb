@@ -46,7 +46,7 @@
   	<%= render "hospital/home/render/encounters_favorite_dialog" %>
   	<!-- 复制弹出框 -->
   	<%= render "hospital/home/render/encounters_copy_dialog" %>
-  	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
+  	
 	</div>
 </template>
 <!-- 处方打印模板 -->
@@ -55,15 +55,7 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data: function(){
-		var statusOptions = [
-			{value: "0", label: "未审核", type: "primary"},
-			{value: "1", label: "已审核", type: "primary"},
-			{value: "2", label: "待收费", type: "warning"},
-			{value: "3", label: "已收费", type: "success"},
-			{value: "4", label: "已发药", type: "success"},
-			{value: "7", label: "废弃", type: "info"},
-			{value: "9", label: "已退费", type: "info"},
-		];
+		
 		return {
 			/* 基础设置 --- start */ 
 				orgname: "", // 机构名称
@@ -127,7 +119,7 @@ window.current_template_obj = {
 			    ],
 				},
 				birthPickerOptions: {
-					disabledDate(time) {
+					disabledDate: function (time) {
 	          return time.getTime() > Date.now();
 	        },
 				},
@@ -168,7 +160,7 @@ window.current_template_obj = {
 					drugs: [],
 					editIndex: -1, // 正在编辑的医嘱序号
 					multipleOrdersSelection: [], // 已经勾选的医嘱
-					ordersStatus: statusOptions,
+					ordersStatus: presStatusOptions,
 				/* 药品 --- end */ 
 
 				/* 药品模板 --- start */ 
@@ -205,7 +197,7 @@ window.current_template_obj = {
 					}, // 新建处方验证规则
 					prescription: {}, // 处方模型
 					printPresRow: {}, // 打印处方行
-					prescriptionsStatus: statusOptions,
+					prescriptionsStatus: presStatusOptions,
 				/* 处方 --- end */ 
 
 			/* 主业务  ----- end */ 
@@ -552,6 +544,7 @@ window.current_template_obj = {
 	    			var res = response.data;
 	    			if(res.flag) {
 	    				_this.diagnoses = res.data;
+	    				_this.encounter.diagnoses = res.master;
 	    			}
 	    		}, function (response) {
 	    			_this.$message.error("获取诊断列表失败，请联系管理员。");
@@ -650,6 +643,21 @@ window.current_template_obj = {
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		_this.$message.error("删除诊断失败，请联系管理员。");
 	      	})
+		    },
+		    sortDiagnoses: function (index, sort) {
+		    	var _this = this;
+					var tempOption = _this.diagnoses[index + sort];  
+					_this.$http.post('/hospital/diagnoses/sort', {encounter_id: _this.encounter.id, tag_id: _this.diagnoses[index].id, exchange_id: tempOption.id, sort: sort, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+	          var res = response.data;
+	          if(res.flag) {
+	      			Vue.set(_this.diagnoses, index + sort, _this.diagnoses[index]);  
+							Vue.set(_this.diagnoses, index, tempOption); 
+	      		} else {
+							_this.$message.error(res.info);
+	      		}
+	        }, function() {
+	          _this.$message.error("后台出错，调整顺序失败。请联系管理员");
+	        });
 		    },
 			/* encounter 诊断编辑 ----end */ 
 
@@ -1072,7 +1080,7 @@ window.current_template_obj = {
     				_this.prescriptions = res.data;
     			}
     		}, function (response) {
-    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    			_this.$message.error("获取处方列表失败，请联系管理员。");
     		})
     	},
     	// 根据勾选的医嘱生成处方

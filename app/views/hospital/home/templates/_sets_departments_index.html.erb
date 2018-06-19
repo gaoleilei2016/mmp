@@ -34,8 +34,13 @@
 				<el-table
 		      :data="departments"
 		      :height="tableHeight"
+		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      style="width: 100%">
+		      <el-table-column
+			      type="selection"
+			      width="30">
+			    </el-table-column>
 		      <el-table-column
 		        prop="id"
 		        label="科室编号">
@@ -192,19 +197,22 @@ window.current_template_obj = {
       	_this.$message.error("后台出错，获取科室列表失败。");
       })
 		},
-		// 
+		// 每页条数改变
   	handleSizeChange: function (val) {
       this.patPageSize = val;
       this.getData();
     },
+    // 页码改变
     handleCurrentChange: function (val) {
     	this.currentPage = val;
       this.getData();
     },
+    // 勾选改变
     handleSelectionChange: function (val) {
     	this.multipleSelection = val;
     	console.log(val)
     },
+    // 选择tab
 		handleTabClick: function (tab, event) {
 
 		},

@@ -103,9 +103,6 @@ class Ims::OrdersController < ApplicationController
   end
 
   def get_detail
-    p "++++++++++++++++++++++++++"
-    p current_user.organization_id
-    p "++++++++++++++++++++++++++"
     id = params[:id]
     data = [{
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
