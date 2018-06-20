@@ -69,15 +69,16 @@
 		background: none !important;
 	}
 </style>
-<div class="mui-content" id="vue_content">
+<div class="mui-content" id="vue_content" v-cloak>
 	<div id="search_content">
 		<div class="mui-input-row search_header_row">
 			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="document.getElementById('search_input').focus();"></i>
 			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
-			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
+			<input id="search_input" v-model="search_str" type="text" class="mui-input" placeholder="您想去哪取药" autocomplete="off">
+			<span v-if="search_str" @click="search_str='';" class="mui-icon mui-icon-clear" style=" font-size: 20px; position: absolute; z-index: 1; top: 10px; right: 0; width: 38px; height: 38px; text-align: center; color: #999;"></span>
 		</div>
 		<div class="search_results" style="height: calc( 100% - 40px );overflow: auto;">
-			<template v-if="pharmacys">
+			<template v-if="pharmacys&&pharmacys.length">
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
 						<div>
@@ -105,7 +106,7 @@
 		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
 		<span v-else>距离当前最近</span>
 	</p>
-	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in common_vue.prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
 				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
@@ -150,9 +151,10 @@
 	</ul>
 </div>
 <script type="text/javascript">
-	new Vue({
+	var current_app = new Vue({
 		el:"#vue_content",
 		data:{
+			common_vue:{},
 			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
@@ -164,24 +166,28 @@
 				// console.log( 'xxxxxxxxxxxxxx',val,val.length );
 				var _this = this;
 				clearTimeout(_this.timer)
-				_this.timer = setTimeout(function() {
-					$("#loading").show();
-					$.ajax({
-						url:'/interfaces/get_pharmacy?search='+val+'&',
-						data:{lng:_this.point.lng,lat:_this.point.lat},
-						success:function(json) {
-							if (json.flag) {
-								_this.pharmacys = json.rows;
-							}else{
-								mui.toast("请刷新后重试");
-							}
-						},
-						complete:function() {
-							$("#loading").hide();
-						},
-						error:error_fun
-					})
-				},500)
+				if (val) {
+					_this.timer = setTimeout(function() {
+						$("#loading").show();
+						$.ajax({
+							url:'/interfaces/get_pharmacy?search='+val+'&',
+							data:{lng:_this.point.lng,lat:_this.point.lat},
+							success:function(json) {
+								if (json.flag) {
+									_this.pharmacys = json.rows;
+								}else{
+									mui.toast("请刷新后重试");
+								}
+							},
+							complete:function() {
+								$("#loading").hide();
+							},
+							error:error_fun
+						})
+					},500)
+				}else{
+					_this.pharmacys=null;
+				}
 			},
 		},
 		methods:{
@@ -300,7 +306,8 @@
 			var _this = this;
 			// _this.search_str = '';
 			this.get_current_pharmacy();
-			this.get_prescriptions();
+			// this.get_prescriptions();
+			this.common_vue = common_vue;
 			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
 				$("#bottom_tabs").hide(300);
