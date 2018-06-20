@@ -458,7 +458,8 @@ window.current_template_obj = {
     },
     get_order:function (id,e) {
       var _this = this;
-      if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
+      console.log(e.currentTarget)
+      if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       if (!id) {
         id="";
         _this.$notify({
@@ -480,7 +481,7 @@ window.current_template_obj = {
         });
       });
     },
-    get_return_pres:function(tab,event){
+    get_return_pres:function(tab,e){
       var _this = this
       var stat = _this.return_list_panel
       _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
@@ -507,7 +508,7 @@ window.current_template_obj = {
     },
     get_return_order:function (id,e) {
       var _this = this;
-      if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
+      if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       if (!id) {
         id="";
         _this.$notify({

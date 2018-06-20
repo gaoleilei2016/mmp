@@ -11,6 +11,9 @@ $margin-part:12px;
 
 $order-detail-height:40%;
 
+body{
+	background-color: white!important;
+}
 body > .container{
   padding: 40px 0px 41px;
 }
@@ -68,6 +71,7 @@ body > .container{
 
 			.el-tabs{
 				height: calc(100% - 76px);
+				padding:0 8px 8px 8px;
 
 				.el-tabs__header{
 					margin-bottom: 0px;
