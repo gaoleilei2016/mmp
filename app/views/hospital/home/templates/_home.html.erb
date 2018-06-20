@@ -4,7 +4,7 @@
 <template id="home_div">
 	<el-row :gutter="20">
 	  <el-col :span="4">
-	  	<h2>功能介绍</h2>
+	  	<h2 align="center">功能介绍</h2>
 	    <el-menu
 	      default-active="1-1-1"
 	      :default-openeds="['1', '2', '3', '4']"
@@ -100,7 +100,22 @@
 	    </el-menu>
 	  </el-col>
 	  <el-col :span="20">
-	  	主要内容
+	  	<div class="card-wrapper">
+	  		<a href="#1-1-1"></a>
+	  		<div class="page-header"><h4>个人信息　<small>基本信息字段明细</small></h4></div>
+	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码</p>
+	  		<p><span class="text-danger">*</span>小于14岁补充必填：出生日期、监护人</p>
+	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位、照片(通过刷身份证自动获取)</p>
+	  		<p>医疗信息：血型、身高、体重、BMI</p>
+	  	</div>
+	  	<div class="card-wrapper">
+	  		<a href="#1-1-2"></a>
+	  		<div class="page-header"><h4>诊断　<small>快捷录入患者主诊断</small></h4></div>
+	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码</p>
+	  		<p><span class="text-danger">*</span>小于14岁补充必填：出生日期、监护人</p>
+	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位</p>
+	  		<p>医疗信息：血型、身高、体重、BMI</p>
+	  	</div>
 	  </el-col>
 	</el-row>
 </template>
@@ -117,7 +132,7 @@ const home = Vue.extend({
 			}
 		})
 		// home跳转到接诊页面
-		router.push("/encounters/new");
+		// router.push("/encounters/new");
 	},
 	activated:function(){
 		window.apps.header_and_footer.header_selected_tab = '#/home';

@@ -2,7 +2,7 @@
   <el-collapse-item name="patientinfo1">
     <template slot="title">
     	<el-button size="mini" @click.stop.native="searchEncounters({search: '', modal: 'isShowEncountersDialog'})" type="text" icon="fa fa-lg fa-fw fa-search text-mmp-lighter" title="搜索患者"></el-button>
-    	<el-button v-if="loadingidcard" size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-spinner fa-spin text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px;" disabled> 正在读取 </el-button>
+    	<el-button v-if="loadingidcard" size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-spinner fa-spin text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;" disabled> 正在读取身份证 </el-button>
     	<el-button v-else size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-id-card-o text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px;"></el-button>
     	<!-- <i class="fa fa-lg fa-fw fa-search text-mmp-lighter" @keyup.enter.stop.native="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>&#12288; -->
       <!-- <el-input
@@ -41,7 +41,7 @@
 							  placement="top-start"
 							  v-if="encounter.photo"
 							  title="照片"
-							  width="200"
+							  width="150"
 							  trigger="hover">
 							  <img :src="encounter.photo" alt="患者头像" />
 							  <i slot="reference" class="fa fa-fw fa-photo text-muted-light"></i>
@@ -247,7 +247,7 @@
 						<el-button v-else class="button-new-tag" @click="showTagInput">+ 添加过敏</el-button>
 					</el-form-item>
 				</el-col>
-				<el-col :span="6">
+				<el-col :span="5">
 					<el-form-item
 				    label="血型"
 				    prop="blood">
@@ -275,7 +275,7 @@
 				    <el-input v-model="encounter.weight"><template slot="append">kg</template></el-input>
 				  </el-form-item>
 				</el-col>
-				<el-col :span="6">
+				<el-col :span="7">
 					<el-form-item
 				    label="BMI"
 				    prop="bmi"
@@ -412,7 +412,7 @@
 	    <template slot-scope="scope">
 	      <!-- <el-button size="mini" @click="editEncounter(scope.row)" type="primary" title="编辑就诊信息" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button> -->
 	      <el-button size="mini" @click="createEncounterBySomeMethods({type: 'by_person', row: scope.row})" type="success" title="新建就诊" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
-	    	<el-dropdown v-if="scope.row.encounter_data&&scope.row.encounter_data.length>0" trigger="click">
+	    	<el-dropdown v-if="scope.row.encounter_data&&scope.row.encounter_data.length>0" trigger="click" style="border: 1px solid #aaa; padding: 1.5px 3px; border-radius: 4px; cursor: pointer; font-size: 80%;">
 				  <span class="el-dropdown-link">
 				    编辑就诊<i class="el-icon-caret-bottom el-icon--right"></i>
 				  </span>
