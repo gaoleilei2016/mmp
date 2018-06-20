@@ -1,4 +1,4 @@
-<div class="detail_panel" v-for="(info,index) in detail" style="height:calc(100% - 30px)">
+<div class="detail_panel" v-for="(info,index) in return_detail" style="height:calc(100% - 30px)">
 	<div class="el-row">
 		<div class="el-col-12">订单号：{{info.order_code}}</div>
 		<div class="el-col-12">日期：{{ info.created_at | formatDate('yyyy-MM-dd') }}</div>
@@ -15,7 +15,7 @@
   <el-table
     :data="info.details"
     border
-    style="width:100%">
+    style="width: 100%">
     <el-table-column
       prop="name"
       label="药品名称"
@@ -33,12 +33,10 @@
     </el-table-column>
     <el-table-column
       prop="quantity"
-      align="right"
       label="数量">
     </el-table-column>
     <el-table-column
       prop="price"
-      align="right"
       label="单价">
       <template slot-scope="scope">
         <div align="right">{{scope.row.price | formatMoney(2)}}</div>
@@ -46,11 +44,10 @@
     </el-table-column>
     <el-table-column
       prop="net_amt"
-      label="金额"
-      align="right">
+      label="金额">
       <template slot-scope="scope">
         <div align="right">{{scope.row.net_amt | formatMoney(2)}}</div>
-      </template>
+      </template>      
     </el-table-column>
   </el-table>
 
@@ -59,23 +56,16 @@
   <div class="el-row" style="padding-top:12px;">
   	<div class="el-col-12">发票：</div>
     <div class="el-col-12 btns" style="text-align:right;">
-      <span v-if="info.is_order&&info.status === '1'">
-        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">收费并发药</button>
+      <span v-if="info.is_order&&info.status === '5'&&info.is_returned != 1">
+        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
       </span>
-      <span v-if="info.is_order&&info.status === '1'">
-        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="charging_pre(info.order_id)">收费</button>
-      </span>
-      <span v-if="info.is_order&&info.status === '2' ">
-        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">发药</button>
-      </span>      
-    	<!-- <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">发药</button> -->
     </div>
   </div>
 
   <div class="detail_panel_pres">
 	  <el-tabs v-model="activeName2" type="card">
-	    <el-tab-pane v-for="(pre,index) in info.pres" v-bind:name="pre.index" v-bind:label="pre.type" :key="pre.prescription_id">
-        <%= render "ims/home/render/prescription_form"%>
+	    <el-tab-pane v-for="(pre,index) in info.pres" v-bind:name="pre.index" v-bind:label="pre.type" v-bind:pre_id="pre.prescription_id">
+        <%= render "ims/home/render/prescription_form_return"%>
       </el-tab-pane>
 	  </el-tabs>
   </div>

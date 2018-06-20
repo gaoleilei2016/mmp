@@ -108,7 +108,7 @@ class Ims::Order < ApplicationRecord
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-      data = [{
+      data = {
           type:'订单',
           is_order:true,
           order_id: order.id,
@@ -142,9 +142,12 @@ class Ims::Order < ApplicationRecord
                   firm: x.firm,
                   img_path: x.img_path
                 }
-              }
-          }]
-          
+              },
+          pres:[]
+        }
+          p "++++++++++++++++++++++++++"
+          p prescriptions
+          p "++++++++++++++++++++++++++"
           temp = 0;    
           prescriptions.each do |k,v|
             p "---------------------",v
@@ -157,19 +160,22 @@ class Ims::Order < ApplicationRecord
                     price: x[:price],
                     net_amt: (x[:total_quantity].to_f*x[:price].to_f),
                     firm:x[:firm],
+                    frequency:x[:frequency][:display],
+                    dose:x[:dose][:value].to_s + x[:dose][:unit].to_s,
+                    route:x[:route][:display]
                   }
                 }
-            data <<{
+            data[:pres] <<{
               :type => '处方'+(temp += 1).to_s,
               :is_order => false,
-              :order_id => v[:id],
+              :order_id => "",
               :order_code => v[:prescription_no],
               :amt => v[:price],
               :status => v[:status],
               :phone=>v[:phone],
               :source_org_name => v[:org][:display],
               :doctor => v[:author][:display],
-              :prescriptions_id => [],
+              :prescription_id => v[:id],
               :patient_name => v[:name],
               :patient_sex => v[:gender][:display],
               :patient_age => v[:age],
@@ -182,10 +188,11 @@ class Ims::Order < ApplicationRecord
               :note => v[:note],
               :pre_type => v[:type][:display],
               :diagnoses => ((v[:diagnoses]||[]).map{|e| e.display}.join(",") rescue nil),
+              :created_at => v[:created_at],
               details: details
             }
           end
-        return {flag:true,:data=>data}
+        return {flag:true,:order=>data}
     end
 
     # 到店患者未在平台操作的处方收费或者收费并发药操作
@@ -225,7 +232,7 @@ class Ims::Order < ApplicationRecord
         order_id = args[:id]
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
-        return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
+        # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
         return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"

@@ -109,11 +109,6 @@ class Ims::OrdersController < ApplicationController
       lines:[
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
       ]
       }]

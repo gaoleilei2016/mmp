@@ -1,179 +1,85 @@
 <style type="text/css">
-#prescription_header{font-size: 12px;padding: 8px;}
-#prescription_header .title{font-size: 21px;}
-#prescription_header .header-right-btns{position: absolute; right:12px; bottom:8px; text-align: right; }
-.router-view-content{padding:0;}
-#side_menu{border-right:1px solid #ddd;}
-#side_menu > div{
-	padding:8px;
-	border-bottom:1px solid #ddd;
-}
-#side_menu i{
-	padding:4px;
-	font-size: 1.2em;
-}
-body > .container{
-  padding: 40px 0px 41px;
-}
-.el-table th, .el-table td{
-	padding:8px 0px;
-}
-#ims_order_main .el-menu span,#ims_order_main .el-menu i{display: block;}
-#ims_order_main .el-menu-item {padding:0;padding-left:0px!important;padding-top:6px; text-align: center;}
-#ims_order_main .el-menu span{padding-top:6px; line-height: 12px;}
-#ims_order_main .el-menu i{width:auto;margin-right:0px;}
-#ims_order_main .prescription-info .padding {padding-left:12px; padding-right:12px;}
-#ims_order_main .prescription-info .el-collapse-item__content {padding-bottom:0px;}
 </style>
 <template>
-
 	<div id="ims_order_main">
-
-		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse" style="rgb(56,73,91)">
+		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
 		  <el-menu-item index="1" @click="show_panel('out_order')">
 		    <i class="el-icon-goods"></i>
-		    <span slot="title">发药</span>  
+		    <span >发药</span>  
 		  </el-menu-item>
 
 		  <el-menu-item index="2" @click="show_panel('return_drug')">
 		    <i class="el-icon-sold-out"></i>
-		    <span slot="title">退药</span>  
+		    <span >退药</span>  
 		  </el-menu-item>
-
-      <el-menu-item index="2" @click="show_panel('return_drug')">
-        <i class="el-icon-sold-out"></i>
-        <span slot="title">统计</span>  
-      </el-menu-item>
 
 		  <el-menu-item index="3" @click="show_panel('reports')">
 		    <i class="el-icon-document"></i>
-		    <span slot="title">报表</span>
+		    <span >报表</span>
 		  </el-menu-item>
 
 		  <el-menu-item index="4" @click="show_panel('settings')">
 		    <i class="el-icon-setting"></i>
-		    <span slot="title">设置</span>
+		    <span >设置</span>
 		  </el-menu-item>
 		  
 		</el-menu>
 
-		<div class="function_panel out_order" style="height:100%;">
+		<div class="function_panel out_order">
 			<%= render "ims/home/render/out_order"%>
 		</div>
 
-		<div class="function_panel return_drug" style="height:100%;display:none;">
+		<div class="function_panel return_drug" style="display:none;">
 			<%= render "ims/home/render/return_order"%>
 		</div>
 
-		<div class="function_panel reports" style="height:100%;display:none;">
-			<%= render "ims/home/render/order_reports"%>
+		<div class="function_panel reports" style="display:none;">
+			<%#= render "ims/home/render/order_reports"%>
 		</div>
 
-		<div class="function_panel settings" style="height:100%;display:none;">
-			<%= render "ims/home/render/settings"%>
+		<div class="function_panel settings" style="display:none;">
+			<%#= render "ims/home/render/settings"%>
 		</div>
 
 	</div>
 </template>
 <script type="text/javascript">
+document.onkeydown = function(){
+  console.log(window.event.keyCode)
+  if(window.event.keyCode = 114){
+    var ele = document.getElementsByClassName("el-input__inner")
+    // $.each(ele,function(k,v))
+  }
+}
 window.current_template_obj = {
 	data:function(){
 		return {
-			isCollapse: false,
-      return_pres:[],
-      return_detail:[],
-			pres:[],
-      pre_detail:[],
-			detail:[{is_order:true}],
-      activeName2:"1",
-      return_activeName2:"5",
-      tab_header: '0', return_tab_header: '0',
-      tab_header_data: [],
-      input21: '',
-      setting: {},
-      options:[{value:"yes",label:"是"},{value:"no",label:"否"}],
-      token:"<%= %>",
-      dialogFormVisible: false,
-      tableData_plat:[],
-      platform_data:[],
-        form: {
-          name: '',
-        },
-        formLabelWidth: '120px',
-			rules: {
-				validity: [
-		      { required: true, message: '效期不能为空'},
-		    ],
-				voice: [
-		      { required: true, message: '请选择语音'},
-		    ]
-			},
-			activeTab: "histories",
-			tableData3: [],
+      isCollapse: true,
+      out_order_search:"",
+      out_list_panel:"0",
+      order_lists:[],
+      detail:[{pres:[{type:"处方"}]}],
 
-      pickerOptions2: {
-        shortcuts: [{
-          text: '最近一周',
-          onClick:function(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近一个月',
-          onClick:function(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-            picker.$emit('pick', [start, end]);
-          }
-        }, {
-          text: '最近三个月',
-          onClick:function(picker) {
-            const end = new Date();
-            const start = new Date();
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-            picker.$emit('pick', [start, end]);
-          }
-        }]
-      },
-      value6: '',
-      value7: '',
-      report_type:[]
+      return_order_search:"",
+      return_list_panel:"5",
+      return_order_lists:[],
+      return_detail:[{pres:[{type:"处方"}]}],
+
+      dialogFormVisible: false,
+      platform_data:[],
+      activeName2:'0',
 		}
 	},
 	methods:{
-    init:function(){
-      $("div.list_fun_panel[stat='1']").addClass("active");
-      stat = "1"
-      this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response){
-        this._data.pres =response.data.data;
-      },this.errorCallback);
+    init:function(){},
+    handleOpen:function(key, keyPath) {
+      console.log(key, keyPath);
     },
-    handleClick:function(tab, event) {
-      if (tab.index == "0") {
-        this.get_pres('1')
-      }else if (tab.index == "1") {
-        this.get_pres('2')
-      };      
+    handleClose:function(key, keyPath) {
+      console.log(key, keyPath);
     },
-    return_handleClick:function(tab, event) {
-      if (tab.index == "0") {
-        this.get_pres('5')
-      }else if (tab.index == "1") {
-        this.get_pres('7')
-      };      
-    },
-    errorCallback:function(response){
-      this.$notify({
-        title: '提示',
-        message: '服务器请求出错了',
-        duration: 0
-      });
-    },
-		show_panel:function(method){
+    show_panel:function(method){
       var _this = this
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
@@ -181,75 +87,21 @@ window.current_template_obj = {
       try{
         $(document).find(str).find(".prescription_list_panel .is-active").click();
       }catch(e){
-        _this._data.pres = []
+        _this._data.order_lists = []
         console.log(e)
       }
-		},
-		choose_prescription:function(){
-			number = this.tab_header
-			tab_val = this.tab_header_data[number]
-      this._data.detail = [tab_val]
     },
-    return_choose_prescription:function(){
-      number = this.return_tab_header
-      tab_val = this.tab_header_data[number]
-      this._data.detail = [tab_val]
-    },    
-      handleOpen:function(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleClose:function(key, keyPath) {
-        console.log(key, keyPath);
-      },		
-		handleSelectionChange:function(val) {
-      this.multipleSelection = val;
-    },
-    handleCurrentChange:function(val) {
-    	this.currentRow = val;
-    },
-    create_search_order:function(row){
-    	current = this.currentRow
-    	multiple = this.multipleSelection
-    	_this = this
-    	if (multiple&&multiple.length>0) {
-    		temp = []
-    		$.each(multiple,function(k,v){
-	    		temp.push({id:v.id,code:v.code, name:v.name, amount:v.amount})
-    		})
-	    	data = {authenticity_token:"<%= form_authenticity_token %>",order:temp}
-	    	Vue.http.post("/ims/orders/create_order",data).then(function(response){
-          try{
-            _this.set_pres(response.data)
-          }catch(e){
-            console.log(e)
-          }
-          _this.dialogFormVisible = false
-        },function(response){
-          _this.$message('订单创建失败，请重试！');
-        })
-    	}else{
-    		_this.$message('请选择要生成订单的数据！');
-    	}
-    },		
-		search_platform_pre:function(val){
-			if (!val) {val = ""};
-      this.$http.get('/ims/orders/get_orders?platform='+val).then(function(response) {
-        this._data.tableData_plat = response.data
-      },function(response){
-        this.$notify({
-          title: '提示',
-          message: '服务器请求出错了',
-          duration: 0
-        });
-      });
-		},
-		search:function(e){
+    out_order_search_fun:function(e){
       var _this = this
+      setTimeout(function(){
+
       value = e.srcElement._value
-			stat = Number(this.tab_header)+1
-      this.$http.get('/ims/orders/get_search_data?stat='+stat+'&search='+value).then(function(response) {
+      stat = Number(_this.out_list_panel)
+      _this.$http.get('/ims/orders/get_search_data?stat='+stat+'&search='+value).then(function(response) {
         temp = []
+        temp2 = []
         flag_arr = []
+        order_status = []
         flag = true
         ori_data = response.data
         if (ori_data[0]&&ori_data[0].r_status<0) {
@@ -257,11 +109,13 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
+          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
+          order_status.push(data1.status)
           temp.push({
             id:data1.cfid,
             order_id:data1.order_id,
@@ -275,6 +129,8 @@ window.current_template_obj = {
             iden:data1.iden,
             phone:data1.phone,
             status:data1.cfstatus,
+            amt:data1.price,
+            created_at:data1.created_at,
             lines:[{
               name:data1.title,
               specification:data1.specification,
@@ -286,6 +142,7 @@ window.current_template_obj = {
             for(i=1;i<ori_data.length;i++){
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
+              order_status.push(for_data.status)
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
@@ -310,7 +167,9 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:data1.cfstatus,
+                      status:for_data.cfstatus,
+                      amt:for_data.price,
+                      created_at:for_data.created_at,
                       lines:[{
                         name:for_data.title,
                         specification:for_data.specification,
@@ -325,50 +184,264 @@ window.current_template_obj = {
             }
           };
 
-          console.log(flag_arr)
-
           if (flag_arr.indexOf(1)>=0) {
-            temp2 = []
             stat = _this.activeName2
+            console.log("temp",temp)
+            console.log("temp.length",temp.length)
             temp.map(function(item){
-              if (item.status == stat) {
-                temp2<<{
+              if (temp2.length<=0) {
+                temp2.push({
                   order_id:item.order_id,
-                  order_code:item.order_type,
+                  order_code:item.order_code,
                   patient_name:item.name,
-                  amt:""
-                }
-              };
+                  created_at:item.created_at,
+                  amt:item.amt,
+                  status:item.status
+                })
+              }else{
+                if (item.status == temp2[0].status) {
+                  temp2.push({
+                    order_id:item.order_id,
+                    order_code:item.order_code,
+                    patient_name:item.name,
+                    created_at:item.created_at,
+                    amt:item.amt,
+                    status:item.status
+                  })
+                };
+              }
+              console.log(temp2)
             })
-            _this._data.pres = temp2
+            console.log("temp2.length",temp2.length)
+            console.log(temp2)
+            if (temp2.length>0) {
+              if(temp2[0].status == "2"){
+                _this.out_list_panel = "1"
+                _this._data.order_lists = temp2
+              }else if(temp2[0].status == "3"){
+                _this.out_list_panel = "2"
+                  _this._data.order_lists = temp2
+              }else if(temp2[0].status == "4"){
+                _this.$notify({title: '提示',message: '订单已发药！'});  
+              }else if(temp2[0].status == "8"){
+                _this.$notify({title: '提示',message: '订单已退药！'});  
+              }else{
+                _this.$notify({title: '提示',message: '订单状态不对！'});  
+              }
+            }else{
+              _this.$notify({title: '提示',message: '没有数据！'});  
+            }
           }else if(flag_arr.indexOf(99)>=0){
             _this._data.platform_data = temp
             _this._data.dialogFormVisible = true
+          }else{
+            _this.$notify({
+              title: '提示',
+              message: '未找到数据！',
+            });
           }
         }else{
           _this.$notify({
             title: '提示',
             message: '没有数据！',
-          });          
+          });
+          console.log("没有数据")
+        }
+        console.log(temp)
+        console.log(flag_arr)
+        console.log(order_status)
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },200)
+
+    },
+    return_order_search_fun:function(e){
+      var _this = this
+      setTimeout(function(){
+
+      value = e.srcElement._value
+      stat = Number(_this.return_list_panel)
+      _this.$http.get('/ims/orders/get_order_by_code?stat='+stat+'&search='+value).then(function(response) {
+        temp = []
+        temp2 = []
+        flag_arr = []
+        order_status = []
+        flag = true
+        ori_data = response.data
+        if (ori_data[0]&&ori_data[0].r_status<0) {
+          _this.$notify({
+            title: '提示',
+            message: '没有数据！',
+          });
+          console.log("没有数据")
+          return ""
+        };
+        if(ori_data&&ori_data.length>0){
+          data1 = ori_data[0]
+          flag_arr.push(data1.r_status)
+          order_status.push(data1.status)
+          temp.push({
+            id:data1.cfid,
+            order_id:data1.order_id,
+            order_type:data1.order_type,
+            order_code:data1.order_code,
+            pre_code:data1.prescription_no,
+            name:data1.name,
+            age:data1.age,
+            sex:data1.gender_display,
+            address:data1.address,
+            iden:data1.iden,
+            phone:data1.phone,
+            status:data1.cfstatus,
+            amt:data1.price,
+            created_at:data1.created_at,
+            lines:[{
+              name:data1.title,
+              specification:data1.specification,
+              qty:data1.single_qty_value,
+              unit:data1.single_qty_unit,
+            }]
+          })
+          if (ori_data.length>1) {
+            for(i=1;i<ori_data.length;i++){
+              for_data = ori_data[i]
+              flag_arr.push(for_data.r_status)
+              order_status.push(for_data.status)
+              inter:
+              for(j=0;j<temp.length;j++){
+                if (temp[j].id == for_data.cfid) {
+                  temp[j].lines.push({
+                    name:for_data.title,
+                    specification:for_data.specification,
+                    qty:for_data.single_qty_value,
+                    unit:for_data.single_qty_unit,                    
+                  })
+                  break inter;
+                }else{
+                  if (j == temp.length-1) {
+                    temp.push({
+                      id:for_data.cfid,
+                      order_id:for_data.order_id,
+                      order_type:for_data.order_type,
+                      order_code:for_data.order_code,                      
+                      pre_code:for_data.prescription_no,
+                      name:for_data.name,
+                      age:for_data.age,
+                      sex:for_data.gender_display,
+                      address:for_data.address,
+                      iden:for_data.iden,
+                      phone:for_data.phone,
+                      status:for_data.cfstatus,
+                      amt:for_data.price,
+                      created_at:for_data.created_at,
+                      lines:[{
+                        name:for_data.title,
+                        specification:for_data.specification,
+                        qty:for_data.single_qty_value,
+                        unit:for_data.single_qty_unit,
+                      }]
+                    })
+                  };
+                  
+                }
+              }
+            }
+          };
+
+          if (flag_arr.indexOf(1)>=0) {
+            stat = _this.activeName2
+            console.log("temp",temp)
+            console.log("temp.length",temp.length)
+            temp.map(function(item){
+              if (temp2.length<=0) {
+                temp2.push({
+                  order_id:item.order_id,
+                  order_code:item.order_code,
+                  patient_name:item.name,
+                  created_at:item.created_at,
+                  amt:item.amt,
+                  status:item.status
+                })
+              }else{
+                if (item.status == temp2[0].status) {
+                  temp2.push({
+                    order_id:item.order_id,
+                    order_code:item.order_code,
+                    patient_name:item.name,
+                    created_at:item.created_at,
+                    amt:item.amt,
+                    status:item.status
+                  })
+                };
+              }
+              console.log(temp2)
+            })
+            console.log("temp2.length",temp2.length)
+            console.log(temp2)
+            if (temp2.length>0) {
+              if(temp2[0].status == "2"){
+                _this.$notify({title: '提示',message: '订单未发药！'});
+              }else if(temp2[0].status == "3"){
+                _this.$notify({title: '提示',message: '订单未发药！'});
+              }else if(temp2[0].status == "5"){
+                _this.return_list_panel = "5"
+                _this._data.return_order_lists = temp2
+              }else if(temp2[0].status == "8"){
+                 _this.return_list_panel = "8".
+                 _this._data.return_order_lists = temp2
+              }else{
+                _this.$notify({title: '提示',message: '没有数据！'});  
+              }
+            }else{
+              _this.$notify({title: '提示',message: '没有数据！'});  
+            }
+          }else if(flag_arr.indexOf(99)>=0){
+            _this.$notify({
+              title: '提示',
+              message: '订单未收费 或 未发药！',
+            });
+          }else{
+            _this.$notify({
+              title: '提示',
+              message: '未找到数据！',
+            });
+          }
+        }else{
+          _this.$notify({
+            title: '提示',
+            message: '没有数据！',
+          });
+          console.log("没有数据")
+        }
+        console.log(temp)
+        console.log(flag_arr)
+        console.log(order_status)
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },200)
+
+    },
+    get_out_pres:function(tab,event){
+      var _this = this
+      var stat = _this.out_list_panel
+      _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
+        if(response.data.data&&response.data.data.length>0){
+          _this.set_order_list(response.data.data)
+        }else{
+          _this.set_order_list([])
         }
       },function(response){
-        _this.$notify({
-          title: '提示',
-          message: '服务器请求出错了',
-          duration: 0
-        });
-      });
-		},
-    get_pres:function (stat,e) {
-      var _this = this
-      $(".prescription_list").find(".active").removeClass("active")
-      _this._data.tab_header_data = []
-      _this._data.detail = [{is_order:true}]
-    	if (!stat) {stat=""};
-      _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
-        if(response.data.data&&response.data.data.length>0){_this.set_pres(response.data.data)}else{_this.set_pres([])}
-      },function(response){
-        _this.set_pres()
+        _this.set_order_list()
         _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
@@ -376,32 +449,30 @@ window.current_template_obj = {
         });
       });
     },
-    set_pres:function(data){
+    set_order_list:function(data){
       if (data) {
-        this._data.pres = data
+        this._data.order_lists = data
       }else{
-      	this._data.pres = []
+        this._data.order_lists = []
       }
     },
-    get_pre:function (id,e) {
-    	var _this = this;
-      _this._data.tab_header = '0'
-      _this._data.tab_header_data = []
-      _this._data.detail = [{is_order:true}]  
-    	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
-    	if (!id) {
-    		id="";
+    get_order:function (id,e) {
+      var _this = this;
+      console.log(e.currentTarget)
+      if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+      if (!id) {
+        id="";
         _this.$notify({
           title: '提示',
           message: '订单信息不全！',
           duration: 0
         });
         return ""
-    	};
+      };
       _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
-        console.log(response.data.data)
-        _this._data.tab_header_data = response.data.data
-        setTimeout(function(){  _this._data.detail =  [_this.tab_header_data[0]] },300)
+        console.log(response.data.order)
+        _this._data.detail = [response.data.order]
+        // setTimeout(function(){  _this._data.detail =  [_this.tab_header_data[0]] },300)
       },function(response){
         _this.$notify({
           title: '提示',
@@ -410,35 +481,130 @@ window.current_template_obj = {
         });
       });
     },
-    get_detail:function (id,e) {
-    	if(e)$(e.currentTarget).addClass("active").siblings("p").removeClass("active")
-    	if (!id) { id="";     this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
-        return ""
-    	};
-      this.$http.get('/ims/orders/get_detail?id='+id).then(function(response) {
-        this._data.detail = response.data
+    get_return_pres:function(tab,e){
+      var _this = this
+      var stat = _this.return_list_panel
+      _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
+        if(response.data.data&&response.data.data.length>0){
+          _this.set_return_order_lists(response.data.data)
+        }else{
+          _this.set_return_order_lists([])
+        }
       },function(response){
-        this.$notify({
+        _this.set_return_order_lists()
+        _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
           duration: 0
         });
       });
     },
-
-    //收费 
-    charging_pre:function(id){
-      this.oprate_order({id:id,method:"charging_pre",todo:"收费"})
+    set_return_order_lists:function(data){
+      if (data) {
+        this._data.return_order_lists = data
+      }else{
+        this._data.return_order_lists = []
+      }
     },
-    //发药  发订单
+    get_return_order:function (id,e) {
+      var _this = this;
+      if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+      if (!id) {
+        id="";
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全！',
+          duration: 0
+        });
+        return ""
+      };
+      _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
+        _this._data.return_detail = [response.data.order]
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },  
+      
     out_order:function(id){
-    	this.oprate_order({id:id,method:"dispensing_order",todo:"发药"})
-    },
+      var _this = this
+      if (id){}else{
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能发药！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/dispensing_order?id='+id).then(function(response) {
+        stat = response.data.flag ? true : false
+        info = response.data.info
+        type = stat ? "success" : "warning";
+        if (info) {
+          _this.$notify({
+            title: '提示',
+            message: info,
+            type:type,
+            duration:(stat ? 4500 : 0)
+          })          
+        };
+        try{
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".is-active").click()
+        }catch(e){
+          console.log(e)
+        }
+        _this._data.order_lists = []
+        _this._data.detail = [{}]
 
-		//退药
-		return_drug:function(id){
-			this.oprate_order({id:id,method:"return_drug",todo:"退药"})	
-		},
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },
+    charging_pre:function(id){
+      var _this = this
+      if (id){}else{
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能发药！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/charging_pre?id='+id).then(function(response) {
+        stat = response.data.flag ? true : false
+        info = response.data.info
+        type = stat ? "success" : "warning";
+        if (info) {
+          _this.$notify({
+            title: '提示',
+            message: info,
+            type:type,
+            duration:(stat ? 4500 : 0)
+          })          
+        };
+        try{
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".is-active").click()
+        }catch(e){
+          console.log(e)
+        }
+        _this._data.order_lists = []
+        _this._data.detail = [{}]
+
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },
     //平台搜索  收费
     platform_charging_fun:function(){
       var _this = this
@@ -481,16 +647,16 @@ window.current_template_obj = {
           _this.$message('收费并发药失败，请重试！');
         })
     },    
-		oprate_order:function(data){
+    return_order:function(id){
       var _this = this
-    	if (data.id){}else{
+      if (id){}else{
         _this.$notify({
           title: '提示',
-          message: '订单信息不全，不能发药！',
-        });    		
-    		return false
-    	}
-			_this.$http.get('/ims/orders/'+data.method+'?id='+data.id).then(function(response) {
+          message: '订单信息不全，不能退药！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/return_drug?id='+id).then(function(response) {
         stat = response.data.flag ? true : false
         info = response.data.info
         type = stat ? "success" : "warning";
@@ -503,64 +669,48 @@ window.current_template_obj = {
           })          
         };
         try{
-          method = ""
-          if(data.method == "charging_pre"||data.method == "dispensing_order"){
-            method = "out_order"
-          }else{
-            method = data.method
-          }
-          str = "div.function_panel."+method
+          str = "div.function_panel.return_drug"
           $(document).find(str).find(".is-active").click()
         }catch(e){
           console.log(e)
         }
-        _this._data.tab_header_data = []
-        _this._data.detail = [{is_order:true}]
-        // _this.$notify({
-        //   title: '提示',
-        //   message: data.todo+(stat ? "成功" : "失败"),
-        //   type:type,
-        //   // duration:(stat ? 4500 : 0)
-        // })
+        _this._data.order_lists = []
+        _this._data.detail = [{}]
+
       },function(response){
         _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
           duration: 0
         });
-      });
-		},
+      });      
+    },
+    choose_prescription:function(id){
+      console.log(id)
+      this.
+      str = "#pre_"+id
+      $("#ims_order_main").find(str).show();
+    },
     format_time:function(data){
-	  	var time = new Date(data)
-	  	if (data) {
-		    return time.toLocaleDateString().replace(/\//g,"-")+" "+time.toTimeString().slice(0,5)
-	  	}else{
-	  		return ""
-	  	}
+      var time = new Date(data)
+      if (data) {
+        return time.toLocaleDateString().replace(/\//g,"-")+" "+time.toTimeString().slice(0,5)
+      }else{
+        return "未知"
+      }
     },
     format_price:function(data){
-			if (data) {
-				return Number(data)==NaN ? 0.00 : parseFloat(data).toFixed(2)
-			}else{
-				return ""
-			}
+      if (data) {
+        return Number(data)==NaN ? 0.00 : parseFloat(data).toFixed(2)
+      }else{
+        return ""
+      }
     },
-    fix_diagnoses:function(data){
-			try{
-				if (typeof(data.join())==Object) {
-					return ""
-				}else{
-					return data.join();
-				}
-			}catch(err){
-				return ""
-			}
-    }
 	},
 	mounted:function(){
 		this.$nextTick(function(){
 			this.init();
 		})	
-	}
+	},
 }
 </script>

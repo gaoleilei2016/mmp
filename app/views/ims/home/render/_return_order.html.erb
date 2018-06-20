@@ -1,45 +1,30 @@
-		<div id="prescription_panel">
-			
-			<div class="el-row" id="prescription_body">
-				<div class="el-col el-col-8 prescription_list_panel" style="height: 100%; overflow: auto; padding:12px; border-right:1px solid #ddd;">
-					<div class="el-input el-input--mini" style="height:40px;">
-						<el-input
-						    placeholder="请输入内容"
-						    prefix-icon="el-icon-search"
-						    v-model="input21"
-						    @change="search"
-						    >
-						  </el-input>					
-					</div>
-
-				  <el-tabs v-model="return_activeName2" type="card" @tab-click="return_handleClick">
-				    <el-tab-pane label="已发药" name="5"></el-tab-pane>
-				    <el-tab-pane label="已退药" name="7"></el-tab-pane>
-				  </el-tabs>
-
-					<div class="prescription_list">
-						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-on:click="get_pre(pre.order_id,$event)">
-								<span class="el-col el-col-8" style="overflow:hidden; display:block; float:left;">{{pre.order_code}}</span>
-								<span class="el-col el-col-8 text-center" style="display:block; float:left;">{{pre.patient_name}}</span>
-								<span class="el-col el-col-8 text-right" style="display:block; float:left;">{{format_price(pre.amt)}}</span>
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="el-col el-col-16" style="height: 100%;">
-					<div style="height:30px;">
-						<el-tabs v-model="return_tab_header" type="card" @tab-click="return_choose_prescription">
-						  <el-tab-pane
-						    v-for="(item, index) in tab_header_data"
-						    :key="item.id"
-						    :label="item.type"
-						  ></el-tab-pane>
-						</el-tabs>
-					</div>
-					<%= render "ims/home/render/prescription_panel"%>
-				</div>
-			</div>
-
+<div id="prescription_main_panel">
+	<div class="prescription_list_panel">
+		<div>订单列表</div>
+		<div class="el-input el-input--mini" style="padding-top:12px; padding-bottom:12px;">
+			<el-input
+			  placeholder="搜索 订单号 / 手机号"
+			  prefix-icon="el-icon-search"
+			  v-model="return_order_search"
+			  @keyup.enter.native="return_order_search_fun"
+			  >
+			</el-input>
 		</div>
+	  <el-tabs v-model="return_list_panel" type="card" @tab-click="get_return_pres">
+	    <el-tab-pane label="已发药" name="5"></el-tab-pane>
+	    <el-tab-pane label="已退药" name="7"></el-tab-pane>
+				<el-row :gutter="20" v-for="order in return_order_lists" class="pre_list" @click.native="get_return_order(order.order_id,$event)">
+					<el-col :span="6" style="width:120px;">{{format_time(order.created_at)}}</el-col>
+					<el-col :span="6" style="width:calc(100% - 280px);overflow-x:hidden;">{{order.order_code}}</el-col>
+					<el-col :span="6" style="width:80px;">{{order.patient_name}}</el-col>
+					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(order.amt)}}</el-col>
+				</el-row>
+	  </el-tabs>
+	</div>
+
+	<div class="prescription_detail_panel">
+		<div>订单详情</div>
+		<%= render "ims/home/render/prescription_panel_return"%>
+	</div>
+
+</div>
