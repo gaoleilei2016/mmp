@@ -10,6 +10,7 @@ class Hospital::DiagnosesController < ApplicationController
 	# 只能通过就诊id
 	# /hospital/diagnoses
 	def index
+		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 		ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
 		@all_diagnoses = ret[:master] + ret[:slaver]
@@ -25,6 +26,7 @@ class Hospital::DiagnosesController < ApplicationController
 	# 	display: 
 	# }
 	def create
+		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		@diagnose = ::Hospital::Diagnose.new(format_encounter_diagnose_create_args)
 		@diagnose.set_rank
 		if @diagnose.save
@@ -41,6 +43,7 @@ class Hospital::DiagnosesController < ApplicationController
 	# /hospital/diagnoses/sort
 	def sort
 		p "Hospital::DiagnosesController" , params
+		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		# tag_id 是被操作   exchange_id 被更换的是
 		case params[:sort].to_s
 		when "1" # 上移
@@ -68,10 +71,11 @@ class Hospital::DiagnosesController < ApplicationController
 	# PUT
 	# /hospital/diagnoses/:id
 	def update
+		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		respond_to do |format|
 	    if @diagnose.update_attributes(format_encounter_diagnose_update_args)
 	    	@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
-				all_ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
+			all_ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
 	    	format.html { redirect_to @diagnose, notice: 'diagnose was successfully updated.'}
 	    	format.json { render json: {flag: true, info:"", master: all_ret[:master], data: @diagnose.to_web_front} }
 	    else
@@ -84,6 +88,7 @@ class Hospital::DiagnosesController < ApplicationController
 	# DELETE
 	# /hospital/diagnoses/:id
 	def destroy
+		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		if @diagnose.destroy
 			@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 			ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
