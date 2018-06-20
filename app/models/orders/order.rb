@@ -271,6 +271,7 @@ class Orders::Order < ApplicationRecord
 				 user_id: attrs[:current_user].id.to_s,
 				 invoice_id: attrs[:invoice_id].to_s,
 				 _locked: 0,
+				 settle_times: 0,
 				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
