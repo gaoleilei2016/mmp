@@ -11,6 +11,7 @@ class Hospital::Order < ApplicationRecord
   def initialize args = {}
     super args
     self.status = 0
+    self.type_type = 'instance'
   end
 
 
