@@ -1,5 +1,5 @@
 <style type="text/css">
-	html,body,.mui-content{
+	html,body,#vue_content,.mui-content{
 		height: 100%;
 		overflow: hidden;
 	}
@@ -17,95 +17,113 @@
 		background: none !important;
 	}
 </style>
-<header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-		<span class="mui-icon mui-icon-left-nav"></span>
-	</a>
-	<h1 class="mui-title">确认订单</h1>
-</header>
-<div class="mui-content" id="vue_content">
-	<ul class="mui-table-view no_active_background">
-		<li class="mui-table-view-cell" style="padding: 22px 18px 14px;overflow: visible;">
-			<div>
-				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
-				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
-				<div class="mui-media-body">
-					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
-					<span v-else><i class="fal fa-spinner fa-spin"></i> 获取购物车</span>
-					<p class="mui-ellipsis">{{current_pharmacy.addr||"　"}}</p>
-				</div>
-			</div>
-			<ul class="mui-table-view no_background" style="margin-top: 15px;">
-				<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
-					<div href="javascript:;" class="">
-						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
-						<div class="mui-media-body">
-							{{drug.title}}
-							<p class="mui-ellipsis">
-								{{drug.specification}}
-								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
-							</p>
-						</div>
+<div id="vue_content">
+	<header class="my_top_nav mui-bar mui-bar-nav">
+		<a href="/" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+			<span class="mui-icon mui-icon-left-nav"></span>
+		</a>
+		<h1 class="mui-title">确认订单</h1>
+	</header>
+	<div class="mui-content">
+		<ul class="mui-table-view no_active_background">
+			<li class="mui-table-view-cell" style="padding: 22px 18px 14px;overflow: visible;">
+				<div>
+					<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+					<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+					<div class="mui-media-body">
+						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+						<span v-else><i class="fal fa-spinner fa-spin"></i> 获取购物车</span>
+						<p class="mui-ellipsis">{{current_pharmacy.addr||"　"}}</p>
 					</div>
+				</div>
+				<ul class="mui-table-view no_background" style="margin-top: 15px;">
+					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
+						<div href="javascript:;" class="">
+							<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+							<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
+							<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+							<div class="mui-media-body">
+								{{drug.title}}
+								<p class="mui-ellipsis">
+									<p style="padding-top: 6px;">{{drug.specification}}</p>
+									<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
+								</p>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<ul id="" class="mui-table-view mui-table-view-chevron" style="margin: 16px 0 0px;">
+			<li class="mui-table-view-cell mui-media">
+				<a href="javascript:$('#xxxxx1,#xxxxx2').show();" class="mui-navigate-right">
+					<div class="mui-media-body">
+						支付方式
+						<span class='mui-pull-right' style="color: #999;">
+							<template v-if="pay_type=='online'">在线支付</template>
+							<template v-if="pay_type=='offline'">到店支付</template>
+						</span>
+					</div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell mui-media">
+				<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+					<div class="mui-media-body">
+						抵用券
+						<span class='mui-pull-right' style="color: #999;">暂无可用</span>
+						<!-- <span class='mui-pull-right' style="color: #F55742;">-5 元</span> -->
+					</div>
+				</a>
+			</li>
+			<li class="mui-table-view-cell">
+				<span>发票</span>
+				<div class="mui-switch mui-switch-mini">
+					<div class="mui-switch-handle"></div>
+				</div>
+			</li>
+			<template v-if="fapiao">
+				<li class="mui-table-view-cell">
+					<a href="javascript:$('#xxxxx1,#xxxxx3').show();" class="mui-navigate-right">
+						<span>发票类型</span>
+						<span class='mui-pull-right' style="color: #999;">电子发票</span>
+					</a>
 				</li>
-			</ul>
-		</li>
-	</ul>
-	<ul id="" class="mui-table-view mui-table-view-chevron" style="margin: 16px 0 0px;">
-		<li class="mui-table-view-cell mui-media">
-			<a href="javascript:$('#xxxxx1,#xxxxx2').show();" class="mui-navigate-right">
-				<div class="mui-media-body">
-					支付方式
-					<span class='mui-pull-right' style="color: #999;">
-						<template v-if="pay_type=='online'">在线支付</template>
-						<template v-if="pay_type=='offline'">到店支付</template>
-					</span>
-				</div>
-			</a>
-		</li>
-		<li class="mui-table-view-cell mui-media">
-			<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
-				<div class="mui-media-body">
-					抵用券
-					<span class='mui-pull-right' style="color: #999;">暂无可用</span>
-					<!-- <span class='mui-pull-right' style="color: #F55742;">-5 元</span> -->
-				</div>
-			</a>
-		</li>
-		<li class="mui-table-view-cell">
-			<span>发票</span>
-			<div class="mui-switch mui-switch-mini">
-				<div class="mui-switch-handle"></div>
-			</div>
-		</li>
-	</ul>
-	<p style="font-size: 10px;padding: 10px 14px;margin: 0;">温馨提示：本平台只对处方药品作信息展示。 所有处方均来源于医院并授权许可，真实有效。 所有药品均由具备资质的药店提供。</p>
+				<li class="mui-table-view-cell">
+					<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+						<span>发票内容</span>
+						<span class='mui-pull-right' style="color: #999;">明细</span>
+					</a>
+				</li>
+				<li class="mui-table-view-cell">
+					<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+						<span>发票抬头</span>
+						<span class='mui-pull-right' style="color: #999;"></span>
+					</a>
+				</li>
+			</template>
+		</ul>
+		<p style="font-size: 10px;padding: 10px 14px;margin: 0;">温馨提示：本平台只对处方药品作信息展示。 所有处方均来源于医院并授权许可，真实有效。 所有药品均由具备资质的药店提供。</p>
+		<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
+			<input type="text" name="order[payment_type]" v-model="pay_type">
+			<input type="text" name="order[hospital_id]" v-model="prescription.org_id">
+			<input type="text" name="order[hospital_name]" v-model="prescription.org_name">
+			<input type="text" name="order[pharmacy_id]" v-model="current_pharmacy.id">
+			<input type="text" name="order[pharmacy_name]" v-model="current_pharmacy.name">
+			<select v-if="prescription.prescription_ids" multiple="multiple" name="order[prescription_ids][]" v-model="prescription.prescription_ids">
+				<option v-for="id in prescription.prescription_ids" key="id">{{id}}</option>
+			</select>
+		</form>
+	</div>
 	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 997;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
 		<button type="button" @click="submit_form" style="float: right;font-size: 20px;width: 130px;color: #fff;background: #F55742;height: 100%;text-align: center;">提交订单</button>
 		<div style="overflow: hidden;padding-right: 10px;text-align: right;"><span style="font-size: .7em;">总金额</span> <span style="color: #F55742;"><span style="font-size: .7em;">¥</span> {{format_float(prescription.total_price)}}</span></div>
 	</div>
-	<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
-		<input type="text" name="order[payment_type]" v-model="pay_type">
-		<input type="text" name="order[hospital_id]" v-model="prescription.org_id">
-		<input type="text" name="order[hospital_name]" v-model="prescription.org_name">
-		<input type="text" name="order[pharmacy_id]" v-model="current_pharmacy.id">
-		<input type="text" name="order[pharmacy_name]" v-model="current_pharmacy.name">
-		<select v-if="prescription.prescription_ids" multiple="multiple" name="order[prescription_ids][]" v-model="prescription.prescription_ids">
-			<option v-for="id in prescription.prescription_ids" key="id">{{id}}</option>
-		</select>
-	</form>
 </div>
-<div id="xxxxx1" onclick="$('#xxxxx1,#xxxxx2').hide();" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
+<div id="xxxxx1" onclick="$('#xxxxx1,#xxxxx2,#xxxxx3').hide();" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
 <div id="xxxxx2" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
 	<p style="text-align: center;padding: 12px;font-size: 12px;">支付方式</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
-		<!-- <li class="mui-table-view-cell">
-			<a href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx2').hide();">在线支付</a>
-		</li>
-		<li class="mui-table-view-cell">
-			<a href="javascript:;" onclick="current_app.pay_type='offline';$('#xxxxx1,#xxxxx2').hide();">到店支付</a>
-		</li> -->
 		<li class="mui-table-view-cell mui-selected">
 			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx2').hide();">在线支付</a>
 		</li>
@@ -116,6 +134,22 @@
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
 			<a href="javascript:$('#xxxxx1,#xxxxx2').hide();"><b>关闭</b></a>
+		</li>
+	</ul>
+</div>
+<div id="xxxxx3" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
+	<p style="text-align: center;padding: 12px;font-size: 12px;">支付方式</p>
+	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
+		<li class="mui-table-view-cell mui-selected">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#xxxxx1,#xxxxx3').hide();">在线支付</a>
+		</li>
+		<li class="mui-table-view-cell">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='offline';$('#xxxxx1,#xxxxx3').hide();">到店支付</a>
+		</li>
+	</ul>
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
+			<a href="javascript:$('#xxxxx1,#xxxxx3').hide();"><b>关闭</b></a>
 		</li>
 	</ul>
 </div>

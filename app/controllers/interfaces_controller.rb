@@ -88,12 +88,14 @@ class InterfacesController < ApplicationController
 		order = JSON.parse(params[:order].to_json)
 		order[:current_user] = current_user
 		re = Orders::Order.create_order_by_presc_ids(order)
+		flash[:notice] = re[:info]
+		session[:cart_prescription_ids] = nil
 		if re[:ret_code]!='0'
-			flash[:notice] = re[:info]
 			return redirect_to "/customer/portal/settlement"
 		end
 		# p '~~~~~~~~~~~~',re
 		# p re
+		# flash[:notice] = re[:info]
 		if re[:order].payment_type.to_s == '2'
 			redirect_to "/customer/home/order?id=#{re[:order].id}"
 		else re[:order].payment_type.to_s == '1'

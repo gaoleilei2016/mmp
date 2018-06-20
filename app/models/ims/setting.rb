@@ -9,6 +9,7 @@ class Ims::Setting < ApplicationRecord
 	# 	returned_at: integer,     # 退药时间天数
 	# 	payment_expired: integer,     # 付费未取药过期天数
 	# 	unpaid_expired: integer,     # 未支付订单过期天数
+	#   voice_prompts: boolean,     # 语音提示
 	# 	created_at: datetime,     # 
 	# 	updated_at: datetime    # 
 	# }
@@ -19,7 +20,7 @@ class Ims::Setting < ApplicationRecord
 
 	class << self
 		# 
-		def create_set args = {}
+		def update_set args = {}
 			
 		end
 	end

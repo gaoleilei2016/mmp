@@ -44,9 +44,20 @@ input{opacity: 0.8;}
 			<el-row>
 		  	<el-col :span="10">
 		  		<el-form-item
-				    label="订单效期"
+				    label="付费未取药过期天数"
 				    prop="validity">
-				    <el-input v-model="setting.validity" auto-complete="off">
+				    <!-- <el-input v-model="setting.validity" auto-complete="off"> -->
+			    	<el-input v-model="setting.validity" auto-complete="off" name="ims_setting[payment_expired]">
+
+					    <span>天</span>
+					  </el-input>
+				  </el-form-item>
+
+				<el-form-item
+				    label="未支付订单过期天数"
+				    prop="validity">
+				    <!-- <el-input v-model="setting.validity" auto-complete="off"> -->
+			    	<el-input v-model="setting.validity" auto-complete="off" name="ims_setting[unpaid_expired]">
 					    <span>天</span>
 					  </el-input>
 				  </el-form-item>
@@ -54,7 +65,8 @@ input{opacity: 0.8;}
 				  <el-form-item
 				    label="语音提示"
 				    prop="voice">
-				  	<el-select v-model="setting.voice" value-key="code" placeholder="请选择">
+				  	<!-- <el-select v-model="setting.voice" value-key="code" placeholder="请选择"> -->
+			  		<el-select v-model="setting.voice" value-key="code" placeholder="请选择" name="ims_setting[voice_prompts]">
 					    <el-option
 					      v-for="item in options"
 					      :key="item.value"
