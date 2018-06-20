@@ -168,14 +168,14 @@ class Ims::Order < ApplicationRecord
             data[:pres] <<{
               :type => '处方'+(temp += 1).to_s,
               :is_order => false,
-              :order_id => v[:id],
+              :order_id => "",
               :order_code => v[:prescription_no],
               :amt => v[:price],
               :status => v[:status],
               :phone=>v[:phone],
               :source_org_name => v[:org][:display],
               :doctor => v[:author][:display],
-              :prescriptions_id => [],
+              :prescription_id => v[:id],
               :patient_name => v[:name],
               :patient_sex => v[:gender][:display],
               :patient_age => v[:age],
@@ -231,7 +231,7 @@ class Ims::Order < ApplicationRecord
         order_id = args[:id]
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
-        return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
+        # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=args[:org_id]
         return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
         return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"

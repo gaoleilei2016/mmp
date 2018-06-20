@@ -45,6 +45,13 @@
 	</div>
 </template>
 <script type="text/javascript">
+document.onkeydown = function(){
+  console.log(window.event.keyCode)
+  if(window.event.keyCode = 114){
+    var ele = document.getElementsByClassName("el-input__inner")
+    // $.each(ele,function(k,v))
+  }
+}
 window.current_template_obj = {
 	data:function(){
 		return {
@@ -52,12 +59,12 @@ window.current_template_obj = {
       out_order_search:"",
       out_list_panel:"0",
       order_lists:[],
-      detail:[{}],
+      detail:[{pres:[{type:"处方"}]}],
 
       return_order_search:"",
       return_list_panel:"5",
       return_order_lists:[],
-      return_detail:[{}],      
+      return_detail:[{pres:[{type:"处方"}]}],
 
       dialogFormVisible: false,
       platform_data:[],
@@ -102,7 +109,7 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据11111111111111111111")
+          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
@@ -222,7 +229,7 @@ window.current_template_obj = {
                 _this.$notify({title: '提示',message: '订单状态不对！'});  
               }
             }else{
-              _this.$notify({title: '提示',message: '没有数据333333333333！'});  
+              _this.$notify({title: '提示',message: '没有数据！'});  
             }
           }else if(flag_arr.indexOf(99)>=0){
             _this._data.platform_data = temp
@@ -236,9 +243,9 @@ window.current_template_obj = {
         }else{
           _this.$notify({
             title: '提示',
-            message: '没有数据222222222222222！',
+            message: '没有数据！',
           });
-          console.log("没有数据22222222222222222222")
+          console.log("没有数据")
         }
         console.log(temp)
         console.log(flag_arr)
@@ -255,10 +262,13 @@ window.current_template_obj = {
     },
     return_order_search_fun:function(e){
       var _this = this
+      setTimeout(function(){
+
       value = e.srcElement._value
-      stat = Number(this.return_list_panel)
-      this.$http.get('/ims/orders/get_order_by_code?stat='+stat+'&search='+value).then(function(response) {
+      stat = Number(_this.return_list_panel)
+      _this.$http.get('/ims/orders/get_order_by_code?stat='+stat+'&search='+value).then(function(response) {
         temp = []
+        temp2 = []
         flag_arr = []
         order_status = []
         flag = true
@@ -268,6 +278,7 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
+          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
@@ -287,6 +298,8 @@ window.current_template_obj = {
             iden:data1.iden,
             phone:data1.phone,
             status:data1.cfstatus,
+            amt:data1.price,
+            created_at:data1.created_at,
             lines:[{
               name:data1.title,
               specification:data1.specification,
@@ -323,7 +336,9 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:data1.cfstatus,
+                      status:for_data.cfstatus,
+                      amt:for_data.price,
+                      created_at:for_data.created_at,
                       lines:[{
                         name:for_data.title,
                         specification:for_data.specification,
@@ -339,53 +354,73 @@ window.current_template_obj = {
           };
 
           if (flag_arr.indexOf(1)>=0) {
-            temp2 = []
             stat = _this.activeName2
+            console.log("temp",temp)
+            console.log("temp.length",temp.length)
             temp.map(function(item){
-              if (temp2<=0) {
-                temp2<<{
+              if (temp2.length<=0) {
+                temp2.push({
                   order_id:item.order_id,
-                  order_code:item.order_type,
+                  order_code:item.order_code,
                   patient_name:item.name,
-                  amt:"",
+                  created_at:item.created_at,
+                  amt:item.amt,
                   status:item.status
-                }
+                })
               }else{
                 if (item.status == temp2[0].status) {
-                  temp2<<{
+                  temp2.push({
                     order_id:item.order_id,
-                    order_code:item.order_type,
+                    order_code:item.order_code,
                     patient_name:item.name,
-                    amt:"",
+                    created_at:item.created_at,
+                    amt:item.amt,
                     status:item.status
-                  }
+                  })
                 };
               }
+              console.log(temp2)
             })
-            if (temp2[0]) {
-              if(temp2[0].status == "5"){
+            console.log("temp2.length",temp2.length)
+            console.log(temp2)
+            if (temp2.length>0) {
+              if(temp2[0].status == "2"){
+                _this.$notify({title: '提示',message: '订单未发药！'});
+              }else if(temp2[0].status == "3"){
+                _this.$notify({title: '提示',message: '订单未发药！'});
+              }else if(temp2[0].status == "5"){
                 _this.return_list_panel = "5"
-              }else if(temp2[0].status == "7"){
-                _this.return_list_panel = "7"
+                _this._data.return_order_lists = temp2
+              }else if(temp2[0].status == "8"){
+                 _this.return_list_panel = "8".
+                 _this._data.return_order_lists = temp2
+              }else{
+                _this.$notify({title: '提示',message: '没有数据！'});  
               }
-              _this._data.return_order_lists = temp2
             }else{
-
+              _this.$notify({title: '提示',message: '没有数据！'});  
             }
           }else if(flag_arr.indexOf(99)>=0){
-            // _this._data.platform_data = temp
-            // _this._data.dialogFormVisible = true
             _this.$notify({
               title: '提示',
               message: '订单未收费 或 未发药！',
+            });
+          }else{
+            _this.$notify({
+              title: '提示',
+              message: '未找到数据！',
             });
           }
         }else{
           _this.$notify({
             title: '提示',
             message: '没有数据！',
-          });          
+          });
+          console.log("没有数据")
         }
+        console.log(temp)
+        console.log(flag_arr)
+        console.log(order_status)
       },function(response){
         _this.$notify({
           title: '提示',
@@ -393,6 +428,8 @@ window.current_template_obj = {
           duration: 0
         });
       });
+    },200)
+
     },
     get_out_pres:function(tab,event){
       var _this = this
@@ -609,7 +646,50 @@ window.current_template_obj = {
           _this.$message('收费并发药失败，请重试！');
         })
     },    
-    return_order:function(id){},
+    return_order:function(id){
+      var _this = this
+      if (id){}else{
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能退药！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/return_drug?id='+id).then(function(response) {
+        stat = response.data.flag ? true : false
+        info = response.data.info
+        type = stat ? "success" : "warning";
+        if (info) {
+          _this.$notify({
+            title: '提示',
+            message: info,
+            type:type,
+            duration:(stat ? 4500 : 0)
+          })          
+        };
+        try{
+          str = "div.function_panel.return_drug"
+          $(document).find(str).find(".is-active").click()
+        }catch(e){
+          console.log(e)
+        }
+        _this._data.order_lists = []
+        _this._data.detail = [{}]
+
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });      
+    },
+    choose_prescription:function(id){
+      console.log(id)
+      this.
+      str = "#pre_"+id
+      $("#ims_order_main").find(str).show();
+    },
     format_time:function(data){
       var time = new Date(data)
       if (data) {
@@ -630,6 +710,6 @@ window.current_template_obj = {
 		this.$nextTick(function(){
 			this.init();
 		})	
-	}
+	},
 }
 </script>
