@@ -48,6 +48,7 @@ class Ims::Order < ApplicationRecord
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           is_returned: order.is_returned,
+          created_at: order.created_at,
           }
         }
         return {flag:true,data:data}
@@ -145,12 +146,8 @@ class Ims::Order < ApplicationRecord
               },
           pres:[]
         }
-          p "++++++++++++++++++++++++++"
-          p prescriptions
-          p "++++++++++++++++++++++++++"
           temp = 0;    
           prescriptions.each do |k,v|
-            p "---------------------",v
             next if v[:orders].blank?
             details = v[:orders].map{|x| {
                     name: x[:title],
@@ -254,7 +251,7 @@ class Ims::Order < ApplicationRecord
           dup_detail.save
           new_order.details << dup_detail
         end
-        new_order.save ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。',}
+        new_order.save ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
@@ -264,24 +261,30 @@ class Ims::Order < ApplicationRecord
 
     # 发药
     def dispensing_order args = {}
-      order_id = args[:id]
-      current_user = args[:current_user]
-      order = Orders::Order.find order_id rescue nil
-      return {flag:false,:info=>"未找到订单信息。"} if order.blank?
-      return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
-      return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
-      return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
-      return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
-      ::ActiveRecord::Base.transaction  do
-        temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
-        data = Orders::Order.order_completion(temp)
-        return {flag:false,info:data[:info]} if data[:ret_code].to_i!=0
-        prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-        send_data = {current_user:current_user,prescriptions:prescriptions}
-        result = Ims::PrescriptionHeader.save_prescription send_data
-        return_data = result[:flag] ? {flag:true,info:'退药成功！'} : {flag:false,info:(result[:flag]|| '退药失败。')}
+      begin
+        result = {}
+        order_id = args[:id]
+        current_user = args[:current_user]
+        order = Orders::Order.find order_id rescue nil
+        return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+        return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
+        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
+        return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
+        return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
+        ::ActiveRecord::Base.transaction  do
+          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
+          data = Orders::Order.order_completion(temp)
+          return {flag:false,info:data[:info]} if data[:ret_code].to_i!=0
+          prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+          send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
+          result = Ims::PrescriptionHeader.save_prescription send_data
+        end
+        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:(result[:info]|| '发药失败。')}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")
+        {flag:false,info:'发药失败。'}
       end
-      return_data
     end
 
     # 退药
@@ -298,11 +301,44 @@ class Ims::Order < ApplicationRecord
         ::ActiveRecord::Base.transaction  do
           update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
           result = header.update_attributes!(update_data)
+          return {flag:false,info:'退药失败。'} unless result
+          header.reload
+          header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
+          create_new_prescription header,current_user
         end
-        result ? {flag:true,info:'退药成功！'} : {flag:false,info:(result[:flag]|| '退药失败。'),}
+        result ? {flag:true,info:'退药成功！'} : {flag:false,info:(result[:info]|| '退药失败。'),}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
+    def create_new_prescription header = {},current_user
+      begin
+        new_header = header.clone.dup
+        new_header.prescription_no = header.prescription_no.to_s+"_T"
+        new_header.ori_id = header.id
+        new_header.ori_code = header.prescription_no
+        new_header.return_name = current_user.name
+        new_header.returner_id = current_user.id
+        new_header.return_at = Time.new
+        new_header.status = '8'
+        details = []
+        header.details.each do |detail|
+          dup_detail = detail.clone.dup
+          dup_detail.qty = -detail.qty.to_f
+          dup_detail.amount = -detail.amount.to_f
+          dup_detail.return_qty = detail.qty.to_f
+          dup_detail.ori_detail_id = detail.id
+          details << dup_detail.attributes
+        end
+        details_1 = Ims::PrescriptionDetail.create!(details)
+        new_header.details = details_1
+        new_order.save! ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。'}
+      rescue Exception => e
+        print e.message 
+        print "+++++++++++++++++++++++ create_new_prescription 出错: " + e.backtrace.join("\n")
         result = {flag:false,:info=>"药店系统出错。"}
       end
     end

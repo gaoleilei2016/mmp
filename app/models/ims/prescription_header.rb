@@ -7,27 +7,27 @@ class Ims::PrescriptionHeader < ApplicationRecord
 
 		# 处方单保存 
 		def save_prescription args = {}
-			return {flag:false,info:"处方信息为空。发药失败！"} if attrs[:prescriptions].blank?
-			return {flag:false,info:"处方明细信息为空。发药失败！"} if (attrs[:prescriptions][:orders] rescue nil).blank?
-			return {flag:false,info:"没有获取到发药用户信息。"} if attrs[:current_user].blank?
-			current_user = attrs[:current_user]
+			return {flag:false,info:"处方信息为空。发药失败！"} if args[:prescriptions].blank?
+			return {flag:false,info:"没有获取到发药用户信息。"} if args[:current_user].blank?
+			current_user = args[:current_user]
+			order = args[:order]
 			prescription_headers = []
+			# ::ActiveRecord::Base.transaction do
 			::ActiveRecord::Base.transaction(:requires_new => true) do
-				attrs[:prescriptions].each do |prescription|
-					header = prescription_data prescription,current_user
+				args[:prescriptions].each do |k,prescription|
+					header = prescription_data prescription,current_user,order
 					next if header.blank?
 					prescription_headers << ::Ims::PrescriptionHeader.create!(header)
 				end
 				raise ActiveRecord::Rollback
-				p prescription_headers.count,attrs[:prescriptions].count
-				prescription_headers.count==attrs[:prescriptions].count ? {flag:true,info:"处方保存成功！"} : {flag:false,info:"处方保存失败。"}
 			end
+			prescription_headers.count==args[:prescriptions].count ? {flag:true,info:"处方保存成功！"} : {flag:false,info:"处方保存失败。"}
 		end
 
-		def prescription_data prescription= {},current_user
+		def prescription_data prescription= {},current_user,order
 			begin
 				details = (prescription[:orders]||[]).map{|detail| 
-					Ims::PrescriptionDetail.new({
+					{
 						:serialno=> detail[:serialno],
 						:title=> detail[:title],
 						:specification=> detail[:specification],
@@ -63,9 +63,10 @@ class Ims::PrescriptionHeader < ApplicationRecord
 						:measure_unit=> detail[:measure_unit],
 						:type_type=> detail[:type_type],
 						:hospital_prescription_order_id=> detail[:id],
-					})
+					}
 				}
-				order = Orders::Order.find prescription[:bill_id]
+				return {} if details.blank?
+				details_1 = Ims::PrescriptionDetail.create(details)
 				header = {
 					:prescription_no=>prescription[:prescription_no] ,
 					:note=>prescription[:note] ,
@@ -96,19 +97,20 @@ class Ims::PrescriptionHeader < ApplicationRecord
 					:delivery_org_id=>current_user.try(:organization_id) ,
 					:delivery_org_name=>current_user.try(:organization).try(:name) ,
 					:delivery_at=>Time.new ,
-					:drug_store_id=>prescription[:drug_store_id] ,
-					:drug_store_name=>prescription[:drug_store_name] ,
+					:drug_store_id=>(prescription[:drug_store_id]||order.try(:target_org_id)),
+					:drug_store_name=>(prescription[:drug_store_name]||order.try(:target_org_name)) ,
 					:effective_start=>prescription[:effective_start] ,
 					:effective_end=>prescription[:effective_end] ,
 					:diagnoses=>(prescription[:diagnoses]||[].map{|e| e.display}).join(',') ,
 					:specialmark=>prescription[:specialmark] ,
 					:status=>'4' ,
-					:bill_id=>prescription[:bill_id] ,
+					:bill_id=>order.try(:id) ,
+					:bill_code=>order.try(:order_code) ,
 					:bill_at=>order.try(:created_at) ,
 					:hospital_prescription_at=>prescription[:created_at] ,
 					:hospital_prescription_id=>prescription[:id] ,
 					:is_returned=>false ,
-					:details=>details,
+					:details=>details_1,
 				}
 				return header
 			rescue Exception => e
