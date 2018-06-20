@@ -17,5 +17,9 @@ class Customer::PortalController < ApplicationController
 			flash[:notice] = '请选择药房'
 			redirect_to '/'
 		end
+		unless session[:cart_prescription_ids]&&session[:cart_prescription_ids].length>0
+			flash[:notice] = '购物车空空如也'
+			redirect_to '/'
+		end
 	end
 end

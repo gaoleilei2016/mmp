@@ -88,6 +88,9 @@
 			.common_grey{
 				color: #8A8782;
 			}
+			.mui-bar .mui-icon-left-nav{
+				color: #F55742;
+			}
 		</style>
 		<style type="text/css">
 /* 3个圆圈的加载样式
@@ -107,7 +110,7 @@
   width: 20px;
   height: 20px;
   /*// background-color: #67CF22;*/
-  background-color: #428bca;
+  background-color: #F55742;
  
   border-radius: 100%;
   display: inline-block;
@@ -176,7 +179,7 @@
 				$(".mui-tab-item.users_home").addClass("mui-active");
 			}else{
 				$(".mui-tab-item").each(function(i,v) {
-					if (location.pathname == $(v).attr('data-url')) {
+					if ( location.pathname.indexOf( $(v).attr('data-url') )>-1 ) {
 						$(v).addClass("mui-active");
 					}
 				})
@@ -218,7 +221,7 @@
 						map.addOverlay(mk);
 						map.panTo(r.point);
 					}
-					console.log( '您的位置：'+r.point.lng+','+r.point.lat );
+					// console.log( '您的位置：'+r.point.lng+','+r.point.lat );
 					callback&&callback(r.point);
 				}
 				else {
