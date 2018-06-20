@@ -331,7 +331,7 @@ class Ims::Order < ApplicationRecord
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PrescriptionHeader.save_prescription send_data
         end
-        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:'发药失败。'}
+        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。}"}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")
