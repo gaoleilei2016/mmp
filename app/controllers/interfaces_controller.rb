@@ -34,6 +34,7 @@ class InterfacesController < ApplicationController
 		end
 		# order.net_amt ##订单号用机构id+订单号
 		order.increment(:settle_times,1)
+		order.save
 		args = {out_trade_no: "#{order.id}_#{order.settle_times}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
 		# p '~~~~~~~~~',args
 		case params[:pay_type]
