@@ -3,6 +3,56 @@ class Person < ApplicationRecord
 	belongs_to :user,                   :class_name => '::User',                        :foreign_key => 'user_id', optional: true
 	has_many :encounters,				:class_name => '::Hospital::Encounter',			:foreign_key => 'person_id'
 	has_many :irritabilities,           :class_name => '::Hospital::Irritability',      :foreign_key => 'person_id'
+
+
+	validates :name, :phone, :age, :gender_code, presence: true
+
+	def to_web_front
+		self.reload
+		ret = {
+			id: self.id,
+			iden: self.iden,
+			name: self.name,
+			name_jp: self.name_jp,
+			name_wb: self.name_wb,
+			birth_date: self.birth_date,
+			age: self.age,
+			gender: {
+			  code: self.gender_code, 
+			  display: self.gender_display
+			},
+			occupation:{
+			  code: self.occupation_code,
+			  display: self.occupation_display
+			},
+			phone: self.phone,
+			address: self.pa_address,
+			unit_name: self.unit_name,
+			ua_address: self.ua_address,
+			unit_phone: self.unit_phone,
+			contact_name: self.contact_name,
+			contact_phone: self.contact_phone,
+			created_at: self.created_at,
+			updated_at: self.updated_at,
+			nation: {
+			  code: self.nation_code,
+			  display: self.nation_display
+			},
+			blood:{
+			  code: self.blood_code,
+			  display: self.blood_display
+			},
+			marriage:{
+			  code: self.marriage_code,
+			  display: self.marriage_display
+			},
+			height: self.height,
+			weight: self.weight,
+		}
+		return ret
+	end
+
+
 end
 
 
