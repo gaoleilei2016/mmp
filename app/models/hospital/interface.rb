@@ -17,6 +17,11 @@ module ::Hospital::Interface
     return ret
   end
 
+  def self.get_not_read_prescriptions_by_phone(phone)
+    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone} AND a.is_read=0"
+    ::Hospital::Prescription.find_by_sql(sql)
+  end
+
 
 
 #   attrs = { 
