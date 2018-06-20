@@ -137,6 +137,7 @@ class Ims::OrdersController < ApplicationController
 
   # 订单发药
   def dispensing_order
+    p "fffffffffffffffffffffffffffffffffffffffffffffffff"
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
     temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"}
