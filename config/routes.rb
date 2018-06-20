@@ -105,8 +105,7 @@ Rails.application.routes.draw do
     # 诊断
     resources :diagnoses do
       collection do
-        get :get_diagnoses_by_encounter_id
-        post :create_by_encounter_id
+        post :sort
       end
     end
 
