@@ -811,7 +811,7 @@ window.current_template_obj = {
     			unit: drug.unit, // 单位
     			price: drug.price, // 价格
     			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
-    			single_qty: {value: 1, unit: drug.unit}, // 单次数量
+    			single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
     			route: _this.$parent.common_data_routes[0],// 频次
     			frequency: _this.$parent.common_data_frequencys[0],// 频次
     			course_of_treatment: {value: "", unit: "天"},  // 疗程
