@@ -5,10 +5,9 @@ class Person < ApplicationRecord
 	has_many :irritabilities,           :class_name => '::Hospital::Irritability',      :foreign_key => 'person_id'
 
 
-	validates :name, :phone, :age, :gender_code, presence: true
+	validates :name, :phone, :age, :gender_code,:gender_display, presence: {message: "不能为空"}
 
 	def to_web_front
-		self.reload
 		ret = {
 			id: self.id,
 			iden: self.iden,
