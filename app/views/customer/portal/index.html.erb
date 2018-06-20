@@ -76,15 +76,17 @@
 			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
 			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
 		</div>
-		<div class="search_results" style="">
+		<div class="search_results" style="height: calc( 100% - 40px );overflow: auto;">
 			<template v-if="pharmacys">
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
 						<div>
-							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
 							<div class="mui-media-body">
-								{{item.name}}
-								<p style="float: right;">{{item.distance}}</p>
+								<div>
+									{{item.name}}
+									<p style="float: right;">{{item.distance}}</p>
+								</div>
 								<p class="mui-ellipsis">{{item.addr}}</p>
 							</div>
 						</div>
