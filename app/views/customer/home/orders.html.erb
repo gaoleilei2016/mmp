@@ -52,7 +52,7 @@
 		<div v-for="order in orders" style="margin-bottom: 16px;">
 			<ul class="mui-table-view" style="margin-bottom: 8px;">
 				<li class="mui-table-view-cell">
-					<div>
+					<a :href="'/customer/home/order?id='+order.id">
 						<span>No: {{order.order_code}}</span>
 						<span style="float: right;color: #F55742;">
 							<span v-if="order.payment_type=='1'">
@@ -66,7 +66,7 @@
 							</span>
 							<span v-if="order.payment_type=='2'">到店支付</span>
 						</span>
-					</div>
+					</a>
 				</li>
 				<li class="mui-table-view-cell">
 					<a :href="'/customer/home/order?id='+order.id">
@@ -100,8 +100,10 @@
 			</ul>
 			<div style="text-align: right;padding-right: 8px;">
 				<button type="button" @click="$parent.cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
-				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">重新支付</button>
-				<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+				<template v-if="order.payment_type=='1'">
+					<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">去支付</button>
+					<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+				</template>
 			</div>
 		</div>
 	</div>
