@@ -59,6 +59,58 @@ class Ims::Order < ApplicationRecord
       end
   	end
 
+    # 处方查询(已发药、退药)
+    def prescription_search args={}
+      begin
+        data = []
+        return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
+        query ="select * from orders_orders where delivery_id = #{args[:org_id]}"
+        query.concat(" and prescription_no=#{args[:order_code]}") unless args[:order_code].blank?
+        query.concat(" and status=#{args[:status]}")
+        case args[:status].to_i
+        when 5
+          query.concat(" order by delivery_at desc")
+        when 8
+          query.concat(" order by return_at desc")
+        else
+        end
+        Ims::PrescriptionHeader.find_by_sql(query).map{|order|
+
+        }
+
+        Orders::Order.find_by_sql(query).map{|order| 
+          preson = Person.find order.person_id rescue nil
+          data <<{
+          order_id: order.id,
+          order_code: order.order_code,
+          amt: order.net_amt,
+          status: order.status,
+          payment_at: order.payment_at,     # 支付时间
+          end_time: order.end_time,     # 订单完成时间
+          close_time: order.close_time,
+          target_org_name: order.target_org_name,
+          source_org_name: order.source_org_name,
+          doctor: order.doctor,
+          prescriptions_id: order.prescription_ids,
+          prescriptions_count: order.try(:prescription_ids).count,
+          patient_name: order.patient_name,
+          patient_sex: order.patient_sex,
+          patient_age: order.patient_age,
+          patient_iden: order.patient_iden,
+          patient_phone: order.patient_phone,
+          payment_type: order.payment_type,
+          is_returned: order.is_returned,
+          created_at: order.created_at,
+          }
+        }
+        return {flag:true,data:data}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 订单发药 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
   	# 未指定药店的订单查询(未在平台上操作的患者也能在药店客户端协助患者自选药品购药)[可能查到]
     def get_prescription_or_order_data args = {}
       i_days = 6
@@ -279,7 +331,7 @@ class Ims::Order < ApplicationRecord
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PrescriptionHeader.save_prescription send_data
         end
-        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:(result[:info]|| '发药失败。')}
+        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:'发药失败。'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")

@@ -82,13 +82,9 @@ class Ims::OrdersController < ApplicationController
     else
       type = "9999"
     end
-    org_id = ""#current_user.organization_id rescue ""
-    order_code = ""#取药码  可以没有
-    data  = []
     if params[:platform]
-      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
+      @data = Orders::Order.get_order_to_medical({type:type,org_id:current_user.try(:organization_id)})
     end
-
     #搜索药店的 订单 处方
     if params[:stat]
       attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
@@ -96,6 +92,14 @@ class Ims::OrdersController < ApplicationController
     end
     render json:@data.to_json
   end
+
+  def get_prescriptions
+    status = params[:stat]
+    attrs = {status: status,org_id: current_user.try(:organization_id)}
+    @data = Ims::Order.prescription_search attrs
+    render json:@data.to_json
+  end
+
 
   def get_order
     @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
