@@ -21,13 +21,16 @@
 	<h1 class="mui-title"><%= params[:name] %></h1>
 </header>
 <div class="mui-content" id="vue_content">
+	<!-- <a href="baidumap://map/geocoder?location=<%= params[:lat] %>,<%= params[:lng] %>&output=html" target="_blank">百度导航</a> -->
 	<div style="height: calc( 100% );">
 		<div id="map_use_div" style="height: 100%;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
 	</div>
 </div>
 <script type="text/javascript">
+	var last_marker = null;
+	var map = null;
 	$(function() {
-		var map = new BMap.Map("map_use_div");
+		map = new BMap.Map("map_use_div");
 		// var point = new BMap.Point(106.7091771,26.62990674);
 		// map.centerAndZoom(point,12);
 		map.enableScrollWheelZoom(true);
@@ -46,19 +49,28 @@
 		});
 		map.addControl(navigationControl);
 		// 添加定位控件
+		// map.clearOverlays();
 		var geolocationControl = new BMap.GeolocationControl();
 		geolocationControl.addEventListener("locationSuccess", function(e){
-			// console.log( 'xxxxxxxxxxxxxxxxx',e.point );
+			// console.log( 'xxxxxxxxxxxxxxxxx',e );
 			// return false;
 			// console.log( e.point );
+			// alert("xxxxx")
 			if (e.point.lat==26.62990674&&e.point.lng==106.7091771) {
 				mui.toast("未知的当前位置");
 				map.centerAndZoom(new_point,14);
+				map.removeOverlay(e.marker);
 			}else{
 				// var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
+				// console.log( map.getOverlays() );
 				var walking = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true}});
 				walking.search(e.point,new_point);
+				// console.log( walking );
+				// walking.clearResults();
 			}
+			// map.removeOverlay(last_marker);
+			last_marker = e.marker;
+			// console.log( last_marker );
 			// // 定位成功事件
 			// var address = '';
 			// address += e.addressComponent.province;
@@ -75,8 +87,30 @@
 		});
 		map.addControl(geolocationControl);
 		setTimeout(function() {
+			$('.BMap_geolocationIcon').click(function(e) {
+				// map.clearOverlays();
+				map.getOverlays().map(function(item) {
+					if(item != marker){
+						map.removeOverlay(item);
+					}
+				})
+			})
 			$('.BMap_geolocationIcon').click()
 		})
+		// $(function() {
+		// 	setInterval(function() {
+		// 		// $('.BMap_geolocationIcon').click()
+		// 		addressOverlay('',function(point) {
+		// 			// var mk = new BMap.Marker(point);
+		// 			// map.addOverlay(mk);
+		// 			// var point = new BMap.Point(106.7091771,26.62990674);
+		// 			last_marker&&last_marker.setPosition(point);
+		// 			// console.log( '~~~~',point );
+		// 			// map.panTo(point);
+		// 		});
+		// 		// console.log( map.getOverlays() );
+		// 	},8000); // 浏览器记录不了同意定位时反复确认？
+		// })
 
 		// map.panTo(new_point);  
 		// var myGeo = new BMap.Geocoder();    

@@ -13,11 +13,14 @@
 	.mui-table-view.no_background:after{
 		background: none;
 	}
-	.mui-table-view:after,.mui-table-view:before{
+	.mui-table-view:before{
 		height: 1px;
 	}
+	.mui-table-view:after{
+		height: 0;
+	}
 	.mui-table-view-cell{
-		padding: 13px 15px 0;
+		/*padding: 13px 15px 0;*/
 	}
 	.mui-table-view-cell:last-child{
 		padding-bottom: 13px;
@@ -34,6 +37,20 @@
 </header>
 <div class="mui-content" id="vue_content">
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
+		<li class="mui-table-view-cell">
+			<div>
+				<span>No: {{item.prescription_no}}</span>
+				<span style="float: right;color: #F55742;">
+					<span v-if="item.status=='0'">未审核</span>
+					<span v-if="item.status=='1'">已审核</span>
+					<span v-if="item.status=='2'">待收费</span>
+					<span v-if="item.status=='3'">已收费</span>
+					<span v-if="item.status=='4'">已发药</span>
+					<span v-if="item.status=='7'">废弃</span>
+					<span v-if="item.status=='9'">已退费</span>
+				</span>
+			</div>
+		</li>
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
 				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
@@ -49,7 +66,7 @@
 					</p>
 				</div>
 			</div>
-			<ul class="mui-table-view" style="margin: 15px 0;">
+			<ul class="mui-table-view" style="margin: 15px 0 0;">
 				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
 						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->

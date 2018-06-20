@@ -12,62 +12,65 @@
 		<div class="el-col-6">年龄：{{info.patient_age}}</div>
 		<div class="el-col-6">电话：{{info.patient_phone}}</div>
 	</div>
-  <el-table
-    :data="info.details"
-    border
-    style="width: 100%">
-    <el-table-column
-      prop="name"
-      label="药品名称"
-      width="180">
-    </el-table-column>
-    <el-table-column
-      prop="specifications"
-      label="规格"
-      width="100">
-    </el-table-column>
-    <el-table-column
-      prop="firm"
-      label="厂家"
-      width="100">
-    </el-table-column>
-    <el-table-column
-      prop="quantity"
-      label="数量">
-    </el-table-column>
-    <el-table-column
-      prop="price"
-      label="单价">
-      <template slot-scope="scope">
-        <div align="right">{{scope.row.price | formatMoney(2)}}</div>
-      </template>      
-    </el-table-column>
-    <el-table-column
-      prop="net_amt"
-      label="金额">
-      <template slot-scope="scope">
-        <div align="right">{{scope.row.net_amt | formatMoney(2)}}</div>
-      </template>      
-    </el-table-column>
-  </el-table>
+  
+  <div class="detail_panel_scroll">
+    <el-table
+      :data="info.details"
+      border
+      style="width: 100%">
+      <el-table-column
+        prop="name"
+        label="药品名称"
+        width="180">
+      </el-table-column>
+      <el-table-column
+        prop="specifications"
+        label="规格"
+        width="100">
+      </el-table-column>
+      <el-table-column
+        prop="firm"
+        label="厂家"
+        width="100">
+      </el-table-column>
+      <el-table-column
+        prop="quantity"
+        label="数量">
+      </el-table-column>
+      <el-table-column
+        prop="price"
+        label="单价">
+        <template slot-scope="scope">
+          <div align="right">{{scope.row.price | formatMoney(2)}}</div>
+        </template>      
+      </el-table-column>
+      <el-table-column
+        prop="net_amt"
+        label="金额">
+        <template slot-scope="scope">
+          <div align="right">{{scope.row.net_amt | formatMoney(2)}}</div>
+        </template>      
+      </el-table-column>
+    </el-table>
 
-  <div style="text-align:right;">合计：{{format_price(info.amt)}}</div>
+    <div style="text-align:right;">合计：{{format_price(info.amt)}}</div>
 
-  <div class="el-row" style="padding-top:12px;">
-  	<div class="el-col-12">发票：</div>
-    <div class="el-col-12 btns" style="text-align:right;">
-      <span v-if="info.is_order&&info.status === '5'&&info.is_returned != 1">
-        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
-      </span>
+    <div class="el-row" style="padding-top:12px;">
+    	<div class="el-col-12">发票：</div>
+      <div class="el-col-12 btns" style="text-align:right;">
+        <span v-if="info.is_order&&info.status === '5'&&info.is_returned != 1">
+          <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
+        </span>
+      </div>
     </div>
-  </div>
 
-  <div class="detail_panel_pres">
-	  <el-tabs v-model="activeName2" type="card">
-	    <el-tab-pane v-for="(pre,index) in info.pres" v-bind:name="pre.index" v-bind:label="pre.type" v-bind:pre_id="pre.prescription_id">
-        <%= render "ims/home/render/prescription_form_return"%>
-      </el-tab-pane>
-	  </el-tabs>
+    <div class="detail_panel_pres">
+  	  <el-tabs v-model="activeName2" type="card">
+  	    <el-tab-pane v-for="(pre,index) in info.pres" v-bind:name="pre.index" v-bind:label="pre.type" v-bind:pre_id="pre.prescription_id">
+          <%= render "ims/home/render/prescription_form_return"%>
+        </el-tab-pane>
+  	  </el-tabs>
+    </div>
   </div>
 
 </div>

@@ -437,6 +437,8 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0){
           _this.set_order_list(response.data.data)
+            _this._data.detail = [{pres:[{type:"处方"}]}]
+            // return_detail:[{pres:[{type:"处方"}]}],          
         }else{
           _this.set_order_list([])
         }
@@ -552,11 +554,11 @@ window.current_template_obj = {
         };
         try{
           str = "div.function_panel.out_order"
-          $(document).find(str).find(".is-active").click()
+          $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
           console.log(e)
+          _this._data.order_lists = []
         }
-        _this._data.order_lists = []
         _this._data.detail = [{}]
 
       },function(response){
@@ -593,8 +595,8 @@ window.current_template_obj = {
           $(document).find(str).find(".is-active").click()
         }catch(e){
           console.log(e)
+          _this._data.order_lists = []
         }
-        _this._data.order_lists = []
         _this._data.detail = [{}]
 
       },function(response){
@@ -670,12 +672,12 @@ window.current_template_obj = {
         };
         try{
           str = "div.function_panel.return_drug"
-          $(document).find(str).find(".is-active").click()
+          $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
           console.log(e)
+          _this._data.return_order_lists = []
         }
-        _this._data.order_lists = []
-        _this._data.detail = [{}]
+        _this._data.return_detail = [{}]
 
       },function(response){
         _this.$notify({

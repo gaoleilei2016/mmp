@@ -76,7 +76,7 @@
 			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
 			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
 		</div>
-		<div class="search_results" style="margin-top: 10px;">
+		<div class="search_results" style="">
 			<template v-if="pharmacys">
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
@@ -93,8 +93,8 @@
 			</template>
 			<template v-else>
 				<div style="padding-left: 16px;">
-					<p style="margin: 8px;min-height: 100px;">历史记录</p>
-					<p style="margin: 8px;">大家常用</p>
+					<p style="padding: 8px;min-height: 100px;">历史记录</p>
+					<p style="padding: 8px;">大家常用</p>
 				</div>
 			</template>
 		</div>

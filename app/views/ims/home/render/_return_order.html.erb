@@ -14,7 +14,7 @@
 	    <el-tab-pane label="已发药" name="5"></el-tab-pane>
 	    <el-tab-pane label="已退药" name="7"></el-tab-pane>
 				<el-row :gutter="20" v-for="order in return_order_lists" class="pre_list" @click.native="get_return_order(order.order_id,$event)">
-					<el-col :span="6" style="width:120px;">{{format_time(order.created_at)}}</el-col>
+					<el-col :span="6" style="width:120px;">{{ order.created_at | formatDate('yy-MM-dd')}}</el-col>
 					<el-col :span="6" style="width:calc(100% - 280px);overflow-x:hidden;">{{order.order_code}}</el-col>
 					<el-col :span="6" style="width:80px;">{{order.patient_name}}</el-col>
 					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(order.amt)}}</el-col>

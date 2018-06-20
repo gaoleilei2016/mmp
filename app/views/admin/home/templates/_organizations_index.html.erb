@@ -91,7 +91,7 @@
 										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
 											<input v-model="searchInputValue" @keyup="get_timeout_users" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
 											<span class="el-input__prefix" @click="get_users"><i class="el-icon-search el-input__icon"></i></span>
-											<span class="el-input__suffix" @click="searchInputValue='';get_users;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+											<span class="el-input__suffix" @click="searchInputValue='';get_users();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
 										</div>
 									</div>
 								</div>
@@ -131,7 +131,7 @@
 										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
 											<input v-model="searchInputValue1" @keyup="get_timeout_users1" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
 											<span class="el-input__prefix" @click="get_users1"><i class="el-icon-search el-input__icon"></i></span>
-											<span class="el-input__suffix" @click="searchInputValue1='';get_users1;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+											<span class="el-input__suffix" @click="searchInputValue1='';get_users1();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
 										</div>
 									</div>
 								</div>
@@ -261,7 +261,7 @@ window.current_template_obj = {
 		},
 		tabClick:function(tab) {
 			var _this = this;
-			console.log( tab.label=='位置' );
+			// console.log( tab.label=='位置' );
 			_this.$nextTick(function() {
 				// addressOverlay("map_use_div");
 				_this.init_map();

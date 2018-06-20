@@ -57,32 +57,39 @@ class Orders::Order < ApplicationRecord
 	def cancel_order(cur_user=nil,reason='')
 		cur_user ||= User.find(user_id)
 		result = {ret_code:'0',info:''}
-		case status.to_s
-		when '1'
-			prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
-			update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
-			result = {ret_code:'0',info:'订单已取消。'}
-		when '2'
-			arg = {
-				# 退费人
-				return_charge_opt: {
-					id: cur_user.id.to_s,
-					display: cur_user.name.to_s
-				},
-				# 退费时间
-				return_charge_at: Time.now.to_s(:db)
-			}
-			prescriptions.each{|x|x.return_charge(arg, cur_user)}
-			update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
-			result = {ret_code:'0',info:'取消成功，处方已失效。'}
-		when '5'
-			return {ret_code:'-1',info:'订单已完成，不允许取消。'}
-		when '6'
-			return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
-		when '7'
-			return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
+		begin
+			update_attributes(_locked:1)
+			case status.to_s
+			when '1'
+				prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
+				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
+				result = {ret_code:'0',info:'订单已取消。'}
+			when '2'
+				arg = {
+					# 退费人
+					return_charge_opt: {
+						id: cur_user.id.to_s,
+						display: cur_user.name.to_s
+					},
+					# 退费时间
+					return_charge_at: Time.now.to_s(:db)
+				}
+				prescriptions.each{|x|x.return_charge(arg, cur_user)}
+				update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
+				result = {ret_code:'0',info:'取消成功，处方已失效。'}
+			when '5'
+				return {ret_code:'-1',info:'订单已完成，不允许取消。'}
+			when '6'
+				return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
+			when '7'
+				return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
+			end
+			prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+		rescue Exception => e
+			p e
+		ensure
+			self.update_attributes(_locked:0)
 		end
-		prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 		result
 	end
 
@@ -178,6 +185,8 @@ class Orders::Order < ApplicationRecord
 				 target_org_id: attrs[:pharmacy_id].to_s,
 				 target_org_name: attrs[:pharmacy_name].to_s,
 				 user_id: attrs[:current_user].id.to_s,
+				 invoice_id: attrs[:invoice_id].to_s,
+				 _locked: 0,
 				 payment_type: attrs[:payment_type].to_s == 'online' ? '1' : '2',
 				 source_org_id: presc[:hospital_id].to_s,
 				 patient_sex: presc[:patient_sex].to_s,
@@ -306,55 +315,64 @@ class Orders::Order < ApplicationRecord
 		def order_completion attrs = {}
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:''}
-			if attrs[:id].blank?
-				result[:ret_code] = '-1'
-				result[:info].concat("发药人不能为空!")
-			end
-			if attrs[:drug_user].blank?
-				result[:ret_code] = '-1'
-				result[:info].concat("发药人id不能为空！")
-			end
-			if attrs[:drug_user_id].blank?
-				result[:ret_code] = '-1'
-				result[:info].concat("订单ID不能为空!")
-			end
-			unless order = Orders::Order.where("id = ? and status in (1,2)",attrs[:id]).last
-				result[:ret_code] = '-1'
-				result[:info].concat("当前订单状态异常!")	
-			end
-			if result[:ret_code].to_s == '0'
-				order.update_attributes(drug_user:attrs[:drug_user],
-										drug_user_id:attrs[:drug_user_id],
-										end_time:Time.now.to_s(:db),
-										status:attrs[:status],
-										)
-				result[:info] = "订单已完成。" 
-				if ["2","5"].include?attrs[:status].to_s
-					args = {
-						# 创建订单人
-						charger: {
-							id: attrs[:current_user].id,
-							display: attrs[:current_user].name
-							},
-						# 订单创建时间
-						charge_at: order.created_at.to_s(:db)
-					}
-					##通知处方订单已结算
-				 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
-					if ["5"].include?attrs[:status].to_s
-					 	args2 = {
-							# 发药人
-							delivery: {
+			order = nil
+			begin
+				unless order = Orders::Order.where("id = ? and _locked = 0 and status in (1,2)",attrs[:id]).last
+					result[:ret_code] = '-1'
+					result[:info].concat("当前订单状态异常!,请稍后再试。")	
+					return result
+				end
+				order.update_attributes(_locked:1)
+				if attrs[:id].blank?
+					result[:ret_code] = '-1'
+					result[:info].concat("发药人不能为空!")
+				end
+				if attrs[:drug_user].blank?
+					result[:ret_code] = '-1'
+					result[:info].concat("发药人id不能为空！")
+				end
+				if attrs[:drug_user_id].blank?
+					result[:ret_code] = '-1'
+					result[:info].concat("订单ID不能为空!")
+				end
+				if result[:ret_code].to_s == '0'
+					order.update_attributes(drug_user:attrs[:drug_user],
+											drug_user_id:attrs[:drug_user_id],
+											end_time:Time.now.to_s(:db),
+											status:attrs[:status],
+											)
+					result[:info] = "订单已完成。" 
+					if ["2","5"].include?attrs[:status].to_s
+						args = {
+							# 创建订单人
+							charger: {
 								id: attrs[:current_user].id,
 								display: attrs[:current_user].name
-							},
-							# 发药时间
-							delivery_at: order.created_at.to_s(:db)
+								},
+							# 订单创建时间
+							charge_at: order.created_at.to_s(:db)
 						}
-						order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+						##通知处方订单已结算
+					 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
+						if ["5"].include?attrs[:status].to_s
+						 	args2 = {
+								# 发药人
+								delivery: {
+									id: attrs[:current_user].id,
+									display: attrs[:current_user].name
+								},
+								# 发药时间
+								delivery_at: order.created_at.to_s(:db)
+							}
+							order.prescriptions{|x|x.send_drug(args, attrs[:current_user])}
+						end
 					end
+					##更新处方状态。。。。。。
 				end
-				##更新处方状态。。。。。。
+			rescue Exception => e
+				p e
+			ensure
+				order.update_attributes(_locked:0)
 			end
 			result
 

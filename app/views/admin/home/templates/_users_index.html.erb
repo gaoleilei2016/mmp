@@ -43,6 +43,7 @@
 					<div v-if="scope.row.type_code=='2'">药房</div>
 				</template>
 			</el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="管理级别" prop="admin_level"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="机构" prop="organization_id" width="100"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="手机号" prop="login"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="姓名" prop="name"></el-table-column>
@@ -81,7 +82,7 @@
 						<div class="clear"></div>
 						<el-form-item label="机构" prop="organization_id">
 							<!-- <el-input v-model="ruleForm.organization_id"></el-input> -->
-							<el-select v-model="ruleForm.organization_id" filterable remote reserve-keyword placeholder="请输入关键词" :remote-method="remoteMethod" :loading="loading">
+							<el-select clearable v-model="ruleForm.organization_id" filterable remote reserve-keyword placeholder="请输入关键词" :remote-method="remoteMethod" :loading="loading">
 								<el-option v-for="item in options4" :key="item.id" :label="item.id+'　'+item.name" :value="item.id"></el-option>
 							</el-select>
 						</el-form-item>
