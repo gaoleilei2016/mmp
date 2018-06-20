@@ -110,6 +110,7 @@ Rails.application.routes.draw do
     end
 
     resources :patients
+    resources :people
   end
   ########### hospital ##########
   ############################
