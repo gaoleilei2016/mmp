@@ -1,4 +1,5 @@
 class Orders::Order < ApplicationRecord
+	table_name = "Orders_order"
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
 	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
@@ -35,7 +36,7 @@ class Orders::Order < ApplicationRecord
 #  shipping_code varchar(20)  NULL '物流单号',
 #  pay_type float NOT NULL '支付类型,Alipay ,Wechat',
 #  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1未付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
+#  status VARCHAR(4) NOT NULL '1待付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
 #  )
 
@@ -93,7 +94,7 @@ class Orders::Order < ApplicationRecord
 		result
 	end
 
-	##退药方法 prescription_ids:[],current_user:''
+	##退药方法 attrs = {prescription_ids:[],current_user:''}
 	def cancel_medical(attrs={})
 		attrs = attrs.deep_symbolize_keys
 		begin
@@ -162,7 +163,7 @@ class Orders::Order < ApplicationRecord
 		end
 	end
 
-	private
+	# private
 	def cancel_order_by_private(prescriptions,cur_user,reason)
 		arg = {
 		# 退费人
