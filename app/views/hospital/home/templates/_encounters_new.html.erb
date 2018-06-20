@@ -131,6 +131,7 @@ window.current_template_obj = {
 				encmodalloading: false, // 模态框loading
 				encounters: [], // 就诊列表
 				searchencstr: "", // 搜索就诊列表
+				loadingidcard: false, // 正在读取身份证信息
 			/* 患者基本信息  ----- end */ 
 
 			/* 主业务  ----- start */ 
@@ -222,7 +223,7 @@ window.current_template_obj = {
 	},
 	mounted: function () {
 		// console.log测试用
-		// apps.encounters_new = this;
+		apps.encounters_new = this;
 		this.$nextTick(function(){
 			this.init();
 		})
@@ -293,6 +294,35 @@ window.current_template_obj = {
   	/* 公共方法  ---- end */ 
 
   	/* encounter相关操作  ---- start */
+  		// 身份证读卡
+  		getIdCardInfo: function () {
+  			socket.send('5|INFO');
+  			this.loadingidcard = true; // 显示正在加载身份证数据
+  		},
+  		SetIdCardInfo: function (json) {
+  			console.log("读卡信息为", json);
+  			var _this = this;
+  			var res = json.result;
+  			_this.encounter.address = res.address; // 地址
+  			_this.encounter.iden = res.code; // 身份证号
+  			_this.encounter.name = res.name; // 名字
+  			_this.encounter.photo = res.photo; // 照片
+  			_this.getBirthdayFromIdCard(res.code); // 生日、年龄
+  			_this.loadingidcard = false; // 取消正在加载身份证数据
+  			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
+  			for(var i=0; i<genders.length; i++) {
+  				if(genders[i].display == res.gender) {
+  					_this.encounter.gender = genders[i];
+  					break;
+  				}
+  			}
+  			for(var i=0; i<nations.length; i++) {
+  				if(nations[i].display == res.folk) {
+  					_this.encounter.nation = nations[i];
+  					break;
+  				}
+  			}
+  		},
   		focusEncSearchInp: function (flag) {
   			var $target = $(this.$refs["searchencstr"].$el);
   			if(flag) {
@@ -309,7 +339,7 @@ window.current_template_obj = {
 				if(json.modal){
 					_this[json.modal] = true;
 				}
-  			_this.encountersResource.get({search: json.search}).then( function(response) {
+  			Vue.resource('/hospital/people.json').get({search: json.search}).then( function(response) {
   				var res = response.data;
   				_this.encmodalloading = false;
   				if(res.flag) {
