@@ -150,7 +150,7 @@ class Hospital::PrescriptionsController < ApplicationController
     render json: {flag: true, info: "success", data: ret}
   end
 
-  # UPDATE
+  # PUT
   # 根据处方ids更新 处方已读
   # {
   #   prescription_ids: []
