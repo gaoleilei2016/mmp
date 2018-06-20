@@ -206,7 +206,8 @@ class Ims::Order < ApplicationRecord
             order = result[:order]
             att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user],status:'5'}
             order_com = Orders::Order.order_completion att
-            return (result[:ret_code]=="0" ? {flag:true,info:"处方发药成功！"} : {flag:false,:info=>"处方发药失败。",result:result,order_com:order_com})  
+            pre_data = dispensing_order att
+            return pre_data[:flag] ? {flag:true,info:"处方发药成功！",order_com:order_com} : {flag:false,info:"处方发药失败。",order_com:order_com,pre_data:pre_data}
           else
             return {flag:false,:info=>"处方暂不做处理。"}
           end
@@ -219,7 +220,7 @@ class Ims::Order < ApplicationRecord
     end
 
     # 退药
-    def return_drug args={}
+    def return_drug1 args={}
       begin
         order_id = args[:id]
         order = Orders::Order.find order_id rescue nil
@@ -247,6 +248,51 @@ class Ims::Order < ApplicationRecord
           new_order.details << dup_detail
         end
         new_order.save ? {flag:true,info:'退药成功！'} : {flag:false,info:'退药失败。',}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
+    # 发药
+    def dispensing_order args = {}
+      order_id = args[:id]
+      current_user = args[:current_user]
+      order = Orders::Order.find order_id rescue nil
+      return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+      return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
+      return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
+      return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
+      return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
+      ::ActiveRecord::Base.transaction  do
+        temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
+        data = Orders::Order.order_completion(temp)
+        return {flag:false,info:data[:info]} if data[:ret_code].to_i!=0
+        prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+        send_data = {current_user:current_user,prescriptions:prescriptions}
+        result = Ims::PrescriptionHeader.save_prescription send_data
+        return_data = result[:flag] ? {flag:true,info:'退药成功！'} : {flag:false,info:(result[:flag]|| '退药失败。')}
+      end
+      return_data
+    end
+
+    # 退药
+    def return_drug args={}
+      begin
+        pre_id = args[:id]
+        header = Ims::PrescriptionHeader.find pre_id rescue nil
+        return {flag:false,:info=>"未找到处方信息。"} if header.blank?
+        # return {flag:false,:info=>"线上支付订单不能退药。"} if header.payment_type!="2"
+        return {flag:false,:info=>"该处方为#{header.delivery_org_name}的发药处方，请前往该药店进行退药。"} if header.delivery_org_id!=args[:org_id]
+        return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
+        return {flag:false,:info=>"该处方不是发药状态，不能退药。"} if header.status!="5"
+        current_user = args[:current_user]
+        ::ActiveRecord::Base.transaction  do
+          update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
+          result = header.update_attributes!(update_data)
+        end
+        result ? {flag:true,info:'退药成功！'} : {flag:false,info:(result[:flag]|| '退药失败。'),}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
