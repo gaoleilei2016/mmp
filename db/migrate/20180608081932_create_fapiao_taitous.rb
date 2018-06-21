@@ -11,5 +11,8 @@ class CreateFapiaoTaitous < ActiveRecord::Migration[5.1]
       t.string :bank_num # 银行账号
       t.timestamps
     end
+    change_table :fapiao_taitous do |t|
+      t.string :type_code # 企业1 / 个人2
+    end
   end
 end
