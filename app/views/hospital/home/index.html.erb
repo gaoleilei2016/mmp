@@ -39,7 +39,8 @@
 			{value: "3", label: "已收费", type: "success"},
 			{value: "4", label: "已发药", type: "success"},
 			{value: "7", label: "废弃", type: "info"},
-			{value: "9", label: "已退费", type: "info"},
+			{value: "8", label: "已退药", type: "info"},
+			// {value: "9", label: "已退费", type: "info"},
 		];
 
 
@@ -150,4 +151,13 @@
 	    window_printer.print();
 	  };
 	})
+
+	// 快捷键设置
+	document.onkeydown = function(){
+		if(event.keyCode==112) { // F1 调用身份证读卡
+		  apps.encounters_new.getIdCardInfo();
+		  return false;
+		}
+	}
+	
 </script>

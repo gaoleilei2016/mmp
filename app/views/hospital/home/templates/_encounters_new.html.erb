@@ -11,7 +11,7 @@
 	  		<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
 	  			<!-- 历史就诊tab -->
 	  			<!-- 药品tab显示模板和生成处方按钮 -->
-	  			<div v-if="activeTab=='orders' && encounter.id">
+	  			<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">
 		  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
 		  			<el-button size="mini" @click="openCopyModal">复制</el-button>
 		  			<el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
@@ -341,8 +341,30 @@ window.current_template_obj = {
   				$target.removeClass('addlarge');
   			}
   		},
-  		// 搜索患者
+  		// 搜索就诊
   		searchEncounters: function (json) {
+  			var _this = this;
+  			_this.encounters = [];
+  			_this.encmodalloading = true;
+				if(json.modal){
+					_this[json.modal] = true;
+				}
+  			_this.encountersResource.get({search: json.search}).then( function(response) {
+  				var res = response.data;
+  				_this.encmodalloading = false;
+  				if(res.flag) {
+  					_this.encounters = res.data;
+  				}
+  				if(json.modal){
+						_this.$refs["searchencstr"].focus();
+					}
+  			}, function(response) {
+  				_this.encmodalloading = false;
+      		_this.$message.error("搜索就诊失败，请联系管理员。");
+      	})
+  		},
+  		// 搜索患者
+  		searchPeople: function (json) {
   			var _this = this;
   			_this.encounters = [];
   			_this.encmodalloading = true;
@@ -360,7 +382,7 @@ window.current_template_obj = {
 					}
   			}, function(response) {
   				_this.encmodalloading = false;
-      		_this.$message.error("搜索就诊失败，请联系管理员。");
+      		_this.$message.error("搜索患者失败，请联系管理员。");
       	})
   		},
   		// 编辑encounter
@@ -381,7 +403,7 @@ window.current_template_obj = {
   			if(json.type=="by_person") { // 通过就诊创建新的就诊
   				encounter = json.row;
   			}
-  			btn.removeAttr("disabled").find(".fa").hide();
+  			btn.removeAttr("disabled").find(".fa").toggle();
 				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
       		_this.handleEncounterReturn(response, btn);
       		// _this.getOrders();
@@ -389,7 +411,7 @@ window.current_template_obj = {
 	  				_this.isShowEncountersDialog = false;
 	  			}
       	}, function(response) {
-      		btn.removeAttr("disabled").find(".fa").hide();
+      		btn.removeAttr("disabled").find(".fa").toggle();
       		_this.$message.error("创建就诊信息失败，请联系管理员。");
       	})
   		},
