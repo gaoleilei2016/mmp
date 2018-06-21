@@ -150,7 +150,6 @@ class Ims::OrdersController < ApplicationController
   # 订单发药
   def dispensing_order
     data = Ims::Order.dispensing_order params.merge(current_user:current_user)
-    p data
     render json:data.to_json
   end
 
@@ -194,7 +193,7 @@ class Ims::OrdersController < ApplicationController
   # 退药(目前只能线下退药)
   # => 页面需传 订单 id(string) 
   def return_drug
-    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user}
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
     @data = Ims::Order.return_drug params.merge(args)
     render json:@data.to_json
   end

@@ -31,8 +31,8 @@
 		</div>
 
 		<div class="function_panel return_drug" style="display:none;">
-      <%#= render "ims/home/render/return_order"%>
-			<%= render "ims/home/render/return_drug"%>
+      <%= render "ims/home/render/return_order"%>
+			<%#= render "ims/home/render/return_drug"%>
 		</div>
 
 		<div class="function_panel reports" style="display:none;">
@@ -487,7 +487,7 @@ window.current_template_obj = {
     get_return_pres:function(tab,e){
       var _this = this
       var stat = _this.return_list_panel
-      _this.$http.get('/ims/orders/get_prescriptions?stat='+stat).then(function(response) {
+      _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0){
           _this.set_return_order_lists(response.data.data)
         }else{
@@ -521,7 +521,7 @@ window.current_template_obj = {
         });
         return ""
       };
-      _this.$http.get('/ims/orders/get_prescription?id='+id).then(function(response) {
+      _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
         _this._data.return_detail = [response.data.order]
       },function(response){
         _this.$notify({
