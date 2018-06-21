@@ -29,6 +29,20 @@
 	.mui-table-view:after{
 		height: 0;
 	}
+	.list_info{
+		padding: 20px 0;
+		border-bottom: 1px solid #333;
+	}
+	.list_info .item{
+		margin: 0;
+		padding: 0;
+		line-height: 26px;
+		float: left;
+		width: 100%;
+	}
+	.list_info .drug_item:not(:last-child){
+		margin-bottom: 20px;
+	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
 	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
@@ -37,71 +51,43 @@
 	<h1 class="mui-title">处方详情</h1>
 </header>
 <div class="mui-content" id="vue_content" v-cloak>
-	<div v-if="prescription">
+	<div v-if="prescription" style="padding: 0 12px;">
 		<div style="position: relative;text-align: center;padding: 13px 0;">
 			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
 			<h4 style="font-weight: 500;">处方签</h4>
-			<h4 style="border: 1px solid #ddd;padding: 5px;position: absolute;right: 8px;top: 35px;margin: 0;">{{prescription.type.display}}</h4>
+			<h4 style="border: 1px solid #333;padding: 5px;position: absolute;right: 8px;top: 35px;margin: 0;">{{prescription.type.display}}</h4>
 		</div>
-		<div>
+		<div style="padding: 0 0 8px;border-bottom: 1px solid #333;">
 			<span>处方号: {{prescription.prescription_no}}</span>
 			<span style="float: right;">{{prescription.created_at}}</span>
 		</div>
-		<ul class="mui-table-view" style="margin-bottom: 22px;">
-			<li class="mui-table-view-cell">
-				<a :href="'/customer/home/prescription?id='+prescription.id">
-					<span>No: {{prescription.prescription_no}}（{{prescription.name}}）</span>
-					<span style="float: right;color: #F55742;">
-						<span v-if="prescription.status=='0'">未审核</span>
-						<span v-if="prescription.status=='1'">已审核</span>
-						<span v-if="prescription.status=='2'">待收费</span>
-						<span v-if="prescription.status=='3'">已收费</span>
-						<span v-if="prescription.status=='4'">已发药</span>
-						<span v-if="prescription.status=='7'">废弃</span>
-						<span v-if="prescription.status=='8'">已退药</span>
-						<span v-if="prescription.status=='9'">已退费</span>
-					</span>
-				</a>
-			</li>
-			<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-				<a :href="'/customer/home/prescription?id='+prescription.id">
-					<div>
-						<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
-						<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
-						<div class="mui-media-body">
-							<div>
-								<span>{{prescription.org.display}}</span>
-								<span style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
-							</div>
-							<p class="mui-ellipsis" style="font-size: 12px;">
-								{{show_diagnoses(prescription.diagnoses)}}
-								<span style="float: right;">{{prescription.author.display}}</span>
-							</p>
-						</div>
-					</div>
-					<ul class="mui-table-view" style="margin: 15px 0 0;">
-						<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
-							<div href="javascript:;" class="">
-								<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-								<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-								<div class="mui-media-body">
-									{{drug.title}}
-									<p class="mui-ellipsis" style="float: right;">
-										<span>{{drug.specification}}</span>
-									</p>
-									<p class="mui-ellipsis">
-										<span style="margin-right: 10px;color: #F55742;">{{drug.route.display}}</span>
-										<span style="margin-right: 10px;color: #F55742;">{{drug.dose.value}}{{drug.dose.unit}}</span>
-										<span style="color: #F55742;">{{drug.frequency.display}}</span>
-										<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
-									</p>
-								</div>
-							</div>
-						</li>
-					</ul>
-				</a>
-			</li>
-		</ul>
+		<div class="list_info" style="">
+			<div class="item" style="width: 39.3%;">姓名：{{prescription.name}}</div>
+			<div class="item" style="width: 30.3%;">性别：{{prescription.gender.display}}</div>
+			<div class="item" style="width: 30.3%;">年龄：{{prescription.age}}</div>
+			<div class="item" style="">身份证号：{{prescription.iden}}</div>
+			<div class="item" style="">手机号：{{prescription.phone}}</div>
+			<div class="item" style="">住址：{{prescription.address}}</div>
+			<div class="item" style="width: 39.9%;">科室：{{prescription.encounter_loc.display}}</div>
+			<div class="item" style="width: 60%;">诊断：{{show_diagnoses(prescription.diagnoses)}}</div>
+			<div class="clear"></div>
+		</div>
+		<div class="list_info">
+			<p class="item">药品清单</p>
+			<div class="drug_item" v-for="drug in prescription.orders">
+				<div class="item" style="width: 39.9%;">{{drug.title}}</div>
+				<div class="item" style="width: 20%;">{{drug.specification}}</div>
+				<div class="item" style="width: 20%;">{{drug.route.display}}</div>
+				<div class="item" style="width: 20%;">{{drug.frequency.display}}</div>
+				<div>数量：{{drug.total_quantity}} {{drug.unit}}　单价：{{format_float(drug.price)}}</div>
+			</div>
+		</div>
+		<div style="padding-top: 6px;">
+			<div style="width: 49.9%;float: left;">审核、配方：{{prescription.auditor&&prescription.auditor.display}}</div>
+			<div style="width: 50%;float: left;">核对、发药：{{prescription.delivery&&prescription.delivery.display}}</div>
+			<div style="width: 49.9%;float: left;">医师：{{prescription.author.display}}</div>
+			<div style="width: 50%;float: left;">总计：{{prescription.price}}</div>
+		</div>
 	</div>
 </div>
 <script type="text/javascript">
