@@ -253,6 +253,10 @@ class Orders::Order < ApplicationRecord
 	end
 
 	class << self
+
+		def aaaaaaaaaaaaaa
+			p 'ddddddddddddddddddddsssssssssssssssssss'
+		end
 			
 
 # hospital_id:'医院id'
