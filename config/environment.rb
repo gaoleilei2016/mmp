@@ -3,5 +3,5 @@ require_relative 'application'
 
 # Initialize the Rails application.
 Rails.application.initialize!
-::Orders::Order.aaaaaaaaaaaaaa
+::Orders::Order.check_order_timer
 
