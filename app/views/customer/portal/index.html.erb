@@ -119,7 +119,7 @@
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="organ in organs">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div class="mui-checkbox mui-left">
-				<input @click="check_all($event,organ)" type="checkbox" checked style="top: 12px;left: 0px;">
+				<input @click="check_all($event,organ)" type="checkbox" :checked="equals_array(organ.prescription_ids,organ.prescription_ids2)" style="top: 12px;left: 0px;">
 				<label style="padding-left: 26px;padding-right: 0;">
 					<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
 					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
@@ -215,6 +215,19 @@
 		computed:{
 		},
 		methods:{
+			equals_array:function(arr1,arr2) {
+				var flag = true;
+				if (arr1.length&&arr1.length==arr2.length) {
+					arr1.map(function(item) {
+						if (arr2.indexOf(item)==-1) {
+							flag = false;
+						}
+					})
+				}else{
+					flag = false;
+				}
+				return flag;
+			},
 			total_price:function(organ) {
 				var to_pri = 0;
 				organ.prescriptions.map(function(item) {
