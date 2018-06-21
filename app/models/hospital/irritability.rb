@@ -6,7 +6,7 @@ class Hospital::Irritability < ApplicationRecord
 
 	class<<self
 		def batch_update(args, cur_person, cur_user)
-			cur_person.irritabilities.delete_all
+			::Hospital::Irritability.where("person_id" => cur_person.id).delete_all
 			args.each do |_name|
 				t = ::Hospital::Irritability.create({
 					display: _name,

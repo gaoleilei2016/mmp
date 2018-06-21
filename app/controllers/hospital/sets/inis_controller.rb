@@ -94,6 +94,12 @@ class Hospital::Sets::InisController < ApplicationController
     end
 	end
 
+  # 获取本人机构当前人员列表
+  def get_org_user_list
+    user_list = ::Hospital::Sets::Ini.get_cur_org_users(current_user)
+    render json:{flag: true, info: "success", data: user_list}
+  end
+
 	private
     # Use callbacks to share common setup or constraints between actions.
     def set_ini
@@ -109,7 +115,9 @@ class Hospital::Sets::InisController < ApplicationController
       ret = {
         enable_print_pres: ini_args[:enable_print_pres],
         uoperator_id: current_user.id,
-        print_pres_html: ini_args[:print_pres_html]
+        print_pres_html: ini_args[:print_pres_html],
+        prescription_audit_id: ini_args[:prescription_audit][:id],
+        encounter_search_time: ini_args[:encounter_search_time].to_i
       }
       return ret
     end

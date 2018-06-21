@@ -50,6 +50,7 @@
 					<span v-if="item.status=='8'">已退药</span>
 					<span v-if="item.status=='9'">已退费</span>
 				</span>
+				<span v-if="!item.is_read" class="mui-badge common_bg_red" style="position: absolute;right: 12px;top: 16px; padding: 4px;"></span>
 			</a>
 		</li>
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
