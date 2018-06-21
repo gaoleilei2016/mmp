@@ -68,6 +68,16 @@
 	.mui-content .mui-active{
 		background: none !important;
 	}
+	.mui-checkbox input[type=checkbox]:before, .mui-radio input[type=radio]:before{
+		font-size: 20px;
+		/*color: #F55742;*/
+	}
+	.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
+		color: #F55742;
+	}
+	.mui-table-view-cell:after{
+		left: 0;
+	}
 </style>
 <div class="mui-content" id="vue_content" v-cloak>
 	<div id="search_content">
@@ -106,9 +116,24 @@
 		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
 		<span v-else>距离当前最近</span>
 	</p>
-	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
+		<form class="">
+			<div class="mui-input-row mui-checkbox mui-left">
+				<div>checked：false</div>
+				<input name="checkbox" value="Item 1" type="checkbox" >
+			</div>
+			<div class="mui-input-row mui-checkbox mui-left">
+				<label>checked：true</label>
+				<input name="checkbox" value="Item 2" type="checkbox" checked>
+			</div>
+			<div class="mui-input-row mui-checkbox mui-left mui-disabled">
+				<label>disabled checkbox</label>
+				<input name="checkbox" type="checkbox" disabled="disabled">
+			</div>
+		</form>
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="organ in organs">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-			<div>
+			<div class="mui-checkbox mui-left" style="padding-left: 26px;">
+				<input name="checkbox" value="Item 2" type="checkbox" checked style="top: 12px;left: 0px;">
 				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
 				<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 				<div class="mui-media-body">
@@ -121,8 +146,16 @@
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
+			<template v-for="prescription in organ.prescriptions">
 			<ul class="mui-table-view" style="margin: 15px 0;">
-				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
+				<li class="mui-table-view-cell" style="padding-left: 0;">
+					<div class="mui-checkbox mui-left" style="padding-left: 26px;">
+						<input name="checkbox" value="Item 2" type="checkbox" checked style="top: 0px;left: 0px;">
+						<span>处方号: {{prescription.prescription_no}}</span>
+						<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
+					</div>
+				</li>
+				<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
 					<div href="javascript:;" class="">
 						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
 						<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
@@ -136,13 +169,14 @@
 					</div>
 				</li>
 			</ul>
+			</template>
 			<div style="line-height: 33px;">
-				<a href="javascript:;" @click="send_prescription_ids_session(item)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
-					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(item.first_created_at).pattern("MM月dd日")}}</span>
+					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
 					<span style="color: #F55742;float: right;">
 						<span>¥</span>
-						<span style="font-size: 1.5em;">{{format_float(item.total_price)}}</span>
+						<span style="font-size: 1.5em;">{{format_float(organ.total_price)}}</span>
 					</span>
 					<span style="float: right;margin-right: 6px;">合计</span>
 				</div>
@@ -158,7 +192,7 @@
 			current_pharmacy:{},
 			pharmacys:null,
 			search_str:'',
-			prescriptions:[],
+			organs:[],
 		},
 		watch:{
 			search_str:function(val) {
@@ -219,6 +253,7 @@
 			},
 			get_c_phar:function(point) {
 				var _this = this;
+				// alert(JSON.stringify(point))
 				$.ajax({
 					url:"/interfaces/get_current_pharmacy",
 					data:point,
@@ -287,7 +322,7 @@
 					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
-							_this.prescriptions = json.data;
+							_this.organs = json.data;
 						}else{
 							_this.$message(json.info);
 						}
