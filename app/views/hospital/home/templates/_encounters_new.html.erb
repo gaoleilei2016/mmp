@@ -296,6 +296,16 @@ window.current_template_obj = {
   	/* encounter相关操作  ---- start */
   		// 身份证读卡
   		getIdCardInfo: function () {
+  			console.log(socket.readyState)
+  			if(socket.readyState==3) { // 身份证读卡服务处于关闭状态
+  				this.$message({
+  					showClose: true,
+	          message: '请启动身份证后台读卡服务。',
+	          type: 'warning',
+	          duration: 0,
+	        });
+  				return false;
+  			}
   			socket.send('5|INFO');
   			this.loadingidcard = true; // 显示正在加载身份证数据
   		},
@@ -359,6 +369,10 @@ window.current_template_obj = {
   			this.isShowEncountersDialog = false;
   			// 重新加载页面主业务数据
   			this.activeTab = "orders";
+  			if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+					// 提示填写诊断
+	  			this.$refs["encdiagnose"].focus();
+				}
   			this.getOrders();
   		},
   		// 用一些特殊的方式创建encounter，刷身份证，在曾经就诊的基础上创建
@@ -370,8 +384,8 @@ window.current_template_obj = {
   			btn.removeAttr("disabled").find(".fa").hide();
 				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
       		_this.handleEncounterReturn(response, btn);
-      		_this.getOrders();
-      		if(json.type=="by_person") { // 通过就诊创建新的就诊
+      		// _this.getOrders();
+      		if(json.type=="by_person") { // 通过患者创建新的就诊
 	  				_this.isShowEncountersDialog = false;
 	  			}
       	}, function(response) {
@@ -430,8 +444,13 @@ window.current_template_obj = {
 	        type: 'success'
 	      });
 	      this.getDiffrentData(this.activeTab);
-				// 聚焦医嘱搜索框
-	      this.$refs["ordtitle"].focus();
+				if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+					// 提示填写诊断
+	  			this.$refs["encdiagnose"].focus();
+				} else {
+					// 聚焦医嘱搜索框
+	      	this.$refs["ordtitle"].focus();
+				}
 	    },
 	    // 重置encounter表单
 	    resetEncounterForm: function (formName) {
@@ -451,6 +470,13 @@ window.current_template_obj = {
 	    	}
 	    	_this.rules["birth_date"][0]["required"] = flag;
 	    	_this.rules["contact_name"][0]["required"] = flag;
+	    	// 判断是否有出生日期，修改年龄，修改出生年份
+	    	if(_this.encounter.birth_date) {
+		    	var year = ((new Date()).getFullYear() - val);
+		    	var birth = new Date(_this.encounter.birth_date);
+		    	birth.setYear(year);
+		    	_this.encounter.birth_date = birth;
+	    	}
 	    },
 			// 判断性别，根据性别显示图标
 	  	judgeGender: function (gender) {
@@ -656,7 +682,7 @@ window.current_template_obj = {
 		    deleteDiagnoses: function (index, row) {
 		    	var _this = this, $target = $(event.target);
 		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: encounter_id}).then( function(response) {
 	      		var res = response.data;
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		if(res.flag) {
@@ -920,7 +946,9 @@ window.current_template_obj = {
 		      // 默认勾选新建医嘱
 		      this.defaultCheckNewOrder();
 		      // 聚焦医嘱搜索框
-		      this.$refs["ordtitle"].focus();
+		      this.$nextTick(function(){
+		      	this.$refs["ordtitle"].focus();
+					})
 	    	} else {
 	    		this.$message.error(res.info);
 	    	}

@@ -12,7 +12,18 @@ function DealJob(msg) {
 	}
 	var idcard = JSON.parse(msg);
 	if (typeof(idcard) == undefined || idcard.error != 0) {
-		alert("Read IdCard error.");
+		// alert("Read IdCard error.");
+		var _this = apps.encounters_new;
+		_this.$confirm('请在读卡器上放置身份证卡片！', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then( function () {
+    	// 重新发起读卡请求
+      _this.getIdCardInfo();
+    }).catch( function () {
+      _this.loadingidcard = false;         
+    });
 	} else {
 		//todo Job
 		// console.log(idcard);
