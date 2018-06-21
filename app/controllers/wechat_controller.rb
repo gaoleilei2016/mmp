@@ -9,39 +9,47 @@ class WechatController < ApplicationController
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login
     if wx_user_sign_in? #已经登录并且已登记过的
-      p '111111111111111111111111'
       session[:openid] = current_user.openid
       redirect_to '/'
     else
-      p '222222222222222222222222222222'
       res = Pay::Wechat.get_openid(params[:code])
-      p res
       if res[:error] #获取openid失败的
-        p '333333333333333333333333333333'
         flash[:notice] = res[:msg]
         redirect_to '/users/sign_up'
       else
-        p '4444444444444444444444'
         session[:openid] = res[:openid]
         user = User.find_by(openid: res[:openid])
-        p user
         if user
-          p '5555555555555555555555555555'
           sign_in(user)
           redirect_to '/'
         else
-          p '666666666666666666666666'
           redirect_to '/users/sign_up'
         end
       end
     end
   end
 
+  # 已支付调用
   def pay
     begin
-      
+      write_log("-------微信公众号支付成功--更新数据-----#{params[:out_trade_no]}")
+      order = Pay::Order.find_by(out_trade_no: params[:out_trade_no])
+      res = if order
+              return {state: :fail, msg: '已支付', desc: '订单已支付'} if order.status.eql?('success')
+              if order.update_attributes({status: 'success', status_desc: '已支付'})
+                Orders::Order.find(order.out_trade_no.split('_')[0]).order_settle("Wechat")
+                {state: :success, msg: '数据更新成功'}
+              else
+                {state: :error, msg: '更新失败', desc: order.errors.full_messages.join(',')}
+              end
+            else
+              {state: :error, msg: '订单不存在'}
+            end
+      write_log("------结果-----#{res.to_json}")
+      render json: res.to_json
     rescue Exception => e
-      
+      res = {state: :error, msg: '系统错误', desc: e.message}
+      render json: res.to_json
     end
   end
 
