@@ -763,7 +763,8 @@ window.current_template_obj = {
           _this._data.return_order_lists = []
         }
         _this._data.return_detail = [{}]
-
+        _this._data.return_reason_form.name = ""
+        _this._data.return_reason_visible = false;
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
