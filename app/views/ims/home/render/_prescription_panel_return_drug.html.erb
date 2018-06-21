@@ -1,0 +1,78 @@
+<div class="prescription_content detail_panel" v-for="(info,index) in return_detail"  style="height:100%;">
+  <div style="">
+      <div class="prescription_form_title separate">
+        <h3 style="text-align:center;">
+          <b class="prescription_source_type">{{info.source_org_name}}</b><br>
+          <b>{{info.pre_type||'普通处方'}}</b>
+        </h3>
+        <div class="el-row" style="font-size:15px; overflow:hidden;border-bottom:1px solid #ddd;">
+          <div class="el-col-12 text-left">处方号：<span>{{info.order_code}}</span></b></div>
+          <div class="el-col-12" style="text-align:right;">处方时间：<span>{{format_time(info.created_at)}}</span></b></div>
+        </div>          
+      </div>
+
+      <div style="line-height:17px; border-bottom:1px solid #ddd;">
+        <div class="el-row">
+          <div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{info.patient_name}}</span></div>
+          <div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{info.patient_sex}}</span></div>
+          <div class="el-col el-col-10 text-left patient_age" style="word-break:keep-all;">年龄:<span style="font-weight:bold;">{{info.patient_age}}</span></div>
+        </div> 
+
+        <div class="el-row">
+          <div class="el-col el-col-14 text-left">病历号:<span>{{info.patient_no}}</span></div>
+          <div class="el-col el-col-10 text-left patient_nature">医疗类别: <span>{{info.patient_nature}}</span></div>          
+        </div>
+
+        <div class="el-row">
+          <div class="el-col el-col-14 text-left patient_addr biller_loc_name">科室/地址:{{info.biller_loc_name}}</div>
+        </div>
+
+        <div class="el-row">
+          <div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{info.diagnoses}}</span></div>
+          <div class="el-col-10 text-left patient_iden">身份证: <span>{{info.patient_iden}}</span></div>
+        </div>
+      </div>
+
+      <div class="prescription_item_info separate" style="border-bottom:1px solid #ddd;">
+        <div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R:</div>
+          <div class="el-row" style="margin-left:1px;"> 
+            <div class="el-col-2" style="width:15%;text-align: left;">药品名称</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">规格</div>
+            <div class="el-col-2" style="width:8%;text-align: left;">单次剂量</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">途径</div>
+            <div class="el-col-2" style="width:13%;text-align: left;">频次</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">数量</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">单价</div>
+            <div class="el-col-2" style="width:12%;text-align: right;">金额</div>
+            <div class="el-col-2" style="width:10%;text-align: center;">备注</div>
+          </div>
+        <div class="item_list" style="margin-top: 10px;" v-for="(line,index) in info.details">
+          <div class="el-row" style="margin-left:1px;"> 
+            <div class="el-col-2" style="width:15%;text-align: left;">{{line.title}}</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">{{line.specification}}</div>
+            <div class="el-col-2" style="width:8%;text-align: left;">{{line.dose_value}}{{line.dose_unit}}</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">{{line.route_display}}</div>
+            <div class="el-col-2" style="width:13%;text-align: left;">{{line.frequency_display}}</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">{{line.qty}}{{line.unit}}</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">{{line.price}}</div>
+            <div class="el-col-2" style="width:12%;text-align: right;">{{format_price(line.amount)}}</div>
+            <div class="el-col-2" style="width:10%;text-align: center;">{{line.note}}</div>
+          </div>
+        </div>
+        <div class="el-row" style="text-align:center;position:relative;margin-left:1px;margin-bottom: 50px;margin-top: 20px; ">（以下为空白）</div>
+      </div>
+  </div>
+
+  <div class="prescription_footer">
+    <div class="el-row" style="margin:0;margin-bottom: 10px;">
+      <div class="el-col-12">医生: <span>{{info.doctor}}</span></div>
+      <div class="el-col-12 total_amount" style="float:right;text-align:right;">金额: <span>{{format_price(info.amt)}}</span></div>
+    </div>
+  </div>
+<div class="el-row" style="padding-top:12px;">
+  <div class="el-col-24 btns" style="text-align:right;">
+      <span v-if="info.status === 4&&info.is_returned != 1">
+        <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
+      </span>
+    </div>
+</div>
