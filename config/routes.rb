@@ -69,6 +69,7 @@ Rails.application.routes.draw do
       resources :inis do
         collection do
           get :cur_org_ini
+          get :get_org_user_list
         end
       end
       resources :departments do 
