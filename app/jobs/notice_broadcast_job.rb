@@ -4,7 +4,7 @@ class NoticeBroadcastJob < ApplicationJob
   def perform(message)
   	p "_______________perform_________________\n"
     p message[:data]
-    data = {flag:true, info:"新订单", org_id:"34", status:"2", order_id:"12", created_at:Time.new.strftime("%Y-%m-%d %H:%M"), order_code:"D54235822", patient_name:"提示", amt:"23"}
+    # data = {flag:true, info:"新订单", org_id:"34", status:"2", order_id:"12", created_at:Time.new.strftime("%Y-%m-%d %H:%M"), order_code:"D54235822", patient_name:"提示", amt:"23"}
     ActionCable.server.broadcast 'notice_channel', data:message[:data]
   end
  
