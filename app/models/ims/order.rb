@@ -21,7 +21,7 @@ class Ims::Order < ApplicationRecord
         when '5'#已发药
          query.concat(" and status=5 ")
         when '7'#已退药
-         query.concat(" and status=7 ")
+         query.concat(" and (status=7 or status=6) ")
         else
         end
         query.concat(' order by created_at desc')
@@ -74,7 +74,6 @@ class Ims::Order < ApplicationRecord
           query.concat(" order by return_at desc")
         else
         end
-        p query
         Ims::PreHeader.find_by_sql(query).map{|header|
           data <<{
             order_id:header.id,
@@ -322,6 +321,7 @@ class Ims::Order < ApplicationRecord
     def return_drug args={}
       begin
         order_id = args[:id]
+        current_user = args[:current_user]
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
         # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
@@ -425,6 +425,7 @@ class Ims::Order < ApplicationRecord
           dup_detail.amount = -detail.amount.to_f
           dup_detail.return_qty = detail.qty.to_f
           dup_detail.ori_detail_id = detail.id
+          dup_detail.status = '8'
           dup_detail.header_id = nil
           details << dup_detail.attributes
         end

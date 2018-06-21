@@ -297,7 +297,8 @@ class ::Hospital::Prescription < ApplicationRecord
 			price: self.orders.map{|e| e.price }.reduce(:+),
 			specialmark: self.specialmark,
 			created_at: self.created_at,
-			updated_at: self.updated_at
+			updated_at: self.updated_at,
+			is_read: self.is_read
 		}
 		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
