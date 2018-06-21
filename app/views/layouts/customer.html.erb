@@ -160,42 +160,6 @@
 /*// 3个圆圈的加载样式  end*/
 		</style>
 	</head>
-
-	<script type="text/javascript">
-		var common_vue = new Vue({
-			data:{
-				prescriptions:[],
-			},
-			methods:{
-				get_prescriptions:function() {
-					var _this = this;
-					$("#loading").show();
-					$.ajax({
-						url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
-						success:function(json) {
-							if (json.flag) {
-								_this.prescriptions = json.data;
-								if (json.data.length) {
-									$(".mine_prescriptions_red_badge").show();
-								}
-							}else{
-								_this.$message(json.info);
-							}
-						},
-						complete:function() {
-							$("#loading").hide();
-						},
-						error:function(e) {
-							mui.toast("处方获取失败");
-						}
-					})
-				},
-			},
-			mounted:function() {
-			}
-		})
-		common_vue.get_prescriptions();
-	</script>
 	<body>
 		<div id="loading" style="position: fixed;height: 100%;width: 100%;z-index: 9999;display: none;">
 			<div class="spinner-3circle" style="position: absolute;top: calc( 50% - 10px );left: calc( 50% - 30px );">
@@ -248,6 +212,42 @@
 		<% elsif notice.present?||alert.present? %>
 		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
 		<% end -%>
+	</script>
+	<script type="text/javascript">
+		var common_vue = new Vue({
+			data:{
+				// prescriptions:[],
+			},
+			methods:{
+				get_not_read_prescription:function() {
+					var _this = this;
+					$("#loading").show();
+					$.ajax({
+						url:'/hospital/prescriptions/get_not_read_prescription?phone=<%= current_user.login %>',
+						success:function(json) {
+							if (json.flag) {
+								// _this.prescriptions = json.data;
+								if (json.count) {
+									$(".mine_prescriptions_red_badge").show();
+								}
+							}else{
+								_this.$message(json.info);
+							}
+						},
+						complete:function() {
+							$("#loading").hide();
+						},
+						error:function(e) {
+							mui.toast("未读处方获取失败");
+						}
+					})
+				},
+			},
+			mounted:function() {
+				console.log( 'xxxxxxxx' );
+			}
+		})
+		common_vue.get_not_read_prescription();
 	</script>
 	<% if [["customer/portal", "index"],["customer/portal", "map"]].index([controller_path,action_name]) %>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=qPvNQ3ko8Gx0bpVDR89gN42e343emLOF"></script>

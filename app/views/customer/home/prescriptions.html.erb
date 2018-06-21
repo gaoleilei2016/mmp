@@ -39,7 +39,7 @@
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell">
 			<div>
-				<span>No: {{item.prescription_no}}</span>
+				<span>No: {{item.prescription_no}}（{{item.name}}）</span>
 				<span style="float: right;color: #F55742;">
 					<span v-if="item.status=='0'">未审核</span>
 					<span v-if="item.status=='1'">已审核</span>
