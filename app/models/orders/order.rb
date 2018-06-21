@@ -200,10 +200,10 @@ class Orders::Order < ApplicationRecord
 
 			when '5'
 				Hospital::Prescription.transaction do
-					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:attrs[:reason])
+					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
-					if self.payment_type.to_s != '2' #如果是线下支付的
-						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:attrs[:reason])
+					if self.payment_type.to_s == '2' #如果是线下支付的
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
 					end
 				end
 				result[:ret_code] = '0'
