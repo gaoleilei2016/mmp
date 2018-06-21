@@ -1,11 +1,14 @@
 <style type="text/css">
+	#current_app_div .card-wrapper p {
+		line-height: 30px !important;
+	}
 </style>
 <template id="home_div">
 	<el-row :gutter="20">
 	  <el-col :span="4" style="width: 220px;">
 	  	<span>.</span>
 	  	<div style="position: fixed; left: 0; top: 30px; width: 220px;">
-		  	<h3 align="center" style="background: #545c64; color: #fff; margin: 0; padding-top: 1em;">功能介绍</h3>
+		  	<h3 align="center" style="background: #545c64; color: #fff; margin: 0; padding-top: 1em;">~~ 功能介绍 ~~</h3>
 		    <el-menu
 		      default-active="1-1"
 		      @select="handleSelectMenu"
@@ -27,8 +30,7 @@
 		          <el-menu-item index="1-1-4">手动录入</el-menu-item>
 		          <el-menu-item index="1-1-5">刷身份证</el-menu-item>
 		          <el-menu-item index="1-1-6">搜索患者</el-menu-item>
-		          <el-menu-item index="1-1-7">给已有病人新建就诊</el-menu-item>
-		          <el-menu-item index="1-1-8">其他功能</el-menu-item>
+		          <el-menu-item index="1-1-7">其他功能</el-menu-item>
 		        </el-submenu>
 		        <el-submenu index="1-2">
 		          <template slot="title">历史就诊</template>
@@ -105,7 +107,7 @@
 	  </el-col>
 	  <el-col :span="20" style="width: calc( 100% - 220px ); ">
 	  	<div name="1-1-1" class="card-wrapper">
-	  		<div class="page-header"><h3>个人信息　<small>基本信息字段明细</small></h3></div>
+	  		<div class="page-header"><h3>1-1-1 个人信息　<small>基本信息字段明细</small></h3></div>
 	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码<img style="width: 100%;" src="/assets/hospital/1-1-1-1.jpg"/></p>
 	  		<p><span class="text-danger">*</span>小于14岁补充必填：出生日期、监护人</p>
 	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位、照片(通过刷身份证自动获取)<img style="width: 100%;" src="/assets/hospital/1-1-1-2.jpg"/></p>
@@ -113,30 +115,51 @@
 	  	</div>
 	  	<br/>
 	  	<div name="1-1-2" class="card-wrapper">
-	  		<div class="page-header"><h3>诊断　<small>快捷录入患者主诊断</small></h3></div>
+	  		<div class="page-header"><h3>1-1-2 诊断　<small>快捷录入患者主诊断</small></h3></div>
 	  		<p>1、从ICD10编码进行选择，可以保存编码和疾病名称</p>
 	  		<p>2、自己录入诊断</p>
 	  		<img style="width: 100%;" src="/assets/hospital/1-1-2-1.jpg"/>
 	  	</div>
 	  	<br/>
 	  	<div name="1-1-3" class="card-wrapper">
-	  		<div class="page-header"><h3>过敏　<small>快捷录入患者过敏信息</small></h3></div>
+	  		<div class="page-header"><h3>1-1-3 过敏　<small>快捷录入患者过敏信息</small></h3></div>
 	  		<img src="/assets/hospital/1-1-3-1.jpg"/>
 	  		<img src="/assets/hospital/1-1-3-2.jpg"/>
 	  	</div>
 	  	<br/>
 	  	<div name="1-1-4" class="card-wrapper">
-	  		<div class="page-header"><h3>手动录入　<small>手动新建一个患者就诊信息</small></h3></div>
+	  		<div class="page-header"><h3>1-1-4 手动录入　<small>手动新建一个患者就诊信息</small></h3></div>
 	  		<p>必填：姓名、性别、年龄、手机号码、诊断</p>
 	  		<br/>
 	  		<img style="width: 100%;" src="/assets/hospital/1-1-4-1.jpg"/>
 	  	</div>
 	  	<br/>
-	  	<div name="1-1-4" class="card-wrapper">
-	  		<div class="page-header"><h3>刷身份证　<small>通过刷身份证获取患者基本信息</small></h3></div>
+	  	<div name="1-1-5" class="card-wrapper">
+	  		<div class="page-header"><h3>1-1-5 刷身份证　<small>通过刷身份证获取患者基本信息</small></h3></div>
+	  		<p>
+	  			刷卡步骤：将身份证放置在读卡器上，点击<img src="/assets/hospital/1-1-5-4.jpg"/>按钮，显示<img src="/assets/hospital/1-1-5-5.jpg"/>，读卡成功之后，自动将数据填充到表单。
+	  		</p>
 	  		<p>获取数据：姓名、性别、年龄、身份证号、出生日期、住址、照片</p>
-	  		<p>补充必填：手机号码</p>
 	  		<img style="width: 100%;" src="/assets/hospital/1-1-1-1.jpg"/>
+	  		<br/>
+	  		<p class="text-danger">安装身份证读卡插件：</p>
+	  		<p>1、下载安装包 <a href="/ID_card_installation_package.rar">ID_card_installation_package</a> <img src="/assets/hospital/1-1-5-1.jpg"/></p>
+	  		<p>2、解压缩</p>
+	  		<p>3、双击 <img src="/assets/hospital/1-1-5-2.jpg"/>文件，安装读卡服务</p>
+	  		<p>4、产生桌面图标<img src="/assets/hospital/1-1-5-3.jpg"/></p>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-6" class="card-wrapper">
+	  		<div class="page-header"><h3>1-1-6 搜索患者　<small>搜索患者进行编辑，或者新建就诊</small></h3></div>
+	  		<p>点击<img src="/assets/hospital/1-1-6-1.jpg"/>按钮，弹出框中显示患者列表框，可以查看患者基本信息和就诊次数。<img style="width: 100%;" src="/assets/hospital/1-1-6-2.jpg"/></p>
+	  		<p>点击<img src="/assets/hospital/1-1-6-3.jpg"/>按钮，为此患者新建一次就诊记录。</p>
+	  		<p>点击“编辑就诊”按钮，编辑就诊。如果患者有一次有效就诊，显示编辑按钮<img src="/assets/hospital/1-1-6-4.jpg"/>，点击进入编辑页面；如果患者有多次就诊，显示列表进行选择编辑。<img src="/assets/hospital/1-1-6-5.jpg"/></p>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-7" class="card-wrapper">
+	  		<div class="page-header"><h3>1-1-7 其他功能　<small></small></h3></div>
+	  		<p>刷新：悬停<img src="/assets/hospital/1-1-7-1.jpg"/>按钮，显示<img src="/assets/hospital/1-1-7-2.jpg"/>，点击后，整页刷新，清除表单数据。</p>
+	  		<p>折叠：点击患者页头，患者表单进行折叠，为页面节约更多的空间。<img style="width: 100%;" src="/assets/hospital/1-1-7-3.jpg"/><img style="width: 100%;" src="/assets/hospital/1-1-7-4.jpg"/></p>
 	  	</div>
 	  </el-col>
 	</el-row>
