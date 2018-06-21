@@ -262,7 +262,7 @@
           common_data_org_type_code:[{code:'1',display:'医院'},{code:'2',display:'药房'}],
           common_data_genders:[{code:"1",display:'男'},{code:'2',display:'女'}],
           common_data_occupations:[{code: "01", display: "幼托儿童"}, {code: "02", display: "散居儿童"}, {code: "03", display: "学生（大中小学）"}, {code: "04", display: "教师"}, {code: "05", display: "保育员及保姆"}, {code: "06", display: "餐饮食品业"}, {code: "07", display: "商业服务"}, {code: "08", display: "医务人员"}, {code: "09", display: "工人"}, {code: "10", display: "民工"}, {code: "11", display: "农民"}, {code: "12", display: "牧民"}, {code: "13", display: "渔（船）民"}, {code: "14", display: "干部职员"}, {code: "15", display: "离退人员"}, {code: "16", display: "家务及待业"}, {code: "17", display: "不详"}, {code: "99", display: "其他"}], // CodeSystem 2.16.156.1.13610.1.364.2.1.202
-          common_data_nations:[{code:"TU",display:'土族'},{code:'KZ',display:'哈沙克族'}], // ValueSet 2.16.156.1.675425699.1.11.14
+          common_data_nations:[],
           common_data_marriages:[{code:"10",display:'未婚'},{code:'20',display:'已婚'}], // CodeSystem 2.16.156.1.19449.1.2261.2
           common_data_bloods:[{code:"1",display:'A型'},{code:'2',display:'B型'},{code:'3',display:'O型'},{code:'4',display:'AB型'},{code:'5',display:'不详'}], // CodeSystem 2.16.156.1.13610.1.364.4.50.5
           common_data_routes:[{code: "PO", display: "口服", jianpin: "KF"},{code: "IV.DRIP", display: "静脉滴注", jianpin: "JMDZ"},{code: "SC", display: "皮下注射", jianpin: "PXZS"},{code: "IM", display: "肌肉注射", jianpin: "JRZS"},{code: "IV.SHOVE", display: "静脉推注", jianpin: "JMTZ"},{code: "INH", display: "雾化吸入", jianpin: "WHXR"},{code: "JMBR", display: "静脉泵入", jianpin: "JMBR"},{code: "OP", display: "滴眼", jianpin: "DY"},{code: "NA", display: "滴鼻", jianpin: "DB"},{code: "ST", display: "喷喉", jianpin: "PH"},{code: "CHEW", display: "含化", jianpin: "HH"},{code: "ATW", display: "敷伤口", jianpin: "FSK"},{code: "CTS", display: "擦皮肤", jianpin: "CPF"},{code: "RE", display: "直肠用药", jianpin: "ZCYY"},{code: "SL", display: "舌下用药", jianpin: "SXYY"},{code: "INJP", display: "注射用药", jianpin: "ZSYY"},{code: "ID", display: "皮内注射", jianpin: "PNZS"},{code: "IV", display: "静脉注射", jianpin: "JMZS"},{code: "IN", display: "吸入用药", jianpin: "XRYY"},{code: "LA", display: "局部用药", jianpin: "JBYY"},{code: "SCM", display: "椎管内用药", jianpin: "ZGNYY"},{code: "ACD", display: "关节腔内用药", jianpin: "GJQNYY"},{code: "PCM", display: "胸膜腔用药", jianpin: "XMQYY"},{code: "IP", display: "腹腔用药", jianpin: "FQYY"},{code: "VA", display: "阴道用药", jianpin: "YDYY"},{code: "EM", display: "气管内用药", jianpin: "QGNYY"},{code: "ODW", display: "其他用药途径", jianpin: "QTYYTJ"}],
@@ -349,16 +349,16 @@
           get_codesystem_data:function(target,oid,obj_key,display_name_flag){
             var _this = this;
             $.ajax({
-              url:'/voc/get_table_names.json?target='+target+'&oid='+oid,
+              url:'/interfaces/get_dicts.json?oid='+oid,
               success:function(json){
                 if (target=='CodeSystemTree') {
                   _this[obj_key] = json;
                 }else{
-                  _this[obj_key] = json.map(function(x){ 
+                  _this[obj_key] = json.rows.map(function(x){ 
                     if (display_name_flag) {
-                      return {code:x[0],display_name:x[1],jianpin:x[3]};
+                      return {code:x.code,display_name:x.name,jianpin:x.jianpin};
                     }else{
-                      return {code:x[0],display:x[1],jianpin:x[3]};
+                      return {code:x.code,display:x.name,jianpin:x.jianpin};
                     }
                   });
                 }
@@ -400,7 +400,8 @@
         },
         mounted:function(){
           // console.log("================ current_app mounted ================")
-          // this.get_codesystem_data('CodeSystem','2.16.156.1.19449.1.2261.1','codesystem_data_sex');
+          // this.get_codesystem_data('CodeSystem','2.16.156.1.19449.1.2261.1','common_data_genders');
+          this.get_codesystem_data('CodeSystem','2.16.156.1.19449.1.3304','common_data_nations');
           // this.get_common_data_departments();
           var _this = this;
           <% if notice.present?||alert.present? %>

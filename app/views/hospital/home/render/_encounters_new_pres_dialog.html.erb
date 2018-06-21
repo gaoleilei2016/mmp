@@ -64,7 +64,7 @@
         <span style="cursor: pointer;" v-if="scope.$index<sendOrders.length-1" class="fa fa-chevron-down to-down-icon" title="下移" v-on:click="sortSeOrderList(scope.$index, 1)"></span>
 	    </template>
 	  </el-table-column>
-	  <%= render "hospital/home/render/orders_table_common_partial.html" %>
+	  <%= render "hospital/home/render/orders_table_common_partial" %>
 	</el-table>
   <span slot="footer" class="dialog-footer">
 		<center>

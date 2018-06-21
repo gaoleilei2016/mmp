@@ -13,7 +13,6 @@ class Hospital::Irritability < ApplicationRecord
 					person: cur_person,
 					data_entry: cur_user
 				})
-				p t.errors
 			end
 		end
 	end
