@@ -18,6 +18,7 @@ class Orders::Order < ApplicationRecord
 #  drug_user_id varchar(20)  NULL '发药人id',
 #  end_time DATETIME NOT NULL '订单完成时间',
 #  close_time DATETIME NOT NULL '订单关闭时间',
+#  refund_medical_time DATETIME NOT NULL '退药时间',
 #  target_org_id VARCHAR(32) NOT NULL '目标机构编码',
 #  target_org_name VARCHAR(32) NOT NULL '目标机构名称',
 #  source_org_id VARCHAR(32) NOT NULL '来源机构编码',
@@ -25,6 +26,7 @@ class Orders::Order < ApplicationRecord
 #  order_code VARCHAR(32) NOT NULL '订单号',
 #  user_id VARCHAR(32) NOT NULL '用户id',
 #  reason VARCHAR(32) NOT NULL '原因',
+#  is_send_medical int NOT NULL '是否发过药',
 #  person_id varchar(32)  NULL 'personid',
 #  doctor varchar(32)  NULL '开单医生',
 #  patient_name varchar(20)  NULL '患者名字',
@@ -36,7 +38,7 @@ class Orders::Order < ApplicationRecord
 #  shipping_code varchar(20)  NULL '物流单号',
 #  pay_type float NOT NULL '支付类型,Alipay ,Wechat',
 #  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1待付款,2已付款,3未发货,4已发货,5交易成功,6交易关闭,7交易取消'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
+#  status VARCHAR(4) NOT NULL '1待付款,2待领药,3未发货,4已发货,5交易完成,6已退药,7交易关闭'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
 #  )
 
@@ -56,26 +58,28 @@ class Orders::Order < ApplicationRecord
 
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
 	def cancel_order(cur_user=nil,reason='')
-		cur_user ||= User.find(user_id)
+		current_user = current_user||User.find(user_id)
 		result = {ret_code:'0',info:''}
 		begin
 			update_attributes(_locked:1)
 			case status.to_s
 			when '1'
-				prescriptions.each{|x|x.back_wait_charge({}, cur_user)}
+				prescriptions.each{|x|x.back_wait_charge({}, current_user)}
 				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
+				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				result = {ret_code:'0',info:'订单已取消。'}
-			when '2'
+			when cur_user && '2'
 				arg = {
 					# 退费人
 					return_charge_opt: {
-						id: cur_user.id.to_s,
-						display: cur_user.name.to_s
+						id: current_user.id.to_s,
+						display: current_user.name.to_s
 					},
 					# 退费时间
 					return_charge_at: Time.now.to_s(:db)
 				}
-				prescriptions.each{|x|x.return_charge(arg, cur_user)}
+				prescriptions.each{|x|x.return_charge(arg, current_user)}
+				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 				result = {ret_code:'0',info:'取消成功，处方已失效。'}
 			when '5'
@@ -85,7 +89,6 @@ class Orders::Order < ApplicationRecord
 			when '7'
 				return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
 			end
-			prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 		rescue Exception => e
 			p e
 		ensure
@@ -95,6 +98,74 @@ class Orders::Order < ApplicationRecord
 	end
 
 	##退药方法 attrs = {prescription_ids:[],current_user:''}
+	# def cancel_medical(attrs={})
+	# 	attrs = attrs.deep_symbolize_keys
+	# 	begin
+	# 		update_attributes(_locked:1)
+	# 		result = {ret_code:'-1',info:'当前状态不需要退药。',amt:0.0}
+	# 		case status.to_s
+	# 		when '1'
+
+	# 		when '2'
+
+	# 		when '3'
+
+	# 		when '4'
+
+	# 		when '5'
+	# 			source_amt = self.net_amt
+	# 			Hospital::Prescription.transaction do
+	# 				p attrs[:prescription_ids].size < self.prescription_ids.size
+	# 				if attrs[:prescription_ids].size < self.prescription_ids.size
+	# 					#订单中去除处方
+	# 					self.prescription_ids.size
+	# 					self.prescription_ids -= attrs[:prescription_ids].map{|x|x.to_i}
+	# 					self.prescription_ids.size
+	# 					#订单中去除处方明细
+	# 					self.detail_ids -= self.details.select{|x| attrs[:prescription_ids].map{|x|x.to_i}.include?x.prescription_id.to_i}.map{|v|v.id}
+	# 					result[:amt] = source_amt - self.net_amt
+	# 				elsif attrs[:prescription_ids].size == self.prescription_ids.size
+	# 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
+	# 					result[:amt] = self.net_amt
+	# 				else
+	# 					return result
+	# 				end
+
+	# 				#需要退费的金额
+	# 				if self.payment_type.to_s == '2'
+	# 					#  ##订单id+结算次数 退单
+	# 					args = {out_trade_no: "#{id}_#{settle_times}", refund_fee: result[:amt].to_f.round(2), reason:attrs[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+	# 					res = Pay::Refund.carry_out(args)
+	# 					# p '~~~~~~~',res
+	# 					if [:succ,:success].include?res[:state].to_sym
+	# 						###退款成功
+	# 						cancel_order_by_private(Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]),attrs[:current_user],attrs[:reason])
+	# 					else
+	# 						raise ''
+
+	# 					end
+	# 				else
+	# 					cancel_order_by_private(Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]),attrs[:current_user],attrs[:reason])
+	# 				end
+	# 			end
+	# 			result[:ret_code] = '0'
+	# 			result[:info] = '退药成功！'
+	# 		when '6'
+
+	# 		when '7'
+
+	# 		else
+
+	# 		end
+	# 		save
+	# 	rescue Exception => e
+	# 		p e
+	# 	ensure
+	# 		update_attributes(_locked:0)
+	# 		return result
+	# 	end
+	# end
+	##退药方法 attrs = {reason:'',current_user:''}
 	def cancel_medical(attrs={})
 		attrs = attrs.deep_symbolize_keys
 		begin
@@ -110,39 +181,11 @@ class Orders::Order < ApplicationRecord
 			when '4'
 
 			when '5'
-				source_amt = self.net_amt
 				Hospital::Prescription.transaction do
-					p attrs[:prescription_ids].size < self.prescription_ids.size
-					if attrs[:prescription_ids].size < self.prescription_ids.size
-						#订单中去除处方
-						self.prescription_ids.size
-						self.prescription_ids -= attrs[:prescription_ids].map{|x|x.to_i}
-						self.prescription_ids.size
-						#订单中去除处方明细
-						self.detail_ids -= self.details.select{|x| attrs[:prescription_ids].map{|x|x.to_i}.include?x.prescription_id.to_i}.map{|v|v.id}
-						result[:amt] = source_amt - self.net_amt
-					elsif attrs[:prescription_ids].size == self.prescription_ids.size
-						update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
-						result[:amt] = self.net_amt
-					else
-						return result
-					end
-
-					#需要退费的金额
-					if self.payment_type.to_s == '2'
-						#  ##订单id+结算次数 退单
-						args = {out_trade_no: "#{id}_#{settle_times}", refund_fee: result[:amt].to_f.round(2), reason:attrs[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
-						res = Pay::Refund.carry_out(args)
-						# p '~~~~~~~',res
-						if [:succ,:success].include?res[:state].to_sym
-							###退款成功
-							cancel_order_by_private(Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]),attrs[:current_user],attrs[:reason])
-						else
-							raise ''
-
-						end
-					else
-						cancel_order_by_private(Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]),attrs[:current_user],attrs[:reason])
+					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:attrs[:reason])
+					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
+					if self.payment_type.to_s != '2' #如果是线下支付的
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:attrs[:reason])
 					end
 				end
 				result[:ret_code] = '0'
@@ -154,7 +197,6 @@ class Orders::Order < ApplicationRecord
 			else
 
 			end
-			save
 		rescue Exception => e
 			p e
 		ensure
@@ -427,6 +469,7 @@ class Orders::Order < ApplicationRecord
 												status:attrs[:status],
 												)
 						result[:info] = "订单已完成。" 
+						#订单结算
 						if ["2","5"].include?attrs[:status].to_s
 							args = {
 								# 创建订单人
@@ -439,7 +482,10 @@ class Orders::Order < ApplicationRecord
 							}
 							##通知处方订单已结算
 						 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
+						 	#订单发药
 							if ["5"].include?attrs[:status].to_s
+								#发药标志改为1（已发药）
+								order.update_attributes(:is_send_medical=>1)
 							 	args2 = {
 									# 发药人
 									delivery: {
