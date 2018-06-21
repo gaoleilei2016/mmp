@@ -403,7 +403,7 @@ window.current_template_obj = {
   			if(json.type=="by_person") { // 通过就诊创建新的就诊
   				encounter = json.row;
   			}
-  			btn.removeAttr("disabled").find(".fa").hide();
+  			btn.removeAttr("disabled").find(".fa").toggle();
 				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
       		_this.handleEncounterReturn(response, btn);
       		// _this.getOrders();
@@ -411,7 +411,7 @@ window.current_template_obj = {
 	  				_this.isShowEncountersDialog = false;
 	  			}
       	}, function(response) {
-      		btn.removeAttr("disabled").find(".fa").hide();
+      		btn.removeAttr("disabled").find(".fa").toggle();
       		_this.$message.error("创建就诊信息失败，请联系管理员。");
       	})
   		},
