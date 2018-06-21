@@ -21,7 +21,7 @@ class Ims::Order < ApplicationRecord
         when '5'#已发药
          query.concat(" and status=5 ")
         when '7'#已退药
-         query.concat(" and status=7 ")
+         query.concat(" and (status=7 or status=6) ")
         else
         end
         query.concat(' order by created_at desc')
@@ -74,7 +74,6 @@ class Ims::Order < ApplicationRecord
           query.concat(" order by return_at desc")
         else
         end
-        p query
         Ims::PreHeader.find_by_sql(query).map{|header|
           data <<{
             order_id:header.id,

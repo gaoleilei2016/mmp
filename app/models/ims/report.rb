@@ -5,8 +5,23 @@ class Ims::Report
 
 		# => 药店药品销售情况
 		# => [当前机构、来源机构、发药时间区间、发药人、]
+    # args ={org_id:'34',start_time:'2018-06-20',end_time:'2018-06-21',status:5}
 		def sale_report args = {}
-			
+      begin
+  			org_id = args[:org_id]
+        start_time = args[:start_time] || (Time.new - 1.day).to_s(:db)
+        end_time = args[:end_time] || Time.new.to_s(:db)
+        status = args[:status]
+        sql = "SELECT  b.title,b.specification,b.factory_name,sum(b.qty) as 'total_qty',b.unit,b.price,round(sum(b.amount),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM ims_pre_headers a INNER JOIN ims_pre_details b on a.id= b.header_id where a.delivery_org_id='#{org_id}'" 
+        status.blank? ? sql.concat(" and (a.status=4 || a.status=8 )") : sql.concat("and (a.status=#{status} )")
+        sql.concat(" and a.created_at BETWEEN '#{start_time}' AND date_add('#{end_time}',interval 1 day) GROUP BY  b.title,b.specification,b.factory_name,b.unit,b.price;")
+        result = Ims::PreHeader.find_by_sql(sql)
+        JSON.parse(result.to_json)
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 订单明细信息及处方信息查询 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
 		end
 
 		# 订单搜索

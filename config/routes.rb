@@ -154,10 +154,18 @@ Rails.application.routes.draw do
       end
     end
 
+    # 设置
     resources :settings do
       collection do
         get :get_cur_set
         post :save_settings
+      end
+    end
+
+    # 统计
+    resources :reports do
+      collection do
+        get :sale_report          # 销售统计
       end
     end
 

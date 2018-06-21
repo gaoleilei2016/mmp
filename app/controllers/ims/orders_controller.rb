@@ -1,3 +1,4 @@
+#encoding:utf-8
 class Ims::OrdersController < ApplicationController
   before_action :set_ims_order, only: [:show, :edit, :update, :destroy]
 
