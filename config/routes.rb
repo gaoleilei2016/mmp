@@ -12,9 +12,11 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      post :refund_order
       get :get_orders
       post :pay_order
       post :save_order
+      post :cancel_order
       get :get_prescriptions_cart
       get :set_prescriptions_cart
       get :set_current_pharmacy
@@ -43,8 +45,10 @@ Rails.application.routes.draw do
     resources :home do
       collection do
         get :prescriptions
+        get :prescription
         get :orders
         get :order
+        get :confirm_order
       end
     end
     resources :portal do
@@ -68,6 +72,12 @@ Rails.application.routes.draw do
           get :cur_org_ini
         end
       end
+      resources :departments do 
+        collection do 
+          get :get_active_departments
+          post :set_cur_department
+        end
+      end
       resources :mtemplates # 医嘱模板管理
     end
     resources :home
@@ -86,12 +96,24 @@ Rails.application.routes.draw do
       collection do
         get :get_all_prescriptions_by_phone
         get :get_prescriptions_by_phone
+        get :get_not_read_prescription
+        put :read_prescription
       end
       member do
         post :set_drug_store
       end
     end
     resources :histories      # 历史列表
+
+    # 诊断
+    resources :diagnoses do
+      collection do
+        post :sort
+      end
+    end
+
+    resources :patients
+    resources :people
   end
   ########### hospital ##########
   ############################
@@ -121,6 +143,11 @@ Rails.application.routes.draw do
         get :oprate_order       # 订单操作(发药/退药、、)
         get :order_settings
         get :get_detail
+        get :get_search_data    # 未发订单或处方检索
+        get :get_order_by_code  # 已发药或已退订单检索  
+        post :operat_order_by_prescription   # 平台处方收费或收费并发药操作
+        get :return_drug           # 退药
+        get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
       end
     end

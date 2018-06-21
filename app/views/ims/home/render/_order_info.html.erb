@@ -65,7 +65,7 @@
 			  <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.header.id)">发药</button>
 			</span>
 			<span v-if="info.header.status === 'E'&&info.header.delivery_status == 'E' ">
-				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="return_order(info.header.id)">退药</button>
+				<button type="button" class="el-button el-button--primary el-button--mini" v-on:click="return_drug(info.header.id)">退药</button>
 			</span>
 		</div>
 	</div>

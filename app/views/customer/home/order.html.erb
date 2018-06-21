@@ -2,6 +2,7 @@
 	html,body,.mui-content{
 		height: 100%;
 		overflow: hidden;
+		background: #fff;
 	}
 	.mui-content{
 		overflow: auto;
@@ -13,64 +14,132 @@
 	.mui-table-view.no_background:after{
 		background: none;
 	}
+	.mui-content .mui-active{
+		background: none !important;
+	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+	<a href="/customer/home/orders" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
 	</a>
 	<h1 class="mui-title">订单详情</h1>
 </header>
-<div class="mui-content" id="vue_content">
-	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in orders">
-		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-			<div>
-				<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
-				<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
-				<div class="mui-media-body">
-					<span>{{item.organ.name||"　"}}</span>
-					<span style="float: right;" class="common_red">
-						<span v-if="item.payment_type=='1'">
-							<span v-if="item.status=='1'">未付款</span>
-							<span v-if="item.status=='2'">已付款</span>
-							<span v-if="item.status=='3'">未发货</span>
-							<span v-if="item.status=='4'">已发货</span>
-							<span v-if="item.status=='5'">交易成功</span>
-							<span v-if="item.status=='6'">交易关闭</span>
-							<span v-if="item.status=='7'">交易取消</span>
+<div class="mui-content" id="vue_content" v-cloak>
+	<div v-if="order" style="">
+		<ul class="mui-table-view" style="margin-bottom: 8px;">
+			<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+				<div>
+					<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+					<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+					<div class="mui-media-body">
+						<span>{{order.organ.name||"　"}}</span>
+						<span style="float: right;" class="common_red">
+							<span v-if="order.payment_type=='1'">
+								<span v-if="order.status=='1'">未付款</span>
+								<span v-if="order.status=='2'">已付款</span>
+								<span v-if="order.status=='3'">未发货</span>
+								<span v-if="order.status=='4'">已发货</span>
+								<span v-if="order.status=='5'">交易成功</span>
+								<span v-if="order.status=='6'">交易关闭</span>
+								<span v-if="order.status=='7'">交易取消</span>
+							</span>
+							<span v-if="order.payment_type=='2'">到店支付</span>
 						</span>
-						<span v-if="item.payment_type=='2'">到店支付</span>
-					</span>
-					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{item.organ.addr||"　"}}</p>
-				</div>
-			</div>
-			<ul class="mui-table-view" style="margin: 15px 0;">
-				<li class="mui-table-view-cell no_background" v-for="drug in item.drugs" style="padding-left: 0;">
-					<div href="javascript:;" class="">
-						<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-						<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
-						<div class="mui-media-body">
-							{{drug.name}}
-							<p class="mui-ellipsis">
-								{{drug.specifications}}
-								<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.quantity}} {{drug.unit}}</span>
-							</p>
-						</div>
+						<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{order.organ.addr||"　"}}</p>
 					</div>
-				</li>
-			</ul>
-			<div style="line-height: 33px;">
-				合计 <span class="common_red">¥ {{format_float(item.total_price)}}</span>
-			</div>
-		</li>
-	</ul>
+				</div>
+				<ul class="mui-table-view" style="margin: 15px 0;">
+					<li class="mui-table-view-cell no_background" v-for="drug in order.drugs" style="padding-left: 0;">
+						<div href="javascript:;" class="">
+							<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+							<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+							<div class="mui-media-body">
+								{{drug.name}}
+								<p class="mui-ellipsis">
+									{{drug.specifications}}
+									<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.quantity}} {{drug.unit}}</span>
+								</p>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<div style="line-height: 33px;">
+					合计 <span class="common_red">¥ {{format_float(order.total_price)}}</span>
+				</div>
+			</li>
+		</ul>
+		<div style="text-align: right;padding-right: 8px;margin-bottom: 8px;">
+			<!-- <button type="button" v-if="order.status=='2'">申请退款</button> -->
+			<button type="button" @click="cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
+			<template v-if="order.payment_type=='1'">
+				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">去支付</button>
+				<button type="button" @click="refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+			</template>
+		</div>
+		<div style="padding-left: 12px;">
+			<div class="common_grey">订单编号：{{order.order_code}}</div>
+			<div class="common_grey">下单时间：{{new Date(order.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
+		</div>
+		<div style="text-align: center;padding-bottom: 30px;">
+			<template v-if="order.status=='2'||order.payment_type=='2'">
+				<img :src="order.base64_img" style="width: 100%;max-width: 222px;">
+				<div class="common_red">
+					请向药店药师出示该二维码或订单编号
+				</div>
+			</template>
+			<template v-else></template>
+		</div>
+	</div>
 </div>
 <script type="text/javascript">
 	new Vue({
 		el:"#vue_content",
 		data:{
-			orders:[],
+			order:null,
 		},
 		methods:{
+			refund_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/refund_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.flag) {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
+			cancel_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/cancel_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.ret_code == "0") {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},
@@ -78,13 +147,13 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/interfaces/get_orders',
+					url:'/interfaces/get_orders.json?id=<%= params[:id] %>',
 					data:{per:10},
 					success:function(json) {
 						if (json.flag) {
-							_this.orders = json.rows;
+							_this.order = json.order;
 						}else{
-							_this.$message(json.info);
+							mui.toast(json.info);
 						}
 					},
 					complete:function() {

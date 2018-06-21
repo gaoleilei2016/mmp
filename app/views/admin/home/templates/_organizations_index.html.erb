@@ -91,7 +91,7 @@
 										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
 											<input v-model="searchInputValue" @keyup="get_timeout_users" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
 											<span class="el-input__prefix" @click="get_users"><i class="el-icon-search el-input__icon"></i></span>
-											<span class="el-input__suffix" @click="searchInputValue='';get_users;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+											<span class="el-input__suffix" @click="searchInputValue='';get_users();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
 										</div>
 									</div>
 								</div>
@@ -131,7 +131,7 @@
 										<div class="el-input el-input--mini el-input--prefix el-input--suffix" style="width: 120px;">
 											<input v-model="searchInputValue1" @keyup="get_timeout_users1" autocomplete="off" placeholder="名称、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
 											<span class="el-input__prefix" @click="get_users1"><i class="el-icon-search el-input__icon"></i></span>
-											<span class="el-input__suffix" @click="searchInputValue1='';get_users1;"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+											<span class="el-input__suffix" @click="searchInputValue1='';get_users1();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
 										</div>
 									</div>
 								</div>
@@ -210,12 +210,6 @@ window.current_template_obj = {
 		}
 	},
 	watch:{
-		// map_search_str:function(val) {
-		// 	var _this = this;
-		// 	addressToPoint('map_use_div',val,function(point) {
-		// 		_this.point = point;
-		// 	})
-		// }
 		map_search_str:function(val) {
 			var _this = this;
 			if (_this.click_to_fill) {
@@ -223,7 +217,7 @@ window.current_template_obj = {
 			}else{
 				var map = _this.map;
 				var myGeo = new BMap.Geocoder();
-				myGeo.getPoint(val, function(point){
+				map && myGeo.getPoint(val, function(point){
 					if (point) {
 							map.centerAndZoom(point);
 							map.clearOverlays();
@@ -267,7 +261,7 @@ window.current_template_obj = {
 		},
 		tabClick:function(tab) {
 			var _this = this;
-			console.log( tab.label=='位置' );
+			// console.log( tab.label=='位置' );
 			_this.$nextTick(function() {
 				// addressOverlay("map_use_div");
 				_this.init_map();
@@ -361,43 +355,6 @@ window.current_template_obj = {
 				})
 			})
 		},
-		// // 同步 dialog 项目表格的变色行
-		// sync_success_tr:function() {
-		// 	var _this = this;
-		// 	var selected_ids = (_this.tableData31||[]).map(function(item) {
-		// 		return item.id;
-		// 	});
-		// 	$('#dialog2_right_table tr').removeClass("selected-success");
-		// 	$(".dialog2_right_tr_id").each(function(i,v) {
-		// 		if ( selected_ids.indexOf($(v).attr('data-id'))>-1 ) {
-		// 			$(v).parents("tr").addClass("selected-success");
-		// 		}
-		// 	});
-		// },
-		// re_organization:function(row,e) {
-		// 	var _this = this;
-		// 	var index = _this.tableData31.indexOf(row);
-		// 	if (index>-1) {
-		// 		_this.tableData31.splice(index,1);
-		// 		_this.sync_success_tr();
-		// 	}
-		// },
-		// 选择仪器
-		// right_copyto_left2:function(row, event, column) {
-		// 	var _this = this;
-		// 	var tr = $(event.target).is('tr') ? $(event.target) : $(event.target).parents('tr');
-		// 	var selected_ids = _this.tableData31.map(function(item) {
-		// 		return item.id;
-		// 	});
-		// 	var index = $.inArray( row.id, selected_ids );
-		// 	if (index>-1) {
-		// 		$(tr).removeClass("selected-success");
-		// 		this.tableData31.splice(index,1);
-		// 	}else{
-		// 		$(tr).addClass("selected-success");
-		// 		this.tableData31.push(row);
-		// 	}
-		// },
 		remove_organization_of_z:function(row) {
 			var tr = $('[data-id="'+row.id+'"]').parents('tr');
 			if (tr) {
@@ -477,6 +434,10 @@ window.current_template_obj = {
 					_this.seleced_organization = {id:row.id,save_method:'PUT',form_type:row.code_system,name:json.organization.name,code:json.organization.code};
 					// json.organization.yaofang_type||(json.organization.yaofang_type=true);
 					_this.ruleForm = json.organization;
+					_this.map_search_str = json.organization.addr;
+					_this.point.lat = json.organization.lat;
+					_this.point.lng = json.organization.lng;
+
 					_this.tableData2 = json.users||[];
 					_this.tableData21 = json.organizations||[];
 					_this.dialogVisible = true;
@@ -590,12 +551,11 @@ window.current_template_obj = {
 			this.ruleForm = _.cloneDeep(this.defaultForm);
 			this.tableData2 = [];
 			this.tableData21 = [];
+			_this.map_search_str = '';
+			_this.point = {};
 			_this.$nextTick(function() {
 				_this.$refs.ruleForm.clearValidate();
 			})
-			// setTimeout(function() {
-			// 	_this.$refs.ruleForm.resetFields();
-			// })
 		},
 		get_timeout_organizations:function (e) {
 			var _this = this;

@@ -1,7 +1,9 @@
 module ::Hospital::Interface
   # => 根据电话号获取处方单
-  def self.get_prescriptions_by_phone(phone)
-    ::Hospital::Prescription.find_by_sql("SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.status = '1' and a.encounter_id=b.id WHERE b.phone=#{phone}")
+  def self.get_prescriptions_by_phone(phone,status='')
+    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone}"
+    status.present? && sql.concat(" and a.status = #{status}")
+    ::Hospital::Prescription.find_by_sql(sql)
   end
 
 
@@ -13,6 +15,11 @@ module ::Hospital::Interface
       ret[_prescription_id] = ::Hospital::Prescription.find(_prescription_id).to_web_front
     end
     return ret
+  end
+
+  def self.get_not_read_prescriptions_by_phone(phone)
+    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone} AND a.is_read=0"
+    ::Hospital::Prescription.find_by_sql(sql)
   end
 
 

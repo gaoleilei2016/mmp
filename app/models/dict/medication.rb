@@ -28,7 +28,9 @@ class ::Dict::Medication < ApplicationRecord
   			formul_display: self.formul_name,
         factory_name: self.produce_name,
         base_unit: self.base_unit,
-        mul: self.mul
+        mul: self.mul,
+        measure_val: self.measure_val,
+        measure_unit: self.measure_unit
     	}
   	end
 end

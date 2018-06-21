@@ -54,6 +54,7 @@ class Hospital::PrescriptionsController < ApplicationController
         @prescription.link_diagnoses(args[:diagnoses_args], current_user)
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
+        @prescription.set_tookcode
         p "link_orders save"
         # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
         audit_args = {
@@ -112,13 +113,15 @@ class Hospital::PrescriptionsController < ApplicationController
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
-    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
+    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
       prescription_ids = []
       total_price = 0.0
-      orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+      _status = []
+      orders = _prescriptions.map { |e| prescription_ids<<e.id;_status<<e.status;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
       cur_org[:prescription_ids] = prescription_ids
       cur_org[:total_price] = total_price
       cur_org[:orders] = orders
+      cur_org[:status] = _status
       cur_org[:first_created_at] = _prescriptions[0].created_at
       ret << cur_org
     end
@@ -145,6 +148,27 @@ class Hospital::PrescriptionsController < ApplicationController
       ret << _prescription.to_web_front
     end
     render json: {flag: true, info: "success", data: ret}
+  end
+
+  # PUT
+  # 根据处方ids更新 处方已读
+  # {
+  #   prescription_ids: []
+  # }
+  def read_prescription
+    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil? || params[:prescription_ids].is_array
+    ::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
+    render json:{flag: true, info:"success"}
+  end
+
+  # GET
+  # 获取未读处方的数量  通过电话查询
+  # {phone: ""}
+  def get_not_read_prescription
+    return render json:{flag: false, info:"没有电话号码或格式不正确"} if params[:phone].nil?
+    cur_phone = params[:phone]
+    count = ::Hospital::Interface.get_not_read_prescriptions_by_phone(cur_phone).count
+    render json:{flag: true, info: "success", count: count}
   end
 
   # /# POST

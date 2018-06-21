@@ -166,10 +166,14 @@
           <% if current_user.organization %>
           ，<%= current_user.organization.name %>
           <% end %>
+          <span id="header_show_dep_span"><%= current_user.cur_loc_display %></span>
           <i class="el-icon-caret-bottom el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown" class="_h_right_menus">
           <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item>
+          <% if current_user.organization&&current_user.organization.type_code=='1' %>
+            <el-dropdown-item><a onclick="docCommMet.openDepDialog()"><i class="fa fa-exchange fa-fw"></i>切换科室</a></el-dropdown-item>
+          <% end  %>
           <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
           <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
         </el-dropdown-menu>

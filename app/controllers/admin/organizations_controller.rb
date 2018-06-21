@@ -21,6 +21,7 @@ class Admin::OrganizationsController < ApplicationController
 		if org.save
 			org.users = User.where(:id=>params[:user_ids])
 			org.save
+			org.users.update_all(:admin_level=>"1",type_code:org.type_code)
 			(params[:organization_ids]||[]).each{|o_id|
 				if org.type_code=='1'
 					org.pharmacy_link.create(pharmacy_id:o_id)
@@ -40,8 +41,10 @@ class Admin::OrganizationsController < ApplicationController
 		# p '~~~~~~~~~ organizations update',org_data
 		org = ::Admin::Organization.find(params[:id])
 		if org.update_attributes(org_data)
+			org.users.update_all(:admin_level=>nil,type_code:nil)
 			org.users = User.where(:id=>params[:user_ids])
 			org.save
+			org.users.update_all(:admin_level=>"1",type_code:org.type_code)
 			if org.type_code=='1'
 				org.pharmacy_link.each{|x| x.destroy}
 				(params[:organization_ids]||[]).each{|o_id|

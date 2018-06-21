@@ -1,0 +1,588 @@
+<style type="text/css">
+</style>
+<template>
+	<!-- 药品模板管理界面 -->
+	<div id="sets_mtemplates_index_div">
+		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+		  <el-breadcrumb-item>设置</el-breadcrumb-item>
+		  <el-breadcrumb-item>药品模板管理</el-breadcrumb-item>
+		</el-breadcrumb>
+		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+			<div style="">
+				<el-row :gutter="20" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<el-input
+					    placeholder="搜索模板名称 / 简拼 / 类型"
+					    prefix-icon="el-icon-search"
+					    size="mini"
+					    v-model="search">
+					    <i
+						    class="el-icon-circle-close-outline el-input__icon"
+						    slot="suffix"
+						    v-on:click="search=''">
+						  </i>
+					  </el-input>
+					</el-col>
+					<el-col :span="6" style="line-height: 30px;">&nbsp;
+						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
+					</el-col>
+					<el-col :span="10" style="text-align: right;">
+						<el-button size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建模板</el-button>
+					</el-col>
+				</el-row>
+				<el-table
+		      :data="mtemplates"
+		      :height="tableHeight"
+		      class="thiner-row"
+		      style="width: 100%">
+		      <el-table-column
+		        prop="title"
+		        label="模板名"
+		        min-width="100">
+		      </el-table-column>
+		      <el-table-column
+		        prop="location.display"
+		        label="科室"
+		        min-width="150">
+		      </el-table-column>
+		      <el-table-column
+		        prop="author.display"
+		        label="作者"
+		        min-width="100">
+		      </el-table-column>
+		      <el-table-column
+		        prop="disease.display"
+		        label="病种"
+		        min-width="100">
+		      </el-table-column>
+		      <el-table-column
+		        prop="sharing_scope.display"
+		        label="共享范围"
+		        min-width="100">
+		      </el-table-column>
+		      <el-table-column
+		        prop="created_at"
+		        label="创建日期"
+		        min-width="120">
+		        <template slot-scope="scope">
+			      	{{scope.row.created_at | formatDate}}
+			      </template>
+		      </el-table-column>
+		      <el-table-column
+		        label=""
+		        fixed="right"
+		        min-width="80">
+		        <template slot-scope="scope">
+			      	<el-button
+			        	v-if="scope.row.status!='O'"
+			        	style="color: #a94442;"
+			          type="text"
+			          @click="abandonTemplate(scope.$index, scope.row)"
+			          size="mini">
+			          作废
+			        </el-button>
+			        <el-button
+			        	v-if="scope.row.status!='O'"
+			          type="text"
+			          @click="openFormModal({action:'edit', index: scope.$index, row: scope.row})"
+			          size="mini">
+			          编辑
+			        </el-button>
+			      </template>
+		      </el-table-column>
+		    </el-table>
+			</div>
+	  </el-tabs>
+		<!-- 分页标记 -->
+	  <el-pagination
+	  	background
+	    @size-change="handleSizeChange"
+	    @current-change="handleCurrentChange"
+	    :current-page="currentPage"
+	    :page-sizes="[10, 25, 50, 100, 200]"
+	    :page-size="pageSize"
+	    layout="total, sizes, prev, pager, next, jumper"
+	    :total="dataCount">
+	  </el-pagination>
+
+	  <!-- 编辑模态框 -->
+	  <el-dialog
+		  :title="(!mtemplate.id ? '新建' : '编辑')+'模板'"
+		  :visible.sync="isShowFormDialog"
+		  width="90%">
+		  <%#= render "hospital/home/render/encounters_orders_partial" %>
+      <el-table
+        :data="orders"
+        class="orders-table thiner-row"
+        style="width: 100%">
+        <%= render "hospital/home/render/orders_table_common_partial" %>
+      </el-table>
+		  <br/>
+		  <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
+        <el-form-item 
+          label="模板名称" 
+          prop="title">
+          <el-input v-model="mtemplate.title"></el-input>
+        </el-form-item>
+        <el-form-item 
+          label="共享范围" 
+          prop="sharing_scope.code">
+          <el-select v-model="mtemplate.sharing_scope" value-key="code" placeholder="请选择" style="width: 100%;">
+            <el-option
+              v-for="item in ($parent.common_data_sharing_scopes||[])"
+              :key="item.code"
+              :label="item.display"
+              :value="item">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item 
+          label="病种">
+          <el-autocomplete size="mini" v-model="mtemplate.disease&&mtemplate.disease.display" ref="diagnose" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
+            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="mtemplate.disease={code: '', display: ''}"></i>
+            <template slot-scope="props">
+              <span style="float: left">{{ props.item.display }}</span>
+              <span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
+            </template>
+          </el-autocomplete>
+        </el-form-item>
+        <el-form-item 
+          label="备注">
+          <el-input v-model="mtemplate.note"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitMTemplateForm('mtemplateForm')">保 存<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+          <el-button @click="isShowFormDialog = false">取 消</el-button>
+        </el-form-item>
+      </el-form>
+		</el-dialog>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		var options = this.$parent.common_data_sharing_scopes;
+		return {
+			mtemplatesResource: Vue.resource('/hospital/sets/mtemplates{/id}.json'),
+			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+     	codeIni: {},
+     	cardTabsOptions: options,
+     	activeName: options[0].code,
+     	statusOptions: [
+     		{value: "N", label: "新建", type: "primary"},
+     		{value: "A", label: "启用", type: "warning"},
+    		{value: "O", label: "废弃", type: "info"},
+     	],
+     	// 药品模板创建规则
+			mtemplateRules: {
+				title: [
+		      { required: true, message: '姓名不能为空'},
+		    ],
+				"sharing_scope.code": [
+		      { required: true, message: '共享范围不能为空'},
+		    ],
+			},
+     	multipleSelection: [], // 已经选择的项
+     	mtemplates: [],
+     	mtemplate: {}, // 模板对象
+     	isShowFormDialog: false, // 显示编辑模板
+     	orders: [], // 医嘱列表
+     	order: {},
+     	editIndex: -1, // 正在编辑的医嘱序号
+     	// 搜索
+    	search: "", // 搜索内容
+    	tableHeight: 200, // 表格高度
+    	// 分页相关
+	  	currentPage: 1, // 当前页
+	  	pageSize: 25, // 默认一页显示25条
+	  	dataCount: 100, // 总数据条数
+		}
+	},
+	watch: {
+		search: function (newValue, oldValue) {
+    	this.getData();
+    },
+	},
+  mounted: function () {
+		this.$nextTick(function(){
+			this.init();
+		})
+	},
+	methods:{
+		init: function () {
+  		var _this = this;
+
+       var clientHeight = document.body.clientHeight;
+      _this.tableHeight = clientHeight - 290;
+      _this.getData();
+  	},
+  	// 获取模板数据
+  	getData: function () {
+  		var _this = this;
+			_this.mtemplatesResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize}).then( function(response) {
+				var res = response.data;
+  			if(res.flag) {
+          _this.mtemplates = res.data;
+          _this.dataCount = res.data.length;
+  			}else{
+  				_this.$message.error(res.info);
+  			}
+      },function(response) {
+      	_this.$message.error("后台出错，获取药品模板失败。");
+      })
+  	},
+  	// 查询诊断
+  	querySearchDiagnoseAsync: function(queryString, cb) {
+			var _this = this;
+			Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+		    var res = response.data;
+		    if (res.flag) {
+					cb(res.data);
+					// 设置下拉选择的第一项为高亮
+					var el = _this.$refs["diagnose"];
+					if(el) {
+						el.highlightedIndex = 0
+					}
+				}
+		  },function() {
+		  	_this.$message.error("获取诊断列表失败，请联系管理员。");
+		  })
+		},
+		// 选择疾病
+    handleSelectMTempDisease: function (item) {
+    	this.mtemplate.disease = {code: item.code, display: item.display};
+    },
+  	// 模板类型切换
+  	handleTabClick: function () {
+  		this.getData();
+  	},
+  	// 
+  	handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    handleCurrentChange: function (val) {
+    	this.currentPage = val;
+      this.getData();
+    },
+    handleSelectionChange: function (val) {
+    	this.multipleSelection = val;
+    	console.log(val)
+    },
+    // 聚焦下一个
+  	focusNext: function (now, next) {
+  		var _this = this;
+  		var _now = _this.$refs[now],
+  				_next = _this.$refs[next];
+  		if(_now instanceof Array) { _now = _now[0]; }
+  		if(_next instanceof Array) { _next = _next[0]; }
+			// el-select需要使用blur方法让下拉列表关闭
+			if(next=="encgender"){
+				_this.encounter.gender = _this.$parent.common_data_genders[0];
+			}
+			if(_now.$el.className.indexOf("el-select")>-1) {
+				_now.blur();
+			}
+			// 聚焦保存按钮， 草药添加按钮
+  		if(next.indexOf("save")>-1) {
+  			_next.$el.focus();
+  		} else if (now=="ordtitle") { // 如果是第一个搜索框，判断是否有数据之后，再跳转下一个
+  			if(!_this.order.serialno) {
+  				_this.$message({
+	          message: '请选择药品。',
+	          type: 'warning'
+	        });
+  			} else {
+  				_next.focus();
+  			}
+  		} else {
+  			// 聚焦下一个输入框
+				_next.focus();
+			}
+  	},
+    // 打开模态框
+    openFormModal: function (json) {
+    	var _this = this;
+    	if(json.action=="create") {
+	    	_this.mtemplate = {
+	    		title: "", // 模板名称
+	    		sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
+	    		disease: {code: "", display: ""}, // 病种
+	    		note: "", // 备注
+	    	}
+    	}
+    	if(json.action=="edit") {
+    		_this.mtemplate = json.row;
+    		_this.orders = json.row.orders;
+    	}
+    	_this.isShowFormDialog = true;
+    },
+    // 搜索药品，查询药品
+  	searchDrugs: function (queryString, cb) {
+  		var _this = this;
+  		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
+		    var res = response.data;
+		    if (res.flag) {
+		    	var drugs = res.data;
+					cb(drugs);
+					// 设置下拉选择的第一项为高亮
+					var el = _this.$refs["ordtitle"];
+					if(el) {
+						el.highlightedIndex = 0;
+					}
+				}
+		  },function() {
+		  	_this.$message.error("获取选择药品列表失败，请联系管理员。");
+		  })
+  	},
+  	// 选择某个药品
+  	selectDrug: function (item) {
+  		var _this = this, drug = item;
+  		_this.order = {
+  			serialno: drug.serialno, // drug药品序列号
+  			title: drug.name, // drug药品序列号
+  			name: drug.name,
+  			specification: drug.spec, // 规格
+  			unit: drug.unit, // 单位
+  			price: drug.price, // 价格
+  			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
+  			single_qty: {value: 1, unit: drug.unit}, // 单次数量
+  			route: _this.$parent.common_data_routes[0],// 频次
+  			frequency: _this.$parent.common_data_frequencys[0],// 频次
+  			course_of_treatment: {value: "", unit: "天"},  // 疗程
+  			total_quantity: 1, // 总量
+  			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
+  			measure_val: drug.measure_val,  // 最小单位的值
+  		}
+  		_this.focusNext('ordtitle', 'ordsingleqty');
+  	},
+  	// 单次数量、单次剂量、频次、疗程改变，计算总量
+  	calculateQuantity: function (field) {
+  		var _this = this;
+  		// 药品将检测单次数量、单次剂量的改变
+  		var minUnit = _this.order.measure_val;
+  		if(minUnit) {
+  			if (field=="dose") {
+  				_this.order.single_qty.value = parseFloat((parseFloat(_this.order[field].value) / parseFloat(minUnit)).toFixed(2));
+  			}
+  			if (field=="single_qty") {
+  				_this.order.dose.value = parseFloat((parseFloat(_this.order[field].value) * parseFloat(minUnit)).toFixed(2));
+  			}
+  		}
+  	},
+  	// 保存药品
+    submitOrderForm: function (formName) {
+			var _this = this;
+      _this.$refs[formName].validate( function (valid) {
+        if (valid) {
+        	if(!_this.order.serialno || !_this.order.title) {
+        		_this.$message({
+		          message: '请选择药品。',
+		          type: 'warning'
+		        });
+		        _this.$refs["ordtitle"].focus();
+		        return false;
+        	}
+        	if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
+        		_this.$message({
+		          message: '请填写药品的单次数量。',
+		          type: 'warning'
+		        });
+		        _this.$refs["ordsingleqty"].focus();
+		        return false;
+        	}
+        	if(!(_this.order.dose&&_this.order.dose.value)) {
+        		_this.$message({
+		          message: '请填写药品的单次剂量。',
+		          type: 'warning'
+		        });
+		        _this.$refs["orddose"].focus();
+		        return false;
+        	}
+        	if(!_this.order.total_quantity) {
+        		_this.$message({
+		          message: '请填写药品的总量。',
+		          type: 'warning'
+		        });
+		        _this.$refs["ordtotalquantity"].focus();
+		        return false;
+        	}
+          // 判断是否有id，有id的话，就是编辑，没有id为新建
+          var btn = $(_this.$refs["saveorder"].$el);
+          btn.attr("disabled", "disabled").find(".fa").show();
+          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order, type: "template"};
+          if(!_this.order.id) {
+          	_this.ordersResource.save(json).then( function(response) {
+          		_this.handleOrderReturn(response, btn, "save");
+          	}, function(response) {
+          		btn.removeAttr("disabled").find(".fa").hide();
+          		_this.$message.error("创建药品失败，请联系管理员。");
+          	})
+          } else {
+          	_this.ordersResource.update({id: _this.order.id}, json).then( function(response) {
+          		_this.handleOrderReturn(response, btn, "update");
+          	}, function(response) {
+          		btn.removeAttr("disabled").find(".fa").hide();
+          		_this.$message.error("更新药品失败，请联系管理员。");
+          	})
+          }
+        } else {
+          _this.$message({
+	          message: '请按照规范录入数据。',
+	          type: 'warning'
+	        });
+          return false;
+        }
+      });
+    },
+    // 医嘱保存成功之后的处理
+    handleOrderReturn: function (response, btn, action) {
+    	this.order = {};
+    	btn.removeAttr("disabled").find(".fa").hide();
+    	var res = response.data;
+    	if(res.flag) {
+	    	if(action=="save") {
+	    		this.orders.push(res.data);
+	    	} else {
+	    		this.orders.splice(this.editIndex, 1); // 修改已经编辑的数据
+		      this.orders.splice(this.editIndex, 0, res.data); // 修改已经编辑的数据
+	    	}
+	    	this.$message({
+	        message: "药品保存成功。",
+	        type: 'success'
+	      });
+	      // 聚焦医嘱搜索框
+	      this.$refs["ordtitle"].focus();
+    	} else {
+    		this.$message.error(res.info);
+    	}
+    },
+    // 编辑药品
+    editOrder: function (index, row) {
+    	this.editIndex = index;
+    	this.order = row;
+    	this.order.name = row.title;
+    },
+    // 删除医嘱
+    deleteOrder: function (index, row) {
+    	var _this = this, $target = $(event.target);
+    	// current_app.loading = true;
+    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
+    	_this.ordersResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+    		var res = response.data;
+    		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+    		if(res.flag) {
+    			_this.$message({
+	          message: res.info,
+	          type: 'warning'
+	        });
+	        _this.orders.splice(index, 1);
+    		}else{
+    			_this.$message.error(res.info);
+    		}
+    	}, function(response) {
+    		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+    		_this.$message.error("删除药品失败，请联系管理员。");
+    	})
+    },
+    // 勾选医嘱
+    handleOrdersSelectionChange: function (val) {
+      this.multipleOrdersSelection = val;
+    },
+    // 已经发送的医嘱（待交费、完成）和作废的医嘱显示非激活状态灰色{row, rowIndex}
+    judgeOrderRow: function (obj) {
+    	var row = obj.row;
+    	if(row.status=='N'){
+    		return "";
+    	} else {
+    		return "inactive-row";
+    	}
+    },
+    // 提交药品模板的方法
+    submitMTemplateForm: function (formName) {
+    	var _this = this;
+    	_this.$refs[formName].validate( function (valid) {
+        if (valid) {
+        	if(!_this.orders || _this.orders.length==0) {
+        		_this.$message({
+		          message: "医嘱不能为空。",
+		          type: 'warning'
+		        });
+        		return false;
+        	}
+        	var ids = [];
+        	(_this.orders||[]).forEach(function (item, index) {
+        		ids.push(item.id);
+        	})
+        	_this.mtemplate["order_ids"] = ids;
+        	var btn = $(event.target);
+        	btn.attr("disabled", "disabled").find(".fa").show();
+        	var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate};
+        	if(!_this.mtemplate.id) {
+	        	_this.mtemplatesResource.save(json).then( function(response) {
+	        		_this.handleAfterSave(btn, response);
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("创建医嘱模板失败，请联系管理员。");
+		      	})
+        	} else {
+        		_this.mtemplatesResource.update({id: _this.mtemplate.id}, json).then( function(response) {
+	        		_this.handleAfterSave(btn, response);
+		      	}, function(response) {
+		      		btn.removeAttr("disabled").find(".fa").hide();
+		      		_this.$message.error("更新医嘱模板失败，请联系管理员。");
+		      	})
+        	}
+				} else {
+          _this.$message({
+	          message: '请按照规范录入数据。',
+	          type: 'warning'
+	        });
+          return false;
+        }
+      })
+    },
+    handleAfterSave: function (btn, response) {
+  		btn.removeAttr("disabled").find(".fa").hide();
+  		var res = response.data;
+  		if(res.flag) {
+  			this.$message({
+          message: "生成医嘱模板成功。",
+          type: 'success'
+        });
+  			// 将创建的模板添加到使用模板列表
+  			this.getData();
+  			// 关闭模态框
+  			this.isShowFormDialog = false;
+  		} else {
+  			this.$message.error(res.info);
+  		}
+
+    },
+    // 作废模板
+    abandonTemplate: function (index, row) {
+    	var _this = this;
+    	_this.$confirm('此操作将作废模板, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then( function () {
+      	_this.mtemplatesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+  				var res = response.data;
+    			if(res.flag) {
+	          // row.status = res.data.status;
+	          _this.mtemplates.splice(index, 1);
+    			}else{
+    				_this.$message.error(res.info);
+    			}
+	      },function(response) {
+	      	_this.$message.error("后台出错，作废药品模板失败。");
+	      })
+    	}).catch( function () {
+    	})
+    },
+	},
+}
+</script>

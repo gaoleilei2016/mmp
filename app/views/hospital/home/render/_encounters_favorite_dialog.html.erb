@@ -96,7 +96,7 @@
           <el-col :span="24">
             <el-form-item 
               label="病种">
-              <el-autocomplete size="mini" v-model="mtemplate.disease" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
+              <el-autocomplete size="mini" v-model="mtemplate.disease&&mtemplate.disease.display" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
                 <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="mtemplate.disease={code: '', display: ''}"></i>
                 <template slot-scope="props">
                   <el-col :span="10">{{props.item.code}}</el-col>

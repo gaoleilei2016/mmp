@@ -75,12 +75,12 @@ class Ims::OrdersController < ApplicationController
       type = "1"
     when '2' #待发药
       type = "2"
-    when '3' #已发药
-      type = ""
-    when '4' #已退药
-      type = ""
+    when '5' #已发药
+      type = "5"
+    when '7' #已退药
+      type = "7"
     else
-      type = ""
+      type = "9999"
     end
     org_id = ""#current_user.organization_id rescue ""
     order_code = ""#取药码  可以没有
@@ -103,19 +103,11 @@ class Ims::OrdersController < ApplicationController
   end
 
   def get_detail
-    p "++++++++++++++++++++++++++"
-    p current_user.organization_id
-    p "++++++++++++++++++++++++++"
     id = params[:id]
     data = [{
       header:{id:"121sdf20sd1g2asd0f",status:"P",patient_name:"张三",},
       lines:[
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
-        {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1002",text:"扇贝",total_quantity:"5",unit:"克"},
         {item_code:"1090",text:"yaopin",total_quantity:"23",unit:"克"},
       ]
@@ -134,9 +126,11 @@ class Ims::OrdersController < ApplicationController
   
   #订单收费
   def charging_pre
+    p current_user
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"2"})
+    temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
+    data = Orders::Order.order_completion(temp)
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
@@ -145,17 +139,13 @@ class Ims::OrdersController < ApplicationController
   def dispensing_order
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    data = Orders::Order.order_completion({id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,status:"5"})
+    temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"}
+    data = Orders::Order.order_completion(temp)
     re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
 
-  # 订单退药
-  def return_order
-    @reslut = @ims_order.return_order rescue {flag:true,info:"发药成功！"}
-    render json:@reslut.to_json
-  end
-
+  
   # 获取已发送到该药店的订单
   # def get_orders
   # 	# p IPSocket.getaddress(Socket.gethostname)
@@ -169,17 +159,43 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
-  # 订单操作(发药、退药、、、)
-  def oprate_order
-  	case params[:method]
-  	when 'out_order'
-  		@reslut = @ims_order.dispensing_order
-  	when 'return_order'
-  		@reslut = @ims_order.return_order
-  	else
-  		@reslut ={false:false,info:"该操作未处理。"}
-  	end
-    render json:@reslut.to_json
+  # 未发订单或处方检索
+  def get_search_data
+    # @yd = Ims::Order.get_order_by_code params.merge({org_id:current_user.organization_id})
+    attrs = {search:params[:search],org_id:current_user.organization_id}
+    @data = Ims::Order.get_prescription_or_order_data attrs #unless @data[:flag]
+    render json:@data.to_json
+  end
+
+  # 已发药或已退订单检索
+  def get_order_by_code
+    # params = {search:search}
+    @data = Ims::Order.get_order_by_code params.merge({org_id:current_user.organization_id})
+    render json:@data.to_json
+  end
+
+  # 平台处方收费或收费并发药操作
+  # => 页面需传 prescription_ids(array) , status(string) ['2':收费,'5':收费并发药]
+  def operat_order_by_prescription
+    args= {org_id:current_user.organization_id,org_name:current_user.organization.name,user_id:current_user.id,user_name:current_user.name,current_user:current_user}
+    @data = Ims::Order.operat_order_by_prescription params.merge(args)
+    render json:@data.to_json
+  end
+
+  # 退药(目前只能线下退药)
+  # => 页面需传 订单 id(string) 
+  def return_drug
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    @data = Ims::Order.return_drug params.merge(args)
+    render json:@data.to_json
+  end
+
+  # 下载错误处方返回
+  # => 页面需传 订单 id(string) 
+  def prescription_back
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    @data = Ims::Order.prescription_back params.merge(args)
+    render json:@data.to_json
   end
 
   private

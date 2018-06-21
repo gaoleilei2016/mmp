@@ -1,81 +1,38 @@
-		<div id="prescription_panel">
-			
-			<div class="el-row" id="prescription_body">
-				<div class="el-col el-col-8" style="height: 100%; overflow: auto; padding:12px; border-right:1px solid #ddd;">
-					<div class="el-input el-input--mini" style="height:40px;">
-						<el-input
-						    placeholder="请输入内容"
-						    prefix-icon="el-icon-search"
-						    v-model="input21"
-						    @change="search"
-						    >
-						  </el-input>					
-					</div>
-
-					<div class="el-row prescription_list_fun">
-						<div class="el-col el-col-12 list_fun_panel" stat="1" v-on:click="get_pres('1',$event)">未交费</div>
-						<div class="el-col el-col-12 list_fun_panel" stat="2" v-on:click="get_pres('2',$event)">待发药</div>
-					</div>
-
-					<div class="prescription_list">
-						<div class="el-row">
-							<p class="el-col el-col-24" v-for="pre in pres" v-bind:id="pre.order_id" v-on:click="get_pre(pre.order_id,$event)">
-								<span class="el-col el-col-8" style="overflow:hidden; display:block; float:left;">{{pre.order_code}}</span>
-								<span class="el-col el-col-8 text-center" style="display:block; float:left;">{{pre.patient_name}}</span>
-								<span class="el-col el-col-8 text-right" style="display:block; float:left;">{{format_price(pre.amt)}}</span>
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="el-col el-col-16" style="height: 100%;">
-					<div style="height:30px;">
-						<el-tabs v-model="tab_header" type="card" @tab-click="choose_prescription">
-						  <el-tab-pane
-						    v-for="(item, index) in tab_header_data"
-						    :key="item.id"
-						    :label="item.type"
-						  ></el-tab-pane>
-						</el-tabs>
-					</div>
-					<%= render "ims/home/render/prescription_panel"%>
-				</div>
-			</div>
-
-			<el-dialog title="搜索订单" :visible.sync="dialogFormVisible">
-			  <el-form :model="form" @submit.native.prevent>
-			    <el-form-item label="订单标识" :label-width="formLabelWidth">
-			      <el-input v-model="form.name" auto-complete="off" placeholder="二维码 / 条形码 / 验证码" @change="search_platform_pre"></el-input>
-			    </el-form-item>
-			  </el-form>
-			  <el-table
-			  ref="multipleTable"
-	      :data="tableData_plat"
-	      highlight-current-row
-	      @current-change="handleCurrentChange"
-	      @selection-change="handleSelectionChange"
-	      style="width: 100%">
-		    <el-table-column
-		      type="selection"
-		      width="55">
-		    </el-table-column>
-	      <el-table-column
-	        prop="code"
-	        label="编号"
-	        width="180">
-	      </el-table-column>
-	      <el-table-column
-	        prop="name"
-	        label="姓名"
-	        width="180">
-	      </el-table-column>
-	      <el-table-column
-	        prop="amount"
-	        label="金额">
-	      </el-table-column>
-	    </el-table>
-			  <div slot="footer" class="dialog-footer">
-			    <el-button size="small" type="primary" @click="create_search_order()">生成订单</el-button>
-			  </div>
-			</el-dialog>
+<div id="prescription_main_panel">
+	<div class="prescription_list_panel">
+		<div>订单列表</div>
+		<div class="el-input el-input--mini" style="padding-top:12px; padding-bottom:12px;">
+			<el-input
+			  placeholder="搜索 取药码 / 订单号 / 手机号"
+			  prefix-icon="el-icon-search"
+			  v-model="out_order_search"
+			  @keyup.enter.native="out_order_search_fun"
+			  >
+			</el-input>
 		</div>
+	  <el-tabs v-model="out_list_panel" type="card" @tab-click="get_out_pres">
+	    <el-tab-pane label="未交费" name="1"></el-tab-pane>
+	    <el-tab-pane label="待发药" name="2"></el-tab-pane>
+				<el-row :gutter="20" v-for="order in order_lists" class="pre_list" @click.native="get_order(order.order_id,$event)">
+					<el-col :span="6" style="width:120px;">{{format_time(order.created_at)}}</el-col>
+					<el-col :span="6" style="width:calc(100% - 280px)">{{order.order_code}}</el-col>
+					<el-col :span="6" style="width:80px;">{{order.patient_name}}</el-col>
+					<el-col :span="6" style="width:80px; padding-left:0px; text-align:right;">{{format_price(order.amt)}}</el-col>
+				</el-row>
+	  </el-tabs>
+	</div>
+
+	<div class="prescription_detail_panel">
+		<div>订单详情</div>
+		<%= render "ims/home/render/prescription_panel"%>
+	</div>
+
+</div>
+
+<el-dialog title="" :visible.sync="dialogFormVisible" class="platform_search_dialog">
+	<%= render "ims/home/render/platform_search"%>
+  <div slot="footer" class="dialog-footer">
+    <el-button size="small" type="primary" @click="platform_charging_fun()">收费</el-button>
+    <el-button size="small" type="primary" @click="platform_charging_and_out_fun()">收费并发药</el-button>
+  </div>
+</el-dialog>

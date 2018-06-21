@@ -1,0 +1,139 @@
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+		/*background: #fff;*/
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-content .mui-active{
+		background: none !important;
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-table-view:before{
+		height: 1px;
+	}
+	.mui-table-view:after{
+		height: 0;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">处方详情</h1>
+</header>
+<div class="mui-content" id="vue_content" v-cloak>
+	<div v-if="prescription" style="">
+		<ul class="mui-table-view" style="margin-bottom: 22px;">
+			<li class="mui-table-view-cell">
+				<a :href="'/customer/home/prescription?id='+prescription.id">
+					<span>No: {{prescription.prescription_no}}（{{prescription.name}}）</span>
+					<span style="float: right;color: #F55742;">
+						<span v-if="prescription.status=='0'">未审核</span>
+						<span v-if="prescription.status=='1'">已审核</span>
+						<span v-if="prescription.status=='2'">待收费</span>
+						<span v-if="prescription.status=='3'">已收费</span>
+						<span v-if="prescription.status=='4'">已发药</span>
+						<span v-if="prescription.status=='7'">废弃</span>
+						<span v-if="prescription.status=='8'">已退药</span>
+						<span v-if="prescription.status=='9'">已退费</span>
+					</span>
+				</a>
+			</li>
+			<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
+				<a :href="'/customer/home/prescription?id='+prescription.id">
+					<div>
+						<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+						<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
+						<div class="mui-media-body">
+							<div>
+								<span>{{prescription.org.display}}</span>
+								<span style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
+							</div>
+							<p class="mui-ellipsis" style="font-size: 12px;">
+								{{show_diagnoses(prescription.diagnoses)}}
+								<span style="float: right;">{{prescription.author.display}}</span>
+							</p>
+						</div>
+					</div>
+					<ul class="mui-table-view" style="margin: 15px 0 0;">
+						<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
+							<div href="javascript:;" class="">
+								<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+								<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+								<div class="mui-media-body">
+									{{drug.title}}
+									<p class="mui-ellipsis" style="float: right;">
+										<span>{{drug.specification}}</span>
+									</p>
+									<p class="mui-ellipsis">
+										<span style="margin-right: 10px;color: #F55742;">{{drug.route.display}}</span>
+										<span style="margin-right: 10px;color: #F55742;">{{drug.dose.value}}{{drug.dose.unit}}</span>
+										<span style="color: #F55742;">{{drug.frequency.display}}</span>
+										<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+									</p>
+								</div>
+							</div>
+						</li>
+					</ul>
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			prescription:null,
+		},
+		methods:{
+			show_diagnoses:function(diagnoses) {
+				return (diagnoses||[]).map(function(v) {
+					return v.display;
+				}).join("。")
+			},
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_prescription:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/home/prescription.json?id=<%= params[:id] %>',
+					data:{per:10},
+					success:function(json) {
+						if (json.flag) {
+							_this.prescription = json.prescription;
+						}else{
+							mui.toast(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("获取失败");
+					}
+				})
+			},
+		},
+		mounted:function() {
+			this.get_prescription();
+		}
+	})
+</script>

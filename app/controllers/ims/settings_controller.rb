@@ -25,6 +25,7 @@ class Ims::SettingsController < ApplicationController
   # POST /ims/settings.json
   def create
     p "create"
+    p ims_setting_params
     @ims_setting = Ims::Setting.new(ims_setting_params)
 
     respond_to do |format|

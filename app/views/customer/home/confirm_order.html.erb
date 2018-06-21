@@ -1,0 +1,112 @@
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+		background: #fff;
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">订单支付确认</h1>
+</header>
+<div class="mui-content" id="vue_content">
+	<div v-if="order">
+		<div style="padding: 40px 20px 20px;">
+			<div class="common_grey">支付方式：<%= case params[:pay_type] when "Wechat" then "微信支付" when "Alipay" then "支付宝支付" end %></div>
+			<div class="common_grey">订单编号：{{order.order_code}}</div>
+			<div class="common_grey">下单时间：{{new Date(order.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
+		</div>
+		<div style="padding: 20px;">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="display: block;width: 100%;padding: 8px 0;" @click="confirm_order">已完成支付</button>
+		</div>
+		<div style="padding: 20px;">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="display: block;width: 100%;padding: 8px 0;" onclick="location.href='/customer/portal/pay?id=<%= params[:id] %>'">重新支付</button>
+		</div>
+		<div style="padding: 20px;">
+			<button type="button" class="mui-btn mui-btn-primary mui-btn-outlined" style="display: block;width: 100%;padding: 8px 0;" @click="cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			order:null,
+		},
+		methods:{
+			cancel_order:function(id) {
+				$("#loading").show();
+				$.ajax({
+					url:"/interfaces/cancel_order",
+					type:'post',
+					data:{id:id},
+					success:function(json) {
+						if (json.ret_code == "0") {
+							location.reload();
+						}else{
+						}
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单操作失败");
+					}
+				})
+			},
+			confirm_order:function() {
+				this.get_and_confirm_order("show_info");
+			},
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_and_confirm_order:function(show_info) {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/interfaces/get_orders.json?id=<%= params[:id] %>',
+					data:{per:10},
+					success:function(json) {
+						if (json.flag) {
+							_this.order = json.order;
+							if (json.order.status=='2') {
+								if (show_info) {
+									mui.toast("恭喜您已完成支付");
+								}
+								location.href = "/customer/home/order?id=<%= params[:id] %>"
+							}else{
+								if (show_info) {
+									mui.toast("支付信息还未同步，请稍后重试",{duration:5000});
+								}
+							}
+						}else{
+							mui.toast(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("订单获取失败");
+					}
+				})
+			},
+		},
+		mounted:function() {
+			this.get_and_confirm_order();
+		}
+	})
+</script>

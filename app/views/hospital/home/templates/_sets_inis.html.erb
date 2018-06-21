@@ -9,24 +9,30 @@
 			<h3>初始设置<small>初始值设置</small></h3>
 		</div>
 		<el-form :model="ini" size="mini" :rules="rules" ref="ini" label-width="300px" style="width: 80%; margin: 0 auto;">
-			<div class="page-header">
-				<h4>打印处方单&#12288;<small>处方单相关设置</small></h4>
+			<div class="card-wrapper">
+				<div class="page-header">
+					<h4>处方单&#12288;<small>处方单相关设置</small></h4>
+				</div>
+				<el-form-item label="启用打印处方功能" prop="enable_print_pres">
+				  <el-radio v-model="ini.enable_print_pres" :label="true">是</el-radio>
+	  			<el-radio v-model="ini.enable_print_pres" :label="false">否</el-radio>
+			  </el-form-item>
+				<el-form-item label="处方打印内容" prop="print_pres_html">
+				  <el-tabs v-model="activeName1" type="card" class="ace-edit-wrapper">
+				    <el-tab-pane label="页面" name="print_pres_html1">
+				    	<div v-html="ini.print_pres_html" class="scroll-section" style="overflow: auto;"></div>
+				    </el-tab-pane>
+				    <el-tab-pane label="源码" name="print_pres_html2">
+				    	<div id="code_wrapper1" contentEditable="true">
+							</div>
+				    </el-tab-pane>
+				  </el-tabs>
+				  <span class="text-danger">可以修改显示的文字，但是不要随意修改代码！！！</span>
+			  </el-form-item>
+			  <el-form-item label="处方审核人" prop="prescription_audit_id">
+			  	<el-input v-model="ini.prescription_audit_id" placeholder="请输入内容"></el-input>
+			  </el-form-item>
 			</div>
-			<el-form-item label="启用打印处方功能" prop="enable_print_pres">
-			  <el-radio v-model="ini.enable_print_pres" :label="true">是</el-radio>
-  			<el-radio v-model="ini.enable_print_pres" :label="false">否</el-radio>
-		  </el-form-item>
-			<el-form-item label="处方打印内容" prop="print_pres_html">
-			  <el-tabs v-model="activeName1" type="card" class="ace-edit-wrapper">
-			    <el-tab-pane label="页面" name="print_pres_html1">
-			    	<div v-html="ini.print_pres_html" class="scroll-section" style="overflow: auto;"></div>
-			    </el-tab-pane>
-			    <el-tab-pane label="源码" name="print_pres_html2">
-			    	<div id="code_wrapper1" contentEditable="true">
-						</div>
-			    </el-tab-pane>
-			  </el-tabs>
-		  </el-form-item>
 
 		  <hr style="border-top: 1px solid #eeeeee;"/>
 		  <el-form-item>

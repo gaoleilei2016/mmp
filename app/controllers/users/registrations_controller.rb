@@ -27,7 +27,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
     params[:user] = {
       login:params[:login],
       password:params[:password],
-      email:"#{params[:login]}@duanxinzhuce.tm"
+      email:"#{params[:login]}@duanxinzhuce.tm",
+      openid:session[:openid],
+      openname:session[:openname],
     }
     build_resource(sign_up_params)
     # # 图片验证码
