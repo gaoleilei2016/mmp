@@ -1,4 +1,7 @@
 <%= stylesheet_link_tag "/assets/hospital/home" %>
+<!-- 身份证读卡 -->
+<%= javascript_include_tag "/assets/hospital/iden_websocket" %>
+
 <style type="text/css">
 	#hospital_layout_hidden .el-radio {
 		display: block;
@@ -8,6 +11,7 @@
 </style>
 <div id="hospital_layout_hidden">
 	<input type="hidden" id="current_user_loc_id" value="<%= current_user.cur_loc_id %>">
+	<input type="hidden" id="current_user_is_admin" value="<%= current_user.is_admin? %>">
 	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
 	<el-dialog
 	  title="选择科室"
@@ -42,11 +46,14 @@
 	var docCommMet = new Vue({
 	  el: '#hospital_layout_hidden',
 	  data: function() {
-	  	var locId = $("#current_user_loc_id").val();
+	  	var locId = $("#current_user_loc_id").val(),
+	  		isAdmin = ($("#current_user_is_admin").val()=="true" ? true : false);
+
 	    return { 
 	    	dialogVisible: false,
 	    	dep_id: parseInt(locId), // 当前科室id
 	    	departments: [],
+	    	current_user_is_admin: isAdmin,
 	    }
 	  },
 	  mounted: function(){
@@ -57,9 +64,11 @@
 		methods:{
 			init: function () {
 				// 判断是否有科室，没有科室的话，弹出选择
-				if(!this.dep_id) {
+				if(!this.current_user_is_admin && !this.dep_id) {
 					this.openDepDialog()
 				}
+				// 连接身份证读卡器的后台服务
+				connect();
 			},
 			openDepDialog: function () {
 				this.dialogVisible = true;

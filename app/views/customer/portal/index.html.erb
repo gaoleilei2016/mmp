@@ -106,7 +106,7 @@
 		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
 		<span v-else>距离当前最近</span>
 	</p>
-	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in common_vue.prescriptions">
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 			<div>
 				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
@@ -154,7 +154,6 @@
 	var current_app = new Vue({
 		el:"#vue_content",
 		data:{
-			common_vue:{},
 			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
@@ -304,10 +303,8 @@
 		},
 		mounted:function() {
 			var _this = this;
-			// _this.search_str = '';
 			this.get_current_pharmacy();
-			// this.get_prescriptions();
-			this.common_vue = common_vue;
+			this.get_prescriptions();
 			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
 				$("#bottom_tabs").hide(300);
