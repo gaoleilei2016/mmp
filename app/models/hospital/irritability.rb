@@ -1,7 +1,7 @@
 class Hospital::Irritability < ApplicationRecord
 
 	belongs_to :data_entry,  class_name: '::User', foreign_key: 'data_entry_id', optional: true
-	belongs_to :person, class_name: '::Person', foreign_key: 'person_id', optional: true
+	belongs_to :person, class_name: '::Person', foreign_key: 'person_id', optional: true # 数据库设置了是必填 要考虑一下
 
 
 	class<<self

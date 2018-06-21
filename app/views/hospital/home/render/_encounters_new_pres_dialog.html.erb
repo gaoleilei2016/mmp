@@ -5,6 +5,12 @@
   width="90%">
 	<el-form size="mini" :rules="prescriptionRules" :model="prescription" ref="prescriptionForm" label-width="100px">
   	<el-row>
+  		<el-col :span="24">
+    		<el-form-item
+			    label="姓名">
+			    <span style="padding: 0 20px 5px 20px; border-bottom: 1px solid #ccc; margin-right: 30px;">{{encounter.name}}</span>性别 <span style="padding: 0 20px 5px 20px; border-bottom: 1px solid #ccc; margin-right: 30px; margin-left: 5px;">{{encounter.gender&&encounter.gender.display}}</span>年龄 <span style="padding: 0 20px 5px 20px; border-bottom: 1px solid #ccc; margin-right: 30px; margin-left: 5px;">{{encounter.age}}岁</span>
+			  </el-form-item>
+			</el-col>
 			<el-col :span="12">
     		<el-form-item
 			    label="诊断">
