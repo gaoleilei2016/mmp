@@ -101,7 +101,7 @@ class Ims::PrescriptionHeader < ApplicationRecord
 					:drug_store_name=>(prescription[:drug_store_name]||order.try(:target_org_name)) ,
 					:effective_start=>prescription[:effective_start] ,
 					:effective_end=>prescription[:effective_end] ,
-					:diagnoses=>(prescription[:diagnoses]||[].map{|e| e.display}).join(',') ,
+					:diagnoses=>(prescription[:diagnoses]||[]).map{|s| s.display}.join(",") ,
 					:specialmark=>prescription[:specialmark] ,
 					:status=>'4' ,
 					:bill_id=>order.try(:id) ,

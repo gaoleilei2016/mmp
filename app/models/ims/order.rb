@@ -160,16 +160,23 @@ class Ims::Order < ApplicationRecord
           :delivery_at => header.delivery_at,
           :is_returned => header.is_returned,
           details: (header.details||[]).map{|x| {
-                    name: x.title,
-                    specifications: x.specification,
-                    quantity: x.qty,
-                    unit: x.unit,
-                    price: (x.amount.to_f/x.qty.to_f),
-                    net_amt: (x.amount.to_f),
-                    firm:x.factory_name,
-                    frequency:x.frequency_display,
-                    dose:x.dose_value.to_s + x.dose_unit.to_s,
-                    route:x.route_display
+                    title: x.title,
+                    specification: x.specification,
+                    :dose_value=>x.dose_value,
+                    :dose_unit=>x.dose_unit,
+                    :route_display=>x.route_display,
+                    :frequency_code=>x.frequency_code,
+                    :frequency_display=>x.frequency_display,
+                    :course_of_treatment_value=>x.course_of_treatment_value,
+                    :course_of_treatment_unit=>x.course_of_treatment_unit,
+                    :formul_code=>x.formul_code,
+                    :formul_display=>x.formul_display,
+                    :qty=>x.qty,
+                    :unit=>x.unit,
+                    :price=>x.price,
+                    :amount=>x.amount,
+                    :note=>x.note,
+                    :status=>x.status,
                   }
                 }
         }
@@ -409,7 +416,7 @@ class Ims::Order < ApplicationRecord
         new_header.ori_id = header.id
         new_header.ori_code = header.prescription_no
         new_header.return_name = current_user.name
-        new_header.returner_id = current_user.id
+        new_header.return_id = current_user.id
         new_header.return_at = Time.new
         new_header.total_amount = -header.total_amount.to_f
         new_header.status = '8'
@@ -420,12 +427,13 @@ class Ims::Order < ApplicationRecord
           dup_detail.amount = -detail.amount.to_f
           dup_detail.return_qty = detail.qty.to_f
           dup_detail.ori_detail_id = detail.id
+          dup_detail.header_id = nil
           details << dup_detail.attributes
         end
         {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PrescriptionHeader.where(prescription_no:(header.prescription_no.to_s+"_T")).count>0
         details_1 = Ims::PrescriptionDetail.create!(details)
         new_header.details = details_1
-        new_order.save! ? {flag:true,info:'退药保存成功！'} : {flag:false,info:'退药保存失败。'}
+        new_header.save! ? {flag:true,info:'退药保存成功！'} : {flag:false,info:'退药保存失败。'}
       rescue Exception => e
         print e.message 
         print "+++++++++++++++++++++++ create_new_prescription 出错: " + e.backtrace.join("\n")

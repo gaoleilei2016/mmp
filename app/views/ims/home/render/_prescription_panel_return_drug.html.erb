@@ -35,24 +35,36 @@
 
       <div class="prescription_item_info separate" style="border-bottom:1px solid #ddd;">
         <div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R:</div>
-        <div class="item_list" v-for="(line,index) in info.details">
           <div class="el-row" style="margin-left:1px;"> 
-            <div class="el-col-2" style="width:22%;">{{line.name}}</div>
-            <div class="el-col-2" style="width:18%;">{{line.specifications}}</div>
-            <div class="el-col-2" style="width:8%;">{{line.quantity}}{{line.unit}}</div>
-            <div class="el-col-2" style="width:10%;">{{line.route}}</div>
-            <div class="el-col-2" style="width:17%;">{{line.frequency}}</div>
-            <div class="el-col-2" style="width:10%;">{{line.dose}}</div>
-            <div class="el-col-2" style="width:15%;">{{format_price(line.net_amt)}}</div>
-            <!-- <div class="el-col-2 text-center" style="width:30%;">{{line.firm}}</div> -->
+            <div class="el-col-2" style="width:15%;text-align: left;">药品名称</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">规格</div>
+            <div class="el-col-2" style="width:8%;text-align: left;">单次剂量</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">途径</div>
+            <div class="el-col-2" style="width:13%;text-align: left;">频次</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">数量</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">单价</div>
+            <div class="el-col-2" style="width:12%;text-align: right;">金额</div>
+            <div class="el-col-2" style="width:10%;text-align: center;">备注</div>
+          </div>
+        <div class="item_list" style="margin-top: 10px;" v-for="(line,index) in info.details">
+          <div class="el-row" style="margin-left:1px;"> 
+            <div class="el-col-2" style="width:15%;text-align: left;">{{line.title}}</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">{{line.specification}}</div>
+            <div class="el-col-2" style="width:8%;text-align: left;">{{line.dose_value}}{{line.dose_unit}}</div>
+            <div class="el-col-2" style="width:10%;text-align: left;">{{line.route_display}}</div>
+            <div class="el-col-2" style="width:13%;text-align: left;">{{line.frequency_display}}</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">{{line.qty}}{{line.unit}}</div>
+            <div class="el-col-2" style="width:10%;text-align: right;">{{line.price}}</div>
+            <div class="el-col-2" style="width:12%;text-align: right;">{{format_price(line.amount)}}</div>
+            <div class="el-col-2" style="width:10%;text-align: center;">{{line.note}}</div>
           </div>
         </div>
-        <div class="el-row" style="text-align:center;position:relative;margin-left:1px;">（以下为空白）</div>
+        <div class="el-row" style="text-align:center;position:relative;margin-left:1px;margin-bottom: 50px;margin-top: 20px; ">（以下为空白）</div>
       </div>
   </div>
 
   <div class="prescription_footer">
-    <div class="el-row" style="margin:0;">
+    <div class="el-row" style="margin:0;margin-bottom: 10px;">
       <div class="el-col-12">医生: <span>{{info.doctor}}</span></div>
       <div class="el-col-12 total_amount" style="float:right;text-align:right;">金额: <span>{{format_price(info.amt)}}</span></div>
     </div>
