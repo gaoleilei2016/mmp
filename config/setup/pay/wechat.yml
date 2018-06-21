@@ -3,11 +3,11 @@
 defaults: &defaults
   usable: true
   name: 贵州腾迈华希医疗
-  appid: wx985d4b9d7b2784d2
+  appid: wx220fa8726920e2a2 #wx985d4b9d7b2784d2
   sign_type: MD5
   trade_type: MWEB
   spbill_ip: 58.16.181.25
-  appsecret: 0e8523d092e28993b54b4b980116e832
+  appsecret: 5fce5e7556d04a94eeca5700103c9609 #0e8523d092e28993b54b4b980116e832
   mchid: 1432526502
   pay_url: https://api.mch.weixin.qq.com/pay/unifiedorder
   refund_url: https://api.mch.weixin.qq.com/secapi/pay/refund

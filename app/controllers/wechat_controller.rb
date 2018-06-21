@@ -9,20 +9,28 @@ class WechatController < ApplicationController
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login
     if wx_user_sign_in? #已经登录并且已登记过的
+      p '111111111111111111111111'
       session[:openid] = current_user.openid
       redirect_to '/'
     else
+      p '222222222222222222222222222222'
       res = Pay::Wechat.get_openid(params[:code])
+      p res
       if res[:error] #获取openid失败的
+        p '333333333333333333333333333333'
         flash[:notice] = res[:msg]
         redirect_to '/users/sign_up'
       else
+        p '4444444444444444444444'
         session[:openid] = res[:openid]
         user = User.find_by(openid: res[:openid])
+        p user
         if user
+          p '5555555555555555555555555555'
           sign_in(user)
           redirect_to '/'
         else
+          p '666666666666666666666666'
           redirect_to '/users/sign_up'
         end
       end
