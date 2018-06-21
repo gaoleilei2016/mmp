@@ -81,6 +81,18 @@ class Orders::Order < ApplicationRecord
 				prescriptions.each{|x|x.return_charge(arg, current_user)}
 				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
+				data = {
+					org_id:order.target_org_id,#药房id
+					status:order.status, #订单状态
+					order_id:order.id, #订单id
+					created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+					order_code:order.order_code, #订单号
+					patient_name:order.patient_name, #患者名字
+					amt:order.net_amt, #订单金额
+					flag:false, #true已收费  false 退费
+					info:'您有一张订单结算被用户取消了！', #订单金额
+				}
+				::NoticeBroadcastJob.perform_later(data:data)
 				result = {ret_code:'0',info:'取消成功，处方已失效。'}
 			when '5'
 				return {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -249,6 +261,18 @@ class Orders::Order < ApplicationRecord
 		##通知处方订单已结算
 	 	prescriptions.each{|x|x.charged(args, cur_user)}
 		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		data = {
+					org_id:target_org_id,#药房id
+					status:status, #订单状态
+					order_id:id, #订单id
+					created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+					order_code:order_code, #订单号
+					patient_name:patient_name, #患者名字
+					amt:net_amt, #订单金额
+					flag:true, #true已收费  false 退费
+					info:'您有新的已结算订单！', #订单金额
+				}
+		::NoticeBroadcastJob.perform_later(data:data)
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
@@ -348,6 +372,19 @@ class Orders::Order < ApplicationRecord
 					sch = ::Scheduler.new()
 					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
 					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
+				elsif attrs[:status] == '2'
+					data = {
+						org_id:order.target_org_id,#药房id
+						status:order.status, #订单状态
+						order_id:order.id, #订单id
+						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+						order_code:order.order_code, #订单号
+						patient_name:order.patient_name, #患者名字
+						amt:order.net_amt, #订单金额
+						flag:true, #true已收费  false 退费
+						info:'您有新的线下支付订单！', #订单金额
+					}
+					::NoticeBroadcastJob.perform_later(data:data)
 				end
 				#订单创建成功之后改变处方状态
 				args = {
