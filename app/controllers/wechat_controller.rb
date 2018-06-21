@@ -29,6 +29,18 @@ class WechatController < ApplicationController
     end
   end
 
+  def pay
+    begin
+      
+    rescue Exception => e
+      
+    end
+  end
+
+  def write_log(msg)
+    PayAndSmsLog.info(msg, {file_name: 'wechat'})
+  end
+
   #已登记过，但是未登录
   def rgistered
   end

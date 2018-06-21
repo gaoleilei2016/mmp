@@ -6,6 +6,7 @@ require 'digest/md5'
 class Pay::Wechat
 
   class << self
+    # 退款
     def refund(ref)
       datas = handle_send_datas(refund_datas(ref))
       res = send_cert_data(datas)
@@ -81,11 +82,15 @@ class Pay::Wechat
       Hash.from_xml(res.body)['xml']
     end
 
+    # H5支付
     def payment(args)
       begin
         write_log_return({state: :start, msg: '微信付款开始'})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
+        order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
+        return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
+        return get_payment_url(order) if order #如果订单已存在就直接支付
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'WEB'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
         get_payment_url(order)
@@ -169,6 +174,9 @@ class Pay::Wechat
         write_log_return({state: :start, msg: '微信公众号付款开始', desc: args.to_s})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
+        order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
+        return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
+        return public_info(order) if order
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
         return write_log_return({state: :error, msg: '创建支付记录报错', desc: order.errors.full_messages.join(',')}) unless order.save
         public_info(order)
@@ -185,17 +193,13 @@ class Pay::Wechat
       ret = handle_send_datas(datas)
       res = Hash.from_xml(RestClient.post(wx.pay_url, ret).body)['xml']
       p '2222222222222222222222222222', res
-      data = ''
+      data = {}
       if res['err_code_des'].eql?('该订单已支付')
         data = { state: :success, msg: '支付成功', desc: '支付已完成'}
       elsif res['return_code'].eql?('SUCCESS')
-        if res['result_code'].eql?('SUCCESS')
-          data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
-        else
-          data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
-        end
+        data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
       else
-        data = { state: :fail, msg: '请求失败', desc: "#{res['return_msg']}" }
+        data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
       end
       write_log_return(data)
       if order.update_attributes({status: data[:state], status_desc: data[:desc]})

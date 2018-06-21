@@ -21,13 +21,20 @@ class Pay::Refund < ApplicationRecord
         ord = Pay::Order.find_by(out_trade_no: args[:out_trade_no])
         return write_log_return({state: :error, msg: '参数错误', desc: '退款对应的订单不存在'}) unless ord
         # return write_log_return({state: :fail, msg: '订单未支付', desc: '原始订单未支付无法退款, 若有异常请联系管理员'}) unless ord.paid?
+        ref = find_by(out_refund_no: args[:out_refund_no]) #查找退款订单
+        return write_log_return({state: :fail, msg: '已退款', desc: '订单已退款'}) if ref&.status&.eql?('success')
+        return handle_refund_app(ref) if ref  #如果找到就直接退款
         ref = new({out_refund_no: args[:out_refund_no], refund_fee: args[:refund_fee], reason: args[:reason], order: ord, status: 'com', status_desc: '保存成功'})
         return write_log_return({state: :error, msg: '退款记录保存出错', desc: ref.errors.full_messages.join(',')}) unless ref.save
-        return Pay::Wechat.refund(ref) if ref.order.pay_type.eql?('wechat')
-        Pay::Alipay.refund(ref)
+        handle_refund_app(ref)
       rescue Exception => e
         write_log_return({state: :error, msg: '系统错误', desc: e.message})
       end
+    end
+
+    def handle_refund_app(ref)
+      return Pay::Wechat.refund(ref) if ref.order.pay_type.eql?('wechat')
+      Pay::Alipay.refund(ref)
     end
 
     # args={out_refund_no: '退款单号'}
