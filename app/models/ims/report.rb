@@ -14,7 +14,7 @@ class Ims::Report
         status = args[:status]
         sql = "SELECT  b.title,b.specification,b.factory_name,sum(b.qty) as 'total_qty',b.unit,b.price,round(sum(b.amount),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM ims_pre_headers a INNER JOIN ims_pre_details b on a.id= b.header_id where a.delivery_org_id='#{org_id}'" 
         status.blank? ? sql.concat(" and (a.status=4 || a.status=8 )") : sql.concat("and (a.status=#{status} )")
-        sql.concat(" and a.created_at BETWEEN '#{start_time}' AND date_add('#{end_time}',interval 1 day) GROUP BY  b.title,b.specification,b.factory_name,b.unit,b.price;")
+        sql.concat(" and a.created_at BETWEEN '#{start_time}' AND '#{end_time}' GROUP BY  b.title,b.specification,b.factory_name,b.unit,b.price;")
         result = Ims::PreHeader.find_by_sql(sql)
         JSON.parse(result.to_json)
       rescue Exception => e
@@ -88,30 +88,29 @@ class Ims::Report
 		# where a.target_org_id=38 and a.created_at 
 		# BETWEEN '2018-06-17' AND date_add('2018-06-19',interval 1 day) #GROUP BY b.name
 		# GROUP BY  b.name,b.specifications,b.firm,b.unit,b.price;
-		def change_data_report
+    # args ={org_id:'34',start_time:'2018-06-20',end_time:'2018-06-21',status:2,doctor:'',patient_name:'',source_org_id:''}
+		def change_data_report args={}
 			data = []
-      return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
-      # sql =" SELECT * FROM orders_orders where target_org_id = #{args[:org_id]}"
-      query ="target_org_id = #{args[:org_id]} and created_at between '2018-06-17' and date_add('2018-06-19',interval 1 day)"
-      query.concat(" and doctor=#{args[:doctor]}") unless args[:doctor].blank?
-      query.concat(" and patient_name=#{args[:patient_name]}") unless args[:patient_name].blank?
-      query.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
-      case  args[:type].to_s
+      org_id = args[:org_id]
+      start_time = args[:start_time] || (Time.new - 1.day).to_s(:db)
+      end_time = args[:end_time] || Time.new.to_s(:db)
+      status = args[:status]
+      return {flag:false,:info=>"药店机构为空。"} if org_id.blank?
+      sql = "SELECT  b.name as 'title' ,b.specifications as 'specification',b.firm,sum(b.quantity) as 'total_qty',b.unit,b.price,round(sum(b.net_amt),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM orders_orders a INNER JOIN orders_order_details b on a.id= b.order_id where a.target_org_id=#{args[:org_id]}"
+      sql.concat(" and doctor=#{args[:doctor]}") unless args[:doctor].blank?
+      sql.concat(" and patient_name=#{args[:patient_name]}") unless args[:patient_name].blank?
+      sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
+      case  args[:status].to_s
       when '1'#未付款
-       query.concat(" and payment_type = 2 and status=1 ")
+       sql.concat(" and payment_type = 2 and status=#{args[:status]} ")
       when '2'#已付款
-       query.concat(" and status=2 ")
-      when '5'#已发药
-       query.concat(" and status=5 ")
-      when '7'#已退药
-       query.concat(" and status=7 ")
+       sql.concat(" and status=#{args[:status]} ")
       else
+       sql.concat(" and ((payment_type = 2 and status=1) or status=2) ")
       end
-      orders = Orders::Order.where(query)
-      orders.each do |order|
-
-      end
-
+      sql.concat(" and a.created_at BETWEEN '#{start_time}' AND #{end_time} GROUP BY  b.name,b.specifications,b.firm,b.unit,b.price;")
+      result = Orders::Order.find_by_sql(sql)
+      JSON.parse(result.to_json)
 		end
 
 	end

@@ -321,6 +321,7 @@ class Ims::Order < ApplicationRecord
     def return_drug args={}
       begin
         order_id = args[:id]
+        current_user = args[:current_user]
         order = Orders::Order.find order_id rescue nil
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
         # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
@@ -424,6 +425,7 @@ class Ims::Order < ApplicationRecord
           dup_detail.amount = -detail.amount.to_f
           dup_detail.return_qty = detail.qty.to_f
           dup_detail.ori_detail_id = detail.id
+          dup_detail.status = '8'
           dup_detail.header_id = nil
           details << dup_detail.attributes
         end
