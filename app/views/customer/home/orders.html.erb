@@ -102,7 +102,7 @@
 				<button type="button" @click="$parent.cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
 				<template v-if="order.payment_type=='1'">
 					<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">去支付</button>
-					<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+					<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'||order.status=='6'">申请退款</button>
 				</template>
 			</div>
 		</div>
@@ -121,7 +121,7 @@
 		computed:{
 			not_used_orders:function() {
 				return this.orders.filter(function(item) {
-					return item.status=='1'||item.status=='1';
+					return item.status=='1'||item.status=='2';
 				})
 			}
 		},

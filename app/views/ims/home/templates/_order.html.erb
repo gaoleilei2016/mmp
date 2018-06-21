@@ -44,6 +44,7 @@
 		</div>
 
     <el-button @click="change" id="notice_input" style="display:none;"></el-button>
+    <el-button @click="change" id="notice_input" style="display:none;"></el-button>
     <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
 	</div>
 </template>
@@ -66,10 +67,10 @@ document.notice_data = [];
 $.ims_notice = function(data){
   // alert(data)
   org_id = $("#organization_id").val()
-  if (data&&data.order_id&&data.org_id==org_id) {
+  if (data&&data.org_id == org_id) {
     document.notice_data = data
     $("#notice_input").click()
-  };
+  }
 }
 window.current_template_obj = {
 	data:function(){
@@ -110,24 +111,48 @@ window.current_template_obj = {
 	},
 	methods:{
     init:function(){
-      console.log(this)
-      console.log(this._data)
+      // console.log(this)
+      // console.log(this._data)
+      $(document).find("#prescription_menu").find(".el-menu-item:first").addClass("is-active")
+      $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
     },
     change:function(){
-      // alert(val)
       data = document.notice_data
-      console.log(data)
       if (data.flag) {
-        console.log("+++++++++++++++++++++")
         temp = this._data.order_lists
         temp.push(data)
         this._data.order_lists = temp
-        console.log("+++++++++++++++++++++")
         this.$notify.success({
-          title: 'Info',
+          title: '消息',
           message: '您有新的订单生成',
           showClose: false
         });
+      }else{
+        temp = this._data.order_lists
+        $.each(temp,function(k,v){
+          if (v.order_id == data.order_id) {
+            temp.splice(k,1)
+            return false
+          };
+        })
+        this._data.order_lists=temp
+        this.$notify.success({
+          title: '消息',
+          message: data.info,
+          showClose: false
+        });        
+        // $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
+      }
+    },
+    search_input_change:function(val){
+      if (val.length<=0) {
+        menu = $("#prescription_menu").find(".is-active").text()
+        if (menu.indexOf('发药')>=0) {
+          $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
+        };
+        if (menu.indexOf('退药')>=0) {
+          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .is-active").click();
+        };
       };
     },
     handleOpen:function(key, keyPath) {
@@ -145,7 +170,6 @@ window.current_template_obj = {
         $(document).find(str).find(".prescription_list_panel .is-active").click();
       }catch(e){
         _this._data.order_lists = []
-        console.log(e)
       }
     },
     out_order_search_fun:function(e){
@@ -166,7 +190,6 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
@@ -243,8 +266,6 @@ window.current_template_obj = {
 
           if (flag_arr.indexOf(1)>=0) {
             stat = _this.activeName2
-            console.log("temp",temp)
-            console.log("temp.length",temp.length)
             temp.map(function(item){
               if (temp2.length<=0) {
                 temp2.push({
@@ -267,10 +288,7 @@ window.current_template_obj = {
                   })
                 };
               }
-              console.log(temp2)
             })
-            console.log("temp2.length",temp2.length)
-            console.log(temp2)
             if (temp2.length>0) {
               if(temp2[0].status == "2"){
                 _this.out_list_panel = "1"
@@ -302,16 +320,11 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据")
         }
-        console.log(temp)
-        console.log(flag_arr)
-        console.log(order_status)
       },function(response){
         _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
-          duration: 0
         });
       });
     },200)
@@ -511,6 +524,9 @@ window.current_template_obj = {
     set_order_list:function(data){
       if (data) {
         this._data.order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+        },200)        
       }else{
         this._data.order_lists = []
       }
@@ -561,6 +577,9 @@ window.current_template_obj = {
     set_return_order_lists:function(data){
       if (data) {
         this._data.return_order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
+        },200)
       }else{
         this._data.return_order_lists = []
       }
@@ -744,7 +763,8 @@ window.current_template_obj = {
           _this._data.return_order_lists = []
         }
         _this._data.return_detail = [{}]
-
+        _this._data.return_reason_form.name = ""
+        _this._data.return_reason_visible = false;
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
