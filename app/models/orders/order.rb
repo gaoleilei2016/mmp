@@ -92,7 +92,7 @@ class Orders::Order < ApplicationRecord
 		rescue Exception => e
 			p e
 		ensure
-			update_attributes(_locked:0)
+			self.update_attributes(_locked:0)
 		end
 		result
 	end
@@ -442,6 +442,7 @@ class Orders::Order < ApplicationRecord
 		def order_completion attrs = {}
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:''}
+			order = nil
 			begin
 				unless order = Orders::Order.where("id = ? and _locked = 0 and status in (1,2)",attrs[:id]).last
 					result[:ret_code] = '-1'
