@@ -8,15 +8,15 @@ class Users::SessionsController < Devise::SessionsController
   # GET /resource/sign_in
   def new
     flash[:login] = params[:login] if params[:login].present?
-    if session[:openid]
-      u = User.where(openid:session[:openid]).first
-      if u
-        sign_in(u)
-        return redirect_to "/"
-      else
-        return redirect_to "/users/sign_up?login=#{params[:login]}" 
-      end
-    end
+    return redirect_to "/users/sign_up?login=#{params[:login]}" if session[:openid]
+      # return redirect_to "/users/sign_up?login=#{params[:login]}" 
+    # end
+      # u = User.where(openid:session[:openid]).first
+      # if u
+      #   sign_in(u)
+      #   return redirect_to "/"
+      # else
+      # end
     str = request.user_agent
     if str.include?('Mobile')
       render "/devise/sessions/new2.html.erb",layout:"customer"
@@ -52,9 +52,10 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   # DELETE /resource/sign_out
-  # def destroy
-  #   super
-  # end
+  def destroy
+    session[:openid] = nil
+    super
+  end
 
   # protected
 

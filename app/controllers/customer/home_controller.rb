@@ -14,11 +14,12 @@ class Customer::HomeController < ApplicationController
 		end
 	end
 	def prescription
+		pre = ::Hospital::Prescription.find(params[:id])
+		pre.update_attributes(is_read: true)
 		respond_to do |f|
 			f.html
 			f.json{
-				pre = ::Hospital::Prescription.find(params[:id]).to_web_front
-				render json:{flag:true,prescription:pre}
+				render json:{flag:true,prescription:pre.to_web_front}
 			}
 		end
 	end

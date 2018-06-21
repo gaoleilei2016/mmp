@@ -296,9 +296,18 @@ class ::Hospital::Prescription < ApplicationRecord
 			orders: self.orders.map { |e| e.to_web_front  },
 			price: self.orders.map{|e| e.price }.reduce(:+),
 			specialmark: self.specialmark,
-			created_at: self.created_at,
-			updated_at: self.updated_at,
-			is_read: self.is_read
+			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			updated_at: self.updated_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			is_read: self.is_read,
+			auditor:{
+				id: self.auditor_id,
+				display: self.auditor_display
+			},
+			delivery:{
+				id: self.delivery_id,
+				display: self.delivery_display
+			}
+
 		}
 		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
