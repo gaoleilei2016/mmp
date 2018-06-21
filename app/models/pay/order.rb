@@ -8,6 +8,8 @@ class Pay::Order < ApplicationRecord
   validates_presence_of :title,        message: '订单标题不能为空'
   validates_presence_of :pay_type,     message: '支付类型必须存在'
 
+  validates_presence_of :openid, message: 'openid必须存在', :if => :public_openid
+
   validates_uniqueness_of :out_trade_no, message: '订单号必须唯一'
   validates_inclusion_of :pay_type, :in => %w{alipay wechat}, :message => '目前只支持微信和支付宝支付'
 
@@ -24,6 +26,11 @@ class Pay::Order < ApplicationRecord
     # args={out_trade_no:'订单号'}
     def query_res(args)
     end
+  end
+
+  def public_openid
+    return true if trade_type.eql?('JSAPI')
+    false
   end
 
   # 是否已支付

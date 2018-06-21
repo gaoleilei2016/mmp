@@ -90,7 +90,7 @@ class Pay::Wechat
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
         order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
         return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
-        return get_payment_url(order) if order #如果订单已存在就直接支付
+        return get_payment_url(order) if order&&order.update_attributes(args.merge({pay_type: 'wechat', trade_type: 'WEB'})) #如果订单已存在就直接支付
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'WEB'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
         get_payment_url(order)
@@ -176,7 +176,7 @@ class Pay::Wechat
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
         order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
         return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
-        return public_info(order) if order
+        return public_info(order) if order&&order.update_attributes(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
         return write_log_return({state: :error, msg: '创建支付记录报错', desc: order.errors.full_messages.join(',')}) unless order.save
         public_info(order)
@@ -197,14 +197,18 @@ class Pay::Wechat
       if res['err_code_des'].eql?('该订单已支付')
         data = { state: :success, msg: '支付成功', desc: '支付已完成'}
       elsif res['return_code'].eql?('SUCCESS')
-        data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
+        if res['result_code'].eql?('SUCCESS')
+          data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
+        else
+          data = {state: :fail, msg: '请求失败', desc: res['err_code_des']}
+        end
       else
         data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
       end
-      write_log_return(data)
+      write_log_return(data.merge({rec: order}))
       if order.update_attributes({status: data[:state], status_desc: data[:desc]})
         if data[:state].eql?(:succ)
-          pay = {appId: wx.appid, timeStamp: Time.now.to_i, nonceStr: new_pass(32), package: "prepay_id=#{prepay_id}", signType: 'MD5'}
+          pay = {appId: wx.appid, timeStamp: Time.now.to_i, nonceStr: new_pass(32), package: "prepay_id=#{data[:prepay_id]}", signType: 'MD5'}
           data.merge(pay).merge({sign: handle_jsapi_datas(pay)})
         else
           data
