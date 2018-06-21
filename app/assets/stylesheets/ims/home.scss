@@ -5,14 +5,14 @@ $gray_border:#ddd;
 $auto-border-color:#ddd;
 
 $menu_width:64px;
-$order_list_width:38%;
+$order_list_width:35%;
 $order_main_width:62%;
-$margin-part:12px;
+$margin-part:18px;
 
 $order-detail-height:40%;
 
 body{
-	background-color: #eef5f9!important;
+	/*background-color: #eef5f9!important;*/
 	font-family: "Microsoft YaHei", "Arial Narrow", sans-serif;
 }
 body > .container{
@@ -122,7 +122,8 @@ body > .container{
 			padding:8px;
 			border: 1px solid #dcdfe6;
 			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.12), 0 0 6px 0 rgba(0, 0, 0, 0.04);			
-			width:calc(#{$order_main_width} - #{$margin-part});
+			/*width:calc(#{$order_main_width} - #{$margin-part});*/
+			width:calc(100% - #{$order_list_width} - #{$margin-part});
 
 			.detail_panel{
 				padding:8px;

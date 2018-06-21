@@ -58,8 +58,9 @@
     <div class="el-row" style="padding-top:12px;">
     	<div class="el-col-12">发票：</div>
       <div class="el-col-12 btns" style="text-align:right;">
-        <span v-if="info.is_order&&info.status === '5'&&info.is_returned != 1">
-          <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button>
+        <span v-if="info.is_order&&info.status === '5'">
+          <!-- <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button> -->
+          <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_reason_visible = true">退药</button>
         </span>
       </div>
     </div>
@@ -72,5 +73,17 @@
   	  </el-tabs>
     </div>
   </div>
+
+  <el-dialog :visible.sync="return_reason_visible">
+    <el-form :model="return_reason_form">
+      <el-form-item label="退药原因">
+        <el-input v-model="return_reason_form.name" auto-complete="off"></el-input>
+      </el-form-item>
+    </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button size="small" @click="return_reason_visible = false">取 消</el-button>
+      <el-button size="small" type="primary" @click="return_order(info.order_id)">确 定</el-button>
+    </div>
+  </el-dialog>
 
 </div>
