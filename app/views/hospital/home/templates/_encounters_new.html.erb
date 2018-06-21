@@ -131,6 +131,7 @@ window.current_template_obj = {
 				encmodalloading: false, // 模态框loading
 				encounters: [], // 就诊列表
 				searchencstr: "", // 搜索就诊列表
+				loadingidcard: false, // 正在读取身份证信息
 			/* 患者基本信息  ----- end */ 
 
 			/* 主业务  ----- start */ 
@@ -222,7 +223,7 @@ window.current_template_obj = {
 	},
 	mounted: function () {
 		// console.log测试用
-		// apps.encounters_new = this;
+		apps.encounters_new = this;
 		this.$nextTick(function(){
 			this.init();
 		})
@@ -293,6 +294,35 @@ window.current_template_obj = {
   	/* 公共方法  ---- end */ 
 
   	/* encounter相关操作  ---- start */
+  		// 身份证读卡
+  		getIdCardInfo: function () {
+  			socket.send('5|INFO');
+  			this.loadingidcard = true; // 显示正在加载身份证数据
+  		},
+  		SetIdCardInfo: function (json) {
+  			console.log("读卡信息为", json);
+  			var _this = this;
+  			var res = json.result;
+  			_this.encounter.address = res.address; // 地址
+  			_this.encounter.iden = res.code; // 身份证号
+  			_this.encounter.name = res.name; // 名字
+  			_this.encounter.photo = res.photo; // 照片
+  			_this.getBirthdayFromIdCard(res.code); // 生日、年龄
+  			_this.loadingidcard = false; // 取消正在加载身份证数据
+  			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
+  			for(var i=0; i<genders.length; i++) {
+  				if(genders[i].display == res.gender) {
+  					_this.encounter.gender = genders[i];
+  					break;
+  				}
+  			}
+  			for(var i=0; i<nations.length; i++) {
+  				if(nations[i].display == res.folk) {
+  					_this.encounter.nation = nations[i];
+  					break;
+  				}
+  			}
+  		},
   		focusEncSearchInp: function (flag) {
   			var $target = $(this.$refs["searchencstr"].$el);
   			if(flag) {
@@ -309,7 +339,7 @@ window.current_template_obj = {
 				if(json.modal){
 					_this[json.modal] = true;
 				}
-  			_this.encountersResource.get({search: json.search}).then( function(response) {
+  			Vue.resource('/hospital/people.json').get({search: json.search}).then( function(response) {
   				var res = response.data;
   				_this.encmodalloading = false;
   				if(res.flag) {
@@ -369,7 +399,6 @@ window.current_template_obj = {
 	          if(!_this.encounter.id) {
 	          	_this.encountersResource.save(json).then( function(response) {
 	          		_this.handleEncounterReturn(response, btn);
-	          		_this.handleTabClick();
 	          	}, function(response) {
 	          		btn.removeAttr("disabled").find(".fa").hide();
 	          		_this.$message.error("创建就诊信息失败，请联系管理员。");
@@ -400,6 +429,7 @@ window.current_template_obj = {
 	        message: "就诊信息保存成功。",
 	        type: 'success'
 	      });
+	      this.getDiffrentData(this.activeTab);
 				// 聚焦医嘱搜索框
 	      this.$refs["ordtitle"].focus();
 	    },
@@ -652,6 +682,7 @@ window.current_template_obj = {
 	          if(res.flag) {
 	      			Vue.set(_this.diagnoses, index + sort, _this.diagnoses[index]);  
 							Vue.set(_this.diagnoses, index, tempOption); 
+							_this.encounter.diagnoses = res.master;
 	      		} else {
 							_this.$message.error(res.info);
 	      		}
@@ -689,7 +720,10 @@ window.current_template_obj = {
 
     // 切换主业务区域tab
     handleTabClick: function (tab, event) {
-    	var name = tab.name || this.activeTab
+    	var name = tab.name || this.activeTab;
+    	this.getDiffrentData(name);
+    },
+    getDiffrentData: function (name) {
     	if(name=="orders") {
     		this.getOrders();
     	}
@@ -777,7 +811,7 @@ window.current_template_obj = {
     			unit: drug.unit, // 单位
     			price: drug.price, // 价格
     			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
-    			single_qty: {value: 1, unit: drug.unit}, // 单次数量
+    			single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
     			route: _this.$parent.common_data_routes[0],// 频次
     			frequency: _this.$parent.common_data_frequencys[0],// 频次
     			course_of_treatment: {value: "", unit: "天"},  // 疗程

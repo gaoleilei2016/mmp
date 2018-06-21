@@ -112,7 +112,13 @@
 		  :title="(!mtemplate.id ? '新建' : '编辑')+'模板'"
 		  :visible.sync="isShowFormDialog"
 		  width="90%">
-		  <%= render "hospital/home/render/encounters_orders_partial" %>
+		  <%#= render "hospital/home/render/encounters_orders_partial" %>
+      <el-table
+        :data="orders"
+        class="orders-table thiner-row"
+        style="width: 100%">
+        <%= render "hospital/home/render/orders_table_common_partial" %>
+      </el-table>
 		  <br/>
 		  <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
         <el-form-item 

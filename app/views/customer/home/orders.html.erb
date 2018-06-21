@@ -56,7 +56,7 @@
 						<span>No: {{order.order_code}}</span>
 						<span style="float: right;color: #F55742;">
 							<span v-if="order.payment_type=='1'">
-								<span v-if="order.status=='1'">未付款</span>
+								<span v-if="order.status=='1'">待付款</span>
 								<span v-if="order.status=='2'">已付款</span>
 								<span v-if="order.status=='3'">未发货</span>
 								<span v-if="order.status=='4'">已发货</span>

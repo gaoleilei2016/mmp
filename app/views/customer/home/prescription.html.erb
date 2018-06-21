@@ -19,37 +19,37 @@
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<a href="/customer/home/orders" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+	<a class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 		<span class="mui-icon mui-icon-left-nav"></span>
 	</a>
-	<h1 class="mui-title">订单详情</h1>
+	<h1 class="mui-title">处方详情</h1>
 </header>
 <div class="mui-content" id="vue_content" v-cloak>
-	<div v-if="order" style="">
+	<div v-if="prescription" style="">
 		<ul class="mui-table-view" style="margin-bottom: 8px;">
 			<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
 				<div>
 					<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
 					<i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
 					<div class="mui-media-body">
-						<span>{{order.organ.name||"　"}}</span>
+						<span>{{prescription.organ.name||"　"}}</span>
 						<span style="float: right;" class="common_red">
-							<span v-if="order.payment_type=='1'">
-								<span v-if="order.status=='1'">未付款</span>
-								<span v-if="order.status=='2'">已付款</span>
-								<span v-if="order.status=='3'">未发货</span>
-								<span v-if="order.status=='4'">已发货</span>
-								<span v-if="order.status=='5'">交易成功</span>
-								<span v-if="order.status=='6'">交易关闭</span>
-								<span v-if="order.status=='7'">交易取消</span>
+							<span v-if="prescription.payment_type=='1'">
+								<span v-if="prescription.status=='1'">未付款</span>
+								<span v-if="prescription.status=='2'">已付款</span>
+								<span v-if="prescription.status=='3'">未发货</span>
+								<span v-if="prescription.status=='4'">已发货</span>
+								<span v-if="prescription.status=='5'">交易成功</span>
+								<span v-if="prescription.status=='6'">交易关闭</span>
+								<span v-if="prescription.status=='7'">交易取消</span>
 							</span>
-							<span v-if="order.payment_type=='2'">到店支付</span>
+							<span v-if="prescription.payment_type=='2'">到店支付</span>
 						</span>
-						<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{order.organ.addr||"　"}}</p>
+						<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{prescription.organ.addr||"　"}}</p>
 					</div>
 				</div>
 				<ul class="mui-table-view" style="margin: 15px 0;">
-					<li class="mui-table-view-cell no_background" v-for="drug in order.drugs" style="padding-left: 0;">
+					<li class="mui-table-view-cell no_background" v-for="drug in prescription.drugs" style="padding-left: 0;">
 						<div href="javascript:;" class="">
 							<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
 							<i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i>
@@ -64,25 +64,25 @@
 					</li>
 				</ul>
 				<div style="line-height: 33px;">
-					合计 <span class="common_red">¥ {{format_float(order.total_price)}}</span>
+					合计 <span class="common_red">¥ {{format_float(prescription.total_price)}}</span>
 				</div>
 			</li>
 		</ul>
 		<div style="text-align: right;padding-right: 8px;margin-bottom: 8px;">
-			<!-- <button type="button" v-if="order.status=='2'">申请退款</button> -->
-			<button type="button" @click="cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
-			<template v-if="order.payment_type=='1'">
-				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">去支付</button>
-				<button type="button" @click="refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+			<!-- <button type="button" v-if="prescription.status=='2'">申请退款</button> -->
+			<button type="button" @click="cancel_order(prescription.id)" v-if="prescription.status=='1'">取消订单</button>
+			<template v-if="prescription.payment_type=='1'">
+				<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+prescription.id+'\''" v-if="prescription.status=='1'">去支付</button>
+				<button type="button" @click="refund_order(prescription.id)" v-if="prescription.status=='2'">申请退款</button>
 			</template>
 		</div>
 		<div style="padding-left: 12px;">
-			<div class="common_grey">订单编号：{{order.order_code}}</div>
-			<div class="common_grey">下单时间：{{new Date(order.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
+			<div class="common_grey">订单编号：{{prescription.order_code}}</div>
+			<div class="common_grey">下单时间：{{new Date(prescription.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
 		</div>
 		<div style="text-align: center;padding-bottom: 30px;">
-			<template v-if="order.status=='2'||order.payment_type=='2'">
-				<img :src="order.base64_img" style="width: 100%;max-width: 222px;">
+			<template v-if="prescription.status=='2'||prescription.payment_type=='2'">
+				<img :src="prescription.base64_img" style="width: 100%;max-width: 222px;">
 				<div class="common_red">
 					请向药店药师出示该二维码或订单编号
 				</div>
@@ -95,7 +95,7 @@
 	new Vue({
 		el:"#vue_content",
 		data:{
-			order:null,
+			prescription:null,
 		},
 		methods:{
 			refund_order:function(id) {
@@ -147,11 +147,11 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/interfaces/get_orders.json?id=<%= params[:id] %>',
+					url:'/customer/home/prescription.json?id=<%= params[:id] %>',
 					data:{per:10},
 					success:function(json) {
 						if (json.flag) {
-							_this.order = json.order;
+							_this.prescription = json.prescription;
 						}else{
 							mui.toast(json.info);
 						}
@@ -160,7 +160,7 @@
 						$("#loading").hide();
 					},
 					error:function(e) {
-						mui.toast("订单获取失败");
+						mui.toast("获取失败");
 					}
 				})
 			},
