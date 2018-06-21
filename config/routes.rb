@@ -45,6 +45,7 @@ Rails.application.routes.draw do
     resources :home do
       collection do
         get :prescriptions
+        get :prescription
         get :orders
         get :order
         get :confirm_order
@@ -137,6 +138,8 @@ Rails.application.routes.draw do
       collection do
         get :get_orders         # 获取订单
         get :get_order          # 获取订单
+        get :get_prescriptions  # 获取处方信息
+        get :get_prescription   # 获取处方信息 
         get :charging_pre       # 收费
         get :dispensing_order   # 发药
         get :return_order       # 退药
@@ -149,13 +152,22 @@ Rails.application.routes.draw do
         get :return_drug           # 退药
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
+        post :order_setting  #订单设置
       end
     end
 
+    # 设置
     resources :settings do
       collection do
         get :get_cur_set
         post :save_settings
+      end
+    end
+
+    # 统计
+    resources :reports do
+      collection do
+        get :sale_report          # 销售统计
       end
     end
 

@@ -1,0 +1,134 @@
+<style type="text/css">
+	html,body,.mui-content{
+		height: 100%;
+		overflow: hidden;
+		background: #fff;
+	}
+	.mui-content{
+		overflow: auto;
+		/*padding-bottom: 60px;*/
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-content .mui-active{
+		background: none !important;
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-table-view:before{
+		height: 1px;
+	}
+	.mui-table-view:after{
+		height: 0;
+	}
+	.list_info{
+		padding: 20px 0;
+		border-bottom: 1px solid #333;
+	}
+	.list_info .item{
+		margin: 0;
+		padding: 0;
+		line-height: 26px;
+		float: left;
+		width: 100%;
+	}
+	.list_info .drug_item:not(:last-child){
+		margin-bottom: 20px;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/home/prescriptions" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">处方详情</h1>
+</header>
+<div class="mui-content" id="vue_content" v-cloak>
+	<div v-if="prescription" style="padding: 0 12px;">
+		<div style="position: relative;text-align: center;padding: 13px 0;">
+			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
+			<h4 style="font-weight: 500;">处方签</h4>
+			<h4 style="border: 1px solid #333;padding: 5px;position: absolute;right: 8px;top: 35px;margin: 0;">{{prescription.type.display}}</h4>
+		</div>
+		<div style="padding: 0 0 8px;border-bottom: 1px solid #333;">
+			<span>处方号: {{prescription.prescription_no}}</span>
+			<span style="float: right;">{{prescription.created_at}}</span>
+		</div>
+		<div class="list_info" style="">
+			<div class="item" style="width: 39.3%;">姓名：{{prescription.name}}</div>
+			<div class="item" style="width: 30.3%;">性别：{{prescription.gender.display}}</div>
+			<div class="item" style="width: 30.3%;">年龄：{{prescription.age}}</div>
+			<div class="item" style="">身份证号：{{prescription.iden}}</div>
+			<div class="item" style="">手机号：{{prescription.phone}}</div>
+			<div class="item" style="">住址：{{prescription.address}}</div>
+			<div class="item" style="width: 39.9%;">科室：{{prescription.encounter_loc.display}}</div>
+			<div class="item" style="width: 60%;">诊断：{{show_diagnoses(prescription.diagnoses)}}</div>
+			<div class="clear"></div>
+		</div>
+		<div class="list_info">
+			<p class="item">药品清单</p>
+			<div class="drug_item" v-for="drug in prescription.orders">
+				<div class="item" style="width: 39.9%;">{{drug.title}}</div>
+				<div class="item" style="width: 20%;">{{drug.specification}}</div>
+				<div class="item" style="width: 20%;">{{drug.route.display}}</div>
+				<div class="item" style="width: 20%;">{{drug.frequency.display}}</div>
+				<div>数量：{{drug.total_quantity}} {{drug.unit}}　单价：{{format_float(drug.price)}}</div>
+			</div>
+		</div>
+		<div style="padding-top: 6px;">
+			<div style="width: 49.9%;float: left;">审核、配方：{{prescription.auditor&&prescription.auditor.display}}</div>
+			<div style="width: 50%;float: left;">核对、发药：{{prescription.delivery&&prescription.delivery.display}}</div>
+			<div style="width: 49.9%;float: left;">医师：{{prescription.author.display}}</div>
+			<div style="width: 50%;float: left;">总计：{{prescription.price}}</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	new Vue({
+		el:"#vue_content",
+		data:{
+			prescription:null,
+		},
+		methods:{
+			show_diagnoses:function(diagnoses) {
+				return (diagnoses||[]).map(function(v) {
+					return v.display;
+				}).join("。")
+			},
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_prescription:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/home/prescription.json?id=<%= params[:id] %>',
+					data:{per:10},
+					success:function(json) {
+						if (json.flag) {
+							_this.prescription = json.prescription;
+						}else{
+							mui.toast(json.info);
+						}
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("获取失败");
+					}
+				})
+			},
+		},
+		mounted:function() {
+			this.get_prescription();
+		}
+	})
+</script>

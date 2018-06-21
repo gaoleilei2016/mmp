@@ -25,10 +25,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     # p '~~~~~~~~~',params
     params[:user] = {
-      openid:session[:openid],
       login:params[:login],
       password:params[:password],
-      email:"#{params[:login]}@duanxinzhuce.tm"
+      email:"#{params[:login]}@duanxinzhuce.tm",
+      openid:session[:openid],
+      openname:session[:openname],
     }
     build_resource(sign_up_params)
     # # 图片验证码
@@ -50,13 +51,22 @@ class Users::RegistrationsController < Devise::RegistrationsController
       resource.errors.add(:base,"手机号和短信码不能为空")
       return render "/devise/registrations/new.html.erb",layout:"customer"
     end
-    # 如果是老用户，直接登录
+    # 如果是老用户，更新密码后直接登录，并且关联 openid
     if u=(User.where(login:params[:login]).first)
       # 找回密码时的操作
-      u.password = params[:password]
-      u.save
-      sign_in(u)
-      return redirect_to "/"
+      # u.password = params[:password]
+      u.update_attributes({
+        password: params[:password],
+        openid:session[:openid],
+        openname:session[:openname],
+      })
+      if u.valid?
+        sign_in(u)
+        return redirect_to "/"
+      else
+        resource.errors = u.errors
+        return render "/devise/registrations/new2.html.erb",layout:"customer"
+      end
     end
     resource.save
     yield resource if block_given?
