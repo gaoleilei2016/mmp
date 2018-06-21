@@ -12,7 +12,7 @@ class Ims::Report
         start_time = args[:start_time] || (Time.new - 1.day).to_s(:db)
         end_time = args[:end_time] || Time.new.to_s(:db)
         status = args[:status]
-        sql = "SELECT  b.title,b.specification,b.factory_name,sum(b.qty) as 'total_qty',b.unit,b.price,round(sum(b.amount),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM ims_pre_headers a INNER JOIN ims_pre_details b on a.id= b.header_id where a.delivery_org_id='#{org_id}'" 
+        sql = "SELECT  b.title,b.specification,b.factory_name,sum(b.qty) as 'total_qty',b.unit,b.price,round(sum(b.amount),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM pre_headers a INNER JOIN pre_details b on a.id= b.header_id where a.delivery_org_id='#{org_id}'" 
         status.blank? ? sql.concat(" and (a.status=4 || a.status=8 )") : sql.concat("and (a.status=#{status} )")
         sql.concat(" and a.created_at BETWEEN '#{start_time}' AND '#{end_time}' GROUP BY  b.title,b.specification,b.factory_name,b.unit,b.price;")
         result = Ims::PreHeader.find_by_sql(sql)

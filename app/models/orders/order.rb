@@ -97,7 +97,11 @@ class Orders::Order < ApplicationRecord
 			when '5'
 				return {ret_code:'-1',info:'订单已完成，不允许取消。'}
 			when '6'
-				return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
+				prescriptions.each{|x|x.back_wait_charge({}, current_user)}
+				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
+				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+				result = {ret_code:'0',info:'订单已取消。'}
+				# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
 			when '7'
 				return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
 			end
@@ -173,7 +177,7 @@ class Orders::Order < ApplicationRecord
 	# 		save
 	# 	rescue Exception => e
 	# 		p e.backtrace
-	p '我的，都是我的！'
+	# p '我的，都是我的！'
 	# 	ensure
 	# 		update_attributes(_locked:0)
 	# 		return result
@@ -196,10 +200,10 @@ class Orders::Order < ApplicationRecord
 
 			when '5'
 				Hospital::Prescription.transaction do
-					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:attrs[:reason])
+					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
-					if self.payment_type.to_s != '2' #如果是线下支付的
-						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:attrs[:reason])
+					if self.payment_type.to_s == '2' #如果是线下支付的
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
 					end
 				end
 				result[:ret_code] = '0'

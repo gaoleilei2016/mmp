@@ -59,7 +59,7 @@ class InterfacesController < ApplicationController
 	end
 	#微信，支付宝退款
 	def refund_order
-		order = ::Orders::Order.where("id=? AND status = '2' and _locked = 0",params[:id]).last
+		order = ::Orders::Order.where("id=? AND status in (2,6) and _locked = 0",params[:id]).last
 		return (render json:{flag:false,info:"当前订单状态不允许退费。"})unless order
 		order.update_attributes(_locked:1)
 		# order.net_amt ##订单号用机构id+订单号

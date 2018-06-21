@@ -726,9 +726,9 @@ window.current_template_obj = {
         })
     },    
     return_order:function(id){
-      // console.log(this._data.return_reason_form)
-      // return false;
       var _this = this
+        _this._data.return_reason_form.name = ""
+        _this._data.return_reason_visible = false;
       if (this._data.return_reason_form.name.length>0){}else{
         _this.$message({
           type: 'warning',
@@ -763,7 +763,6 @@ window.current_template_obj = {
           _this._data.return_order_lists = []
         }
         _this._data.return_detail = [{}]
-
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
