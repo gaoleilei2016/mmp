@@ -32,6 +32,10 @@ class ::Dict::DiseasesController < ApplicationController
 	end
 
 	def destroy
-		@disease = ::Dict::Disease.find(params[:id])
+		render json:{flag: false, info: "病种字典列表很重要 不能随意删除，如需删除请联系管理员删除"}
+	end
+
+	def update
+		render json:{flag: false, info: "病种字典列表很重要 不能随意更新，如需更新请联系管理员更新"}
 	end
 end
