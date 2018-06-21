@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180617114240) do
+ActiveRecord::Schema.define(version: 20180620012135) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -118,14 +118,14 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.string "formul_name", limit: 20, comment: "剂型名称"
     t.string "usedescribe", limit: 80, comment: "用法用量描述"
     t.string "measure_unit", limit: 30, comment: "最小计量单位"
-    t.decimal "measure_val", precision: 10, comment: "最小计量值"
+    t.decimal "measure_val", precision: 10, scale: 2, comment: "最小计量值"
     t.string "base_unit", limit: 30, comment: "基本单位"
     t.string "purch_unit", limit: 30, comment: "采购单位"
     t.string "unit", limit: 30, comment: "销售单位"
-    t.decimal "mul", precision: 10, comment: "销售/基本单位的倍率"
-    t.decimal "purch_mul", precision: 10, comment: "采购/基本单位的倍率"
-    t.decimal "purch_price", precision: 10, comment: "采购价格"
-    t.decimal "price", precision: 10, comment: "销售价格"
+    t.decimal "mul", precision: 10, scale: 2, comment: "销售/基本单位的倍率"
+    t.decimal "purch_mul", precision: 10, scale: 2, comment: "采购/基本单位的倍率"
+    t.decimal "purch_price", precision: 12, scale: 4, comment: "采购价格"
+    t.decimal "price", precision: 12, scale: 4, comment: "销售价格"
     t.string "kindcode", limit: 4, comment: "药品分类"
     t.string "kindname", limit: 20, comment: "分类名称"
     t.string "licensenum", limit: 30, comment: "批准文号"
@@ -149,75 +149,71 @@ ActiveRecord::Schema.define(version: 20180617114240) do
   end
 
   create_table "hospital_diagnoses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "code"
-    t.string "display"
-    t.string "system"
-    t.string "status", default: "A"
-    t.string "rank"
-    t.string "encounter_id"
-    t.string "doctor_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "prescription_id"
-    t.integer "type"
-    t.string "note"
-    t.datetime "fall_ill_at"
-    t.integer "type_code"
-    t.string "type_display"
+    t.string "code", limit: 20, comment: "诊断编码"
+    t.string "display", limit: 100, null: false, comment: "诊断名称"
+    t.string "system", limit: 50, comment: "诊断编码系统  现在只支持ICD10"
+    t.string "status", limit: 1, default: "A", comment: "诊断状态 A 未确诊  E 已确诊"
+    t.integer "rank", limit: 1, comment: "诊断序号"
+    t.bigint "encounter_id", comment: "就诊id ( Hospital::Encounter )"
+    t.bigint "doctor_id", null: false, comment: "医生id（User）"
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
+    t.bigint "prescription_id", comment: "处方id ( Hospital::Prescription )"
+    t.string "note", comment: "诊断备注"
+    t.datetime "fall_ill_at", comment: "发病时间"
+    t.integer "type_code", comment: "诊断类型 0 主要诊断  1 次要诊断"
+    t.string "type_display", limit: 10, comment: "诊断类型名称"
   end
 
   create_table "hospital_encounters", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "iden"
-    t.string "name"
-    t.string "name_jp"
-    t.string "name_wb"
-    t.datetime "birth_date"
-    t.integer "age", unsigned: true
-    t.string "gender_code"
-    t.string "gender_display"
-    t.string "occupation_code"
-    t.string "occupation_display"
-    t.string "phone"
-    t.string "address"
-    t.string "unit_name"
-    t.string "ua_address"
-    t.string "unit_phone"
-    t.string "contact_name"
-    t.string "contact_phone"
-    t.string "hospital_oid"
-    t.string "hospital_name"
-    t.string "patient_domain_code"
-    t.string "patient_domain_display"
-    t.string "outpatient_no"
-    t.string "inpatient_no"
-    t.string "started_at"
-    t.string "datetime"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "nation_code"
-    t.string "nation_display"
-    t.string "blood_code"
-    t.string "blood_display"
-    t.integer "drugstore_location_id"
-    t.string "marriage_code"
-    t.string "marriage_display"
-    t.string "height"
-    t.string "weight"
-    t.integer "person_id"
-    t.integer "author_id"
+    t.string "iden", limit: 18, comment: "身份证号"
+    t.string "name", limit: 60, null: false, comment: "姓名"
+    t.string "name_jp", limit: 60, comment: "姓名简拼"
+    t.string "name_wb", limit: 60, comment: "姓名五笔"
+    t.datetime "birth_date", comment: "出生日期"
+    t.integer "age", limit: 1, null: false, comment: "就诊年龄", unsigned: true
+    t.string "gender_code", limit: 2, null: false, comment: "性别编码"
+    t.string "gender_display", limit: 6, null: false, comment: "性别编码名称"
+    t.string "occupation_code", limit: 2, comment: "职业编码"
+    t.string "occupation_display", limit: 40, comment: "职业编码名称"
+    t.string "phone", limit: 11, null: false, comment: "手机号"
+    t.string "address", comment: "就诊时填写的地址  现居地址"
+    t.string "unit_name", comment: "工作单位名称（或者学校等）"
+    t.string "ua_address", comment: "单位地址（或者学校等）"
+    t.string "unit_phone", limit: 20, comment: "单位联系电话"
+    t.string "contact_name", limit: 60, comment: "联系人名称"
+    t.string "contact_phone", limit: 20, comment: "联系人电话"
+    t.bigint "hospital_oid", null: false, comment: "医院 机构id"
+    t.string "hospital_name", null: false, comment: "医院名称"
+    t.string "patient_domain_code", limit: 2, comment: "门诊或住院编码"
+    t.string "patient_domain_display", limit: 10, collation: "latin5_turkish_ci", comment: "门诊或住院编码名称"
+    t.string "patient_no", limit: 10, default: "", null: false, comment: "就诊号"
+    t.datetime "started_at", comment: "就诊时间"
+    t.datetime "created_at", null: false, comment: "数据创建时间"
+    t.datetime "updated_at", null: false, comment: "数据更新时间"
+    t.string "nation_code", limit: 4, comment: "民族编码"
+    t.string "nation_display", limit: 40, comment: "民族编码名称"
+    t.string "blood_code", limit: 2, comment: "血型编码"
+    t.string "blood_display", limit: 20, comment: "血型编码名称"
+    t.bigint "drugstore_location_id", comment: "药店id"
+    t.string "marriage_code", limit: 2, comment: "婚姻编码"
+    t.string "marriage_display", limit: 20, comment: "婚姻编码名称"
+    t.decimal "height", precision: 6, scale: 2, comment: "身高"
+    t.decimal "weight", precision: 6, scale: 2, comment: "体重"
+    t.bigint "person_id", comment: "实体人 Person id"
+    t.bigint "author_id", null: false, comment: "User 接诊医生"
   end
 
   create_table "hospital_irritabilities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "code"
-    t.string "display"
-    t.string "system"
-    t.string "status"
-    t.string "period_start"
-    t.string "datetime"
-    t.string "data_entry_id"
-    t.string "person_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "code", limit: 10, comment: "过敏编码"
+    t.string "display", limit: 40, null: false, comment: "过敏编码名称"
+    t.string "system", limit: 40, comment: "过敏编码系统"
+    t.string "status", limit: 1, comment: "过敏状态"
+    t.datetime "period_start", comment: "过敏开始时间"
+    t.bigint "data_entry_id", null: false, comment: "数据录入人 User"
+    t.bigint "person_id", null: false, comment: "过敏所属人 Person"
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
   end
 
   create_table "hospital_orders", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -238,7 +234,7 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.string "unit"
     t.float "price", limit: 24
     t.string "note"
-    t.string "status"
+    t.integer "status", default: 0
     t.integer "order_type", default: 1
     t.integer "encounter_id"
     t.datetime "created_at", null: false
@@ -258,7 +254,7 @@ ActiveRecord::Schema.define(version: 20180617114240) do
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
     t.integer "organization_id"
-    t.integer "status", limit: 1, default: 1, comment: "濠㈣泛瀚弻鐔兼偐閼哥鍋?0 闁哄牜浜滈鎼佸冀?  1:鐎瑰憡褰冮鎼佸冀?  2:鐎垫澘鎳忛弫鍦嫻?  3:鐎圭寮堕弫鍦嫻?  4:鐎瑰憡褰冭ぐ鍌炴嚒?  7:閹煎鍠庣槐?  8:鐎瑰憡鐓￠埀顑藉亾闁? 9:鐎瑰憡鐓￠埀顑藉亾閻?"
+    t.integer "status", limit: 1, default: 1, comment: "处方状态:0 未审核,  1:已审核   2:待收费   3:已收费   4:已发药   8:已退药  9:已退费"
     t.string "note", collation: "utf8_general_ci"
     t.string "type_code", collation: "utf8_general_ci"
     t.integer "bill_id"
@@ -298,49 +294,41 @@ ActiveRecord::Schema.define(version: 20180617114240) do
   end
 
   create_table "hospital_sets_departments", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "org_id", comment: "机构id"
-    t.string "name", default: "", comment: "科室名称"
-    t.string "jianpin", default: "", comment: "科室简称"
-    t.string "status", default: "", comment: "状态"
+    t.bigint "org_id", null: false, comment: "机构id"
+    t.string "name", limit: 20, default: "", null: false, comment: "科室名称"
+    t.string "jianpin", limit: 20, default: "", comment: "科室简称"
+    t.string "status", limit: 2, default: "", null: false, comment: "状态 N 新建   A 活动  O作废"
     t.string "search_str", default: "", comment: "模糊查询字段"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
+    t.string "note", comment: "科室备注"
   end
 
   create_table "hospital_sets_inis", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.boolean "enable_print_pres", default: false
-    t.integer "uoperator_id"
-    t.text "print_pres_html"
-    t.integer "org_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "hospital_sets_locations", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "org_id", comment: "机构id"
-    t.string "name", comment: "科室名称"
-    t.string "jianpin", comment: "科室简称"
-    t.string "status", comment: "状态"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.boolean "enable_print_pres", default: false, comment: "是否启用处方打印 1是true  0是false"
+    t.integer "uoperator_id", null: false, comment: "最后更新人 User.id"
+    t.text "print_pres_html", comment: "打印模板  写了触发器"
+    t.integer "org_id", null: false, comment: "机构id"
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
   end
 
   create_table "hospital_sets_mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "org_id", comment: "机构id"
-    t.string "status", comment: "状态 默认A状态"
-    t.string "title", comment: "模板名称"
+    t.integer "org_id", null: false, comment: "机构id"
+    t.string "status", limit: 1, null: false, comment: "状态  新建N   默认A 可用  O废弃"
+    t.string "title", limit: 100, null: false, comment: "模板名称"
     t.string "note", comment: "模板备注"
-    t.string "sharing_scope_code", comment: "共享代码"
-    t.string "sharing_scope_display", comment: "共享名称"
-    t.string "disease_code", comment: "病种代码"
-    t.string "disease_display", comment: "病种名称"
-    t.integer "author_id", comment: "作者id"
-    t.string "author_display", comment: "作者名称"
-    t.integer "location_id", comment: "科室id"
-    t.string "location_display", comment: "科室名称"
+    t.string "sharing_scope_code", limit: 1, null: false, comment: "共享代码"
+    t.string "sharing_scope_display", limit: 20, null: false, comment: "共享名称"
+    t.string "disease_code", limit: 20, null: false, comment: "病种代码"
+    t.string "disease_display", limit: 100, null: false, comment: "病种名称"
+    t.bigint "author_id", null: false, comment: "作者id"
+    t.string "author_display", limit: 50, null: false, comment: "作者名称"
+    t.bigint "location_id", null: false, comment: "科室id"
+    t.string "location_display", limit: 60, null: false, comment: "科室名称"
     t.string "search_str", comment: "查询模糊字段"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at", null: false, comment: "创建时间"
+    t.datetime "updated_at", null: false, comment: "更新时间"
   end
 
   create_table "ims_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -368,6 +356,92 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.datetime "updated_at", null: false, comment: "更新时间"
   end
 
+  create_table "ims_prescription_details", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "drug_id"
+    t.string "title"
+    t.string "specification"
+    t.string "single_qty_value"
+    t.string "single_qty_unit"
+    t.string "dose_value"
+    t.string "dose_unit"
+    t.string "route_value"
+    t.string "route_unit"
+    t.string "frequency_code"
+    t.string "frequency_display"
+    t.string "course_of_treatment_value"
+    t.string "course_of_treatment_unit"
+    t.string "formul_code"
+    t.string "formul_display"
+    t.float "qty", limit: 24
+    t.float "send_qty", limit: 24
+    t.float "return_qty", limit: 24
+    t.string "unit"
+    t.string "price"
+    t.float "amount", limit: 24
+    t.string "note"
+    t.string "status"
+    t.string "order_type"
+    t.string "encounter_id"
+    t.string "author_id"
+    t.string "author_name"
+    t.string "factory_name"
+    t.string "base_unit"
+    t.string "mul"
+    t.string "measure_val"
+    t.string "measure_unit"
+    t.string "type_type"
+    t.integer "hospital_prescription_order_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "ims_prescription_headers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "prescription_no"
+    t.string "note"
+    t.string "type_code"
+    t.string "type_name"
+    t.string "confidentiality_code"
+    t.string "confidentiality_name"
+    t.string "name"
+    t.string "gender_code"
+    t.string "gender_name"
+    t.string "age"
+    t.datetime "birth_date"
+    t.string "iden"
+    t.string "occupation_code"
+    t.string "occupation_name"
+    t.string "phone"
+    t.string "address"
+    t.string "org_id"
+    t.string "org_display"
+    t.string "patient_no"
+    t.string "author_id"
+    t.string "author_display"
+    t.string "encounter_loc_id"
+    t.string "encounter_loc_display"
+    t.float "total_amount", limit: 24
+    t.string "orders"
+    t.string "delivery_id"
+    t.string "delivery_name"
+    t.datetime "delivery_at"
+    t.string "return_id"
+    t.string "return_name"
+    t.datetime "return_at"
+    t.string "drug_store_id"
+    t.string "drug_store_name"
+    t.datetime "effective_start"
+    t.datetime "effective_end"
+    t.string "diagnoses"
+    t.string "specialmark"
+    t.string "status"
+    t.string "bill_id"
+    t.datetime "bill_at"
+    t.datetime "hospital_prescription_at"
+    t.integer "hospital_prescription_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "ims_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "org_ii", comment: "组织机构代码"
     t.string "org_name", collation: "utf8_german2_ci", comment: "组织机构名称"
@@ -376,6 +450,7 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.integer "unpaid_expired", comment: "未支付订单过期天数"
     t.datetime "created_at", null: false, comment: "创建时间"
     t.datetime "updated_at", null: false, comment: "更新时间"
+    t.boolean "voice_prompts"
   end
 
   create_table "mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -447,9 +522,16 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.string "patient_age", limit: 10
     t.string "patient_iden", limit: 20
     t.string "pay_type", limit: 20
-    t.integer "is_returned", limit: 1, comment: "是否已退药"
+    t.boolean "is_returned", comment: "是否已退药"
     t.bigint "ori_id", comment: "原单id(退药的单子做记录)"
     t.string "ori_code", comment: "原单code(退药的单子做记录)"
+    t.string "returner", comment: "退药人"
+    t.bigint "returner_id", comment: "退药人id"
+    t.datetime "return_at", comment: "退药时间"
+    t.string "reason"
+    t.integer "_locked"
+    t.string "invoice_id"
+    t.integer "settle_times"
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -467,10 +549,12 @@ ActiveRecord::Schema.define(version: 20180617114240) do
   create_table "pay_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "cost_name", default: ""
     t.string "out_trade_no", default: ""
+    t.string "trade_type", default: ""
     t.string "pay_type", default: ""
-    t.float "total_fee", limit: 24, default: 0.0
+    t.decimal "total_fee", precision: 15, scale: 2
     t.string "title", default: ""
     t.string "return_url", default: ""
+    t.string "openid", default: ""
     t.string "status", default: ""
     t.string "status_desc", default: ""
     t.datetime "created_at", null: false
@@ -478,10 +562,10 @@ ActiveRecord::Schema.define(version: 20180617114240) do
   end
 
   create_table "pay_refunds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "cost_name", default: ""
+    t.integer "order_id"
+    t.string "reason", default: ""
     t.string "out_refund_no", default: ""
-    t.float "refund_fee", limit: 24, default: 0.0
-    t.string "title", default: ""
+    t.decimal "refund_fee", precision: 15, scale: 2
     t.string "status", default: ""
     t.string "status_desc", default: ""
     t.datetime "created_at", null: false
@@ -491,13 +575,14 @@ ActiveRecord::Schema.define(version: 20180617114240) do
   create_table "pay_wechats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "cost_name", default: ""
     t.string "out_trade_no", default: ""
-    t.integer "total_fee", default: 0
+    t.decimal "total_fee", precision: 11, default: "0"
     t.string "title", default: ""
     t.string "return_url", default: ""
     t.string "status", default: ""
     t.string "status_desc", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "trade_type", limit: 200
   end
 
   create_table "people", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -617,6 +702,8 @@ ActiveRecord::Schema.define(version: 20180617114240) do
     t.string "pharmacy_id"
     t.string "openid"
     t.string "headimgurl"
+    t.integer "cur_loc_id", comment: "当前用户科室id"
+    t.string "cur_loc_display", limit: 100, comment: "当前科室名称"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["login"], name: "index_users_on_login", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

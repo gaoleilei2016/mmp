@@ -1,6 +1,6 @@
 <div id="prescription_main_panel">
 	<div class="prescription_list_panel">
-		<div>订单列表</div>
+		<!-- <div>订单列表</div> -->
 		<div class="el-input el-input--mini" style="padding-top:12px; padding-bottom:12px;">
 			<el-input
 			  placeholder=" 输入处方号 "
@@ -11,8 +11,8 @@
 			</el-input>
 		</div>
 	  <el-tabs v-model="return_list_panel" type="card" @tab-click="get_return_pres">
-	    <el-tab-pane label="已发药" name="5"></el-tab-pane>
-	    <el-tab-pane label="已退药" name="7"></el-tab-pane>
+	    <el-tab-pane label="已发药" name="4"></el-tab-pane>
+	    <el-tab-pane label="已退药" name="8"></el-tab-pane>
 				<el-row :gutter="20" v-for="order in return_order_lists" class="pre_list" @click.native="get_return_order(order.order_id,$event)">
 					<el-col :span="6" style="width:120px;">{{ order.delivery_at | formatDate('yy-MM-dd')}}</el-col>
 					<el-col :span="6" style="width:calc(100% - 280px);overflow-x:hidden;">{{order.prescription_no}}</el-col>

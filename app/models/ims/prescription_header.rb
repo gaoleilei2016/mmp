@@ -13,14 +13,14 @@ class Ims::PrescriptionHeader < ApplicationRecord
 			order = args[:order]
 			prescription_headers = []
 			# ::ActiveRecord::Base.transaction do
-			::ActiveRecord::Base.transaction(:requires_new => true) do
+			# ::ActiveRecord::Base.transaction(:requires_new => true) do
 				args[:prescriptions].each do |k,prescription|
 					header = prescription_data prescription,current_user,order
 					next if header.blank?
-					prescription_headers << ::Ims::PrescriptionHeader.create!(header)
+					(prescription_headers << ::Ims::PrescriptionHeader.create!(header) ) unless ::Ims::PrescriptionHeader.where(prescription_no:prescription[:prescription_no]).count>0
 				end
-				raise ActiveRecord::Rollback
-			end
+				# raise ActiveRecord::Rollback
+			# end
 			prescription_headers.count==args[:prescriptions].count ? {flag:true,info:"处方保存成功！"} : {flag:false,info:"处方保存失败。"}
 		end
 
@@ -71,17 +71,17 @@ class Ims::PrescriptionHeader < ApplicationRecord
 					:prescription_no=>prescription[:prescription_no] ,
 					:note=>prescription[:note] ,
 					:type_code=>prescription[:type][:code] ,
-					:type_name=>prescription[:type][:name] ,
+					:type_name=>prescription[:type][:display] ,
 					:confidentiality_code=>prescription[:confidentiality][:code] ,
-					:confidentiality_name=>prescription[:confidentiality][:name] ,
+					:confidentiality_name=>prescription[:confidentiality][:display] ,
 					:name=>prescription[:name] ,
 					:gender_code=>prescription[:gender][:code] ,
-					:gender_name=>prescription[:gender][:name] ,
+					:gender_name=>prescription[:gender][:display] ,
 					:age=>prescription[:age] ,
 					:birth_date=>prescription[:birth_date] ,
 					:iden=>prescription[:iden] ,
 					:occupation_code=>prescription[:occupation][:code] ,
-					:occupation_name=>prescription[:occupation][:name] ,
+					:occupation_name=>prescription[:occupation][:display] ,
 					:phone=>prescription[:phone] ,
 					:address=>prescription[:address] ,
 					:org_id=>prescription[:org][:id] ,

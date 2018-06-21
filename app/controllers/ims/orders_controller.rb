@@ -93,6 +93,12 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  def get_order
+    @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
+    render json:@data.to_json
+  end
+
+  # 获取处方信息
   def get_prescriptions
     status = params[:stat]
     attrs = {status: status,org_id: current_user.try(:organization_id)}
@@ -100,11 +106,13 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
-
-  def get_order
-    @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
+  # # 获取处方信息
+  def get_prescription
+    attrs = {prescription_id:params[:id],org_id:current_user.try(:organization_id)}
+    @data = Ims::Order.get_prescription(attrs)
     render json:@data.to_json
   end
+  
 
   def get_detail
     id = params[:id]
@@ -186,7 +194,7 @@ class Ims::OrdersController < ApplicationController
   # 退药(目前只能线下退药)
   # => 页面需传 订单 id(string) 
   def return_drug
-    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user}
     @data = Ims::Order.return_drug params.merge(args)
     render json:@data.to_json
   end

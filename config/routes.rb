@@ -134,6 +134,8 @@ Rails.application.routes.draw do
       collection do
         get :get_orders         # 获取订单
         get :get_order          # 获取订单
+        get :get_prescriptions  # 获取处方信息
+        get :get_prescription   # 获取处方信息 
         get :charging_pre       # 收费
         get :dispensing_order   # 发药
         get :return_order       # 退药
