@@ -729,9 +729,9 @@ window.current_template_obj = {
     },    
     return_order:function(id){
       var _this = this
-        _this._data.return_reason_form.name = ""
-        _this._data.return_reason_visible = false;
-      if (this._data.return_reason_form.name.length>0){}else{
+      if (this._data.return_reason_form.name.length>0){
+
+      }else{
         _this.$message({
           type: 'warning',
           message: '请填写返回原因！',
@@ -768,6 +768,8 @@ window.current_template_obj = {
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
+      _this._data.return_reason_form.name = ""
+      _this._data.return_reason_visible = false;
     },
     choose_prescription:function(id){
       console.log(id)
