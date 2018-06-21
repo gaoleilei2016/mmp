@@ -293,11 +293,9 @@ window.current_template_obj = {
               if(temp2[0].status == "2"){
                 _this.out_list_panel = "1"
                 _this._data.order_lists = temp2
-                $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
               }else if(temp2[0].status == "3"){
                 _this.out_list_panel = "2"
                   _this._data.order_lists = temp2
-                  $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
               }else if(temp2[0].status == "4"){
                 _this.$notify({title: '提示',message: '订单已发药！'});  
               }else if(temp2[0].status == "8"){
@@ -463,11 +461,9 @@ window.current_template_obj = {
               }else if(temp2[0].status == "5"){
                 _this.return_list_panel = "5"
                 _this._data.return_order_lists = temp2
-                $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
               }else if(temp2[0].status == "8"){
                  _this.return_list_panel = "8".
                  _this._data.return_order_lists = temp2
-                 $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
               }else{
                 _this.$notify({title: '提示',message: '没有数据！'});  
               }
@@ -512,7 +508,6 @@ window.current_template_obj = {
         if(response.data.data&&response.data.data.length>0){
           _this.set_order_list(response.data.data)
             _this._data.detail = [{pres:[{type:"处方"}]}]
-            $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
             // return_detail:[{pres:[{type:"处方"}]}],          
         }else{
           _this.set_order_list([])
@@ -529,6 +524,9 @@ window.current_template_obj = {
     set_order_list:function(data){
       if (data) {
         this._data.order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+        },200)        
       }else{
         this._data.order_lists = []
       }
@@ -564,7 +562,6 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0){
           _this.set_return_order_lists(response.data.data)
-          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
         }else{
           _this.set_return_order_lists([])
         }
@@ -580,6 +577,9 @@ window.current_template_obj = {
     set_return_order_lists:function(data){
       if (data) {
         this._data.return_order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
+        },200)
       }else{
         this._data.return_order_lists = []
       }
