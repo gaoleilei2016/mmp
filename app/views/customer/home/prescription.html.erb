@@ -2,7 +2,7 @@
 	html,body,.mui-content{
 		height: 100%;
 		overflow: hidden;
-		/*background: #fff;*/
+		background: #fff;
 	}
 	.mui-content{
 		overflow: auto;
@@ -37,7 +37,16 @@
 	<h1 class="mui-title">处方详情</h1>
 </header>
 <div class="mui-content" id="vue_content" v-cloak>
-	<div v-if="prescription" style="">
+	<div v-if="prescription">
+		<div style="position: relative;text-align: center;padding: 13px 0;">
+			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
+			<h4 style="font-weight: 500;">处方签</h4>
+			<h4 style="border: 1px solid #ddd;padding: 5px;position: absolute;right: 8px;top: 35px;margin: 0;">{{prescription.type.display}}</h4>
+		</div>
+		<div>
+			<span>处方号: {{prescription.prescription_no}}</span>
+			<span style="float: right;">{{prescription.created_at}}</span>
+		</div>
 		<ul class="mui-table-view" style="margin-bottom: 22px;">
 			<li class="mui-table-view-cell">
 				<a :href="'/customer/home/prescription?id='+prescription.id">
