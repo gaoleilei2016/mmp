@@ -45,6 +45,7 @@ Rails.application.routes.draw do
     resources :home do
       collection do
         get :prescriptions
+        get :prescription
         get :orders
         get :order
         get :confirm_order

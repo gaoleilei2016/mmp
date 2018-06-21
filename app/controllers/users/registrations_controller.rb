@@ -25,10 +25,11 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     # p '~~~~~~~~~',params
     params[:user] = {
-      openid:session[:openid],
       login:params[:login],
       password:params[:password],
-      email:"#{params[:login]}@duanxinzhuce.tm"
+      email:"#{params[:login]}@duanxinzhuce.tm",
+      openid:session[:openid],
+      openname:session[:openname],
     }
     build_resource(sign_up_params)
     # # 图片验证码
