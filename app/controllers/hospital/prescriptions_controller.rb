@@ -134,7 +134,7 @@ class Hospital::PrescriptionsController < ApplicationController
     render json: {flag: true, info: "success", data: ret}
   end
   # GET
-  # /hospital/prescriptions/get_prescriptions_by_phone
+  # /hospital/prescriptions/get_all_prescriptions_by_phone
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -143,14 +143,10 @@ class Hospital::PrescriptionsController < ApplicationController
     cur_phone = params[:phone]
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
-    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).each do |_prescription|
-      # re = JSON.parse(_prescription.to_json)
-      # total_price = 0.0
-      # orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      # re[:total_price] = total_price
-      # re[:orders] = orders
-      # re[:organ] = Admin::Organization.find(_prescription.organization_id)
-      # ret << re
+    page = params[:page]||1
+    per = params[:per]||5
+    sort = "DESC"
+    ::Hospital::Interface.get_prescriptions_by_phone_with_sort(cur_phone, page, per, sort).each do |_prescription|
       ret << _prescription.to_web_front
     end
     render json: {flag: true, info: "success", data: ret}

@@ -4,22 +4,22 @@
 	<div id="ims_order_main">
 		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
-		  <el-menu-item index="1" @click="show_panel('out_order')">
+		  <el-menu-item index="1" @click.native="show_panel('out_order',$event)">
 		    <i class="el-icon-goods"></i>
 		    <span >发药</span>  
 		  </el-menu-item>
 
-		  <el-menu-item index="2" @click="show_panel('return_drug')">
+		  <el-menu-item index="2" @click.native="show_panel('return_drug',$event)">
 		    <i class="el-icon-sold-out"></i>
 		    <span >退药</span>  
 		  </el-menu-item>
 
-		  <el-menu-item index="3" @click="show_panel('reports')">
+		  <el-menu-item index="3" @click.native="show_panel('reports',$event)">
 		    <i class="el-icon-document"></i>
 		    <span >报表</span>
 		  </el-menu-item>
 
-		  <el-menu-item index="4" @click="show_panel('settings')">
+		  <el-menu-item index="4" @click.native="show_panel('settings',$event)">
 		    <i class="el-icon-setting"></i>
 		    <span >设置</span>
 		  </el-menu-item>
@@ -161,8 +161,10 @@ window.current_template_obj = {
     handleClose:function(key, keyPath) {
       console.log(key, keyPath);
     },
-    show_panel:function(method){
+    show_panel:function(method,e){
       var _this = this
+      console.log(e.currentTarget)
+      if(e)$(e.currentTarget).addClass("is-active").siblings("li").removeClass("is-active")
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
@@ -578,7 +580,7 @@ window.current_template_obj = {
       if (data) {
         this._data.return_order_lists = data
         setTimeout(function(){
-          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .pre_list:first").click();
+          $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
         },200)
       }else{
         this._data.return_order_lists = []
@@ -726,10 +728,10 @@ window.current_template_obj = {
         })
     },    
     return_order:function(id){
-      // console.log(this._data.return_reason_form)
-      // return false;
       var _this = this
-      if (this._data.return_reason_form.name.length>0){}else{
+      if (this._data.return_reason_form.name.length>0){
+
+      }else{
         _this.$message({
           type: 'warning',
           message: '请填写返回原因！',
@@ -763,11 +765,11 @@ window.current_template_obj = {
           _this._data.return_order_lists = []
         }
         _this._data.return_detail = [{}]
-        _this._data.return_reason_form.name = ""
-        _this._data.return_reason_visible = false;
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
+      _this._data.return_reason_form.name = ""
+      _this._data.return_reason_visible = false;
     },
     choose_prescription:function(id){
       console.log(id)
