@@ -36,11 +36,11 @@
 		</div>
 
 		<div class="function_panel reports" style="display:none;">
-			<%#= render "ims/home/render/order_reports"%>
+			<%= render "ims/home/render/order_reports"%>
 		</div>
 
 		<div class="function_panel settings" style="display:none;">
-			<%#= render "ims/home/render/settings"%>
+			<%= render "ims/home/render/settings"%>
 		</div>
 
     <el-button @click="change" id="notice_input" style="display:none;"></el-button>
@@ -80,14 +80,32 @@ window.current_template_obj = {
       order_lists:[],
       detail:[{pres:[{type:"处方"}]}],
 
+      return_reason_visible:false,
+      return_reason_form:{
+        name:"",
+      },
       return_order_search:"",
       return_list_panel:"5",
       return_order_lists:[],
       return_detail:[{pres:[{type:"处方"}]}],
 
+      setting_form:{},
+      boolean_options:[{value:"yes",label:"是"},{value:"no",label:"否"}],      
       dialogFormVisible: false,
       platform_data:[],
       activeName2:'0',
+
+      setting_rules: {
+        payment_expired: [
+          { required: true, message: '效期不能为空'},
+        ],
+        unpaid_expired: [
+          { required: true, message: '效期不能为空'},
+        ],        
+        voice: [
+          { required: true, message: '请选择语音'},
+        ]
+      },
 		}
 	},
 	methods:{
@@ -689,7 +707,16 @@ window.current_template_obj = {
         })
     },    
     return_order:function(id){
+      // console.log(this._data.return_reason_form)
+      // return false;
       var _this = this
+      if (this._data.return_reason_form.name.length>0){}else{
+        _this.$message({
+          type: 'warning',
+          message: '请填写返回原因！',
+        });       
+        return false
+      }      
       if (id){}else{
         _this.$notify({
           title: '提示',
@@ -697,7 +724,7 @@ window.current_template_obj = {
         });       
         return false
       }
-      _this.$http.get('/ims/orders/return_drug?id='+id).then(function(response) {
+      _this.$http.get('/ims/orders/return_drug?id='+id+"&reason="+this._data.return_reason_form.name).then(function(response) {
         stat = response.data.flag ? true : false
         info = response.data.info
         type = stat ? "success" : "warning";
@@ -746,7 +773,21 @@ window.current_template_obj = {
     notice_ims:function(data){
       console.log(data)
       this.$notify({ title: '提示', message: data,});
-    }
+    },
+    setting_form_submit:function(data){
+      var _this = this
+        data = {authenticity_token:"<%= form_authenticity_token %>", data:_this._data.setting_form }
+        Vue.http.post("/ims/orders/order_setting",data).then(function(response){
+          if (response.data&&response.data.flag) {
+            response.data.info.length>0 ? _this.$message({message:response.data.info,type:'success'}) : _this.$message({message:"设置成功",type:'success'})
+          }else{
+            _this.$message({message:'设置失败，请重试！',type:'error'});
+          }
+        },function(response){
+          _this.$message({message:'设置失败，请重试！',type:'error'});
+        })      
+      // console.log(this._data.setting_form)
+    },
 	},
 	mounted:function(){
 		this.$nextTick(function(){

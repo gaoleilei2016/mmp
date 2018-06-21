@@ -206,6 +206,11 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  def order_setting
+    p params
+    render json:{flag:true, info:"设置成功！"}
+  end
+  
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order

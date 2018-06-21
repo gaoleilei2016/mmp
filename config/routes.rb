@@ -151,6 +151,7 @@ Rails.application.routes.draw do
         get :return_drug           # 退药
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
+        post :order_setting  #订单设置
       end
     end
 
