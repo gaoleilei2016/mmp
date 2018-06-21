@@ -3,6 +3,7 @@ class NoticeChannel < ApplicationCable::Channel
     stream_from "notice_channel"
     p "========================="
     p "链接成功"
+    p params
     p "========================="
   end
  

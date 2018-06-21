@@ -48,6 +48,7 @@ class Ims::Order < ApplicationRecord
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           is_returned: order.is_returned,
+          created_at: order.created_at,
           }
         }
         return {flag:true,data:data}

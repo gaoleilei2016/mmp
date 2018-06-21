@@ -42,22 +42,40 @@
 			<%#= render "ims/home/render/settings"%>
 		</div>
 
+    <el-button @click="change" id="notice_input" style="display:none;"></el-button>
+    <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
 	</div>
 </template>
 <script type="text/javascript">
 document.onkeydown = function(){
-  console.log(window.event.keyCode)
-  if(window.event.keyCode = 114){
+  // console.log(window.event.keyCode)
+  if(window.event.keyCode == 114){
+    console.log("search")
     var ele = document.getElementsByClassName("el-input__inner")
-    // $.each(ele,function(k,v))
+    $.each(ele,function(k,v){
+      // console.log($(v).parents(".function_panel").css("display"))
+      if ($(v).parents(".function_panel").css("display") == "block") {
+        $(v).select()
+      };
+    })
+    return false
   }
+}
+document.notice_data = [];
+$.ims_notice = function(data){
+  // alert(data)
+  org_id = $("#organization_id").val()
+  if (data&&data.order_id&&data.org_id==org_id) {
+    document.notice_data = data
+    $("#notice_input").click()
+  };
 }
 window.current_template_obj = {
 	data:function(){
 		return {
       isCollapse: true,
       out_order_search:"",
-      out_list_panel:"0",
+      out_list_panel:"1",
       order_lists:[],
       detail:[{pres:[{type:"处方"}]}],
 
@@ -72,7 +90,27 @@ window.current_template_obj = {
 		}
 	},
 	methods:{
-    init:function(){},
+    init:function(){
+      console.log(this)
+      console.log(this._data)
+    },
+    change:function(){
+      // alert(val)
+      data = document.notice_data
+      console.log(data)
+      if (data.flag) {
+        console.log("+++++++++++++++++++++")
+        temp = this._data.order_lists
+        temp.push(data)
+        this._data.order_lists = temp
+        console.log("+++++++++++++++++++++")
+        this.$notify.success({
+          title: 'Info',
+          message: '您有新的订单生成',
+          showClose: false
+        });
+      };
+    },
     handleOpen:function(key, keyPath) {
       console.log(key, keyPath);
     },
@@ -680,11 +718,7 @@ window.current_template_obj = {
         _this._data.return_detail = [{}]
 
       },function(response){
-        _this.$notify({
-          title: '提示',
-          message: '服务器请求出错了',
-          duration: 0
-        });
+        _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
     },
     choose_prescription:function(id){
@@ -708,6 +742,10 @@ window.current_template_obj = {
         return ""
       }
     },
+    notice_ims:function(data){
+      console.log(data)
+      this.$notify({ title: '提示', message: data,});
+    }
 	},
 	mounted:function(){
 		this.$nextTick(function(){
