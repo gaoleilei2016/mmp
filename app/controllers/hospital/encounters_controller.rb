@@ -82,11 +82,14 @@ class Hospital::EncountersController < ApplicationController
   # 4：手动输入信息后保存创建就诊 （采用姓名、手机号做唯一识别  查询Person信息做关联） type: "by_write"
 	def create
     p "Hospital::EncountersController ==========create", params
+    # 判断医生有没有当前科室
+    return render json:{flag:false, info: "没有设置当前科室 请设置后再对病人接诊"} if current_user.cur_loc_id.nil?
     # raise "测试"
+    p current_user.cur_loc_id
     case params[:type].to_s
     when "by_person"
       cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
-      render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
+      return render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
       cur_org = current_user.organization
       encounter_info = ::Hospital::Encounter.get_encounter_info_from_person(cur_person.id)
       encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id, hospital_oid: cur_org.id, hospital_name: cur_org.name)
@@ -209,8 +212,11 @@ class Hospital::EncountersController < ApplicationController
         blood_display: args[:blood][:display], 
         height: args[:height], 
         weight: args[:weight], 
+        encounter_loc_id: current_user.cur_loc_id,
+        encounter_loc_display: current_user.cur_loc_display,
         drugstore_location_id: args[:drugstore_location][:id],
-        author_id: current_user.id
+        author_id: current_user.id,
+        photo: args[:photo]
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息
@@ -243,9 +249,12 @@ class Hospital::EncountersController < ApplicationController
         blood_code: args[:blood][:code], 
         blood_display: args[:blood][:display], 
         height: args[:height], 
-        weight: args[:weight], 
+        weight: args[:weight],
+        encounter_loc_id: current_user.cur_loc_id,
+        encounter_loc_display: current_user.cur_loc_display, 
         drugstore_location_id: args[:drugstore_location][:id],
-        author_id: current_user.id
+        author_id: current_user.id,
+        photo: args[:photo]
       }
       diagnose_args = args[:diagnoses]  #诊断信息
       allergen_args = args[:allergens] #过敏信息

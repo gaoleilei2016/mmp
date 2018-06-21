@@ -26,7 +26,6 @@ class Hospital::Encounter < ApplicationRecord
 	end
 
 	def to_web_front
-		self.reload
 		ret = {
 			id: self.id,
 			iden: self.iden,
@@ -72,6 +71,10 @@ class Hospital::Encounter < ApplicationRecord
 			  code: self.marriage_code,
 			  display: self.marriage_display
 			},
+			encounter_loc:{
+				id: self.encounter_loc_id,
+        		display: self.encounter_loc_display
+        	},
 			height: self.height,
 			weight: self.weight,
 			diagnoses: self.diagnoses.select { |e| e.type_code == 0  },
@@ -83,7 +86,8 @@ class Hospital::Encounter < ApplicationRecord
 			author: {
 				id: self.author_id,
 				display: self.author.name
-			}
+			},
+			photo: self.photo
 		}
 		# 当前就诊的取药点
 		if self.drugstore_location.present?
@@ -124,6 +128,7 @@ class Hospital::Encounter < ApplicationRecord
 			blood_display: self.blood_display,
 			height: self.height,
 			weight: self.weight,
+			photo: self.photo,
 			#剩下字段和person不一致
 			pa_address: self.address
 		}
@@ -156,6 +161,7 @@ class Hospital::Encounter < ApplicationRecord
 			blood_display: cur_person.blood_display,
 			height: cur_person.height,
 			weight: cur_person.weight,
+			photo: cur_person.photo,
 			# 剩下字段和  encounter不一样
 			address: cur_person.pa_address
 		}

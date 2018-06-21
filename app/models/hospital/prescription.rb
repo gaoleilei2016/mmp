@@ -163,7 +163,7 @@ class ::Hospital::Prescription < ApplicationRecord
 	# }
 	def send_drug(args, cur_user)
 		args.deep_symbolize_keys!
-		if status == 3 # 已审核的处方可以变为待收费
+		if status == 3
 			self.status = 4
 			self.delivery_id = args[:delivery][:id] 
 			self.delivery_display = args[:delivery][:display]
@@ -173,6 +173,8 @@ class ::Hospital::Prescription < ApplicationRecord
 			false
 		end
 	end
+
+	#没有退药流程
 
 	###=== 处方状态流转  ===###
 
@@ -239,7 +241,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			}
 		}
 		# 就诊信息
-		cur_doctor = self.doctor
+		cur_doctor = self.doctor # User
 		encounter_info = {
 			# 就诊号
 			patient_no: cur_encounter.patient_no,
@@ -250,8 +252,8 @@ class ::Hospital::Prescription < ApplicationRecord
 			},
 			# 就诊科室
 			encounter_loc: {
-				id: '',
-				display: ''
+				id: cur_encounter.encounter_loc_id,
+				display: cur_encounter.encounter_loc_display
 			}
 		}
 		# 药房信息
@@ -294,8 +296,18 @@ class ::Hospital::Prescription < ApplicationRecord
 			orders: self.orders.map { |e| e.to_web_front  },
 			price: self.orders.map{|e| e.price }.reduce(:+),
 			specialmark: self.specialmark,
-			created_at: self.created_at,
-			updated_at: self.updated_at
+			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			updated_at: self.updated_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			is_read: self.is_read,
+			auditor:{
+				id: self.auditor_id,
+				display: self.auditor_display
+			},
+			delivery:{
+				id: self.delivery_id,
+				display: self.delivery_display
+			}
+
 		}
 		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
