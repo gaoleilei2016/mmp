@@ -45,6 +45,7 @@ Rails.application.routes.draw do
     resources :home do
       collection do
         get :prescriptions
+        get :prescription
         get :orders
         get :order
         get :confirm_order
@@ -95,6 +96,8 @@ Rails.application.routes.draw do
       collection do
         get :get_all_prescriptions_by_phone
         get :get_prescriptions_by_phone
+        get :get_not_read_prescription
+        put :read_prescription
       end
       member do
         post :set_drug_store
@@ -105,12 +108,12 @@ Rails.application.routes.draw do
     # 诊断
     resources :diagnoses do
       collection do
-        get :get_diagnoses_by_encounter_id
-        post :create_by_encounter_id
+        post :sort
       end
     end
 
     resources :patients
+    resources :people
   end
   ########### hospital ##########
   ############################

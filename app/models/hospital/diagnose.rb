@@ -14,7 +14,7 @@ class Hospital::Diagnose < ApplicationRecord
 	# 设置排序字段
 	def set_rank
 		p self.encounter_id
-		self.rank = (::Hospital::Diagnose.where(encounter_id: self.encounter_id, type: self.type_code).order(rank: :desc).first.rank rescue 0) + 1
+		self.rank = (::Hospital::Diagnose.where(encounter_id: self.encounter_id, type_code: self.type_code).order(rank: :desc).first.rank rescue 0) + 1
 	end
 
 	def to_web_front
@@ -32,6 +32,7 @@ class Hospital::Diagnose < ApplicationRecord
 				code: self.type_code,
 				display: self.type_display
 			},
+			rank: self.rank,
 			status: self.status,
 			note: self.note,
 			fall_ill_at: self.fall_ill_at,
@@ -61,13 +62,12 @@ class Hospital::Diagnose < ApplicationRecord
 
 			# 交换两个诊断的顺序
 			def swap(tag_id, exchange_id)
-				cur_diagnoses = ::Hospital.Diagnose.find([tag_id, exchange_id])
-				return {flag: false, info: "不同诊断类型不能"} if cur_diagnoses[0].type != cur_diagnoses[1].type
-				tmp_rank = cur_diagnoses[0].rank
-				cur_diagnoses[0].rank = cur_diagnoses[1].rank
-				cur_diagnoses[1].rank = tmp_rank
-				cur_diagnoses[0].save
-				cur_diagnoses[1].save
+				cur_diagnoses = ::Hospital::Diagnose.find([tag_id, exchange_id])
+				return {flag: false, info: "不同诊断类型不能交换顺序"} if cur_diagnoses[0].type_code != cur_diagnoses[1].type_code
+				cur_diagnoses[0].rank, cur_diagnoses[1].rank = cur_diagnoses[1].rank, cur_diagnoses[0].rank
+				p cur_diagnoses[0].save
+				p cur_diagnoses[1].save
+				return {flag: true, info: "success"}
 			end
 
 			def to_master_and_slaver(cur_diagnoses)

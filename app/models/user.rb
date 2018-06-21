@@ -1,5 +1,6 @@
 class User < ApplicationRecord
 	belongs_to :organization, class_name:"Admin::Organization", optional: true
+	has_many :search_histories, class_name:"SearchHistories"
 	# Include default devise modules. Others available are:
 	# :confirmable, :lockable, :timeoutable and :omniauthable
 	validates_presence_of :login

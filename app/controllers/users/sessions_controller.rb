@@ -8,6 +8,15 @@ class Users::SessionsController < Devise::SessionsController
   # GET /resource/sign_in
   def new
     flash[:login] = params[:login] if params[:login].present?
+    if session[:openid]
+      u = User.where(openid:session[:openid]).first
+      if u
+        sign_in(u)
+        return redirect_to "/"
+      else
+        return redirect_to "/users/sign_up?login=#{params[:login]}" 
+      end
+    end
     str = request.user_agent
     if str.include?('Mobile')
       render "/devise/sessions/new2.html.erb",layout:"customer"

@@ -24,7 +24,7 @@
 						  </i>
 					  </el-input>
 					</el-col>
-					<el-col :span="6" style="line-height: 30px;">&nbsp;
+					<el-col :span="6">&nbsp;
 						<el-button @click="isShowfilters = !isShowfilters" size="mini">高级搜索<span v-if="isShowfilters" class="fa fa-lg fa-fw fa-angle-double-up"></span><span v-else class="fa fa-lg fa-fw fa-angle-double-down"></span></el-button>
 						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
 					</el-col>
@@ -72,7 +72,7 @@
 			      width="30">
 			    </el-table-column>
 		      <el-table-column
-				    min-width="130"
+				    min-width="140"
 				    label="患者">
 				    <template slot-scope="scope">
 				      <span v-if="scope.row.name" style="display: inline-block; width: 70px;">{{ scope.row.name }}</span>&#12288;
@@ -293,7 +293,7 @@ window.current_template_obj = {
 		  	_this.$message.error("获取初始值失败，请联系管理员。");
 		  })
       var clientHeight = document.body.clientHeight;
-      _this.tableHeight = clientHeight - 290;
+      _this.tableHeight = clientHeight - 340;
       _this.getData();
 		},
 		getData: function () {

@@ -89,7 +89,7 @@
 								location.href = "/customer/home/order?id=<%= params[:id] %>"
 							}else{
 								if (show_info) {
-									mui.toast("暂未获取到第三方支付信息，请稍后重试",{duration:5000});
+									mui.toast("支付信息还未同步，请稍后重试",{duration:5000});
 								}
 							}
 						}else{

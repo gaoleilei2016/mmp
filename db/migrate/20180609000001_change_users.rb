@@ -8,6 +8,7 @@ class ChangeUsers < ActiveRecord::Migration[5.1]
       t.string :sex
       t.string :birth
       t.string :openid
+      t.string :openname
       t.string :headimgurl
       t.string :admin_level
     end

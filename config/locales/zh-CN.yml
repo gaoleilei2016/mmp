@@ -1,0 +1,83 @@
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t 'hello'
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t('hello') %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# The following keys must be escaped otherwise they will not be retrieved by
+# the default I18n backend:
+#
+# true, false, on, off, yes, no
+#
+# Instead, surround them with single quotes.
+#
+# en:
+#   'true': 'foo'
+#
+# To learn more, please read the Rails Internationalization guide
+# available at http://guides.rubyonrails.org/i18n.html.
+
+zh-CN:
+  person:
+    id: "人的id"
+    health_file_no: "居民健康档案号"
+    iden: "身份证号"
+    health_card_no: "居民健康卡号" 
+    name: "姓名"
+    birth_date: "出生日期"
+    age: "年龄"
+    gender_code: "性别代码"
+    gender_display: "性别名称"
+    nationality_code: "国籍代码"
+    nationality_display: "国籍名称"
+    home_town_province: "籍贯-省（自治区、直辖市）"
+    home_town_city: "籍贯-市（地区、州）"
+    nation_code: "民族代码"
+    nation_display: "民族名称"
+    marriage_code: "婚姻状况代码"
+    marriage_display: "婚姻状况名称"
+    education_code: "文化程度代码"
+    education_display: "文化程度"
+    occupation_code: "职业编码"
+    occupation_display: "职业编码名称"
+    phone: "联系电话"
+    email: "邮箱"
+    pa_post_code: "现居地址邮政编码"
+    pa_address: "现居地址"
+    ha_post_code: "户口地址邮政编码"
+    ha_address: "户口地址"
+    unit_name: "工作单位名称"
+    unit_phone: "工作单位联系电话"
+    ua_post_code: "工作单位地址邮政编码"
+    ua_address: "工作单位详细地址"
+    contact_name: "联系人姓名"
+    contact_relation_code: "联系人与本人关系代码"
+    contact_relation_display: "联系人与本人关系编码名称"
+    contact_phone: "联系人电话"
+    ca_post_code: "联系人地址邮政编码"
+    ca_address: "联系人详细地址"
+    input_date: "建档时间"
+    input_organ_code: "建档人机构组织机构代码或者信用代码"
+    input_organ_name: "建档人机构名称"
+    input_name: "建档人姓名"
+    created_at: "创建时间"
+    updated_at: "更新时间"
+    photo: "照片"
+    blood_code: "血型编码"
+    blood_display: "血型编码名称"
+    height: "身高  单位cm"
+    weight: "体重 单位kg"
+    name_jp: "姓名简拼"
+    name_wb:  "姓名五笔"

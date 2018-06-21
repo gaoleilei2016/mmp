@@ -9,25 +9,23 @@ class Hospital::Encounter < ApplicationRecord
 
 	#1:  如果有person_id就直接取到person
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人
-	def get_person
+	def get_or_create_person!
 	  return self.person if self.person.present?
-	  cur_person = ::Person.where(name: self.name.strip, phone: self.phone.strip).first
+	  cur_person = ::Person.where(name: self.name, phone: self.phone).first # 姓名和电话号码都都一致的情况下当成是同一个人
 	  if cur_person.nil?
 	  	# 没有查询到 创建一个实体Person
 	  	person_args = self.format_person_args
-	  	cur_person = ::Person.create(person_args)
+	  	cur_person = ::Person.create!(person_args)
 	  else
 	  	#  查询到了
 	  end
 	  # 建立关系然后返回
 	  self.person_id = cur_person.id
-	  self.save
-	  self.reload
+	  self.save!
 	  return cur_person
 	end
 
 	def to_web_front
-		self.reload
 		ret = {
 			id: self.id,
 			iden: self.iden,
@@ -73,6 +71,10 @@ class Hospital::Encounter < ApplicationRecord
 			  code: self.marriage_code,
 			  display: self.marriage_display
 			},
+			encounter_loc:{
+				id: self.encounter_loc_id,
+        		display: self.encounter_loc_display
+        	},
 			height: self.height,
 			weight: self.weight,
 			diagnoses: self.diagnoses.select { |e| e.type_code == 0  },
@@ -84,7 +86,8 @@ class Hospital::Encounter < ApplicationRecord
 			author: {
 				id: self.author_id,
 				display: self.author.name
-			}
+			},
+			photo: self.photo
 		}
 		# 当前就诊的取药点
 		if self.drugstore_location.present?
@@ -101,7 +104,7 @@ class Hospital::Encounter < ApplicationRecord
 
 
 	def format_person_args
-		self.reload
+		p self
 		ret = {
 			iden: self.iden,
 			name: self.name,
@@ -125,11 +128,12 @@ class Hospital::Encounter < ApplicationRecord
 			blood_display: self.blood_display,
 			height: self.height,
 			weight: self.weight,
+			photo: self.photo,
 			#剩下字段和person不一致
 			pa_address: self.address
 		}
 		# 删除值为空的字段 
-		return ret.compact
+		return ret.delete_if {|key,value| value.blank?}
 	end
 
 	def self.get_encounter_info_from_person(person_id)
@@ -157,9 +161,10 @@ class Hospital::Encounter < ApplicationRecord
 			blood_display: cur_person.blood_display,
 			height: cur_person.height,
 			weight: cur_person.weight,
+			photo: cur_person.photo,
 			# 剩下字段和  encounter不一样
 			address: cur_person.pa_address
 		}
-		return encounter_info.compact
+		return encounter_info.delete_if {|key,value| value.blank?}
 	end
 end

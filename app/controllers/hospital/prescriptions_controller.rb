@@ -150,6 +150,27 @@ class Hospital::PrescriptionsController < ApplicationController
     render json: {flag: true, info: "success", data: ret}
   end
 
+  # PUT
+  # 根据处方ids更新 处方已读
+  # {
+  #   prescription_ids: []
+  # }
+  def read_prescription
+    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil? || params[:prescription_ids].is_array
+    ::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
+    render json:{flag: true, info:"success"}
+  end
+
+  # GET
+  # 获取未读处方的数量  通过电话查询
+  # {phone: ""}
+  def get_not_read_prescription
+    return render json:{flag: false, info:"没有电话号码或格式不正确"} if params[:phone].nil?
+    cur_phone = params[:phone]
+    count = ::Hospital::Interface.get_not_read_prescriptions_by_phone(cur_phone).count
+    render json:{flag: true, info: "success", count: count}
+  end
+
   # /# POST
   # /hospital/prescriptions/:id/set_drug_store
   def set_drug_store
