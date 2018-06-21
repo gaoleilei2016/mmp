@@ -116,60 +116,50 @@
 		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
 		<span v-else>距离当前最近</span>
 	</p>
-		<form class="">
-			<div class="mui-input-row mui-checkbox mui-left">
-				<div>checked：false</div>
-				<input name="checkbox" value="Item 1" type="checkbox" >
-			</div>
-			<div class="mui-input-row mui-checkbox mui-left">
-				<label>checked：true</label>
-				<input name="checkbox" value="Item 2" type="checkbox" checked>
-			</div>
-			<div class="mui-input-row mui-checkbox mui-left mui-disabled">
-				<label>disabled checkbox</label>
-				<input name="checkbox" type="checkbox" disabled="disabled">
-			</div>
-		</form>
 	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="organ in organs">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-			<div class="mui-checkbox mui-left" style="padding-left: 26px;">
-				<input name="checkbox" value="Item 2" type="checkbox" checked style="top: 12px;left: 0px;">
-				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
-				<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-				<div class="mui-media-body">
-					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
-					<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
-					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
-				</div>
+			<div class="mui-checkbox mui-left">
+				<input @click="check_all($event,organ)" type="checkbox" checked style="top: 12px;left: 0px;">
+				<label style="padding-left: 26px;padding-right: 0;">
+					<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+					<div class="mui-media-body">
+						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+						<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
+						<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
+					</div>
+				</label>
 			</div>
 			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
-			<template v-for="prescription in organ.prescriptions">
 			<ul class="mui-table-view" style="margin: 15px 0;">
-				<li class="mui-table-view-cell" style="padding-left: 0;">
-					<div class="mui-checkbox mui-left" style="padding-left: 26px;">
-						<input name="checkbox" value="Item 2" type="checkbox" checked style="top: 0px;left: 0px;">
-						<span>处方号: {{prescription.prescription_no}}</span>
-						<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
-					</div>
-				</li>
-				<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
-					<div href="javascript:;" class="">
-						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
-						<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-						<div class="mui-media-body">
-							{{drug.title}}
-							<p class="mui-ellipsis">
-								<p style="padding-top: 6px;">{{drug.specification}}</p>
-								<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
-							</p>
+				<template v-for="prescription in organ.prescriptions">
+					<li class="mui-table-view-cell" style="padding-left: 0;">
+						<div class="mui-checkbox mui-left">
+							<input v-model="organ.prescription_ids" name="checkbox" :value="prescription.id" type="checkbox" style="top: 0px;left: 0px;">
+							<label style="padding-left: 26px;padding-right: 0;">
+								<span>处方号: {{prescription.prescription_no}}</span>
+								<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
+							</label>
 						</div>
-					</div>
-				</li>
+					</li>
+					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
+						<div href="javascript:;" class="">
+							<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
+							<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+							<div class="mui-media-body">
+								{{drug.title}}
+								<p class="mui-ellipsis">
+									<p style="padding-top: 6px;">{{drug.specification}}</p>
+									<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
+								</p>
+							</div>
+						</div>
+					</li>
+				</template>
 			</ul>
-			</template>
 			<div style="line-height: 33px;">
 				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
@@ -196,7 +186,6 @@
 		},
 		watch:{
 			search_str:function(val) {
-				// console.log( 'xxxxxxxxxxxxxx',val,val.length );
 				var _this = this;
 				clearTimeout(_this.timer)
 				if (val) {
@@ -224,6 +213,13 @@
 			},
 		},
 		methods:{
+			check_all:function(e,organ) {
+				if ($(e.target).prop("checked")) {
+					organ.prescription_ids = organ.prescription_ids2;
+				}else{
+					organ.prescription_ids = [];
+				}
+			},
 			send_prescription_ids_session:function(item) {
 				var _this = this;
 				if (_this.current_pharmacy.id) {
