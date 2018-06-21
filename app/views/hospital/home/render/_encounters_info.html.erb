@@ -17,7 +17,7 @@
 		    v-model="searchencstr">
 		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
 		  </el-input>&#12288; -->
-      <b v-if="encounter.name">{{ encounter.name }}</b>&#12288;
+      <span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
       <i v-if="encounter.gender&&encounter.gender.display" v-html="judgeGender(encounter.gender.display)"></i>&#12288;
       <span v-if="encounter.age">{{ encounter.age }}岁</span>
       <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>

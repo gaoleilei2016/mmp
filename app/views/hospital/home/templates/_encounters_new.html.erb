@@ -470,6 +470,13 @@ window.current_template_obj = {
 	    	}
 	    	_this.rules["birth_date"][0]["required"] = flag;
 	    	_this.rules["contact_name"][0]["required"] = flag;
+	    	// 判断是否有出生日期，修改年龄，修改出生年份
+	    	if(_this.encounter.birth_date) {
+		    	var year = ((new Date()).getFullYear() - val);
+		    	var birth = new Date(_this.encounter.birth_date);
+		    	birth.setYear(year);
+		    	_this.encounter.birth_date = birth;
+	    	}
 	    },
 			// 判断性别，根据性别显示图标
 	  	judgeGender: function (gender) {
@@ -675,7 +682,7 @@ window.current_template_obj = {
 		    deleteDiagnoses: function (index, row) {
 		    	var _this = this, $target = $(event.target);
 		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: encounter_id}).then( function(response) {
 	      		var res = response.data;
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		if(res.flag) {
