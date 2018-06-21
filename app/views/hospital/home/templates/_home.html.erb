@@ -1,120 +1,142 @@
 <style type="text/css">
-
 </style>
 <template id="home_div">
 	<el-row :gutter="20">
-	  <el-col :span="4">
-	  	<h2 align="center">功能介绍</h2>
-	    <el-menu
-	      default-active="1-1-1"
-	      :default-openeds="['1', '2', '3', '4']"
-		    background-color="#545c64"
-	      text-color="#fff"
-	      active-text-color="#ffd04b">
-	      <el-submenu index="1">
-	        <template slot="title">
-	          <i class="fa fa-fw fa-user-md"></i>
-	          <span>接诊</span>
-	        </template>
-	        <el-submenu index="1-1">
-	          <template slot="title">基本信息</template>
-	          <el-menu-item index="1-1-1">个人信息</el-menu-item>
-	          <el-menu-item index="1-1-2">诊断</el-menu-item>
-	          <el-menu-item index="1-1-3">过敏</el-menu-item>
-	          <el-menu-item index="1-1-4">手动录入</el-menu-item>
-	          <el-menu-item index="1-1-5">刷身份证</el-menu-item>
-	          <el-menu-item index="1-1-6">搜索患者</el-menu-item>
-	          <el-menu-item index="1-1-7">给已有病人新建就诊</el-menu-item>
-	          <el-menu-item index="1-1-8">其他功能</el-menu-item>
-	        </el-submenu>
-	        <el-submenu index="1-2">
-	          <template slot="title">历史就诊</template>
-	          <el-menu-item index="1-2-1">列表</el-menu-item>
-	          <el-menu-item index="1-2-2">历史药品</el-menu-item>
-	          <el-menu-item index="1-2-3">历史处方</el-menu-item>
-	        </el-submenu>
-	        <el-submenu index="1-3">
-	          <template slot="title">诊断</template>
-	          <el-menu-item index="1-3-1">新建</el-menu-item>
-	          <el-menu-item index="1-3-2">列表</el-menu-item>
-	        </el-submenu>
-	        <el-submenu index="1-4">
-	          <template slot="title">药品</template>
-	          <el-menu-item index="1-4-1">新建</el-menu-item>
-	          <el-menu-item index="1-4-2">列表</el-menu-item>
-	          <el-menu-item index="1-4-3">模板</el-menu-item>
-	          <el-menu-item index="1-4-4">复制</el-menu-item>
-	          <el-menu-item index="1-4-5">生成处方</el-menu-item>
-	        </el-submenu>
-	        <el-submenu index="1-5">
-	          <template slot="title">处方列表</template>
-	          <el-menu-item index="1-5-1">列表</el-menu-item>
-	          <el-menu-item index="1-5-2">处方单</el-menu-item>
-	          <el-menu-item index="1-5-3">打印</el-menu-item>
-	          <el-menu-item index="1-5-4">复制</el-menu-item>
-	          <el-menu-item index="1-5-5">作废</el-menu-item>
-	        </el-submenu>
-	      </el-submenu>
-	      <el-menu-item index="2">
-	        <i class="fa fa-fw fa-users"></i>
-	        <span slot="title">我的患者</span>
-	      </el-menu-item>
-	      <el-submenu index="3">
-	        <template slot="title">
-	          <i class="fa fa-fw fa-bar-chart"></i>
-	        	<span>接诊统计</span>
-	        </template>
-	        <el-menu-item index="3-1">
-		        <span slot="title">接诊列表</span>
+	  <el-col :span="4" style="width: 220px;">
+	  	<span>.</span>
+	  	<div style="position: fixed; left: 0; top: 30px; width: 220px;">
+		  	<h3 align="center" style="background: #545c64; color: #fff; margin: 0; padding-top: 1em;">功能介绍</h3>
+		    <el-menu
+		      default-active="1-1"
+		      @select="handleSelectMenu"
+		      :style="{height: menuHeight+'px', border: 'none'}"
+		      :default-openeds="['1']"
+			    background-color="#545c64"
+		      text-color="#fff"
+		      active-text-color="#ffd04b">
+		      <el-submenu index="1">
+		        <template slot="title">
+		          <i class="fa fa-fw fa-user-md"></i>
+		          <span>接诊</span>
+		        </template>
+		        <el-submenu index="1-1">
+		          <template slot="title">基本信息</template>
+		          <el-menu-item index="1-1-1">个人信息</el-menu-item>
+		          <el-menu-item index="1-1-2">诊断</el-menu-item>
+		          <el-menu-item index="1-1-3">过敏</el-menu-item>
+		          <el-menu-item index="1-1-4">手动录入</el-menu-item>
+		          <el-menu-item index="1-1-5">刷身份证</el-menu-item>
+		          <el-menu-item index="1-1-6">搜索患者</el-menu-item>
+		          <el-menu-item index="1-1-7">给已有病人新建就诊</el-menu-item>
+		          <el-menu-item index="1-1-8">其他功能</el-menu-item>
+		        </el-submenu>
+		        <el-submenu index="1-2">
+		          <template slot="title">历史就诊</template>
+		          <el-menu-item index="1-2-1">列表</el-menu-item>
+		          <el-menu-item index="1-2-2">历史药品</el-menu-item>
+		          <el-menu-item index="1-2-3">历史处方</el-menu-item>
+		        </el-submenu>
+		        <el-submenu index="1-3">
+		          <template slot="title">诊断</template>
+		          <el-menu-item index="1-3-1">新建</el-menu-item>
+		          <el-menu-item index="1-3-2">列表</el-menu-item>
+		        </el-submenu>
+		        <el-submenu index="1-4">
+		          <template slot="title">药品</template>
+		          <el-menu-item index="1-4-1">新建</el-menu-item>
+		          <el-menu-item index="1-4-2">列表</el-menu-item>
+		          <el-menu-item index="1-4-3">模板</el-menu-item>
+		          <el-menu-item index="1-4-4">复制</el-menu-item>
+		          <el-menu-item index="1-4-5">生成处方</el-menu-item>
+		        </el-submenu>
+		        <el-submenu index="1-5">
+		          <template slot="title">处方列表</template>
+		          <el-menu-item index="1-5-1">列表</el-menu-item>
+		          <el-menu-item index="1-5-2">处方单</el-menu-item>
+		          <el-menu-item index="1-5-3">打印</el-menu-item>
+		          <el-menu-item index="1-5-4">复制</el-menu-item>
+		          <el-menu-item index="1-5-5">作废</el-menu-item>
+		        </el-submenu>
+		      </el-submenu>
+		      <el-menu-item index="2">
+		        <i class="fa fa-fw fa-users"></i>
+		        <span slot="title">我的患者</span>
 		      </el-menu-item>
-	        <el-menu-item index="3-2">
-		        <span slot="title">搜索</span>
-		      </el-menu-item>
-		      <el-menu-item index="3-3">
-		        <span slot="title">历史药品</span>
-		      </el-menu-item>
-		      <el-menu-item index="3-4">
-		        <span slot="title">历史处方</span>
-		      </el-menu-item>
-	      </el-submenu>
-	      <el-submenu index="4">
-	        <template slot="title">
-	          <i class="fa fa-fw fa-cogs"></i>
-	          <span>设置</span>
-	        </template>
-	        <el-submenu index="4-1">
-	          <template slot="title">药品模板管理</template>
-	          <el-menu-item index="4-1-1">新建</el-menu-item>
-	          <el-menu-item index="4-1-2">列表</el-menu-item>
-	        </el-submenu>
-	        <el-submenu index="4-2">
-	          <template slot="title">科室管理</template>
-	          <el-menu-item index="4-2-1">新建</el-menu-item>
-	          <el-menu-item index="4-2-2">列表</el-menu-item>
-	        </el-submenu>
-	        <el-menu-item index="4-3">
-		        <span slot="title">初始设置</span>
-		      </el-menu-item>
-	      </el-submenu>
+		      <el-submenu index="3">
+		        <template slot="title">
+		          <i class="fa fa-fw fa-bar-chart"></i>
+		        	<span>接诊统计</span>
+		        </template>
+		        <el-menu-item index="3-1">
+			        <span slot="title">接诊列表</span>
+			      </el-menu-item>
+		        <el-menu-item index="3-2">
+			        <span slot="title">搜索</span>
+			      </el-menu-item>
+			      <el-menu-item index="3-3">
+			        <span slot="title">历史药品</span>
+			      </el-menu-item>
+			      <el-menu-item index="3-4">
+			        <span slot="title">历史处方</span>
+			      </el-menu-item>
+		      </el-submenu>
+		      <el-submenu index="4">
+		        <template slot="title">
+		          <i class="fa fa-fw fa-cogs"></i>
+		          <span>设置</span>
+		        </template>
+		        <el-submenu index="4-1">
+		          <template slot="title">药品模板管理</template>
+		          <el-menu-item index="4-1-1">新建</el-menu-item>
+		          <el-menu-item index="4-1-2">列表</el-menu-item>
+		        </el-submenu>
+		        <el-submenu index="4-2">
+		          <template slot="title">科室管理</template>
+		          <el-menu-item index="4-2-1">新建</el-menu-item>
+		          <el-menu-item index="4-2-2">列表</el-menu-item>
+		        </el-submenu>
+		        <el-menu-item index="4-3">
+			        <span slot="title">初始设置</span>
+			      </el-menu-item>
+		      </el-submenu>
 
-	    </el-menu>
-	  </el-col>
-	  <el-col :span="20">
-	  	<div class="card-wrapper">
-	  		<a href="#1-1-1"></a>
-	  		<div class="page-header"><h4>个人信息　<small>基本信息字段明细</small></h4></div>
-	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码</p>
-	  		<p><span class="text-danger">*</span>小于14岁补充必填：出生日期、监护人</p>
-	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位、照片(通过刷身份证自动获取)</p>
-	  		<p>医疗信息：血型、身高、体重、BMI</p>
+		    </el-menu>
 	  	</div>
-	  	<div class="card-wrapper">
-	  		<a href="#1-1-2"></a>
-	  		<div class="page-header"><h4>诊断　<small>快捷录入患者主诊断</small></h4></div>
-	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码</p>
+	  </el-col>
+	  <el-col :span="20" style="width: calc( 100% - 220px ); ">
+	  	<div name="1-1-1" class="card-wrapper">
+	  		<div class="page-header"><h3>个人信息　<small>基本信息字段明细</small></h3></div>
+	  		<p><span class="text-danger">*</span>必填字段：姓名、性别、年龄、手机号码<img style="width: 100%;" src="/assets/hospital/1-1-1-1.jpg"/></p>
 	  		<p><span class="text-danger">*</span>小于14岁补充必填：出生日期、监护人</p>
-	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位</p>
-	  		<p>医疗信息：血型、身高、体重、BMI</p>
+	  		<p>非必填字段：身份证号、出生日期(>14岁)、住址、联系人、民族、婚姻、职业、工作单位、照片(通过刷身份证自动获取)<img style="width: 100%;" src="/assets/hospital/1-1-1-2.jpg"/></p>
+	  		<p>医疗信息：血型、身高、体重、BMI<img style="width: 100%;" src="/assets/hospital/1-1-1-3.jpg"/></p>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-2" class="card-wrapper">
+	  		<div class="page-header"><h3>诊断　<small>快捷录入患者主诊断</small></h3></div>
+	  		<p>1、从ICD10编码进行选择，可以保存编码和疾病名称</p>
+	  		<p>2、自己录入诊断</p>
+	  		<img style="width: 100%;" src="/assets/hospital/1-1-2-1.jpg"/>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-3" class="card-wrapper">
+	  		<div class="page-header"><h3>过敏　<small>快捷录入患者过敏信息</small></h3></div>
+	  		<img src="/assets/hospital/1-1-3-1.jpg"/>
+	  		<img src="/assets/hospital/1-1-3-2.jpg"/>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-4" class="card-wrapper">
+	  		<div class="page-header"><h3>手动录入　<small>手动新建一个患者就诊信息</small></h3></div>
+	  		<p>必填：姓名、性别、年龄、手机号码、诊断</p>
+	  		<br/>
+	  		<img style="width: 100%;" src="/assets/hospital/1-1-4-1.jpg"/>
+	  	</div>
+	  	<br/>
+	  	<div name="1-1-4" class="card-wrapper">
+	  		<div class="page-header"><h3>刷身份证　<small>通过刷身份证获取患者基本信息</small></h3></div>
+	  		<p>获取数据：姓名、性别、年龄、身份证号、出生日期、住址、照片</p>
+	  		<p>补充必填：手机号码</p>
+	  		<img style="width: 100%;" src="/assets/hospital/1-1-1-1.jpg"/>
 	  	</div>
 	  </el-col>
 	</el-row>
@@ -122,7 +144,7 @@
 <script type="text/javascript">
 const home = Vue.extend({
 	template: '#home_div',
-	mounted:function(){
+	mounted: function(){
 		$(".directed_to_header_menus").click(function(){
 			var _me = $('.header_menu_items.'+$(this).attr("data-target"));
 			if(_me.length){
@@ -133,9 +155,28 @@ const home = Vue.extend({
 		})
 		// home跳转到接诊页面
 		// router.push("/encounters/new");
+		this.$nextTick(function(){
+			this.init();
+		})
 	},
 	activated:function(){
 		window.apps.header_and_footer.header_selected_tab = '#/home';
+	},
+	data: function () {
+		return {
+			menuHeight: 500,
+		}
+	},
+	methods: {
+		init: function () {
+			var clientHeight = document.body.clientHeight;
+      this.menuHeight = clientHeight;
+      console.log(this.menuHeight,'---------')
+		},
+		handleSelectMenu: function (key, keyPath) {
+			console.log(key, keyPath);
+			$(".card-wrapper[name='"+key+"']")[0].scrollIntoView();
+		}
 	}
 })
 </script>
