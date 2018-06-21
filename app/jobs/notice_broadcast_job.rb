@@ -3,8 +3,8 @@ class NoticeBroadcastJob < ApplicationJob
  
   def perform(message)
   	p "_______________perform_________________\n"
-    p message
-    ActionCable.server.broadcast 'notice_channel', message:"2344365"
+    p message[:data]
+    ActionCable.server.broadcast 'notice_channel', data:message[:data]
   end
  
   private
