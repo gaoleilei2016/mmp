@@ -68,7 +68,7 @@ class Orders::Order < ApplicationRecord
 				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				result = {ret_code:'0',info:'订单已取消。'}
-			when cur_user && '2'
+			when payment_type.to_s == '1' && cur_user && '2'
 				arg = {
 					# 退费人
 					return_charge_opt: {
