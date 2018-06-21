@@ -166,7 +166,7 @@
 					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
 					<span style="color: #F55742;float: right;">
 						<span>¥</span>
-						<span style="font-size: 1.5em;">{{format_float(organ.total_price)}}</span>
+						<span style="font-size: 1.5em;">{{total_price(organ)}}</span>
 					</span>
 					<span style="float: right;margin-right: 6px;">合计</span>
 				</div>
@@ -212,7 +212,18 @@
 				}
 			},
 		},
+		computed:{
+		},
 		methods:{
+			total_price:function(organ) {
+				var to_pri = 0;
+				organ.prescriptions.map(function(item) {
+					if(organ.prescription_ids.indexOf(item.id)>-1){
+						to_pri+=item.price;
+					}
+				})
+				return this.format_float(to_pri);
+			},
 			check_all:function(e,organ) {
 				if ($(e.target).prop("checked")) {
 					organ.prescription_ids = organ.prescription_ids2;
