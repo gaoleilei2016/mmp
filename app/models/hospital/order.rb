@@ -52,6 +52,7 @@ class Hospital::Order < ApplicationRecord
       total_quantity: self.total_quantity,
       unit: self.unit,
       price: self.price,
+      total_price: self.price * self.total_quantity,
       note: self.note,
       status: self.status,
       order_type: self.order_type,
