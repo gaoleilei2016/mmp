@@ -647,12 +647,13 @@ window.current_template_obj = {
         });
       });
     },
+    //收费
     charging_pre:function(id){
       var _this = this
       if (id){}else{
         _this.$notify({
           title: '提示',
-          message: '订单信息不全，不能发药！',
+          message: '订单信息不全，不能收费！',
         });       
         return false
       }
@@ -702,6 +703,9 @@ window.current_template_obj = {
           _this.$message('收费成功');
           _this.dialogFormVisible = false
           _this._data.platform_data = []
+          _this.out_list_panel = "2"
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".is-active").click()
         },function(response){
           _this.$message('收费失败，请重试！');
         })
