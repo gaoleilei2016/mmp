@@ -382,20 +382,19 @@ class Orders::Order < ApplicationRecord
 					sch = ::Scheduler.new()
 					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
 					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
-				elsif attrs[:status] == '2'
-					data = {
-						org_id:order.target_org_id,#药房id
-						status:order.status, #订单状态
-						order_id:order.id, #订单id
-						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
-						order_code:order.order_code, #订单号
-						patient_name:order.patient_name, #患者名字
-						amt:order.net_amt, #订单金额
-						flag:true, #true已收费  false 退费
-						info:'您有新的线下支付订单！', #订单金额
-					}
-					::NoticeBroadcastJob.perform_later(data:data)
 				end
+				data = {
+					org_id:order.target_org_id,#药房id
+					status:order.status, #订单状态
+					order_id:order.id, #订单id
+					created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+					order_code:order.order_code, #订单号
+					patient_name:order.patient_name, #患者名字
+					amt:order.net_amt, #订单金额
+					flag:true, #true已收费  false 退费
+					info:'您有新的线下支付订单！', #订单金额
+				}
+					::NoticeBroadcastJob.perform_later(data:data)
 				#订单创建成功之后改变处方状态
 				args = {
 					# 创建订单人
