@@ -10,7 +10,7 @@
 </style>
 <div id="vue_content">
 	<header class="my_top_nav mui-bar mui-bar-nav">
-		<a href="/customer/home/orders" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<a href="javascript:;" onclick="back_to_orders();" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 			<span class="mui-icon mui-icon-left-nav"></span>
 		</a>
 		<h1 class="mui-title">支付订单</h1>
@@ -49,6 +49,16 @@
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
+	function back_to_orders() {
+		// /customer/home/orders
+		var btnArray = ['继续支付', '确定离开'];
+		mui.confirm('您的订单在23小时59分内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
+			if (e.index == 1) {
+				location = '/customer/home/orders';
+			} else {
+			}
+		})
+	}
 	function set_time(msecond){
 		if (msecond>0) {
 			var minutes = parseInt(msecond/(1000 * 60));

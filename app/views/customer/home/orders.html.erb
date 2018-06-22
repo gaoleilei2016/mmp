@@ -39,10 +39,14 @@
 		<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-6"></div>
 		<div class="mui-slider-group" style="height: calc( 100% - 40px );">
 			<div id="item1mobile" style="overflow: auto;" class="mui-slider-item mui-control-content mui-active">
-				<my-component :orders="not_used_orders"></my-component>
+				<div v-for="order in not_used_orders" style="margin-bottom: 16px;">
+					<my-order :order="order"></my-order>
+				</div>
 			</div>
 			<div id="item2mobile" style="overflow: auto;" class="mui-slider-item mui-control-content">
-				<my-component :orders="orders"></my-component>
+				<div v-for="order in orders" style="margin-bottom: 16px;">
+					<my-order :order="order"></my-order>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -62,51 +66,6 @@
 			}
 		},
 		methods:{
-			refund_order:function(id) {
-				$("#loading").show();
-				$.ajax({
-					url:"/interfaces/refund_order",
-					type:'post',
-					data:{id:id},
-					success:function(json) {
-						if (json.flag) {
-							location.reload();
-						}else{
-						}
-						mui.toast(json.info);
-					},
-					complete:function() {
-						$("#loading").hide();
-					},
-					error:function(e) {
-						mui.toast("订单操作失败");
-					}
-				})
-			},
-			cancel_order:function(id) {
-				$("#loading").show();
-				$.ajax({
-					url:"/interfaces/cancel_order",
-					type:'post',
-					data:{id:id},
-					success:function(json) {
-						if (json.ret_code == "0") {
-							location.reload();
-						}else{
-						}
-						mui.toast(json.info);
-					},
-					complete:function() {
-						$("#loading").hide();
-					},
-					error:function(e) {
-						mui.toast("订单操作失败");
-					}
-				})
-			},
-			format_float:function(value) {
-				return (parseFloat(value)||0).toFixed(2);
-			},
 			get_orders:function() {
 				var _this = this;
 				$("#loading").show();
