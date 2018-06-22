@@ -1,5 +1,5 @@
 <el-dialog
-  title="复制药品"
+  title="引用药品"
   :visible.sync="isShowCopyDialog"
   class="copy-orders-modal"
   width="90%">
@@ -29,7 +29,13 @@
   		</div>
   	</el-col>
 	  <el-col :span="18">
+      <div class="spinner-3circle" v-if="copyordersloading">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
 	  	<el-table
+        v-else
         :data="encorders"
         :height="465"
         @selection-change="handleCopyOrdersSelChange"
