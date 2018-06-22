@@ -403,23 +403,39 @@ window.current_template_obj = {
 				}
   			this.getOrders();
   		},
-  		// 用一些特殊的方式创建encounter，刷身份证，在曾经就诊的基础上创建
+  		// 用一些特殊的方式创建encounter，在曾经就诊的基础上创建
   		createEncounterBySomeMethods: function (json) {
-  			var _this = this, encounter, btn = $(event.target);
-  			if(json.type=="by_person") { // 通过就诊创建新的就诊
-  				encounter = json.row;
-  			}
-  			btn.removeAttr("disabled").find(".fa").toggle();
-				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
-      		_this.handleEncounterReturn(response, btn);
-      		// _this.getOrders();
-      		if(json.type=="by_person") { // 通过患者创建新的就诊
-	  				_this.isShowEncountersDialog = false;
-	  			}
-      	}, function(response) {
-      		btn.removeAttr("disabled").find(".fa").toggle();
-      		_this.$message.error("创建就诊信息失败，请联系管理员。");
-      	})
+  			var _this = this, row = json.row;
+  			_this.encounter.name = row.name;
+  			_this.encounter.gender = row.gender;
+  			_this.encounter.age = row.age;
+  			_this.encounter.phone = row.phone;
+  			_this.encounter.iden = row.iden;
+  			_this.encounter.birth_date = row.birth_date;
+  			_this.encounter.address = row.address;
+  			_this.encounter.contact_name = row.contact_name;
+  			_this.encounter.type = json.type;
+  			if(json.type=="by_person") { // 通过患者创建新的就诊
+  				_this.encounter.person_id = row.id;
+  				_this.encounter.diagnoses = [];
+	  			_this.isShowEncountersDialog = false;
+	  		}
+	  		// 提示填写诊断
+	  		_this.$refs["encdiagnose"].focus();
+  		// 	if(json.type=="by_person") { // 通过就诊创建新的就诊
+  		// 		encounter = json.row;
+  		// 	}
+  		// 	btn.removeAttr("disabled").find(".fa").toggle();
+				// _this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
+    //   		_this.handleEncounterReturn(response, btn);
+    //   		// _this.getOrders();
+    //   		if(json.type=="by_person") { // 通过患者创建新的就诊
+	  	// 			_this.isShowEncountersDialog = false;
+	  	// 		}
+    //   	}, function(response) {
+    //   		btn.removeAttr("disabled").find(".fa").toggle();
+    //   		_this.$message.error("创建就诊信息失败，请联系管理员。");
+    //   	})
   		},
 			// 提交encounter信息
 			submitEncounterForm: function (formName) {

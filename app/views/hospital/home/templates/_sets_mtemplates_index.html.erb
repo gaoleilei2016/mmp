@@ -112,13 +112,13 @@
 		  :title="(!mtemplate.id ? '新建' : '编辑')+'模板'"
 		  :visible.sync="isShowFormDialog"
 		  width="90%">
-		  <%#= render "hospital/home/render/encounters_orders_partial" %>
-      <el-table
+		  <%= render "hospital/home/render/encounters_orders" %>
+<!--       <el-table
         :data="orders"
         class="orders-table thiner-row"
         style="width: 100%">
-        <%= render "hospital/home/render/orders_table_common_partial" %>
-      </el-table>
+        <%#= render "hospital/home/render/orders_table_common_partial" %>
+      </el-table> -->
 		  <br/>
 		  <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
         <el-form-item 
@@ -191,6 +191,7 @@ window.current_template_obj = {
      	orders: [], // 医嘱列表
      	order: {},
      	editIndex: -1, // 正在编辑的医嘱序号
+      ordersStatus: presStatusOptions,
      	// 搜索
     	search: "", // 搜索内容
     	tableHeight: 200, // 表格高度
@@ -549,7 +550,7 @@ window.current_template_obj = {
   		var res = response.data;
   		if(res.flag) {
   			this.$message({
-          message: "生成医嘱模板成功。",
+          message: "保存医嘱模板成功。",
           type: 'success'
         });
   			// 将创建的模板添加到使用模板列表
