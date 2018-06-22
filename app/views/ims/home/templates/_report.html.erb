@@ -1,0 +1,145 @@
+<style type="text/css">
+	.report_panel .el-tabs{
+		height: 100%;
+	}
+	.report_panel .el-tabs__content{
+		height: calc(100% - 39px);
+	}
+
+	.report_panel .el-tabs__content table{
+			width: 100%;
+			border-collapse:collapse;}
+	.report_panel .el-tabs__content table tbody td{ text-align: left;
+					border-top: 1px solid #000;border-left: 1px solid #000;}
+	.report_panel .el-tabs__content table tr:nth-last-child(1) td{border-top: 1px solid #000;border-left: 1px solid #000; border-right:1px solid #000; border-bottom: 1px solid #000;}
+	.report_panel .el-tabs__content table	thead th{text-align: left; border-left: 1px solid #000; border-top: 1px solid #000; font-weight: 200px;}
+	.report_panel .el-tabs__content table	thead th:nth-last-child(1){ border-right: 1px solid #000; }
+	.report_panel .el-tabs__content table	thead th.title{text-align: center; font-size: 18px; border:none;}
+	#ims_report_div .el-menu{height:100%;}
+</style>
+<template>
+	<div id="ims_report_div" style="padding:0px;">
+
+		<div style="float:left;width:150px; height:100%;background-color: #38495b;">
+			<el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+			  <el-menu-item index="1">
+			    <i class="el-icon-document"></i>
+			    <span slot="title">报表1</span>
+			  </el-menu-item>
+			  <el-menu-item index="2">
+			    <i class="el-icon-document"></i>
+			    <span slot="title">报表2</span>
+			  </el-menu-item>
+			  <el-menu-item index="3">
+			    <i class="el-icon-document"></i>
+			    <span slot="title">报表3</span>
+			  </el-menu-item>
+			</el-menu>
+		</div>
+
+		<div style="float:left;width:calc(100% - 155px); height:100%;">
+				<el-row  :gutter="5" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<small>日期</small>
+						<el-date-picker
+				      v-model="filter.range"
+				      type="datetimerange"
+				      :picker-options="rangePickerOptions"
+				      range-separator="至"
+				      start-placeholder="开始日期"
+				      end-placeholder="结束日期"
+				      size="mini"
+				      style="width: 100%;"
+				      align="right">
+				    </el-date-picker>
+					</el-col>
+
+					<el-col :span="2" style="padding-top: 18px;">
+						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+					</el-col>
+				</el-row>
+
+				  	<table class="" v-for="item in report_data_1">
+				  		<thead>
+				  			<tr>
+				  				<th colspan="5" class="title">发药报表</th>
+				  			</tr>		  			
+				  			<tr>
+				  				<th colspan="5">医院名称：{{item.source}}</th>
+				  			</tr>
+				  			<tr>
+				  				<th>药品名称</th>
+				  				<th>规格</th>
+				  				<th>单位</th>
+				  				<th>数量</th>
+				  				<th>金额</th>
+				  			</tr>
+				  		</thead>
+				  		<tbody>
+				  			<tr v-for="line in item.lines">
+				  				<td>{{line.name}}</td>
+				  				<td>{{line.specification}}</td>
+				  				<td>{{line.qty}}</td>
+				  				<td>{{line.unit}}</td>
+				  				<td>{{line.amount}}</td>
+				  			</tr>
+				  		</tbody>
+				  	</table>
+				  					
+		</div>
+
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+			report_data_1:[{source:"医院",lines:[{name:"234",specification:"23sw3",qty:"23",unit:"23",amount:"23.45"}]}],
+			isCollapse: true,
+			filter: {
+				range: "",
+			},
+        rangePickerOptions: {
+          shortcuts: [{
+            text: '最近一周',
+            onClick:function(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近一个月',
+            onClick:function(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, {
+            text: '最近三个月',
+            onClick:function(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }]
+        },
+        value4: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
+        value5: ''			
+		}
+	},
+	methods:{
+		getData:function(){},
+      handleOpen:function(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose:function(key, keyPath) {
+        console.log(key, keyPath);
+      }		
+	},
+	mounted:function(){
+	}
+}
+</script>
