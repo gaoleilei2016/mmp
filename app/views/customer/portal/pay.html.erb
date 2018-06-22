@@ -49,8 +49,8 @@
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
+	var time_str = '';
 	function back_to_orders() {
-		// /customer/home/orders
 		var btnArray = ['继续支付', '确定离开'];
 		mui.confirm('您的订单在 '+time_str+' 内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
 			if (e.index == 1) {
@@ -59,7 +59,6 @@
 			}
 		})
 	}
-	var time_str = '';
 	function set_time(msecond){
 		if (msecond>0) {
 			var minutes = parseInt(msecond/(1000 * 60));
