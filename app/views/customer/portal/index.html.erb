@@ -183,19 +183,20 @@
 					</div>
 				</label>
 			</div>
-			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 14px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<template v-for="prescription in organ.prescriptions">
-					<li class="mui-table-view-cell" style="padding-left: 0;">
+					<li class="mui-table-view-cell" style="padding-left: 0;padding-right: 0;">
 						<div class="mui-checkbox mui-left">
 							<input v-model="organ.prescription_ids" name="checkbox" :value="prescription.id" type="checkbox" style="top: 0px;left: 0px;">
-							<label style="padding-left: 26px;padding-right: 0;">
+							<label style="padding-left: 26px;padding-right: 36px;">
 								<span>处方号: {{prescription.prescription_no}}</span>
 								<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
 							</label>
+							<a :href="'/customer/home/prescription?return=root&id='+prescription.id" class="common_red" style="position: absolute;right: 0;top: 0;">查看</a>
 						</div>
 					</li>
 					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
