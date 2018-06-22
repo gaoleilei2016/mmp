@@ -56,8 +56,11 @@
     </el-table>
 
     <div class="el-row" style="padding-top:4px;margin-top:6px;margin-bottom:6px;">
-    	<div class="el-col-18" style=" min-height:60px;" >发票：{{info.invoice||'无'}}</div>
-      <div class="el-col-6">
+    	<div class="el-col-14" style=" min-height:60px;" >
+        <div>发票：</div>
+        <div><span v-if="info.invoice">{{info.invoice.name}}</span></div>
+      </div>
+      <div class="el-col-10">
         <div style="text-align:right;">合计：{{format_price(info.amt)}}</div>
 
         <div class="btns" style="text-align:right;">
