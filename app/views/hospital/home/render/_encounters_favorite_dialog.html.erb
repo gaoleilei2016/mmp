@@ -10,7 +10,12 @@
         style="width: 100%">
         <el-table-column type="expand">
           <template slot-scope="props">
-            sdsdss
+            <el-table
+              :data="(props.row.orders||[])"
+              class="thiner-row"
+              style="width: 100%">
+              <%= render "hospital/home/render/orders_table_common_partial" %>
+            </el-table>
           </template>
         </el-table-column>
         <el-table-column
