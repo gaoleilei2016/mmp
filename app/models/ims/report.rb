@@ -13,7 +13,7 @@ class Ims::Report
         end_time = args[:end_time] || Time.new.to_s(:db)
         status = args[:status]
         sql = "SELECT  b.title,b.specification,b.factory_name,sum(b.qty) as 'total_qty',b.unit,b.price,round(sum(b.amount),2) as 'total_amount',GROUP_CONCAT(a.id) as 'ids' FROM pre_headers a INNER JOIN pre_details b on a.id= b.header_id where a.delivery_org_id='#{org_id}'" 
-        status.blank? ? sql.concat(" and (a.status=4 || a.status=8 )") : sql.concat("and (a.status=#{status} )")
+        status.blank? ? sql.concat(" and (a.status=4 or a.status=8 )") : sql.concat("and (a.status=#{status} )")
         sql.concat(" and a.created_at BETWEEN '#{start_time}' AND '#{end_time}' GROUP BY  b.title,b.specification,b.factory_name,b.unit,b.price;")
         result = Ims::PreHeader.find_by_sql(sql)
         JSON.parse(result.to_json)
@@ -88,7 +88,7 @@ class Ims::Report
 		# where a.target_org_id=38 and a.created_at 
 		# BETWEEN '2018-06-17' AND date_add('2018-06-19',interval 1 day) #GROUP BY b.name
 		# GROUP BY  b.name,b.specifications,b.firm,b.unit,b.price;
-    # args ={org_id:'34',start_time:'2018-06-20',end_time:'2018-06-21',status:2,doctor:'',patient_name:'',source_org_id:''}
+    # args ={org_id:'34',start_time:'2018-06-20',end_time:'2018-06-22',status:2,doctor:'',patient_name:'',source_org_id:''}
 		def change_data_report args={}
 			data = []
       org_id = args[:org_id]
@@ -108,10 +108,89 @@ class Ims::Report
       else
        sql.concat(" and ((payment_type = 2 and status=1) or status=2) ")
       end
-      sql.concat(" and a.created_at BETWEEN '#{start_time}' AND #{end_time} GROUP BY  b.name,b.specifications,b.firm,b.unit,b.price;")
+      sql.concat(" and a.created_at BETWEEN '#{start_time}' AND '#{end_time}' GROUP BY  b.name,b.specifications,b.firm,b.unit,b.price;")
+      p sql
       result = Orders::Order.find_by_sql(sql)
       JSON.parse(result.to_json)
 		end
+
+
+    # 处方药品汇总(发药/退药)[根据医院或发药人](目前实时统计)  先不考虑其他药房可退药情况
+    # => args = {status:"",hospital:nil,detail:nil,delivery_name:nil,factory_name:false,start_time:nil,end_time:nil,org_id:irg_id,current_user:current_user} status:表示发药、退药，hospital：是否是按医院分组，detail：是否查看明细，delivery_name：是否按发药人分组,是否要按生成厂家显示
+    def drug_report args = {}
+      begin
+        org_id = args[:org_id]
+        status = args[:status]
+        tbh ='pre_headers' # "iph_#{org_id}"
+        tbd = 'pre_details' # "ipd_#{org_id}"
+        return {flag:false,:info=>"药店机构为空。"} if org_id.blank?
+        start_time = args[:start_time] || (Time.new - 1.day).to_s(:db)
+        end_time = args[:end_time] || Time.new.to_s(:db)
+        org_display = args[:hospital].blank? ? "": ",a.org_display" 
+        author_name = args[:detail].blank? ? "": ",a.author_name"  
+        factory_name = args[:factory_name].blank? ? "": ",b.factory_name"  
+        opt_name = status.blank? ? "": (status=="4" ? ",a.delivery_name": ",a.return_name")
+        c_d = status.blank? ? " and (a.status=4 or a.status=8 ) and a.delivery_at BETWEEN '#{start_time}' AND '#{end_time}' or a.return_at BETWEEN '#{start_time}' AND '#{end_time}'" : "and a.status=#{status} and "+(status=='4' ? 'a.delivery_at ' : 'a.return_at ')+"BETWEEN '#{start_time}' AND '#{end_time}'"
+        sql = "SELECT b.title,b.specification,#{factory_name},b.unit,b.price,SUM(b.qty) as 'total_qty', round(sum(b.amount),2) as 'total_amount'#{org_display}#{author_name}#{opt_name},GROUP_CONCAT(a.id) as 'ids' FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id where a.drug_store_id=#{org_id} "+c_d+" GROUP BY b.title,b.specification,#{factory_name},b.unit,b.price#{org_display}#{author_name}#{opt_name};"
+        result = Ims::PreHeader.find_by_sql(sql)
+        JSON.parse(result.to_json)
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "============== 处方药品汇总 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
+
+
+    # 报表查看明细 通过id查询
+    def report_detail args={}
+      org_id = args[:org_id]
+      tbh ='pre_headers' # "iph_#{org_id}"
+      tbd = 'pre_details' # "ipd_#{org_id}"
+      ids = "("+args[:ids]+")"
+      sql = "SELECT * FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id WHERE a.id in #{ids}"
+      result = Ims::PreHeader.find_by_sql(sql)
+      JSON.parse(result.to_json)
+    end
+
+    # 针对医院的统计
+    def hospital_report args = {}
+      result = drug_report args
+      data = result.group_by{|e| e["org_display"]}
+      unless args[:detail].blank?
+        data1 ={}
+        data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
+        data = data1
+      end
+      return data
+    end
+
+    # 针对发药人的统计
+    def name_report args = {}
+      result = drug_report args
+      result.group_by{|e| e["delivery_name"]}
+    end
+
+    # 针对医院及发药人的
+    def hospital_and_name args = {}
+      result = drug_report args
+      data = {}
+      if args[:type]=="hospital_and_name"
+        groups= result.group_by{|e| e["org_display"]}
+        groups.map{|k,v| data[k] = v.group_by{|e| e['delivery_name']}}
+        return data
+      end
+      groups= result.group_by{|e| e["delivery_name"]}
+      groups.map{|k,v| data[k] = v.group_by{|e| e['org_display']}}
+      return data
+    end
+
+    # 针对厂家的
+    def drug_by_fact args = {}
+      result = drug_report args
+      result.group_by{|e| e["factory_name"]}
+    end
+
 
 	end
 

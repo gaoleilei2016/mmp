@@ -199,11 +199,10 @@ class InterfacesController < ApplicationController
 		else
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f}
 			if params[:hot].present?
-				# 客户获取热点药房
+				# 客户获取大家热点药房
 				orgs = ::Admin::Organization.where(:type_code=>'2').order("search_count desc").page(params[:page]).per(params[:per])
-				# return render json:{rows:res,total:orgs.total_count,flag:true}
 			elsif params[:history].present?
-				# 客户获取常用药房
+				# 客户获取历史记录药房
 				his = ::Customer::SearchHistory.where(user_id:current_user.id).order("use_count desc").page(1).per(10)
 				orgs = his.map{|x| o = ::Admin::Organization.find(x.pharmacy_id); o.type_code=='2' ? o : nil }.compact
 			else
@@ -221,7 +220,12 @@ class InterfacesController < ApplicationController
 				end
 				res<<re
 			}
-			res.sort_by!{|x| x["num"]}
+			if params[:hot].present?||params[:history].present?
+				# 历史记录 / 大家常用
+			else
+				# 药房搜索按距离排序
+				res.sort_by!{|x| x["num"]}
+			end
 			if params[:history].present?
 				render json:{rows:res,total:orgs.count,flag:true}
 			else
