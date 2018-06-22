@@ -245,16 +245,18 @@ window.current_template_obj = {
 			 //  },function() {
 			 //  	_this.$message.error("获取药房失败，请联系管理员。");
 			 //  })
-			 // 获取基础设置内容
-			 Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
-			 	var res = response.data;
-			 	if(res.flag) {
-        	_this.ini = res.data;
-        	$("#prescription-print-template").html(_this.ini.print_pres_html)
-        }
-			 },function() {
-			  	_this.$message.error("获取初始值失败，请联系管理员。");
-			  })
+			  // 获取基础设置内容
+			  Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+				 	var res = response.data;
+				 	if(res.flag) {
+	        	_this.ini = res.data;
+	        	$("#prescription-print-template").html(_this.ini.print_pres_html)
+	        } else {
+	  				_this.$message.error(res.info);
+	  			}
+				},function() {
+				  _this.$message.error("获取初始值失败，请联系管理员。");
+				})
 			},
 			// 聚焦下一个
 	  	focusNext: function (now, next) {
@@ -360,7 +362,9 @@ window.current_template_obj = {
   				_this.encmodalloading = false;
   				if(res.flag) {
   					_this.encounters = res.data;
-  				}
+  				} else {
+    				_this.$message.error(res.info);
+    			}
   				if(json.modal){
 						_this.$refs["searchencstr"].focus();
 					}
@@ -373,6 +377,7 @@ window.current_template_obj = {
   		searchPeople: function (json) {
   			var _this = this;
   			_this.encounters = [];
+  			_this.searchencstr = "";
   			_this.encmodalloading = true;
 				if(json.modal){
 					_this[json.modal] = true;
@@ -382,7 +387,9 @@ window.current_template_obj = {
   				_this.encmodalloading = false;
   				if(res.flag) {
   					_this.encounters = res.data;
-  				}
+  				} else {
+    				_this.$message.error(res.info);
+    			}
   				if(json.modal){
 						_this.$refs["searchencstr"].focus();
 					}
@@ -482,19 +489,23 @@ window.current_template_obj = {
 	    handleEncounterReturn: function (response, btn) {
 	    	btn.removeAttr("disabled").find(".fa").hide();
 	    	var res = response.data;
-	    	this.encounter = res.data;
-	    	this.$message({
-	        message: "就诊信息保存成功。",
-	        type: 'success'
-	      });
-	      this.getDiffrentData(this.activeTab);
-				if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
-					// 提示填写诊断
-	  			this.$refs["encdiagnose"].focus();
-				} else {
-					// 聚焦医嘱搜索框
-	      	this.$refs["ordtitle"].focus();
-				}
+	    	if(res.flag) {
+		    	this.encounter = res.data;
+		    	this.$message({
+		        message: "就诊信息保存成功。",
+		        type: 'success'
+		      });
+		      this.getDiffrentData(this.activeTab);
+					if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+						// 提示填写诊断
+		  			this.$refs["encdiagnose"].focus();
+					} else {
+						// 聚焦医嘱搜索框
+		      	this.$refs["ordtitle"].focus();
+					}
+	    	} else {
+  				this.$message.error(res.info);
+  			}
 	    },
 	    // 重置encounter表单
 	    resetEncounterForm: function (formName) {
@@ -586,6 +597,8 @@ window.current_template_obj = {
 							if(el) {
 								el.highlightedIndex = 0
 							}
+						} else {
+							_this.$message.error(res.info);
 						}
 				  },function() {
 				  	_this.$message.error("获取诊断列表失败，请联系管理员。");
@@ -645,6 +658,8 @@ window.current_template_obj = {
 	    			if(res.flag) {
 	    				_this.diagnoses = res.data;
 	    				_this.encounter.diagnoses = res.master;
+	    			} else {
+	    				_this.$message.error(res.info);
 	    			}
 	    		}, function (response) {
 	    			_this.$message.error("获取诊断列表失败，请联系管理员。");
@@ -827,6 +842,8 @@ window.current_template_obj = {
     				_this.orders = res.data;
     				// 默认勾选新建医嘱
 		      	_this.defaultCheckNewOrder();
+    			} else {
+    				_this.$message.error(res.info);
     			}
     		}, function (response) {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
@@ -863,7 +880,9 @@ window.current_template_obj = {
 						if(el) {
 							el.highlightedIndex = 0;
 						}
-					}
+					} else {
+    				_this.$message.error(res.info);
+    			}
 			  },function() {
 			  	_this.$message.error("获取选择药品列表失败，请联系管理员。");
 			  })
@@ -1097,6 +1116,8 @@ window.current_template_obj = {
     			var res = response.data;
     			if(res.flag) {
     				_this.mtemplates = res.data;
+    			} else {
+    				_this.$message.error(res.info);
     			}
     		}, function (response) {
     			_this.$message.error("获取药品模板列表失败，请联系管理员。");
@@ -1189,6 +1210,8 @@ window.current_template_obj = {
     			var res = response.data;
     			if(res.flag) {
     				_this.prescriptions = res.data;
+    			} else {
+    				_this.$message.error(res.info);
     			}
     		}, function (response) {
     			_this.$message.error("获取处方列表失败，请联系管理员。");
@@ -1361,6 +1384,8 @@ window.current_template_obj = {
     			var res = response.data;
     			if(res.flag) {
     				_this.histories = res.data;
+    			} else {
+    				_this.$message.error(res.info);
     			}
     		}, function (response) {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
