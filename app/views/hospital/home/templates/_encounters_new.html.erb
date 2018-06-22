@@ -13,7 +13,7 @@
 	  			<!-- 药品tab显示模板和生成处方按钮 -->
 	  			<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">
 		  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
-		  			<el-button size="mini" @click="openCopyModal">复制</el-button>
+		  			<el-button size="mini" @click="openCopyModal">引用</el-button>
 		  			<el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
 	  			</div>
 	  			<!-- 处方Tab -->
@@ -132,6 +132,7 @@ window.current_template_obj = {
 				encounters: [], // 就诊列表
 				searchencstr: "", // 搜索就诊列表
 				loadingidcard: false, // 正在读取身份证信息
+				disabledInput: false, // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
 			/* 患者基本信息  ----- end */ 
 
 			/* 主业务  ----- start */ 
@@ -174,7 +175,7 @@ window.current_template_obj = {
 					// 药品模板创建规则
 					mtemplateRules: {
 						title: [
-				      { required: true, message: '姓名不能为空'},
+				      { required: true, message: '名称不能为空'},
 				    ],
 						"sharing_scope.code": [
 				      { required: true, message: '共享范围不能为空'},
@@ -186,6 +187,7 @@ window.current_template_obj = {
 					isShowCopyDialog: false, // 显示复制模态框
 					searchCopyEncStr: "", // 搜索要复制医嘱的对象
 					multipleCopyOrdersSelection: [], // 复制医嘱的勾选项
+					copyordersloading: false, // 正在加载某个患者的医嘱
 				/* 复制药品 --- end */ 
 
 				/* 处方 --- start */ 
@@ -300,7 +302,8 @@ window.current_template_obj = {
   			if(socket.readyState==3) { // 身份证读卡服务处于关闭状态
   				this.$message({
   					showClose: true,
-	          message: '请启动身份证后台读卡服务。',
+  					dangerouslyUseHTMLString: true,
+	          message: '<p>请启动身份证后台读卡服务。</p><br/><p>如您还未安装，点击 <a href="/ID_card_installation_package.rar">ID_card_installation_package</a> 下载安装包。</p>',
 	          type: 'warning',
 	          duration: 0,
 	        });
@@ -317,6 +320,7 @@ window.current_template_obj = {
   			_this.encounter.iden = res.code; // 身份证号
   			_this.encounter.name = res.name; // 名字
   			_this.encounter.photo = res.photo; // 照片
+  			_this.encounter.type = "by_iden"; // 身份证方式提交的数据
   			_this.getBirthdayFromIdCard(res.code); // 生日、年龄
   			_this.loadingidcard = false; // 取消正在加载身份证数据
   			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
@@ -327,11 +331,13 @@ window.current_template_obj = {
   				}
   			}
   			for(var i=0; i<nations.length; i++) {
-  				if(nations[i].display == res.folk) {
+  				if(nations[i].display.indexOf(res.folk)>-1) {
   					_this.encounter.nation = nations[i];
   					break;
   				}
   			}
+  			_this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+  			// _this.createEncounterBySomeMethods({row: _this.encounter, type: "by_iden"});
   		},
   		focusEncSearchInp: function (flag) {
   			var $target = $(this.$refs["searchencstr"].$el);
@@ -397,23 +403,39 @@ window.current_template_obj = {
 				}
   			this.getOrders();
   		},
-  		// 用一些特殊的方式创建encounter，刷身份证，在曾经就诊的基础上创建
+  		// 用一些特殊的方式创建encounter，在曾经就诊的基础上创建
   		createEncounterBySomeMethods: function (json) {
-  			var _this = this, encounter, btn = $(event.target);
-  			if(json.type=="by_person") { // 通过就诊创建新的就诊
-  				encounter = json.row;
-  			}
-  			btn.removeAttr("disabled").find(".fa").toggle();
-				_this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
-      		_this.handleEncounterReturn(response, btn);
-      		// _this.getOrders();
-      		if(json.type=="by_person") { // 通过患者创建新的就诊
-	  				_this.isShowEncountersDialog = false;
-	  			}
-      	}, function(response) {
-      		btn.removeAttr("disabled").find(".fa").toggle();
-      		_this.$message.error("创建就诊信息失败，请联系管理员。");
-      	})
+  			var _this = this, row = json.row;
+  			_this.encounter.name = row.name;
+  			_this.encounter.gender = row.gender;
+  			_this.encounter.age = row.age;
+  			_this.encounter.phone = row.phone;
+  			_this.encounter.iden = row.iden;
+  			_this.encounter.birth_date = row.birth_date;
+  			_this.encounter.address = row.address;
+  			_this.encounter.contact_name = row.contact_name;
+  			_this.encounter.type = json.type;
+  			if(json.type=="by_person") { // 通过患者创建新的就诊
+  				_this.encounter.person_id = row.id;
+  				_this.encounter.diagnoses = [];
+	  			_this.isShowEncountersDialog = false;
+	  		}
+	  		// 提示填写诊断
+	  		_this.$refs["encdiagnose"].focus();
+  		// 	if(json.type=="by_person") { // 通过就诊创建新的就诊
+  		// 		encounter = json.row;
+  		// 	}
+  		// 	btn.removeAttr("disabled").find(".fa").toggle();
+				// _this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
+    //   		_this.handleEncounterReturn(response, btn);
+    //   		// _this.getOrders();
+    //   		if(json.type=="by_person") { // 通过患者创建新的就诊
+	  	// 			_this.isShowEncountersDialog = false;
+	  	// 		}
+    //   	}, function(response) {
+    //   		btn.removeAttr("disabled").find(".fa").toggle();
+    //   		_this.$message.error("创建就诊信息失败，请联系管理员。");
+    //   	})
   		},
 			// 提交encounter信息
 			submitEncounterForm: function (formName) {
@@ -814,12 +836,17 @@ window.current_template_obj = {
     	getEncOrders: function (encounter_id) {
     		var _this = this;
     		_this.encorders = [];
+    		_this.copyordersloading = true;
     		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
     			var res = response.data;
+    			_this.copyordersloading = false;
     			if(res.flag) {
     				_this.encorders = res.data;
+    			} else {
+    				_this.$message.error(res.info);
     			}
     		}, function (response) {
+    			_this.copyordersloading = false;
     			_this.$message.error("获取药品列表失败，请联系管理员。");
     		})
     	},
