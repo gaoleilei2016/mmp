@@ -57,7 +57,35 @@
 					<el-col :span="2" style="padding-top: 18px;">
 						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
 					</el-col>
-				</el-row>			
+				</el-row>
+
+				  	<table class="" v-for="item in report_data_1">
+				  		<thead>
+				  			<tr>
+				  				<th colspan="5" class="title">发药报表</th>
+				  			</tr>		  			
+				  			<tr>
+				  				<th colspan="5">医院名称：{{item.source}}</th>
+				  			</tr>
+				  			<tr>
+				  				<th>药品名称</th>
+				  				<th>规格</th>
+				  				<th>单位</th>
+				  				<th>数量</th>
+				  				<th>金额</th>
+				  			</tr>
+				  		</thead>
+				  		<tbody>
+				  			<tr v-for="line in item.lines">
+				  				<td>{{line.name}}</td>
+				  				<td>{{line.specification}}</td>
+				  				<td>{{line.qty}}</td>
+				  				<td>{{line.unit}}</td>
+				  				<td>{{line.amount}}</td>
+				  			</tr>
+				  		</tbody>
+				  	</table>
+				  					
 		</div>
 
 	</div>
