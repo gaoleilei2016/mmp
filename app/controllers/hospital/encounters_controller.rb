@@ -86,7 +86,7 @@ class Hospital::EncountersController < ApplicationController
     return render json:{flag:false, info: "没有设置当前科室 请设置后再对病人接诊"} if current_user.cur_loc_id.nil?
     # raise "测试"
     p current_user.cur_loc_id
-    case params[:type].to_s
+    case params[:encounter][:type].to_s
     when "by_person"
       cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
       return render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
@@ -100,7 +100,21 @@ class Hospital::EncountersController < ApplicationController
         render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}
       end
     when "by_iden"
-      render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
+      create_data = format_encounter_create_params
+      @encounter = ::Hospital::Encounter.new(create_data[:encounter])
+      cur_person = ::Person.find_by_iden(@encounter.iden).first
+      @encounter.person_id = cur_person
+      respond_to do |format|
+        ::ActiveRecord::Base.transaction  do
+          if @encounter.save!
+            ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
+            ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
+            format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
+          else
+            format.json { render json: {flag: true, info:" 创建患者信息失败"} }
+          end
+        end
+      end
     when "by_qrcode"
       render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
     when "" # by_write默认不传 手动填写
@@ -123,7 +137,7 @@ class Hospital::EncountersController < ApplicationController
             format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
           else
             format.html { render action: "new" }
-            format.json { render json: @encounter.errors, status: :unprocessable_entity }
+            format.json { render json: {flag: false, info: "创建患者信息失败"} }
           end
         end
       end
