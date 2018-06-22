@@ -106,8 +106,15 @@
 			</template>
 			<template v-else>
 				<div style="padding-left: 16px;">
-					<p style="padding: 8px;min-height: 100px;">历史记录</p>
-					<p style="padding: 8px;">大家常用</p>
+					<p style="padding: 16px 0 0 8px;margin: 0;" class="common_red" v-if="pharmacys">未找到匹配项，可以试试：</p>
+					<p style="padding: 16px 0 0 8px;">历史记录</p>
+					<div style="min-height: 100px;">
+						<span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in history_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span>
+					</div>
+					<p style="padding: 16px 0 0 8px;">大家常用</p>
+					<div style="min-height: 100px;">
+						<span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in hot_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span>
+					</div>
 				</div>
 			</template>
 		</div>
@@ -181,6 +188,8 @@
 			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
+			hot_pharmacys:null,
+			history_pharmacys:null,
 			search_str:'',
 			organs:[],
 		},
@@ -192,7 +201,7 @@
 					_this.timer = setTimeout(function() {
 						$("#loading").show();
 						$.ajax({
-							url:'/interfaces/get_pharmacy?search='+val+'&',
+							url:'/interfaces/get_pharmacy.json?search='+val+'&',
 							data:{lng:_this.point.lng,lat:_this.point.lat},
 							success:function(json) {
 								if (json.flag) {
@@ -215,6 +224,31 @@
 		computed:{
 		},
 		methods:{
+			get_hot_pharmacy:function(history) {
+				var _this = this;
+				$.ajax({
+					url:'/interfaces/get_pharmacy.json',
+					data:{
+						lng:_this.point.lng,lat:_this.point.lat,
+						hot: history ? null : "true",
+						history: history ? "true" : null,
+					},
+					success:function(json) {
+						if (json.flag) {
+							if (history) {
+								_this.history_pharmacys = json.rows;
+							}else{
+								_this.hot_pharmacys = json.rows;
+							}
+						}else{
+							mui.toast("请刷新后重试");
+						}
+					},
+					complete:function() {
+					},
+					error:error_fun
+				})
+			},
 			equals_array:function(arr1,arr2) {
 				var flag = true;
 				if (arr1.length&&arr1.length==arr2.length) {
@@ -363,6 +397,8 @@
 			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
 				$("#bottom_tabs").hide(300);
+				_this.get_hot_pharmacy();
+				_this.get_hot_pharmacy('history');
 			})
 		}
 	})
