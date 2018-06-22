@@ -394,16 +394,14 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
         return {flag:false,:info=>"该处方不是发药状态，不能退药。"} if header.status.to_s!="4"
         current_user = args[:current_user]
-        # ::ActiveRecord::Base.transaction  do
-          update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
-          result = header.update_attributes!(update_data)
-          return {flag:false,info:'退药失败。'} unless result
-          header.reload
-          header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
-          create_new_prescription header,current_user
-          attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
-          # Orders::Order.find(header.bill_id).cancel_medical(attrs)
-        # end
+        update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
+        result = header.update_attributes!(update_data)
+        return {flag:false,info:'退药失败。'} unless result
+        header.reload
+        header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
+        create_new_prescription header,current_user
+        attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
+        # Orders::Order.find(header.bill_id).cancel_medical(attrs)
         {flag:true,info:'退药成功！'} #: {flag:false,info:(result[:info]|| '退药失败。'),}
       rescue Exception => e
         print e.message rescue "  e.messag----"

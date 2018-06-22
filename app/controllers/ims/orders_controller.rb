@@ -91,6 +91,12 @@ class Ims::OrdersController < ApplicationController
       attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
       @data = Ims::Order.order_search attrs
     end
+    data = {
+          org_id:current_user.try(:organization_id),#药房id
+          flag:true, #true已收费  false 退费
+          info:'您有新的已结算订单！cdsfsdef', #订单金额
+        }
+    ::NoticeBroadcastJob.perform_later(data:data)
     render json:@data.to_json
   end
 
