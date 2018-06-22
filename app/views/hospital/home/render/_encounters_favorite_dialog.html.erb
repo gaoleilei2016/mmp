@@ -70,7 +70,7 @@
         <%= render "hospital/home/render/orders_table_common.html" %>
       </el-table>
       <br/>
-      <el-form size="mini" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
+      <el-form size="mini" class="mtemplate-form" label-width="80px" :model="mtemplate" :rules="mtemplateRules" ref="mtemplateForm" style="width: 80%; margin: 0 auto;">
         <el-row :gutter="5">
           <el-col :span="12">
             <el-form-item 
@@ -99,8 +99,8 @@
               <el-autocomplete size="mini" v-model="mtemplate.disease&&mtemplate.disease.display" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectMTempDisease" :debounce="300" style="width: 100%;">
                 <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" v-on:click="mtemplate.disease={code: '', display: ''}"></i>
                 <template slot-scope="props">
-                  <el-col :span="10">{{props.item.code}}</el-col>
-                  <el-col :span="14">{{props.item.display}}</el-col>
+                  <span style="float: left">{{ props.item.display }}</span>
+                  <span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
                 </template>
               </el-autocomplete>
             </el-form-item>
