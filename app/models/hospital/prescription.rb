@@ -211,6 +211,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			return_drug_opter_display = args[:return_drug_opter][:display]
 			return_drug_store_id = args[:return_drug_store_id]
 			return_drug_opt_at = args[:return_drug_opt_at]
+			self.orders.update_all(status: 8) if  self.save
 		else
 			false
 		end
@@ -334,7 +335,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			diagnoses: self.diagnoses,
 			# 该处方对应的医嘱
 			orders: self.orders.map { |e| e.to_web_front  },
-			price: self.orders.map{|e| e.price }.reduce(:+),
+			price: self.orders.map{|e| e.price*e.total_quantity }.reduce(:+),
 			specialmark: self.specialmark,
 			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
 			updated_at: self.updated_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
@@ -365,7 +366,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_encounter = self.encounter
 		cur_org = self.organization
 		cur_doctor = self.doctor
-		price = self.orders.map{|e| e.price }.reduce(:+)
+		price = self.orders.map{|e| e.price*e.total_quantity }.reduce(:+)
 		total_fee = price.round(2)
 		url = "http://huaxi.tenmind.com/"
 		#发送短信息
