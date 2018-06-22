@@ -52,19 +52,21 @@
 	function back_to_orders() {
 		// /customer/home/orders
 		var btnArray = ['继续支付', '确定离开'];
-		mui.confirm('您的订单在23小时59分内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
+		mui.confirm('您的订单在 '+time_str+' 内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
 			if (e.index == 1) {
 				location = '/customer/home/orders';
 			} else {
 			}
 		})
 	}
+	var time_str = '';
 	function set_time(msecond){
 		if (msecond>0) {
 			var minutes = parseInt(msecond/(1000 * 60));
 			minutes<10 ? minutes='0'+minutes : '';
 			var seconds = parseInt(msecond%(1000 * 60)/1000);
 			seconds<10 ? seconds='0'+seconds : '';
+			time_str = minutes+':'+seconds
 			$("#set_time").text('订单有效期 '+minutes+':'+seconds);
 		}else{
 			$("#set_time").addClass("common_red");

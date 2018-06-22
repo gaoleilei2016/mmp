@@ -71,6 +71,7 @@ class InterfacesController < ApplicationController
 			###退款成功
 			order.cancel_order(current_user,'退款成功')
 			# redirect_to res[:pay_url]
+			flash[:notice] = "退款成功"
 			render json:{flag:true,info:"操作成功"}
 		else
 			##退款失败
@@ -105,6 +106,7 @@ class InterfacesController < ApplicationController
 	end
 	def cancel_order
 		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user,'用户取消')
+		flash[:notice] = ret[:info] if ret[:ret_code]=='0'
 		render json: ret
 	end
 	# 获取用户购物车
