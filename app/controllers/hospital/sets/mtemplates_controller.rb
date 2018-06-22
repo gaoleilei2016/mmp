@@ -8,6 +8,7 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
   # GET
   # /hospital/sets/mtemplates
   def index
+    p "index", params
     search_str = params[:search].to_s
     page = params[:page] || 1
     per = params[:per] || 25
@@ -19,7 +20,7 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
     when "2" # 医院共享的
       cur_org = current_user.organization
       @mtemplates = ::Hospital::Sets::Mtemplate.where("sharing_scope_code='2' AND org_id=? AND title LIKE ?", @cur_org.id,"%#{search_str}%")
-    when "avaliable" # 可以使用的
+    when "available" # 可以使用的
       @mtemplates = ::Hospital::Sets::Mtemplate.where("(author_id=? AND title LIKE ?) 
         OR (sharing_scope_code='1' AND location_id=? AND title LIKE ?) 
         OR (sharing_scope_code='2' AND org_id=? AND title LIKE ?)", 
