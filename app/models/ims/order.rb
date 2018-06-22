@@ -21,7 +21,7 @@ class Ims::Order < ApplicationRecord
         when '5'#已发药
          query.concat(" and status=5 ")
         when '7'#已退药
-         query.concat(" and (status=7 or status=6) ")
+         query.concat(" and is_send_medical>=1 and (status=7 or status=6) ")
         else
         end
         query.concat(' order by created_at desc')
