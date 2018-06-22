@@ -137,7 +137,7 @@ class Orders::Order < ApplicationRecord
 			when '4'
 
 			when '5'
-::				Orders::Order.transaction do
+				::Orders::Order.transaction do
 					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
 					# 退药
