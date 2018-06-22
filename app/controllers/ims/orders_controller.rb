@@ -144,7 +144,7 @@ class Ims::OrdersController < ApplicationController
     drug_user_id = current_user.try(:id)
     temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
     data = Orders::Order.order_completion(temp)
-    re_data = {flag: (data[:ret_code].to_i==0 ? true : false),info:data[:info]}
+    re_data = data[:ret_code].to_i==0 ? {flag:true,info:'收费成功！'} : {flag:false,info:data[:info]}
     render json:re_data.to_json
   end
 
