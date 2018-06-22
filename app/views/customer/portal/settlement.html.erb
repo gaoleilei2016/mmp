@@ -302,7 +302,7 @@
 				$.ajax({
 					url:'/customer/fapiao?default=yes',
 					success:function(json) {
-						current_app.fapiao = json.fapiao;
+						current_app.fapiao = json.fapiao||{};
 					},
 					complete:function() {
 						$("#loading").hide();
