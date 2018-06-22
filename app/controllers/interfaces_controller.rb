@@ -154,7 +154,8 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~',params, session[:current_pharmacy_id]
 		if session[:current_pharmacy_id]
 			# 自选
-			o = ::Admin::Organization.where(:type_code=>'2').find(session[:current_pharmacy_id])
+			o = ::Admin::Organization.where(:type_code=>'2',id:session[:current_pharmacy_id]).first
+			raise "查无此药房 id:#{session[:current_pharmacy_id]}" unless o
 
 			re = JSON.parse(o.to_json)
 			if o.lat.present? && o.lng.present? && params[:lat].present? && params[:lng].present?
@@ -197,12 +198,12 @@ class InterfacesController < ApplicationController
 			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f}
 			if params[:hot].present?
 				# 客户获取热点药房
-				orgs = ::Admin::Organization.all.order("search_count desc").page(params[:page]).per(params[:per])
+				orgs = ::Admin::Organization.where(:type_code=>'2').order("search_count desc").page(params[:page]).per(params[:per])
 				# return render json:{rows:res,total:orgs.total_count,flag:true}
 			elsif params[:history].present?
 				# 客户获取常用药房
 				his = ::Customer::SearchHistory.where(user_id:current_user.id).order("use_count desc").page(1).per(10)
-				orgs = his.map{|x| ::Admin::Organization.find(x.pharmacy_id)}
+				orgs = his.map{|x| o = ::Admin::Organization.find(x.pharmacy_id); o.type_code=='2' ? o : nil }.compact
 			else
 				# 客户搜索药房
 				orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])

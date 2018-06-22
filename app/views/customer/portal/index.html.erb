@@ -128,7 +128,7 @@
 			<div class="mui-checkbox mui-left">
 				<input @click="check_all($event,organ)" type="checkbox" :checked="equals_array(organ.prescription_ids,organ.prescription_ids2)" style="top: 12px;left: 0px;">
 				<label style="padding-left: 26px;padding-right: 0;">
-					<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+					<img class="mui-media-object mui-pull-left head-img" src="/assets/customer/pharmacy.png">
 					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 					<div class="mui-media-body">
 						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
@@ -309,7 +309,7 @@
 				var _this = this;
 				// alert(JSON.stringify(point))
 				$.ajax({
-					url:"/interfaces/get_current_pharmacy",
+					url:"/interfaces/get_current_pharmacy.json",
 					data:point,
 					success:function(json) {
 						if (json.flag) {
