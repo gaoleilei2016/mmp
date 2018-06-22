@@ -12,15 +12,11 @@ class Ims::PreHeader < ApplicationRecord
 			current_user = args[:current_user]
 			order = args[:order]
 			prescription_headers = []
-			# ::ActiveRecord::Base.transaction do
-			# ::ActiveRecord::Base.transaction(:requires_new => true) do
-				args[:prescriptions].each do |k,prescription|
-					header = prescription_data prescription,current_user,order
-					next if header.blank?
-					(prescription_headers << ::Ims::PreHeader.create!(header) ) unless ::Ims::PreHeader.where(prescription_no:prescription[:prescription_no]).count>0
-				end
-				# raise ActiveRecord::Rollback
-			# end
+			args[:prescriptions].each do |k,prescription|
+				header = prescription_data prescription,current_user,order
+				next if header.blank?
+				(prescription_headers << ::Ims::PreHeader.create!(header) ) unless ::Ims::PreHeader.where(prescription_no:prescription[:prescription_no]).count>0
+			end
 			prescription_headers.count==args[:prescriptions].count ? {flag:true,info:"处方保存成功！"} : {flag:false,info:"处方保存失败。"}
 		end
 
@@ -35,8 +31,8 @@ class Ims::PreHeader < ApplicationRecord
 						:single_qty_unit=> detail[:single_qty][:unit],
 						:dose_value=> detail[:dose][:value],
 						:dose_unit=> detail[:dose][:unit],
-						:route_value=> detail[:route][:value],
-						:route_unit=> detail[:route][:unit],
+						:route_code=> detail[:route][:code],
+						:route_display=> detail[:route][:display],
 						:frequency_code=> detail[:frequency][:code],
 						:frequency_display=> detail[:frequency][:display],
 						:course_of_treatment_value=> detail[:course_of_treatment][:value],
@@ -54,7 +50,7 @@ class Ims::PreHeader < ApplicationRecord
 						:order_type=> detail[:order_type],
 						:encounter_id=> detail[:encounter_id],
 						:author_id=> detail[:author][:id],
-						:author_name=> detail[:author][:name],
+						:author_name=> detail[:author][:display],
 						:factory_name=> detail[:factory_name],
 						:base_unit=> detail[:base_unit],
 						:mul=> detail[:mul],
