@@ -302,7 +302,8 @@ window.current_template_obj = {
   			if(socket.readyState==3) { // 身份证读卡服务处于关闭状态
   				this.$message({
   					showClose: true,
-	          message: '请启动身份证后台读卡服务。',
+  					dangerouslyUseHTMLString: true,
+	          message: '<p>请启动身份证后台读卡服务。</p><br/><p>如您还未安装，点击 <a href="/ID_card_installation_package.rar">ID_card_installation_package</a> 下载安装包。</p>',
 	          type: 'warning',
 	          duration: 0,
 	        });
