@@ -59,7 +59,7 @@ class Orders::Order < ApplicationRecord
 	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
 	def cancel_order(cur_user=nil,reason='')
 		current_user = current_user||User.find(user_id)
-		result = {ret_code:'0',info:''}
+		result = {ret_code:'-1',info:'当前订单不允许取消'}
 		begin
 			update_attributes(_locked:1)
 			case status.to_s
@@ -68,7 +68,7 @@ class Orders::Order < ApplicationRecord
 				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				result = {ret_code:'0',info:'订单已取消。'}
-			when cur_user && '2'
+			when payment_type.to_s == '1' && cur_user && '2'
 				arg = {
 					# 退费人
 					return_charge_opt: {
@@ -81,16 +81,33 @@ class Orders::Order < ApplicationRecord
 				prescriptions.each{|x|x.return_charge(arg, current_user)}
 				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 				update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
+				data = {
+					org_id:order.target_org_id,#药房id
+					status:order.status, #订单状态
+					order_id:order.id, #订单id
+					created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+					order_code:order.order_code, #订单号
+					patient_name:order.patient_name, #患者名字
+					amt:order.net_amt, #订单金额
+					flag:false, #true已收费  false 退费
+					info:'您有一张订单结算被用户取消了！', #订单金额
+				}
+				::NoticeBroadcastJob.perform_later(data:data)
 				result = {ret_code:'0',info:'取消成功，处方已失效。'}
 			when '5'
 				return {ret_code:'-1',info:'订单已完成，不允许取消。'}
 			when '6'
-				return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
+				prescriptions.each{|x|x.back_wait_charge({}, current_user)}
+				update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
+				prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+				result = {ret_code:'0',info:'订单已取消。'}
+				# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
 			when '7'
 				return {ret_code:'-1',info:'订单已取消，不允许再次取消。'}
 			end
 		rescue Exception => e
-			p e
+			p e.backtrace
+			p '我的，都是我的！'
 		ensure
 			self.update_attributes(_locked:0)
 		end
@@ -159,7 +176,8 @@ class Orders::Order < ApplicationRecord
 	# 		end
 	# 		save
 	# 	rescue Exception => e
-	# 		p e
+	# 		p e.backtrace
+	# p '我的，都是我的！'
 	# 	ensure
 	# 		update_attributes(_locked:0)
 	# 		return result
@@ -182,10 +200,10 @@ class Orders::Order < ApplicationRecord
 
 			when '5'
 				Hospital::Prescription.transaction do
-					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:attrs[:reason])
+					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
-					if self.payment_type.to_s != '2' #如果是线下支付的
-						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:attrs[:reason])
+					if self.payment_type.to_s == '2' #如果是线下支付的
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
 					end
 				end
 				result[:ret_code] = '0'
@@ -198,7 +216,8 @@ class Orders::Order < ApplicationRecord
 
 			end
 		rescue Exception => e
-			p e
+			p e.backtrace
+			p '我的，都是我的！'
 		ensure
 			update_attributes(_locked:0)
 			return result
@@ -249,10 +268,29 @@ class Orders::Order < ApplicationRecord
 		##通知处方订单已结算
 	 	prescriptions.each{|x|x.charged(args, cur_user)}
 		update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
+		data = {
+					org_id:target_org_id,#药房id
+					status:status, #订单状态
+					order_id:id, #订单id
+					created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+					order_code:order_code, #订单号
+					patient_name:patient_name, #患者名字
+					amt:net_amt, #订单金额
+					flag:true, #true已收费  false 退费
+					info:'您有新的已结算订单！', #订单金额
+				}
+		::NoticeBroadcastJob.perform_later(data:data)
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
 	class << self
+
+		def check_order_timer
+			Orders::Order.where('payment_type = 1 and status = 1 and created_at > ?' ,Time.now - 28.minutes ).update_all(status:'7',reason:'超时关闭')
+			Orders::Order.where('payment_type = 1 and status = 1 and created_at < ?' ,Time.now - 30.minutes ).each{|x| 
+				sch = ::Scheduler.new();
+				sch.timer_at(Time.now + (30.minutes - (Time.now - x.created_at)),"::Orders::Order.find(#{x.id.to_s}).cancel_order({},'超时关闭')")}
+		end
 			
 
 # hospital_id:'医院id'
@@ -344,6 +382,19 @@ class Orders::Order < ApplicationRecord
 					sch = ::Scheduler.new()
 					sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
 					result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
+				elsif attrs[:status] == '2'
+					data = {
+						org_id:order.target_org_id,#药房id
+						status:order.status, #订单状态
+						order_id:order.id, #订单id
+						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+						order_code:order.order_code, #订单号
+						patient_name:order.patient_name, #患者名字
+						amt:order.net_amt, #订单金额
+						flag:true, #true已收费  false 退费
+						info:'您有新的线下支付订单！', #订单金额
+					}
+					::NoticeBroadcastJob.perform_later(data:data)
 				end
 				#订单创建成功之后改变处方状态
 				args = {
@@ -449,6 +500,8 @@ class Orders::Order < ApplicationRecord
 					result[:info].concat("当前订单状态异常!,请稍后再试。")	
 					return result
 				end
+				p "order_completion来更新订单了:#{attrs[:status]},#{order.id.to_s}"
+
 				order.update_attributes(_locked:1)
 				Orders::Order.transaction do
 					if attrs[:id].blank?
@@ -464,12 +517,6 @@ class Orders::Order < ApplicationRecord
 						result[:info].concat("订单ID不能为空!")
 					end
 					if result[:ret_code].to_s == '0'
-						order.update_attributes(drug_user:attrs[:drug_user],
-												drug_user_id:attrs[:drug_user_id],
-												end_time:Time.now.to_s(:db),
-												status:attrs[:status],
-												)
-						result[:info] = "订单已完成。" 
 						#订单结算
 						if ["2","5"].include?attrs[:status].to_s
 							args = {
@@ -498,12 +545,20 @@ class Orders::Order < ApplicationRecord
 								}
 								order.prescriptions{|x|x.send_drug(args2, attrs[:current_user])}
 							end
+							p "order_completion订单更新状态拉:#{attrs[:status]},#{order.id.to_s}"
+							order.update_attributes(drug_user:attrs[:drug_user],
+												drug_user_id:attrs[:drug_user_id],
+												end_time:Time.now.to_s(:db),
+												status:attrs[:status],
+												)
+							result[:info] = "订单已完成。" 
 						end
 						##更新处方状态。。。。。。
 					end
 				end
 			rescue Exception => e
-				p e
+				p e.backtrace
+				p '我的，都是我的！'
 			ensure
 				order.update_attributes(_locked:0)
 			end

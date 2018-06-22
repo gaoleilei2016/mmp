@@ -29,9 +29,24 @@
 				  </el-tabs>
 				  <span class="text-danger">可以修改显示的文字，但是不要随意修改代码！！！</span>
 			  </el-form-item>
-			  <el-form-item label="处方审核人" prop="prescription_audit_id">
-			  	<el-input v-model="ini.prescription_audit_id" placeholder="请输入内容"></el-input>
+			  <el-form-item label="处方审核人" prop="prescription_audit">
+			  	<el-select v-model="ini.prescription_audit" value-key="id" placeholder="请选择审核人" style="width: 100%;" filterable>
+				    <el-option
+				      v-for="item in (users||[])"
+				      :key="item.id"
+				      :label="item.name"
+				      :value="item">
+				    </el-option>
+				  </el-select>
 			  </el-form-item>
+				<div class="page-header">
+					<h4>就诊&#12288;<small>就诊信息相关设置</small></h4>
+				</div>
+				<el-form-item label="就诊查询有效时间" prop="encounter_search_time">
+				  <el-input type="number" v-model="ini.encounter_search_time">
+				    <template slot="append">天</template>
+				  </el-input>
+				</el-form-item>
 			</div>
 
 		  <hr style="border-top: 1px solid #eeeeee;"/>
@@ -50,8 +65,11 @@ window.current_template_obj = {
 			ini: {
 				enable_print_pres: false, // 启用打印处方功能
 				print_pres_html: "", // 处方打印内容
+				prescription_audit: {id: "", display: ""},
+				encounter_search_time: 1, // 就诊查询有效时间
 			},
 			rules: {},
+			users: [], // 用户列表，供审核人筛选
 		}
 	},
 	mounted: function () {
@@ -87,6 +105,17 @@ window.current_template_obj = {
       	_this.$message.error('获取初始设置报错，请联系管理员。');
       })
 
+		  Vue.resource('/hospital/sets/inis/get_org_user_list.json').get().then( function (response) {
+        // 根据初始值的设置，对页面做配置显示
+        var res = response.data
+        if(res.flag) {
+        	_this.users = res.data;
+        }else{
+        	_this.$message.error(res.info);
+        }
+      }, function  (response) {
+      	_this.$message.error('获取用户列表报错，请联系管理员。');
+      })
   	},
   	submitForm: function (formName) {
   		var _this = this;

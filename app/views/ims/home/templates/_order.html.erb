@@ -4,22 +4,22 @@
 	<div id="ims_order_main">
 		<el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
-		  <el-menu-item index="1" @click="show_panel('out_order')">
+		  <el-menu-item index="1" @click.native="show_panel('out_order',$event)">
 		    <i class="el-icon-goods"></i>
 		    <span >发药</span>  
 		  </el-menu-item>
 
-		  <el-menu-item index="2" @click="show_panel('return_drug')">
+		  <el-menu-item index="2" @click.native="show_panel('return_drug',$event)">
 		    <i class="el-icon-sold-out"></i>
 		    <span >退药</span>  
 		  </el-menu-item>
 
-		  <el-menu-item index="3" @click="show_panel('reports')">
+		  <el-menu-item index="3" @click.native="show_panel('reports',$event)">
 		    <i class="el-icon-document"></i>
 		    <span >报表</span>
 		  </el-menu-item>
 
-		  <el-menu-item index="4" @click="show_panel('settings')">
+		  <el-menu-item index="4" @click.native="show_panel('settings',$event)">
 		    <i class="el-icon-setting"></i>
 		    <span >设置</span>
 		  </el-menu-item>
@@ -32,7 +32,6 @@
 
 		<div class="function_panel return_drug" style="display:none;">
       <%= render "ims/home/render/return_order"%>
-			<%#= render "ims/home/render/return_drug"%>
 		</div>
 
 		<div class="function_panel reports" style="display:none;">
@@ -49,12 +48,9 @@
 </template>
 <script type="text/javascript">
 document.onkeydown = function(){
-  // console.log(window.event.keyCode)
   if(window.event.keyCode == 114){
-    console.log("search")
     var ele = document.getElementsByClassName("el-input__inner")
     $.each(ele,function(k,v){
-      // console.log($(v).parents(".function_panel").css("display"))
       if ($(v).parents(".function_panel").css("display") == "block") {
         $(v).select()
       };
@@ -66,10 +62,10 @@ document.notice_data = [];
 $.ims_notice = function(data){
   // alert(data)
   org_id = $("#organization_id").val()
-  if (data&&data.order_id&&data.org_id==org_id) {
+  if (data&&data.org_id == org_id) {
     document.notice_data = data
     $("#notice_input").click()
-  };
+  }
 }
 window.current_template_obj = {
 	data:function(){
@@ -110,24 +106,45 @@ window.current_template_obj = {
 	},
 	methods:{
     init:function(){
-      console.log(this)
-      console.log(this._data)
+      $(document).find("#prescription_menu").find(".el-menu-item:first").addClass("is-active")
+      $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
     },
     change:function(){
-      // alert(val)
       data = document.notice_data
-      console.log(data)
       if (data.flag) {
-        console.log("+++++++++++++++++++++")
         temp = this._data.order_lists
         temp.push(data)
         this._data.order_lists = temp
-        console.log("+++++++++++++++++++++")
         this.$notify.success({
-          title: 'Info',
+          title: '消息',
           message: '您有新的订单生成',
           showClose: false
         });
+      }else{
+        temp = this._data.order_lists
+        $.each(temp,function(k,v){
+          if (v.order_id == data.order_id) {
+            temp.splice(k,1)
+            return false
+          };
+        })
+        this._data.order_lists=temp
+        this.$notify({
+          title: '消息',
+          message: data.info,
+          showClose: false
+        });        
+      }
+    },
+    search_input_change:function(val){
+      if (val.length<=0) {
+        menu = $("#prescription_menu").find(".is-active").text()
+        if (menu.indexOf('发药')>=0) {
+          $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
+        };
+        if (menu.indexOf('退药')>=0) {
+          $(document).find("div.function_panel.return_order").find(".prescription_list_panel .is-active").click();
+        };
       };
     },
     handleOpen:function(key, keyPath) {
@@ -136,8 +153,10 @@ window.current_template_obj = {
     handleClose:function(key, keyPath) {
       console.log(key, keyPath);
     },
-    show_panel:function(method){
+    show_panel:function(method,e){
       var _this = this
+      console.log(e.currentTarget)
+      if(e)$(e.currentTarget).addClass("is-active").siblings("li").removeClass("is-active")
       $("div.function_panel").hide();
       var str = "div.function_panel."+method
       $(document).find(str).show();
@@ -145,7 +164,6 @@ window.current_template_obj = {
         $(document).find(str).find(".prescription_list_panel .is-active").click();
       }catch(e){
         _this._data.order_lists = []
-        console.log(e)
       }
     },
     out_order_search_fun:function(e){
@@ -166,7 +184,6 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
@@ -243,8 +260,6 @@ window.current_template_obj = {
 
           if (flag_arr.indexOf(1)>=0) {
             stat = _this.activeName2
-            console.log("temp",temp)
-            console.log("temp.length",temp.length)
             temp.map(function(item){
               if (temp2.length<=0) {
                 temp2.push({
@@ -267,10 +282,7 @@ window.current_template_obj = {
                   })
                 };
               }
-              console.log(temp2)
             })
-            console.log("temp2.length",temp2.length)
-            console.log(temp2)
             if (temp2.length>0) {
               if(temp2[0].status == "2"){
                 _this.out_list_panel = "1"
@@ -302,16 +314,11 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据")
         }
-        console.log(temp)
-        console.log(flag_arr)
-        console.log(order_status)
       },function(response){
         _this.$notify({
           title: '提示',
           message: '服务器请求出错了',
-          duration: 0
         });
       });
     },200)
@@ -335,7 +342,6 @@ window.current_template_obj = {
             title: '提示',
             message: '没有数据！',
           });
-          console.log("没有数据")
           return ""
         };
         if(ori_data&&ori_data.length>0){
@@ -436,10 +442,7 @@ window.current_template_obj = {
                   })
                 };
               }
-              console.log(temp2)
             })
-            console.log("temp2.length",temp2.length)
-            console.log(temp2)
             if (temp2.length>0) {
               if(temp2[0].status == "2"){
                 _this.$notify({title: '提示',message: '订单未发药！'});
@@ -475,9 +478,6 @@ window.current_template_obj = {
           });
           console.log("没有数据")
         }
-        console.log(temp)
-        console.log(flag_arr)
-        console.log(order_status)
       },function(response){
         _this.$notify({
           title: '提示',
@@ -495,7 +495,6 @@ window.current_template_obj = {
         if(response.data.data&&response.data.data.length>0){
           _this.set_order_list(response.data.data)
             _this._data.detail = [{pres:[{type:"处方"}]}]
-            // return_detail:[{pres:[{type:"处方"}]}],          
         }else{
           _this.set_order_list([])
         }
@@ -511,13 +510,15 @@ window.current_template_obj = {
     set_order_list:function(data){
       if (data) {
         this._data.order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+        },200)        
       }else{
         this._data.order_lists = []
       }
     },
     get_order:function (id,e) {
       var _this = this;
-      console.log(e.currentTarget)
       if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       if (!id) {
         id="";
@@ -531,7 +532,6 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_order?id='+id).then(function(response) {
         console.log(response.data.order)
         _this._data.detail = [response.data.order]
-        // setTimeout(function(){  _this._data.detail =  [_this.tab_header_data[0]] },300)
       },function(response){
         _this.$notify({
           title: '提示',
@@ -561,6 +561,9 @@ window.current_template_obj = {
     set_return_order_lists:function(data){
       if (data) {
         this._data.return_order_lists = data
+        setTimeout(function(){
+          $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
+        },200)
       }else{
         this._data.return_order_lists = []
       }
@@ -613,7 +616,6 @@ window.current_template_obj = {
           str = "div.function_panel.out_order"
           $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
-          console.log(e)
           _this._data.order_lists = []
         }
         _this._data.detail = [{}]
@@ -626,12 +628,13 @@ window.current_template_obj = {
         });
       });
     },
+    //收费
     charging_pre:function(id){
       var _this = this
       if (id){}else{
         _this.$notify({
           title: '提示',
-          message: '订单信息不全，不能发药！',
+          message: '订单信息不全，不能收费！',
         });       
         return false
       }
@@ -651,7 +654,6 @@ window.current_template_obj = {
           str = "div.function_panel.out_order"
           $(document).find(str).find(".is-active").click()
         }catch(e){
-          console.log(e)
           _this._data.order_lists = []
         }
         _this._data.detail = [{}]
@@ -681,6 +683,9 @@ window.current_template_obj = {
           _this.$message('收费成功');
           _this.dialogFormVisible = false
           _this._data.platform_data = []
+          _this.out_list_panel = "2"
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".is-active").click()
         },function(response){
           _this.$message('收费失败，请重试！');
         })
@@ -707,10 +712,10 @@ window.current_template_obj = {
         })
     },    
     return_order:function(id){
-      // console.log(this._data.return_reason_form)
-      // return false;
       var _this = this
-      if (this._data.return_reason_form.name.length>0){}else{
+      if (this._data.return_reason_form.name.length>0){
+
+      }else{
         _this.$message({
           type: 'warning',
           message: '请填写返回原因！',
@@ -740,20 +745,14 @@ window.current_template_obj = {
           str = "div.function_panel.return_drug"
           $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
-          console.log(e)
           _this._data.return_order_lists = []
         }
         _this._data.return_detail = [{}]
-
       },function(response){
         _this.$notify({ title: '提示', message: '服务器请求出错了', duration: 0 });
       });      
-    },
-    choose_prescription:function(id){
-      console.log(id)
-      this.
-      str = "#pre_"+id
-      $("#ims_order_main").find(str).show();
+      _this._data.return_reason_form.name = ""
+      _this._data.return_reason_visible = false;
     },
     format_time:function(data){
       var time = new Date(data)
@@ -771,7 +770,6 @@ window.current_template_obj = {
       }
     },
     notice_ims:function(data){
-      console.log(data)
       this.$notify({ title: '提示', message: data,});
     },
     setting_form_submit:function(data){
@@ -786,7 +784,6 @@ window.current_template_obj = {
         },function(response){
           _this.$message({message:'设置失败，请重试！',type:'error'});
         })      
-      // console.log(this._data.setting_form)
     },
 	},
 	mounted:function(){

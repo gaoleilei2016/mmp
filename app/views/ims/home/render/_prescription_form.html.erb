@@ -7,7 +7,7 @@
 				</h3>
 			 	<div class="el-row" style="font-size:15px; overflow:hidden;border-bottom:1px solid #ddd;">
 			  	<div class="el-col-12 text-left">处方号：<span>{{pre.order_code}}</span></b></div>
-			  	<div class="el-col-12" style="text-align:right;">处方时间：<span>{{format_time(pre.created_at)}}</span></b></div>
+			  	<div class="el-col-12" style="text-align:right;">处方时间：<span>{{ pre.created_at | formatDate('yyyy-MM-dd HH:MM')}}</span></b></div>
 			 	</div>					
 			</div>
 

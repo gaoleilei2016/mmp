@@ -141,8 +141,11 @@ class Hospital::EncountersController < ApplicationController
       ::ActiveRecord::Base.transaction  do
         if @encounter.update_attributes!(update_data[:encounter])
           cur_person = @encounter.person
+          p cur_person
           cur_person.update_attributes!(@encounter.format_person_args)
+          p "更新实体信息成功"
           ::Hospital::Irritability.batch_update(update_data[:irritabilities], cur_person, current_user)
+          p "更新过敏信息成功"
           ::Hospital::Diagnose.batch_update(update_data[:diagnoses], @encounter, current_user)
           format.html { redirect_to @encounter, notice: 'encounter was successfully updated.' }
           format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }

@@ -57,12 +57,12 @@
 						<span style="float: right;color: #F55742;">
 							<span v-if="order.payment_type=='1'">
 								<span v-if="order.status=='1'">待付款</span>
-								<span v-if="order.status=='2'">已付款</span>
-								<span v-if="order.status=='3'">未发货</span>
-								<span v-if="order.status=='4'">已发货</span>
-								<span v-if="order.status=='5'">交易成功</span>
-								<span v-if="order.status=='6'">交易关闭</span>
-								<span v-if="order.status=='7'">交易取消</span>
+								<span v-if="order.status=='2'">待领药</span>
+								<!-- <span v-if="order.status=='3'">未发货</span> -->
+								<!-- <span v-if="order.status=='4'">已发货</span> -->
+								<span v-if="order.status=='5'">交易完成</span>
+								<span v-if="order.status=='6'">已退药</span>
+								<span v-if="order.status=='7'">交易关闭</span>
 							</span>
 							<span v-if="order.payment_type=='2'">到店支付</span>
 						</span>
@@ -102,7 +102,7 @@
 				<button type="button" @click="$parent.cancel_order(order.id)" v-if="order.status=='1'">取消订单</button>
 				<template v-if="order.payment_type=='1'">
 					<button type="button" :onclick="'location.href=\'/customer/portal/pay?id='+order.id+'\''" v-if="order.status=='1'">去支付</button>
-					<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'">申请退款</button>
+					<button type="button" @click="$parent.refund_order(order.id)" v-if="order.status=='2'||order.status=='6'">申请退款</button>
 				</template>
 			</div>
 		</div>
@@ -121,7 +121,7 @@
 		computed:{
 			not_used_orders:function() {
 				return this.orders.filter(function(item) {
-					return item.status=='1'||item.status=='1';
+					return item.status=='1'||item.status=='2';
 				})
 			}
 		},
