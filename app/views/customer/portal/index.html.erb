@@ -68,23 +68,36 @@
 	.mui-content .mui-active{
 		background: none !important;
 	}
+	.mui-checkbox input[type=checkbox]:before, .mui-radio input[type=radio]:before{
+		font-size: 20px;
+		/*color: #F55742;*/
+	}
+	.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
+		color: #F55742;
+	}
+	.mui-table-view-cell:after{
+		left: 0;
+	}
 </style>
-<div class="mui-content" id="vue_content">
+<div class="mui-content" id="vue_content" v-cloak>
 	<div id="search_content">
 		<div class="mui-input-row search_header_row">
 			<i class="mui-icon mui-icon-search" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="document.getElementById('search_input').focus();"></i>
 			<i class="mui-icon mui-icon-arrowleft" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; " onclick="$('#search_content').removeClass('on');$('#bottom_tabs').show(300);"></i>
-			<input id="search_input" v-model="search_str" type="text" class="mui-input-clear mui-input" placeholder="您想去哪取药" autocomplete="off">
+			<input id="search_input" v-model="search_str" type="text" class="mui-input" placeholder="您想去哪取药" autocomplete="off">
+			<span v-if="search_str" @click="search_str='';" class="mui-icon mui-icon-clear" style=" font-size: 20px; position: absolute; z-index: 1; top: 10px; right: 0; width: 38px; height: 38px; text-align: center; color: #999;"></span>
 		</div>
-		<div class="search_results" style="">
-			<template v-if="pharmacys">
+		<div class="search_results" style="height: calc( 100% - 40px );overflow: auto;">
+			<template v-if="pharmacys&&pharmacys.length">
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
 						<div>
-							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png">
+							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
 							<div class="mui-media-body">
-								{{item.name}}
-								<p style="float: right;">{{item.distance}}</p>
+								<div>
+									{{item.name}}
+									<p style="float: right;">{{item.distance}}</p>
+								</div>
 								<p class="mui-ellipsis">{{item.addr}}</p>
 							</div>
 						</div>
@@ -103,43 +116,57 @@
 		<span v-if="current_pharmacy.sele_type=='self'">自选药房</span>
 		<span v-else>距离当前最近</span>
 	</p>
-	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="item in prescriptions">
+	<ul class="mui-table-view" style="margin-bottom: 22px;" v-for="organ in organs">
 		<li class="mui-table-view-cell" style="padding: 11px 15px;overflow: visible;">
-			<div>
-				<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
-				<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-				<div class="mui-media-body">
-					<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
-					<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
-					<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
-				</div>
+			<div class="mui-checkbox mui-left">
+				<input @click="check_all($event,organ)" type="checkbox" :checked="equals_array(organ.prescription_ids,organ.prescription_ids2)" style="top: 12px;left: 0px;">
+				<label style="padding-left: 26px;padding-right: 0;">
+					<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+					<div class="mui-media-body">
+						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
+						<span v-else><i class="fal fa-spinner fa-spin"></i> 定位中</span>
+						<p class="mui-ellipsis" style="font-size: 12px;padding-right: 64px;">{{current_pharmacy.addr||"　"}}</p>
+					</div>
+				</label>
 			</div>
 			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
-				<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding-left: 0;">
-					<div href="javascript:;" class="">
-						<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
-						<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-						<div class="mui-media-body">
-							{{drug.title}}
-							<p class="mui-ellipsis">
-								<p style="padding-top: 6px;">{{drug.specification}}</p>
-								<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
-							</p>
+				<template v-for="prescription in organ.prescriptions">
+					<li class="mui-table-view-cell" style="padding-left: 0;">
+						<div class="mui-checkbox mui-left">
+							<input v-model="organ.prescription_ids" name="checkbox" :value="prescription.id" type="checkbox" style="top: 0px;left: 0px;">
+							<label style="padding-left: 26px;padding-right: 0;">
+								<span>处方号: {{prescription.prescription_no}}</span>
+								<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
+							</label>
 						</div>
-					</div>
-				</li>
+					</li>
+					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
+						<div href="javascript:;" class="">
+							<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: initial;">
+							<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+							<div class="mui-media-body">
+								{{drug.title}}
+								<p class="mui-ellipsis">
+									<p style="padding-top: 6px;">{{drug.specification}}</p>
+									<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
+								</p>
+							</div>
+						</div>
+					</li>
+				</template>
 			</ul>
 			<div style="line-height: 33px;">
-				<a href="javascript:;" @click="send_prescription_ids_session(item)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
-					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(item.first_created_at).pattern("MM月dd日")}}</span>
+					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
 					<span style="color: #F55742;float: right;">
 						<span>¥</span>
-						<span style="font-size: 1.5em;">{{format_float(item.total_price)}}</span>
+						<span style="font-size: 1.5em;">{{total_price(organ)}}</span>
 					</span>
 					<span style="float: right;margin-right: 6px;">合计</span>
 				</div>
@@ -148,41 +175,75 @@
 	</ul>
 </div>
 <script type="text/javascript">
-	new Vue({
+	var current_app = new Vue({
 		el:"#vue_content",
 		data:{
 			point:{},
 			current_pharmacy:{},
 			pharmacys:null,
 			search_str:'',
-			prescriptions:[],
+			organs:[],
 		},
 		watch:{
 			search_str:function(val) {
-				// console.log( 'xxxxxxxxxxxxxx',val,val.length );
 				var _this = this;
 				clearTimeout(_this.timer)
-				_this.timer = setTimeout(function() {
-					$("#loading").show();
-					$.ajax({
-						url:'/interfaces/get_pharmacy?search='+val+'&',
-						data:{lng:_this.point.lng,lat:_this.point.lat},
-						success:function(json) {
-							if (json.flag) {
-								_this.pharmacys = json.rows;
-							}else{
-								mui.toast("请刷新后重试");
-							}
-						},
-						complete:function() {
-							$("#loading").hide();
-						},
-						error:error_fun
-					})
-				},500)
+				if (val) {
+					_this.timer = setTimeout(function() {
+						$("#loading").show();
+						$.ajax({
+							url:'/interfaces/get_pharmacy?search='+val+'&',
+							data:{lng:_this.point.lng,lat:_this.point.lat},
+							success:function(json) {
+								if (json.flag) {
+									_this.pharmacys = json.rows;
+								}else{
+									mui.toast("请刷新后重试");
+								}
+							},
+							complete:function() {
+								$("#loading").hide();
+							},
+							error:error_fun
+						})
+					},500)
+				}else{
+					_this.pharmacys=null;
+				}
 			},
 		},
+		computed:{
+		},
 		methods:{
+			equals_array:function(arr1,arr2) {
+				var flag = true;
+				if (arr1.length&&arr1.length==arr2.length) {
+					arr1.map(function(item) {
+						if (arr2.indexOf(item)==-1) {
+							flag = false;
+						}
+					})
+				}else{
+					flag = false;
+				}
+				return flag;
+			},
+			total_price:function(organ) {
+				var to_pri = 0;
+				organ.prescriptions.map(function(item) {
+					if(organ.prescription_ids.indexOf(item.id)>-1){
+						to_pri+=item.price;
+					}
+				})
+				return this.format_float(to_pri);
+			},
+			check_all:function(e,organ) {
+				if ($(e.target).prop("checked")) {
+					organ.prescription_ids = organ.prescription_ids2;
+				}else{
+					organ.prescription_ids = [];
+				}
+			},
 			send_prescription_ids_session:function(item) {
 				var _this = this;
 				if (_this.current_pharmacy.id) {
@@ -212,6 +273,7 @@
 			},
 			get_c_phar:function(point) {
 				var _this = this;
+				// alert(JSON.stringify(point))
 				$.ajax({
 					url:"/interfaces/get_current_pharmacy",
 					data:point,
@@ -280,7 +342,7 @@
 					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
-							_this.prescriptions = json.data;
+							_this.organs = json.data;
 						}else{
 							_this.$message(json.info);
 						}
@@ -296,7 +358,6 @@
 		},
 		mounted:function() {
 			var _this = this;
-			// _this.search_str = '';
 			this.get_current_pharmacy();
 			this.get_prescriptions();
 			$("#search_input").on("focus",function(e) {

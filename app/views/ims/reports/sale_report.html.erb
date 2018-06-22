@@ -1,0 +1,630 @@
+<style type="text/css">
+  @media screen and (max-width: 1000px){
+    #headers_select_time{
+      width: 14.66667%;
+      }
+
+    }
+  @media screen and (min-width: 1020px){
+    #headers_select_time{
+      width: 119px;
+      }
+    #calender_width_ch{
+      width:19%;
+    }
+  }
+  @media screen and (min-width: 1025px){
+    .combined_query_group{  padding-top:0; padding-bottom:0; }
+    .modal-dialog{width:911px;}
+  } 
+  .page-header > h3 {
+    margin: 0;
+    display: inline-block;
+    width: -webkit-calc(100% - 80px);
+    width: -moz-calc(100% - 80px);
+    width: calc(100% - 80px)
+  }
+  .h3 {
+    font-size: 21px;
+    }
+  </style>
+<div class="main-data">
+  <article class="page-header need_not"style="margin:0 0 8px 0;">
+    <i class="fa fa-bar-chart-o fa-fw fa-4x"></i>
+    <h3>药品销售统计报表<small>药品销售统计报表 </small></h3>
+  </article>
+
+
+  <% if request.params[:analysis] %>
+  <div class="alert alert-warning alert-dismissible need_not" role="alert">
+    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+    <center>
+    <% request.params[:analysis].each do |item| %>
+    <strong><%= t(item[:k], :scope=>'tooltips')%>: <%= item[:v] %></strong><% if item[:l] %>&#12288;<span class="label label-success"><%= t(item[:l], :scope=>'labels') %></span>&#12288;<% end %> 
+    <% end %>&#12288;<%= t(:query_tip, :scope=>'tooltips')%>
+    </center>
+  </div>
+  <% end %>
+
+  <form class="form-horizontal" id="search_form" accept-charset="UTF-8" action="/ims/reports/sale_report" method="get">
+    <div class="form-group">
+
+        <div class="col-sm-3 col-xs-3" style="width:15%;">
+          <div class="input-unit">
+            <input type="text" class="form-control" name="search" placeholder=" 搜索药品名称 / 简拼 / 五笔 " value="<%= params[:search]%>" style="padding-right:8px;" autofocus>
+            <button class="hidden" type="submit" class="btn btn-default" id="commit_drug"><span class="fa fa-search fa-lg"></span></button>
+          </div>
+        </div>      
+
+        <div class="col-sm-2" style="width:222px; padding-bottom:5px; height:26.6px;">
+          <div class="input-group date form_datetime">
+            <div class="input-group-addon">开始</div>
+            <input class="string optional form-control option_input" name="start_time" type="text" value="<%= params[:start_time]||(Time.new()-1.day).strftime("%Y-%m-%d")%>" readonly>
+            <span class="input-group-addon">
+              <span class="fa fa-calendar fa-lg"></span>
+            </span>
+          </div>
+        </div>
+
+
+        <div class="col-sm-2" style="width:222px; padding-bottom:5px; height:26.6px;">
+          <div class="input-group date form_datetime">
+            <div class="input-group-addon">结束</div>
+            <input class="string optional form-control option_input" name="end_time" type="text" value="<%= params[:end_time]||Time.new().strftime("%Y-%m-%d")%>" readonly>
+            <span class="input-group-addon">
+              <span class="fa fa-calendar fa-lg"></span>
+            </span>
+          </div>
+        </div>
+
+        
+        <div class="col-sm-2" style="width:109px; padding-bottom:5px; ">
+          <select class="form-control use-select2-single" name="status">
+            <option value="">全部退/发药</option>
+            <option value="4">发药</option>
+            <option value="8">退药</option>
+          </select>
+        </div>
+
+        <div class="col-sm-1" style="width:auto;">
+          <button id="submit_search" type="button" class="btn btn-success" style="width:50px;">确定</button>
+        </div>
+    </div>                         
+  </form>
+
+  <div class="panel panel-default print table_info" >
+    <table class="table table-hover datatable text-center use_drug_analyze" style="table-layout: fixed;">
+
+      <thead>
+        <tr>
+          <th style="color: green;font-style: italic;width:3%;">#</th>
+          <th class="" style="text-align:left;width:19%;">药品名称</th>
+          <th class="" style="text-align:right;width:10%;">规格</th>
+          <th class="" style="text-align:center;width:14%;">生产厂商</th>
+          <th class="" style="text-align:right;width:9%;">数量</th>
+          <th class="" style="text-align:right;width:9%;">单位</th>
+          <th class="" style="text-align:right;width:14%;">单价</th>
+          <th class="" style="text-align:right;width:14%;">金额</th>
+          <th class="hidden-xs" style="text-align:right;width:0%;"> </th>
+        </tr>
+      </thead>
+      <tbody>
+      <% amount_total= 0.0%>
+      <% if @data.count>0 %>
+      <% 
+        no = 0
+        total_amount = 0.0
+        total_qty = 0.0
+      %>
+        <% @data.each do |drug| %>
+          <tr class="data_tr">
+            <td style="color: green;font-style: italic;"><%= no+=1%></td>
+            <td class="text-left description" style="text-align:left;"><%= drug["title"] %></td>
+            <td class="text-left specification" style="text-align:left;"><%= drug["specification"] %></td>
+            <td class="text-left factory_name" style="text-align:left;"><%= drug["factory_name"] %></td>
+            <td class="text-right qty"style="text-align:right;">
+              <% if drug["total_qty"].to_f==drug["total_qty"].to_i %>
+                  <% qty = drug["total_qty"].to_i %>
+              <% else %>
+                <% qty = drug["total_qty"].to_f.round(2) %>
+              <% end %>
+              <%= qty%>
+            </td>
+            <td class="text-right unit" style="text-align:center;"><%=drug["unit"] %>
+            <td class="text-right price" style="text-align:right;"><%=format("%0.4f",drug["price"].to_s) %></td>
+            <td class="price_amount" style="text-align:right;"><%=format("%0.2f",drug["total_amount"].to_s) %></td>
+            <td class="hidden line_ids" hidden-node="true" ><%= drug["ids"]%> </th>
+          </tr>
+          <%
+            total_amount += drug["total_amount"].to_f
+            total_qty +=qty
+          %>
+        <% end %>
+        <tr>
+          <td style= ""></td>
+          <td style= ""></td>
+          <td style=""></td>
+          <td style=""></td>
+          <td colspan="2" style="text-align:right;"><b>药品数量：
+            <%=if total_qty.to_f==total_qty.to_i
+              total_qty.to_i
+            else
+              total_qty.to_f.round(2)
+            end
+            %></b></td>
+          <td style=""></td>
+          <td style=""></td>
+          <td style="text-align:right;white-space:nowrap;"><b>总计：<%=format("%0.2f",total_amount.to_s)%></b></td>
+          <td></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+
+    <div class="panel-footer panel-f">
+      <div class="btn-toolbar pull-right">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default print_information" >打印<i class="fa fa-print fa-lg fa-fw"></i></button>
+          <button type="button" class="btn btn-default download_table_data" >导出<i class="fa fa-sign-out fa-lg fa-fw"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<%#= render '/plugs/lodop_printer'%>
+<%#= javascript_include_tag "download_table"%>
+
+<div id="print_item" style="display:none;">
+  <table cellpadding='0' cellspacing='0' style="width:100%; border:none;" >
+    <colgroup>    
+      <col style="width:22%;"></col>
+      <col style="width:7%;"></col>
+      <col style="width:6%;"></col>
+      <col style="width:10%;"></col>
+      <col style="width:10%;"></col>
+      <col style="width:14%;"></col>
+      <col style="width:14%;"></col>
+    </colgroup>    
+    <thead>
+      <tr>
+        <th colspan="7" style="border:none;"><h3><%=current_user.organization.try(:name)%>药品销售统计报表</h3></th>
+      </tr>
+      <tr>
+        <th colspan="7" style="border:none;text-align:left;">时间段：<%= params[:start_time] %> ~ <%=params[:end_time]%></th>
+      </tr>
+      <tr>
+        <th class="">药品名称</th>
+        <th class="">规格</th>
+        <th class="">生产厂商</th>
+        <th class="">数量</th>
+        <th class="">单位</th>
+        <th class="">单价</th>
+        <th class="">金额</th>
+      </tr>
+    </thead>
+    <tbody>
+      <%
+        amount_total = 0.0
+      %>
+      <% @data.each do |line| %>
+        <tr>
+          <td class=""><%= line["title"]  %></td>
+          <td class=""><%= line["specification"]  %></td>
+          <td class=""><%= line["factory_name"]  %></td>
+          <td class="" style="text-align:right;"><% if line["total_qty"].to_f==line["total_qty"].to_i %>
+                  <%= line["total_qty"].to_i %>
+              <% else %>
+                <%= line["total_qty"].to_f.round(2) %>
+              <% end %></td>
+          <td class=""><%=line["unit"] %></td>
+          <td class="" style="text-align:right;"><%=format("%0.4f",line["price"].to_s) %></td>
+          <td class="" style="text-align:right;"><%=format("%0.2f",line["total_amount"].to_s) %></td>
+          <% amount_total = amount_total+line["total_amount"].to_f%>
+        </tr>
+      <% end %>
+        <tr>
+          <td colspan="6" class="">合计：</td>   
+          <td class="" style="text-align:right;"><%=format("%0.2f",amount_total) %></td>            
+        </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="7" style="border:none;">
+          <div style="float:left; text-align:left;">制表人：<%=current_user.try(:name)%></div>
+          <div style="float:right; text-align:right;">打印时间：<%= Time.new().strftime("%Y-%m-%d %H:%M:%S")%></div>
+        </td>
+      </tr>
+    </tfoot>    
+  </table>
+</div>
+
+    <div class="modal" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 style="padding-left:24px;margin-top:10px;margin-bottom:0;font-weight:bolder"></h4>
+          </div>
+          <input class="hidden" id="line_mz_line_ids" >
+          <input class="hidden" id="line_zy_line_ids" >
+          <div id="print1"class="modal-body"style="padding-bottom:27px;">
+          <h4 class="hidden"style="padding-left:10px;"></h4>
+          <table class="table table-hover datatable panel_table1"style="font-size:12px;width:100%">
+          </table>
+
+        <div class=""style="position:absolute;right:25px;bottom:11px;">
+          <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-mail-reply fa-lg fa-fw" data-toggle="tooltip" data-original-title="返回"></i></button>        
+        </div>
+
+      </div>
+
+      </div>
+      </div>
+    </div><!-- modal1 -->
+
+    <div class="modal" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 style="padding-left:24px;margin-top:10px;margin-bottom:0;font-weight:bolder"></h4>
+          </div>
+          <div id="print2"class="modal-body"style="padding-bottom:27px;">
+          <h4 class="hidden"style="padding-left:10px;"></h4>
+          <table class="table table-hover datatable panel_table2"style="font-size:12px;width:100%">
+          </table>
+
+        <div class=""style="position:absolute;right:25px;bottom:11px;">
+          <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-mail-reply fa-lg fa-fw" data-toggle="tooltip" data-original-title="返回"></i></button>        
+        </div>
+
+      </div>
+
+      </div>
+      </div>
+    </div><!-- modal2 -->
+
+<script id="template1" type="text/x-handlebars-template">
+  <thead>
+    <tr>
+      <th class="" style="">开单科室</th>
+      <th style="text-align:left;">开单医生</th>
+      <th style="text-align:right;">数量</th>
+      <th style="width:22%;"></th>
+      <th style="text-align:center">单位</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{#each this}}
+      <tr class="dblclick_tr">
+        <td class="op_department " style="">{{department}}</td>
+        <td class="op_author" style="text-align:left;">{{author_name}}</td>
+        <td class="qty" style="text-align:right;">{{quantity}}</td>
+        <td style="width:22%;"></td>
+        <td style="text-align:center">{{unit_name}}</td>
+        <td class="line_ids" style="display:none;">{{line_ids}}</td>
+      </tr>
+    {{/each}}
+    <tr>
+      <td></td>
+      <td></td>
+      <td class="panel_table1_qty"style="text-align:right;"><b>总数:<span></span></b></td>
+      <td style="width:22%;"></td>
+      <td></td>
+    </tr>
+  </tbody>
+</script>
+
+<script id="template2" type="text/x-handlebars-template">
+  <thead>
+    <tr>
+      <th></th>
+      <th style="text-align:left;padding-left:10px;">患者姓名</th>
+      <th style="text-align:left;">处方号</th>
+      <th style="text-align:left;">就诊号</th>
+      <th class="hidden" style="text-align:center">门诊/住院</th>
+      <th class="hidden" style="text-align:center">性别</th>
+      <th class="hidden" style="text-align:left;">开单科室</th>
+      <th class="hidden" style="text-align:left;">开单医生</th>
+      <th class="hidden" style="text-align:center">开单时间</th>
+      <th style="text-align:center;">发/退药时间</th>
+      <th class="hidden" style="text-align:left;">接单科室</th>
+      <th style="text-align:right">数量</th>
+      <th style="text-align:center">单位</th>
+      <th style="text-align:right">金额</th>
+    </tr>
+  </thead>
+
+  <tbody class="">
+    {{#each this}}
+      <tr>
+        <td style="text-align:center">{{addone @index}}</td>
+        <td style="text-align:left;padding-left:10px;">{{patient_name}}</td>
+        <td style="text-align:left;"><a href="/erp/prescriptions/{{header_id}}">{{code}}</a></td>
+        <td style="text-align:left;"><a href="/erp/prescriptions/{{header_id}}">{{encounter_ii}}</a></td>
+        <td class="hidden"  style="text-align:center">{{source_name}}</td>
+        <td class="hidden" style="text-align:center">{{patient_gender_name}}</td>
+        <td class="hidden" style="text-align:left;">{{department}}</td>
+        <td class="hidden" style="text-align:left;">{{author_name}}</td>
+        <td class="hidden" style="text-align:center" class="">{{billing_at}}</td>
+        <td style="text-align:center" class="">{{posting_at}}</td>
+        <td class="hidden"  style="text-align:left;">{{operat_loc_name}}</td>
+        <td style="text-align:right">{{quantity}}</td>
+        <td style="text-align:center">{{unit}}</td>
+        <td style="text-align:right">{{amount}}</td>
+      </tr>
+    {{/each}}
+    <tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td style="text-align:right;font-size:14px;min-width:80px;" class="panel_table2_qty"colspan="2"><b>总数:<span></span></b></td>
+    <td style="text-align:right;font-size:14px;min-width:90px;" class="panel_table2_amount"colspan="2"><b>总价:<span></span></b></td>
+    </tr>
+  </tbody>
+</script>
+
+<script type="text/javascript">
+function KeyDown()
+{
+  if (event.keyCode == 13)
+  {
+    event.returnValue=false;
+    event.cancel = true;
+    Form1.btnsubmit.click();
+  }
+}
+  
+$(function(){
+  var i = 0;
+  $("[name='status']").select2("val","<%= params[:status] %>")
+
+  $(".form_datetime").datetimepicker({
+    minView: "month",
+    format: "yyyy-mm-dd",
+    autoclose: true,
+    todayBtn: true,
+    startDate: "2011-11-01",
+    endDate: '<%= Time.new().strftime("%Y-%m-%d") %>',
+    minuteStep: 1,
+    pickerPosition: "bottom-left"
+  })
+
+  if($("table.datatable tbody tr").length<1){
+    $(".complete_form").remove();
+  }
+  $(document).on("keyup","input#recipient-name",function(e){
+    if(e.keyCode==13){
+      $("button.add_drug_button").focus();
+    }
+  })
+  $(document).on("keyup","button.add_drug_button",function(e){
+    if(e.keyCode==13){
+      $("button.add_drug_button").click();
+    }
+  })
+  $(document).on("click",".submit_btn",function(){
+    if (i==0) {
+      document.getElementById("combined_query_group").submit();
+    };
+    i++;
+  });
+
+var description;
+var mz_line_ids="";
+var zy_line_ids="";
+  $(".use_drug_analyze tbody").on("dblclick","tr",function(){
+    var className = $(this).attr("class");
+    if (className) {
+      if (className.indexOf("data_tr")>-1){
+        description = $.trim($(this).find("td.description").text())
+        line_ids = $.trim($(this).find("td.line_ids").text())
+        Drug_use_analyze_modal1_list(line_ids);
+        $(".modal-content h4").text(description);
+      }
+    };
+    $(this).parent("tbody").find("tr.active_bgcolor").removeClass("active_bgcolor")
+    $(this).addClass("active_bgcolor");
+  });
+
+  $(document).keydown(function(e){
+    if (e.keyCode==120) {
+      $(".submit_btn").click();
+    };
+  });
+
+  $("#myModal2").on("show.bs.modal",function(){
+    $("#myModal1").modal("hide")
+  })
+  $("#myModal2").on("hidden.bs.modal",function(){
+    $("#myModal1").modal("show")
+  })
+
+  $("#submit_search").click(function(){
+    var location = $("select[name='location']").val();
+      $("form#search_form").submit();
+  })
+
+
+  $("#sale_statistic").click(function(){
+    $("#in_load").show();
+    start_time = $("input[name='start_time']").val();
+    end_time = $("input[name='end_time']").val();
+    if (!confirm("确定统计时间段："+start_time+" — "+end_time+" ？")){
+      $("#in_load").hide();
+      return false
+    };
+    var data_str=""
+    var price=0.0;
+    var total_cost=0.0;
+    var isdepartment = false;
+    $.ajax({
+      type: 'get',
+      url: '/erp/report/prescription_reports/sale_statistic_save',
+      data: {
+        'start_time':start_time,
+        'end_time':end_time,
+      },
+      async: true,
+      dataType: 'json',
+      success:function(data){
+        $("#in_load").hide();
+        alert(data.info);
+      },
+      error: function(){
+        $("#in_load").hide();
+        alert("汇总出错！")
+        // location.reload()
+      }
+    })
+  })
+
+
+  function switch_sex(str){
+    var temp;
+    switch (str){
+    case "1":
+      temp = "男";
+      break;
+    case "2":
+      temp = "女";
+      break;
+    default:
+       temp = str;
+       break;
+    }
+    return temp
+  }
+})
+
+  $("#myModal1").on("show.bs.modal",function(){
+    //第二个模态框
+    $("tr.dblclick_tr").on("dblclick",function(){
+      $("#myModal1").addClass("nodisplay")
+      var op_author = $(this).find(".op_author").html();
+      var ids = $(this).find("td.line_ids").text()
+      Drug_use_analyze_modal2_list(ids);
+      $(document).click(function(){
+        if ($("#myModal2").attr("style")=="display: none;") {
+          $("#myModal1").removeClass("nodisplay");
+        };
+      })
+      $(document).on("keydown",function(e){
+        if (e.keyCode==27) {
+          $("#myModal").removeClass("nodisplay");
+          $("#myModal").focus();
+        };
+      })
+    })
+  })
+
+  function Drug_use_analyze_modal1_list(ids){
+    $("#in_load").show();
+    var number=0;
+    $.ajax({
+      type:"post",
+      async:true,
+      data:{ids:ids},
+      dataType:"json",
+      url:"/erp/report/prescription_reports/sale_line_to_department",
+      success:function(data){
+        if (data) {
+          $.each(data,function(k,v){
+            number += Number(v.quantity);
+          })
+          var template = Handlebars.compile($("#template1").html());
+          var html = template(data);
+          $("table.panel_table1").html(html);
+          $(".panel_table1_qty span").html(number);
+          $("#in_load").hide();
+          $("#myModal1").modal("show");
+
+        }else{
+          $("#in_load").hide();
+          $("table.panel_table tbody").html();
+          $("#myModal1").modal("show");
+        }
+
+      },
+      error:function(){
+        $("#in_load").hide();
+        alert("数据读取错误");
+      }
+    })
+  }
+function Drug_use_analyze_modal2_list(ids){
+  $("#in_load").show();
+  var price_amount=0.0;
+  var number=0;
+  var no = 0;
+  $.ajax({
+    type:"post",
+    async:true,
+    data:{ids:ids},
+    dataType:"json",
+    url:"/erp/report/prescription_reports/sale_line_to_document",
+    success:function(data){
+      if (data) {
+        console.log(data)
+        $.each(data,function(k,v){
+          price_amount += Number(v.amount);
+          number += Number(v.quantity);
+        })
+        var template = Handlebars.compile($("#template2").html());
+        Handlebars.registerHelper("addone",function(index,options){
+          return parseInt(index)+1;
+        })
+        Handlebars.registerHelper("time",function(index,options){
+          return parseInt(index)+1;
+        })        
+        var html = template(data);
+        $("table.panel_table2").html(html);
+        $(".panel_table2_qty span").html(number);
+        $(".panel_table2_amount span").html(price_amount.toFixed(2));
+        $("#in_load").hide();
+        $("#myModal2").modal("show");
+      }else{
+        $("#in_load").hide();
+        $("table.panel_table2 tbody").html();
+        $("#myModal2").modal("show");
+      }
+
+    },
+    error:function(){
+      $("#in_load").hide();
+      alert("数据读取错误");
+    }
+  })
+}
+
+
+</script>
+
+<script type="text/javascript">
+$(function(){
+  $(".print_information").click(function(){
+  var template_bottom = "<style>td,th {border:1px solid #000; border-collapse: collapse} th{border-bottom:none; padding:2px;} td{padding:2px} </style>"
+    template_bottom += $("#print_item").html()
+    var obj = lodop.initLocalStorage_get_setting("发药统计","str")
+    if(obj){
+      LODOP.ADD_PRINT_TABLE("1.5%","4%","92%","88%",template_bottom);
+
+      if (obj.whether_preview && obj.whether_preview=="no") {
+        LODOP.PRINT()
+      }else if(obj.whether_preview && obj.whether_preview=="yes"){
+        LODOP.PREVIEW();
+      }else{
+        $.hr_alert("请先设置打印","red")
+      }
+    }else{
+      $.hr_alert("请先设置打印","red")
+      return false
+    }
+  })
+})
+</script>
+
+

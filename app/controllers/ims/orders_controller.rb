@@ -1,3 +1,4 @@
+#encoding:utf-8
 class Ims::OrdersController < ApplicationController
   before_action :set_ims_order, only: [:show, :edit, :update, :destroy]
 
@@ -82,13 +83,9 @@ class Ims::OrdersController < ApplicationController
     else
       type = "9999"
     end
-    org_id = ""#current_user.organization_id rescue ""
-    order_code = ""#取药码  可以没有
-    data  = []
     if params[:platform]
-      @data = Orders::Order.get_order_to_medical({type:type,org_id:org_id})
+      @data = Orders::Order.get_order_to_medical({type:type,org_id:current_user.try(:organization_id)})
     end
-
     #搜索药店的 订单 处方
     if params[:stat]
       attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
@@ -101,6 +98,22 @@ class Ims::OrdersController < ApplicationController
     @data = Ims::Order.get_order({order_id:params[:id],org_id:current_user.try(:organization_id)})
     render json:@data.to_json
   end
+
+  # 获取处方信息
+  def get_prescriptions
+    status = params[:stat]
+    attrs = {status: status,org_id: current_user.try(:organization_id)}
+    @data = Ims::Order.prescription_search attrs
+    render json:@data.to_json
+  end
+
+  # # 获取处方信息
+  def get_prescription
+    attrs = {prescription_id:params[:id],org_id:current_user.try(:organization_id)}
+    @data = Ims::Order.get_prescription(attrs)
+    render json:@data.to_json
+  end
+  
 
   def get_detail
     id = params[:id]
@@ -131,18 +144,14 @@ class Ims::OrdersController < ApplicationController
     drug_user_id = current_user.try(:id)
     temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
     data = Orders::Order.order_completion(temp)
-    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
+    re_data = {flag: (data[:ret_code].to_i==0 ? true : false),info:data[:info]}
     render json:re_data.to_json
   end
 
   # 订单发药
   def dispensing_order
-    drug_user = current_user.try(:name)
-    drug_user_id = current_user.try(:id)
-    temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"5"}
-    data = Orders::Order.order_completion(temp)
-    re_data = {flag: (data[:ret_code].to_i>=0 ? true : false),info:data[:info]}
-    render json:re_data.to_json
+    data = Ims::Order.dispensing_order params.merge(current_user:current_user)
+    render json:data.to_json
   end
 
   
@@ -185,7 +194,7 @@ class Ims::OrdersController < ApplicationController
   # 退药(目前只能线下退药)
   # => 页面需传 订单 id(string) 
   def return_drug
-    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id}
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
     @data = Ims::Order.return_drug params.merge(args)
     render json:@data.to_json
   end
@@ -198,6 +207,11 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  def order_setting
+    p params
+    render json:{flag:true, info:"设置成功！"}
+  end
+  
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_order

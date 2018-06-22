@@ -13,4 +13,14 @@ class Customer::HomeController < ApplicationController
 			return redirect_to "/customer/home/order?id=#{@order.id}"
 		end
 	end
+	def prescription
+		pre = ::Hospital::Prescription.find(params[:id])
+		pre.update_attributes(is_read: true)
+		respond_to do |f|
+			f.html
+			f.json{
+				render json:{flag:true,prescription:pre.to_web_front}
+			}
+		end
+	end
 end
