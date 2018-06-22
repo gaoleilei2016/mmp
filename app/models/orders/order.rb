@@ -92,7 +92,11 @@ class Orders::Order < ApplicationRecord
 					flag:false, #true已收费  false 退费
 					info:'您有一张订单结算被用户取消了！', #订单金额
 				}
+					p "notice++++++++++++++++++++++++++++"
+					p data
+					p "notice++++++++++++++++++++++++++++"				
 				::NoticeBroadcastJob.perform_later(data:data)
+				p "cancel---------------sldkfjalskjdglaksjd"
 				result = {ret_code:'0',info:'取消成功，处方已失效。'}
 			when '5'
 				return {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -279,7 +283,11 @@ class Orders::Order < ApplicationRecord
 					flag:true, #true已收费  false 退费
 					info:'您有新的已结算订单！', #订单金额
 				}
+					p "notice++++++++++++++++++++++++++++"
+					p data
+					p "notice++++++++++++++++++++++++++++"						
 		::NoticeBroadcastJob.perform_later(data:data)
+					p "notice+++++++++++++有新的已结算订+++++++++++++++"						
 		{ret_code:'0',info:'订单结算成功！'}
 	end
 
@@ -394,7 +402,11 @@ class Orders::Order < ApplicationRecord
 						flag:true, #true已收费  false 退费
 						info:'您有新的线下支付订单！', #订单金额
 					}
+					p "notice++++++++++++++++++++++++++++"
+					p data
+					p "notice++++++++++++++++++++++++++++"
 					::NoticeBroadcastJob.perform_later(data:data)
+					p "sdfawegasdgherh"
 				end
 				#订单创建成功之后改变处方状态
 				args = {
