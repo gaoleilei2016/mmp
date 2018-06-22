@@ -90,7 +90,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	#待收费转为已审核
+	# 待收费转为已审核
 	def back_wait_charge(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 2 # 已审核的处方可以变为待收费
@@ -127,6 +127,24 @@ class ::Hospital::Prescription < ApplicationRecord
 			false
 		end
 	end
+
+	# 已收费退费转为已审核
+	# args = {
+	# 	reason: ""
+	# }
+	def charged_back_to_audit(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 3 # 已审核的处方可以变为待收费
+			self.status = 1
+			self.charger_id = nil
+			self.charger_display = nil
+			self.charge_at = nil
+			self.orders.update_all(status: 1) if self.save
+		else
+			false
+		end
+	end
+
 
 	# 已收费后可以退费
 	# {
@@ -174,7 +192,29 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	#没有退药流程
+	# 退药
+	# {
+	# 	# 退药人
+	# 	return_drug_opter: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	#   return_drug_store_id:
+	# 	# 退药时间
+	# 	return_drug_opt_at: Time
+	# }
+	def return_drug(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 4
+			self.status = 8
+			return_drug_opter_id = args[:return_drug_opter][:id]
+			return_drug_opter_display = args[:return_drug_opter][:display]
+			return_drug_store_id = args[:return_drug_store_id]
+			return_drug_opt_at = args[:return_drug_opt_at]
+		else
+			false
+		end
+	end
 
 	###=== 处方状态流转  ===###
 
