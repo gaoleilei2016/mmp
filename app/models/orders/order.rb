@@ -70,17 +70,16 @@ class Orders::Order < ApplicationRecord
 					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'
-					arg = {
-						# 退费人
-						return_charge_opt: {
-							id: current_user.id.to_s,
-							display: current_user.name.to_s
-						},
-						# 退费时间
-						return_charge_at: Time.now.to_s(:db)
-					}
-					prescriptions.each{|x|x.return_charge(arg, current_user)}
-					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+					# arg0 = {
+					# 	# 退费人
+					# 	return_charge_opt: {
+					# 		id: current_user.id.to_s,
+					# 		display: current_user.name.to_s
+					# 	},
+					# 	# 退费时间
+					# 	return_charge_at: Time.now.to_s(:db)
+					# }
+					# prescriptions.each{|x|x.return_charge(arg0, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
 						org_id:order.target_org_id,#药房id
@@ -94,7 +93,12 @@ class Orders::Order < ApplicationRecord
 						info:'您有一张订单结算被用户取消了！', #订单金额
 					}
 					::NoticeBroadcastJob.perform_later(data:data)
-					result = {ret_code:'0',info:'取消成功，处方已失效。'}
+					arg = {
+						reason:reason
+					}
+					prescriptions.each{|x|x.charge_back_to_audit(arg, current_user)}
+					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}#用来判断订单是否重复生成，是否可以继续生成
+					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
 				when '6'
@@ -136,6 +140,18 @@ class Orders::Order < ApplicationRecord
 ::				Orders::Order.transaction do
 					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
+					# 退药
+					arg = {
+						return_charge_opter: {
+							id: attrs[:current_user].id.to_s,
+							display: attrs[:current_user].name.to_s
+						},
+						# 退费时间
+						return_drug_store_id: target_org_id,
+						return_drug_opt_at: Time.now.to_s(:db)
+					}
+					prescriptions.each{|x|x.return_drug(arg, attrs[:current_user])}
+
 					if self.payment_type.to_s == '2' #如果是线下支付的
 						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
 					end
