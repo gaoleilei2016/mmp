@@ -11,8 +11,8 @@ class Ims::PreDetail < ApplicationRecord
 	# :single_qty_unit                  # => 单次药品的数量单位
 	# :dose_value                       # => 单次药品的剂量
 	# :dose_unit                        # => 单次药品的剂量单位
-	# :route_value                      # => 使用途径
-	# :route_unit                       # => 使用途径
+	# :route_code                      # => 使用途径
+	# :route_display                       # => 使用途径
 	# :frequency_code                   # => 频次bid
 	# :frequency_display                # => 频次(一天两次、、、)
 	# :course_of_treatment_value        # => 疗程

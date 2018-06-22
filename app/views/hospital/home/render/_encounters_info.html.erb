@@ -1,10 +1,10 @@
 <el-collapse class="patient-info" v-model="activeCollapse">
   <el-collapse-item name="patientinfo1">
     <template slot="title">
-    	<el-button size="mini" @click.stop.native="searchEncounters({search: '', modal: 'isShowEncountersDialog'})" type="text" icon="fa fa-lg fa-fw fa-search text-mmp-lighter" title="搜索患者"></el-button>
+    	<el-button size="mini" @click.stop.native="searchPeople({search: '', modal: 'isShowEncountersDialog'})" type="text" icon="fa fa-lg fa-fw fa-search text-mmp-lighter" title="搜索患者"></el-button>
     	<el-button v-if="loadingidcard" size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-spinner fa-spin text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;" disabled> 正在读取身份证 </el-button>
     	<el-button v-else size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-id-card-o text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;"> &nbsp;读身份证</el-button>
-    	<!-- <i class="fa fa-lg fa-fw fa-search text-mmp-lighter" @keyup.enter.stop.native="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>&#12288; -->
+    	<!-- <i class="fa fa-lg fa-fw fa-search text-mmp-lighter" @keyup.enter.stop.native="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>&#12288; -->
       <!-- <el-input
 		    placeholder="姓名 / 手机号 / 身份证号码 / 诊断"
 		    size="mini"
@@ -15,7 +15,7 @@
 		    @focus="focusEncSearchInp(true)"
 		    @blur="focusEncSearchInp(false)"
 		    v-model="searchencstr">
-		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
+		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
 		  </el-input>&#12288; -->
       <span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
       <i v-if="encounter.gender&&encounter.gender.display" v-html="judgeGender(encounter.gender.display)"></i>&#12288;
@@ -48,7 +48,7 @@
 							</el-popover>
 				  		姓名
 				  	</template>
-				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" placeholder="姓名" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')"></el-input>
+				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" placeholder="姓名" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="性别"
@@ -56,7 +56,7 @@
 				    prop="gender.code">
 				    <span v-if="encounter.gender&&encounter.gender.display.indexOf('女')>-1" class="fa fa-venus gender-icon"></span>
 				    <span v-else class="fa fa-mars gender-icon"></span>
-				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" filterable>
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" :disabled="disabledInput" filterable>
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
 					      :key="item.code"
@@ -69,7 +69,7 @@
 				  	<el-form-item
 					    label="民族"
 					    prop="nation">
-					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" filterable>
 						    <el-option
 						      v-for="item in ($parent.common_data_nations||[])"
 						      :key="item.code"
@@ -84,7 +84,7 @@
 				  <el-form-item
 				    label="年龄"
 				    prop="age">
-				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" prefix-icon="fa fa-ge" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encphone')">
+				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" prefix-icon="fa fa-ge" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encphone')" :disabled="disabledInput">
 				    	<span slot="suffix">岁</span>
 				    </el-input>
 				  </el-form-item>
@@ -114,7 +114,7 @@
 				    label="身份证号"
 				    @change="getBirthdayFromIdCard"
 				    prop="iden">
-				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard"></el-input>
+				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="出生日期"
@@ -125,6 +125,7 @@
 				      style="width: 100%"
 				      @change="getDecilAgeByBirthday"
 				      :picker-options="birthPickerOptions"
+				      :disabled="disabledInput"
 				      placeholder="XXXX-XX-XX">
 				    </el-date-picker>
 				  </el-form-item>
@@ -147,7 +148,7 @@
 				  <el-form-item
 				    label="住址"
 				    prop="address">
-				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline"></el-input>
+				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    :label="encounter.age < 14 ? '监护人' : '联系人'"
@@ -331,11 +332,11 @@
 	    size="mini"
 	    class="search-enc-input"
 	    ref="searchencstr"
-	    @keyup.enter.stop.native="searchEncounters({search: '', modal: 'isShowEncountersDialog', search: searchencstr})"
+	    @keyup.enter.stop.native="searchPeople({search: '', modal: 'isShowEncountersDialog', search: searchencstr})"
 	    @focus="focusEncSearchInp(true)"
 	    @blur="focusEncSearchInp(false)"
 	    v-model="searchencstr">
-	    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchEncounters({search: searchencstr, search: searchencstr})"></i>
+	    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchPeople({search: searchencstr, search: searchencstr})"></i>
 	  </el-input>
   </el-row>
   <br/>
@@ -408,21 +409,20 @@
 	  <el-table-column
 	    fixed="right"
 	    label=""
-	    width="160">
+	    width="180">
 	    <template slot-scope="scope">
 	      <!-- <el-button size="mini" @click="editEncounter(scope.row)" type="primary" title="编辑就诊信息" plain><i class="fa fa-fw fa-lg fa-edit"></i>编辑</el-button> -->
 	      <el-button size="mini" @click="createEncounterBySomeMethods({type: 'by_person', row: scope.row})" type="success" title="新建就诊" plain><i class="fa fa-fw fa-lg fa-plus"></i>新建<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
 	      <el-button v-if="scope.row.encounter_data&&scope.row.encounter_data.length==1" size="mini" @click="editEncounter(scope.row.encounter_data[0])">编辑就诊</el-button>
-	    	<el-dropdown v-if="scope.row.encounter_data&&scope.row.encounter_data.length>1" trigger="click" style="border: 1px solid #aaa; padding: 1.5px 3px; border-radius: 4px; cursor: pointer; font-size: 80%;">
-				  <span class="el-dropdown-link">
-				    编辑就诊<i class="el-icon-caret-bottom el-icon--right"></i>
-				  </span>
+	      <el-dropdown trigger="click" v-if="scope.row.encounter_data&&scope.row.encounter_data.length>1" split-button size="mini" @click="editEncounter(scope.row.encounter_data[0])">
+				  编辑就诊
 				  <el-dropdown-menu slot="dropdown">
 				    <el-dropdown-item v-for="(enc, index) in scope.row.encounter_data" class="clearfix">
-				      <span @click="editEncounter(enc)">{{ enc.created_at | formatDate }}</span>
+				      <span class="edit-span" @click="editEncounter(enc)">{{ enc.created_at | formatDate }}</span>
 				    </el-dropdown-item>
 				  </el-dropdown-menu>
 				</el-dropdown>
+
 	    </template>
 	  </el-table-column>
 	</el-table>
