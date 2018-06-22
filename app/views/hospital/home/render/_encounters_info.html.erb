@@ -48,7 +48,7 @@
 							</el-popover>
 				  		姓名
 				  	</template>
-				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" placeholder="姓名" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')"></el-input>
+				    <el-input v-model="encounter.name" auto-complete="off" prefix-icon="fa fa-user" placeholder="姓名" ref="encname" @keyup.enter.stop.native="focusNext('encname', 'encgender')" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="性别"
@@ -56,7 +56,7 @@
 				    prop="gender.code">
 				    <span v-if="encounter.gender&&encounter.gender.display.indexOf('女')>-1" class="fa fa-venus gender-icon"></span>
 				    <span v-else class="fa fa-mars gender-icon"></span>
-				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" filterable>
+				  	<el-select v-model="encounter.gender" value-key="code" placeholder="请选择" style="width: 100%;" ref="encgender" @keyup.enter.stop.native="focusNext('encgender', 'encage')" @change="focusNext('encgender', 'encage')" :disabled="disabledInput" filterable>
 					    <el-option
 					      v-for="item in ($parent.common_data_genders||[])"
 					      :key="item.code"
@@ -69,7 +69,7 @@
 				  	<el-form-item
 					    label="民族"
 					    prop="nation">
-					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" filterable>
 						    <el-option
 						      v-for="item in ($parent.common_data_nations||[])"
 						      :key="item.code"
@@ -84,7 +84,7 @@
 				  <el-form-item
 				    label="年龄"
 				    prop="age">
-				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" prefix-icon="fa fa-ge" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encphone')">
+				    <el-input type="age" v-model.number="encounter.age" auto-complete="off" prefix-icon="fa fa-ge" @change="judgeAge" ref="encage" @keyup.enter.stop.native="focusNext('encage', 'encphone')" :disabled="disabledInput">
 				    	<span slot="suffix">岁</span>
 				    </el-input>
 				  </el-form-item>
@@ -114,7 +114,7 @@
 				    label="身份证号"
 				    @change="getBirthdayFromIdCard"
 				    prop="iden">
-				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard"></el-input>
+				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="出生日期"
@@ -125,6 +125,7 @@
 				      style="width: 100%"
 				      @change="getDecilAgeByBirthday"
 				      :picker-options="birthPickerOptions"
+				      :disabled="disabledInput"
 				      placeholder="XXXX-XX-XX">
 				    </el-date-picker>
 				  </el-form-item>
@@ -147,7 +148,7 @@
 				  <el-form-item
 				    label="住址"
 				    prop="address">
-				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline"></el-input>
+				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    :label="encounter.age < 14 ? '监护人' : '联系人'"
