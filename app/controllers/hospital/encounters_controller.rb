@@ -114,6 +114,7 @@ class Hospital::EncountersController < ApplicationController
             format.json { render json: {flag: true, info:" 创建患者信息失败"} }
           end
         end
+      end
     when "by_qrcode"
       render json: {flag: false, info:"该功能在计划开发中  暂不支持"}
     when "" # by_write默认不传 手动填写

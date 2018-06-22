@@ -376,6 +376,9 @@ class ::Hospital::Prescription < ApplicationRecord
 	end
 
 	class<<self
+		def over_time(prescription_ids)
+			
+		end
 
 	end
 
