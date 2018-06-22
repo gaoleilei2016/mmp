@@ -59,6 +59,7 @@ Rails.application.routes.draw do
       end
     end
     resources :report
+    resources :fapiao
   end
   ########### customer ##########
   ############################
