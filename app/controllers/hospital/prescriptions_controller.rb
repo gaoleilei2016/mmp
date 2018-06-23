@@ -153,8 +153,8 @@ class Hospital::PrescriptionsController < ApplicationController
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # 获取所有处方以及过期等状态
   def get_all_prescriptions_by_phone
-    cur_phone = params[:phone]
-    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+    cur_phone = params[:phone].to_s
+    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
     ret = []
     page = params[:page]||1
     per = params[:per]||5
@@ -162,7 +162,8 @@ class Hospital::PrescriptionsController < ApplicationController
     ::Hospital::Interface.get_prescriptions_by_phone_with_sort(cur_phone, page, per, sort).each do |_prescription|
       ret << _prescription.to_web_front
     end
-    render json: {flag: true, info: "success", data: ret}
+    count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
+    render json: {flag: true, info: "success", data: ret, count: count}
   end
 
   # PUT
