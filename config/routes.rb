@@ -53,6 +53,11 @@ Rails.application.routes.draw do
     end
     resources :portal do
       collection do
+        
+        get :pullrefresh_main
+        get :pullrefresh_sub
+        get :full_screen
+
         get :map
         get :settlement
         get :pay
