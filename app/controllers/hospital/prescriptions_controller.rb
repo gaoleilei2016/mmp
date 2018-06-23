@@ -27,9 +27,6 @@ class Hospital::PrescriptionsController < ApplicationController
   # GET /hospital/prescriptions/new.json
   def new
     @prescription = Hospital::Prescription.new
-    res = {
-      title: "",
-    }
     respond_to do |format|
       format.html # new.html.erb
       format.json { render json: {flag: true, info:"", data: @prescription} }
