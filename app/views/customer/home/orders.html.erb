@@ -69,9 +69,11 @@
 			get_orders:function() {
 				var _this = this;
 				$("#loading").show();
+				var per = 3;
+				var page = Math.ceil(_this.orders.length/per)+1;
 				$.ajax({
-					url:'/interfaces/get_orders',
-					data:{per:10},
+					url:'/interfaces/get_orders.json?page='+page+'&per='+per,
+					// data:{per:10},
 					success:function(json) {
 						if (json.flag) {
 							_this.orders = json.rows;
