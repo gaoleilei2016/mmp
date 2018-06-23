@@ -958,6 +958,13 @@ window.current_template_obj = {
 	        });
     			return false;
     		}
+    		if(!drug.measure_val || parseFloat(drug.measure_val)==0) {
+    			_this.$message({
+	          message: '药品没有设置最小单位，请联系管理员。',
+	          type: 'warning'
+	        });
+    			return false;
+    		}
     		_this.order = {
     			serialno: drug.serialno, // drug药品序列号
     			title: drug.name, // drug药品序列号
