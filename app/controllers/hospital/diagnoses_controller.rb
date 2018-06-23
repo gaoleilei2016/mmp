@@ -1,10 +1,10 @@
 #encoding:utf-8
 # 诊断控制器
 class Hospital::DiagnosesController < ApplicationController
-	before_action :set_cur_org
+  before_action :set_cur_org
   before_action :set_cur_dep
-  before_action :set_encounter
-	before_action :set_diagnose, only: [:edit, :update, :destroy]
+  before_action :set_cur_encounter
+  before_action :set_diagnose, only: [:edit, :update, :destroy]
   before_action :change?, only: [:edit, :update, :destroy, :sort]
 
 	# GET
@@ -116,7 +116,7 @@ class Hospital::DiagnosesController < ApplicationController
 
     # 获取当前就诊信息
     def set_cur_encounter
-    	@cur_encounter =  ::Hospital::Encounter.find(params[:encounter_id]) rescue nil
+      @cur_encounter =  ::Hospital::Encounter.find(params[:encounter_id]) rescue nil
       return render json:{flag:false, info: "无效就诊id 请刷新重试 或联系管理员"} if @cur_encounter.nil?
       return render json:{flag:false, info: "非本人创建数据 不可操作"} if @cur_encounter.author_id != @cur_encounter.id
     end

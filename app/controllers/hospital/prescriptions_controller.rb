@@ -226,6 +226,7 @@ class Hospital::PrescriptionsController < ApplicationController
         confidentiality_code: "0",
         confidentiality_display: "医院",
         doctor_id: current_user.id,
+        author_id: current_user.id,
         encounter_id: cur_encounter.id,
         effective_start: Time.now,
         effective_end: Time.now + 1.day,
