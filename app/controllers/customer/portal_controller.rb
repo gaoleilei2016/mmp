@@ -2,10 +2,16 @@ class Customer::PortalController < ApplicationController
 	layout "customer"
 	def index
 	end
+	def pullrefresh_main
+	end
+	def pullrefresh_sub
+	end
+	def full_screen
+	end
 	def pay
 		# p '~~~~~~~ pay',params
 		@order = ::Orders::Order.find(params[:id])
-		# p '~~~~~~~~~~~~',@order.net_amt.to_f.round(2)
+		# p '~~~~~~~~~~~~',@order
 		if session[:openid]
 			args = {out_trade_no: "#{@order.id}_#{@order.settle_times}", total_fee: @order.net_amt.to_f.round(2), title: "华希订单-#{@order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{@order.id}&pay_type=#{params[:pay_type]}"}
 			args[:openid] = session[:openid]

@@ -91,6 +91,12 @@ class Ims::OrdersController < ApplicationController
       attrs = {type: params[:stat],org_id: current_user.try(:organization_id)}
       @data = Ims::Order.order_search attrs
     end
+    data = {
+          org_id:current_user.try(:organization_id),#药房id
+          flag:true, #true已收费  false 退费
+          info:'您有新的已结算订单！cdsfsdef', #订单金额
+        }
+    ::NoticeBroadcastJob.perform_later(data:data)
     render json:@data.to_json
   end
 
@@ -144,7 +150,7 @@ class Ims::OrdersController < ApplicationController
     drug_user_id = current_user.try(:id)
     temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
     data = Orders::Order.order_completion(temp)
-    re_data = {flag: (data[:ret_code].to_i==0 ? true : false),info:data[:info]}
+    re_data = data[:ret_code].to_i==0 ? {flag:true,info:'收费成功！'} : {flag:false,info:data[:info]}
     render json:re_data.to_json
   end
 

@@ -122,7 +122,7 @@ class Ims::Order < ApplicationRecord
       end
     end
 
-    # 获取处方明细
+    # 获取处方信息
     def get_prescription args = {}
       p "===========================",args
       return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
@@ -157,6 +157,7 @@ class Ims::Order < ApplicationRecord
           :delivery_id => header.delivery_id,
           :delivery_name => header.delivery_name,
           :delivery_at => header.delivery_at,
+          :invoice_id => header.invoice_id,
           :is_returned => header.is_returned,
           details: (header.details||[]).map{|x| {
                     title: x.title,
@@ -197,10 +198,12 @@ class Ims::Order < ApplicationRecord
       end
     end
 
-    # 处方信息
+    # 订单及处方明细信息
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+      fp = ::Customer::Fapiao.find order.invoice_id rescue nil
+      invoice = fp.blank? ? {flag:false} : {flag:true,name:fp.name,shuihao:fp.shuihao}
       data = {
           type:'订单',
           is_order:true,
@@ -224,6 +227,7 @@ class Ims::Order < ApplicationRecord
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           is_returned: order.is_returned,
+          invoice:invoice,
           details: order.details.map{|x| {
                   name: x.name,
                   quantity: x.quantity,
@@ -326,10 +330,11 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
         # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
-        return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"
+        return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
+        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==6||order.status.to_i==7||order.is_returned==1)
         headers = Ims::PreHeader.where(:bill_id=>order_id,delivery_org_id:args[:org_id])
         headers.map{|header| create_new_prescription header,current_user}
+        headers.update_all({is_returned:true,reason:reason,return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
         attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退药')}
         order.cancel_medical(attrs)
         {flag:true,info:'退药成功！'}
@@ -389,16 +394,14 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
         return {flag:false,:info=>"该处方不是发药状态，不能退药。"} if header.status.to_s!="4"
         current_user = args[:current_user]
-        ::ActiveRecord::Base.transaction  do
-          update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
-          result = header.update_attributes!(update_data)
-          return {flag:false,info:'退药失败。'} unless result
-          header.reload
-          header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
-          create_new_prescription header,current_user
-          attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
-          # Orders::Order.find(header.bill_id).cancel_medical(attrs)
-        end
+        update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
+        result = header.update_attributes!(update_data)
+        return {flag:false,info:'退药失败。'} unless result
+        header.reload
+        header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
+        create_new_prescription header,current_user
+        attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
+        # Orders::Order.find(header.bill_id).cancel_medical(attrs)
         {flag:true,info:'退药成功！'} #: {flag:false,info:(result[:info]|| '退药失败。'),}
       rescue Exception => e
         print e.message rescue "  e.messag----"
@@ -415,6 +418,8 @@ class Ims::Order < ApplicationRecord
         new_header.ori_code = header.prescription_no
         new_header.return_name = current_user.name
         new_header.return_id = current_user.id
+        new_header.return_org_id = current_user.organization_id
+        new_header.return_org_name = current_user.organization.try(:id)
         new_header.return_at = Time.new
         new_header.total_amount = -header.total_amount.to_f
         new_header.status = '8'
@@ -467,15 +472,16 @@ class Ims::Order < ApplicationRecord
 
 
     def send_message attrs
-      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
     end
 
     def order_message attrs
       p "modal   hahahahha"
       p attrs
+      str = attrs[:message]
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      # ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
-      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      ActionCable.server.broadcast 'notice_channel', data:str
+      # NoticeBroadcastJob.perform_later data:str
     end
 
   end

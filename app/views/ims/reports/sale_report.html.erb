@@ -17,34 +17,13 @@
     .combined_query_group{  padding-top:0; padding-bottom:0; }
     .modal-dialog{width:911px;}
   } 
-  .page-header > h3 {
-    margin: 0;
-    display: inline-block;
-    width: -webkit-calc(100% - 80px);
-    width: -moz-calc(100% - 80px);
-    width: calc(100% - 80px)
-  }
-  .h3 {
-    font-size: 21px;
-    }
+  
   </style>
 <div class="main-data">
   <article class="page-header need_not"style="margin:0 0 8px 0;">
     <i class="fa fa-bar-chart-o fa-fw fa-4x"></i>
     <h3>药品销售统计报表<small>药品销售统计报表 </small></h3>
   </article>
-
-
-  <% if request.params[:analysis] %>
-  <div class="alert alert-warning alert-dismissible need_not" role="alert">
-    <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-    <center>
-    <% request.params[:analysis].each do |item| %>
-    <strong><%= t(item[:k], :scope=>'tooltips')%>: <%= item[:v] %></strong><% if item[:l] %>&#12288;<span class="label label-success"><%= t(item[:l], :scope=>'labels') %></span>&#12288;<% end %> 
-    <% end %>&#12288;<%= t(:query_tip, :scope=>'tooltips')%>
-    </center>
-  </div>
-  <% end %>
 
   <form class="form-horizontal" id="search_form" accept-charset="UTF-8" action="/ims/reports/sale_report" method="get">
     <div class="form-group">
