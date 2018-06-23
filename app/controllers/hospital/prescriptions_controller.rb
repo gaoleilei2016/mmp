@@ -94,11 +94,24 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.update_attributes(:status=>7)
-
     respond_to do |format|
-      format.html { redirect_to prescriptions_url }
-      format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      args = {
+        abandonor: {
+          id: current_user.id,
+          display: current_user.name
+        },
+        abandon_at: Time.now
+      }
+      case @prescription.status
+      when 1
+        @prescription.abandon(args, current_user)
+        format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      when 2
+        @prescription.not_audit_to_abandon(args, current_user)
+        format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      else
+        format.json { render json: {flag: false, info:"该状态不予许作废处方 如需作废 请联系管理员处理"} }
+      end
     end
 	end
 
@@ -221,7 +234,6 @@ class Hospital::PrescriptionsController < ApplicationController
         diagnoses_args: diagnoses_args,
         cur_orders: cur_orders
       }
-      p ret
       return ret
     end
 end
