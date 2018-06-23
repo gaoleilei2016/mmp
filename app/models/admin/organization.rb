@@ -15,7 +15,7 @@ class Admin::Organization < ApplicationRecord
       begin
         return {state: :fail, msg: '必须参数为空', desc: "经度和纬度必须有值"} unless args[:lat]&&args[:lng]
         lat, lng = args[:lat].to_f, args[:lng].to_f
-        return {state: :fail, msg: '参数错误', desc: '定位失败'} if lng.eql?(106.7091771)&&lat.eql?(26.62990674)
+        # return {state: :fail, msg: '参数错误', desc: '定位失败'} if lng.eql?(106.7091771)&&lat.eql?(26.62990674)
         num = (args[:num] || 1).to_i
         res = find_by_sql(sql_syntax({lat: lat, lng: lng, num: num}))
         return {state: :empty, msg: '结果为空', desc: '没有找到最近的结果'} if res.nil?
@@ -27,7 +27,7 @@ class Admin::Organization < ApplicationRecord
 
     def distance_list(point, target)
       begin
-        return {state: :fail, msg: '参数错误', desc: '无效的经纬度'} if point[:lng].eql?(106.7091771)&&point[:lat].eql?(26.62990674)
+        # return {state: :fail, msg: '参数错误', desc: '无效的经纬度'} if point[:lng].eql?(106.7091771)&&point[:lat].eql?(26.62990674)
         dis = get_distance(point[:lng], point[:lat], target[:lng], target[:lat])
         {state: :succ, msg: '成功', res: handle_distance(dis), num: dis}        
       rescue Exception => e
