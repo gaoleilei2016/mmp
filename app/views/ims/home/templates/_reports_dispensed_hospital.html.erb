@@ -1,0 +1,282 @@
+<style type="text/css">
+	.thiner-row thead > tr > th {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+	.thiner-row tbody > tr > td {
+		padding: 5px 0;
+		vertical-align: middle;
+	}
+</style>
+<template>
+	<!-- 接诊管理、统计页面 -->
+	<div id="reports_dispensed_hospital_div">
+		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+		  <el-breadcrumb-item>报表</el-breadcrumb-item>
+		</el-breadcrumb>
+		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+			<div style="">
+				<el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+					<el-col :span="8">
+						<small>日期</small>
+						<el-date-picker
+				      v-model="filter.range"
+				      type="datetimerange"
+				      :picker-options="rangePickerOptions"
+				      range-separator="至"
+				      start-placeholder="开始日期"
+				      end-placeholder="结束日期"
+				      size="mini"
+				      style="width: 100%;"
+				      align="right">
+				    </el-date-picker>
+					</el-col>
+					<el-col :span="6">
+						<!-- <small>疾病</small>
+						<el-autocomplete size="mini" v-model="filter.disease" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDisease" :debounce="300" style="width: 100%;">
+	            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="filter.disease=''"></i>
+	            <template slot-scope="props">
+	            	<span style="float: left">{{ props.item.display }}</span>
+      					<span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
+	            </template>
+	          </el-autocomplete> -->
+					</el-col>
+					<el-col :span="2" style="padding-top: 18px;">
+						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+					</el-col>
+				</el-row>
+				<el-table
+		      :data="dispensed_hospitals"
+		      :height="tableHeight"
+		      @selection-change="handleSelectionChange"
+		      class="thiner-row"
+		      style="width: 100%">
+		     <el-table-column
+			      type=""
+			      width="30">
+			    </el-table-column>
+		      <el-table-column
+				    min-width="240"
+				    align="left"
+				    label="药品名称">
+				    <template slot-scope="scope">
+				      <span v-if="scope.row.name" style="display: inline-block; width: 70px;">{{ scope.row.name }}</span>
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="200"
+				    align="left"
+				    label="规格">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.iden" class="fa fa-lg fa-fw text-muted-light"></i>{{ scope.row.iden }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="200"
+				    align="right"
+				    label="数量">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="140"
+				    align="center"
+				    label="单位">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="180"
+				    align="right"
+				    label="单价">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="250"
+				    align="right"
+				    label="金额">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    </template>
+				  </el-table-column>
+
+				   <el-table-column
+			      type=""
+			      width="30">
+			    </el-table-column>
+		    </el-table>
+			</div>
+	  </el-tabs>
+	  <!-- 分页标记 -->
+	  <el-pagination
+	  	background
+	    @size-change="handleSizeChange"
+	    @current-change="handleCurrentChange"
+	    :current-page="currentPage"
+	    :page-sizes="[10, 25, 50, 100, 200]"
+	    :page-size="pageSize"
+	    layout="total, sizes, prev, pager, next, jumper"
+	    :total="dataCount">
+	  </el-pagination>
+
+
+		<!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+			<prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
+		</div> -->
+	</div>
+</template>
+
+<!-- 处方显示模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		var options = [{code: "0", display: "处方发药汇总-医院"}];
+		return {
+			activeName: options[0].code,
+			cardTabsOptions: options,
+			multipleSelection: [],
+
+			dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'),
+			dispensed_hospitals: [],
+			prescriptions: [],
+			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+			orders: [],
+
+			encounter: {},
+			orgname: "",
+			isShowfilters: false, // 高级搜索
+			filter: {
+				range: "",
+			},
+
+			rangePickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
+
+			isShowOrdersDialog: false, // 显示医嘱详细模态框
+			isShowPresDialog: false, // 显示处方详细
+			// 搜索
+    	search: "", // 搜索内容
+    	tableHeight: 200, // 表格高度
+    	// 分页相关
+	  	currentPage: 1, // 当前页
+	  	pageSize: 25, // 默认一页显示25条
+	  	dataCount: 100, // 总数据条数
+		}
+	},
+	components: {
+		// 处方打印组件
+		'prescriptionprint': {
+			props: ['encounter', 'prescription'],
+		  template: "#prescription-print-template",
+		},
+	},
+	watch: {
+		search: function (newValue, oldValue) {
+    	this.getData();
+    },
+	},
+	mounted: function() {
+		this.$nextTick(function(){
+			this.init();
+		})
+	},
+	methods: {
+		init: function () {
+			var _this = this;
+			_this.orgname = $("#current_org_name").val();
+			// 获取基础设置内容
+			Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+			 	var res = response.data;
+			 	if(res.flag) {
+        	$("#prescription-print-template").html(res.data.print_pres_html)
+        }
+			},function() {
+		  	_this.$message.error("获取初始值失败，请联系管理员。");
+		  })
+      var clientHeight = document.body.clientHeight;
+      _this.tableHeight = clientHeight - 340;
+      _this.getData();
+		},
+		getData: function () {
+			var _this = this;
+			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+				var res = response.data;
+  			if(res.flag) {
+          _this.dispensed_hospitals = res.data;
+          _this.dataCount = res.count;
+  			}else{
+  				_this.$message.error(res.info);
+  			}
+      },function(response) {
+      	_this.$message.error("后台出错，获取患者列表失败。");
+      })
+		},
+		// 每页条数改变
+  	handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+    	this.currentPage = val;
+      this.getData();
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+    	this.multipleSelection = val;
+    	console.log(val)
+    },
+    // 选择tab
+		handleTabClick: function (tab, event) {
+
+		},
+		// 判断性别，根据性别显示图标
+  	judgeGender: function (gender) {
+  		if(!gender){ gender = ""; }
+      var html = '';
+  		if(gender.indexOf('男')>-1){
+  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+  		}else if(gender.indexOf('女')>-1){
+  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+  		}else{
+  			html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+  		}
+  		return html;
+	  },
+
+	},
+}
+</script>
