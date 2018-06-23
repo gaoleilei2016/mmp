@@ -480,7 +480,7 @@ class Ims::Order < ApplicationRecord
       p attrs
       str = attrs[:message]
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      ActionCable.server.broadcast 'notice_channel', data:str
+      # ActionCable.server.broadcast 'notice_channel', data:str
       # NoticeBroadcastJob.perform_later data:str
     end
 
