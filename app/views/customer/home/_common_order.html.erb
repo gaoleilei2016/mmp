@@ -1,8 +1,8 @@
 <template id="my_temp_order">
 	<div style="">
-		<ul class="mui-table-view" style="margin-bottom: 8px;">
+		<ul class="mui-table-view order_item" :data-href="'/customer/home/order?id='+order.id" style="margin-bottom: 8px;">
 			<li class="mui-table-view-cell">
-				<a :href="'/customer/home/order?id='+order.id">
+				<a href="javascript:;">
 					<span>No: {{order.order_code}}</span>
 					<span style="float: right;color: #F55742;">
 						<!-- <span v-if="order.payment_type=='1'"> -->
@@ -19,7 +19,7 @@
 				</a>
 			</li>
 			<li class="mui-table-view-cell">
-				<a :href="'/customer/home/order?id='+order.id">
+				<a href="javascript:;">
 					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 					<img class="mui-media-object mui-pull-left head-img" src="/assets/customer/pharmacy.png">
 					<div class="mui-media-body">

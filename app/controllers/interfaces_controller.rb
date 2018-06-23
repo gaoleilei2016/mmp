@@ -25,6 +25,7 @@ class InterfacesController < ApplicationController
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
 		# render json:{flag:true,rows:[{},{},{}],total:4}
+		# render json:{flag:true,rows:[],total:0}
 	end
 	#支付
 	def pay_order
