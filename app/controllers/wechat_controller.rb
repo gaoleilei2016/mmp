@@ -14,8 +14,8 @@ class WechatController < ApplicationController
     else
       res = Pay::Wechat.get_openid(params[:code])
       if res[:error] #获取openid失败的
-        flash[:notice] = res[:msg]
-        redirect_to '/users/sign_up'
+        raise res[:msg]
+        # redirect_to '/users/sign_up'
       else
         session[:openid] = res[:openid]
         user = User.find_by(openid: res[:openid])
@@ -23,6 +23,7 @@ class WechatController < ApplicationController
           sign_in(user)
           redirect_to '/'
         else
+          flash[:notice] = '微信用户请先绑定手机.'
           redirect_to '/users/sign_up'
         end
       end
