@@ -96,7 +96,6 @@ class Ims::OrdersController < ApplicationController
           flag:true, #true已收费  false 退费
           info:'您有新的已结算订单！cdsfsdef', #订单金额
         }
-    ::NoticeBroadcastJob.perform_later(data:data)
     render json:@data.to_json
   end
 

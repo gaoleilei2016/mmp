@@ -9,9 +9,8 @@ App.notice = App.cable.subscriptions.create("NoticeChannel",{
   received: function(data){
     console.log("received")
     console.log(data)
-    // if (window.ims_notice) {};
     if($.ims_notice&&data){
-      $.ims_notice(data.data)
+      $.ims_notice(data)
     }
   },
   say:function(data){
@@ -19,7 +18,6 @@ App.notice = App.cable.subscriptions.create("NoticeChannel",{
   }
 })
 $(function(){
-
   $("input#say").on("keydown",function(e){
     if (e.keyCode == 13) {
       value = $(this).val()
