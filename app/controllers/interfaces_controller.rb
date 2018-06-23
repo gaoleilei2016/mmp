@@ -71,6 +71,7 @@ class InterfacesController < ApplicationController
 			###退款成功
 			order.cancel_order(current_user,'退款成功')
 			# redirect_to res[:pay_url]
+			flash[:notice] = "退款成功"
 			render json:{flag:true,info:"操作成功"}
 		else
 			##退款失败
@@ -105,6 +106,7 @@ class InterfacesController < ApplicationController
 	end
 	def cancel_order
 		ret = ::Orders::Order.find(params[:id]).cancel_order(current_user,'用户取消')
+		flash[:notice] = ret[:info] if ret[:ret_code]=='0'
 		render json: ret
 	end
 	# 获取用户购物车
@@ -135,6 +137,18 @@ class InterfacesController < ApplicationController
 	# 用户选择药房
 	def set_current_pharmacy
 		session[:current_pharmacy_id] = params[:id]
+		org = ::Admin::Organization.find(params[:id])
+		org.search_count ||= 0
+		org.search_count = org.search_count.to_i + 1
+		org.save
+		his = ::Customer::PharmacyHistory.where(user_id:current_user.id,pharmacy_id:org.id).first
+		max_count_add_1 = ::Customer::PharmacyHistory.where(user_id:current_user.id).order('use_count desc').first.try(:use_count).to_i+1
+		if his
+			his.use_count = max_count_add_1
+			his.save
+		else
+			::Customer::PharmacyHistory.create(user_id:current_user.id,pharmacy_id:org.id,use_count:max_count_add_1)
+		end
 		render json:{flag:true,info:"操作成功"}
 	end
 	# 获取用户选择的药房，默认最近的药房（用户传参：当前位置）
@@ -142,7 +156,8 @@ class InterfacesController < ApplicationController
 		# p '~~~~~~~',params, session[:current_pharmacy_id]
 		if session[:current_pharmacy_id]
 			# 自选
-			o = ::Admin::Organization.where(:type_code=>'2').find(session[:current_pharmacy_id])
+			o = ::Admin::Organization.where(:type_code=>'2',id:session[:current_pharmacy_id]).first
+			raise "查无此药房 id:#{session[:current_pharmacy_id]}" unless o
 
 			re = JSON.parse(o.to_json)
 			if o.lat.present? && o.lng.present? && params[:lat].present? && params[:lng].present?
@@ -182,9 +197,28 @@ class InterfacesController < ApplicationController
 			end
 			render json:{rows:orgs,total:orgs.count,flag:true}
 		else
-			# 客户选择常用药房
-			args = {lat: params[:lat].to_f, lng:  params[:lng].to_f}
-			orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+			args = {lat: params[:lat].to_f, lng: params[:lng].to_f}
+			if params[:near].present?
+				args[:num] = 3
+				# 客户获取最近的药房
+				recents = ::Admin::Organization.recent_lists(args)
+				# p '~~~~~~~~~~ near',recents
+				if recents[:state] == :succ
+					orgs = recents[:res].map{|x| x[:org]}
+				else
+					orgs = []
+				end
+			elsif params[:hot].present?
+				# 客户获取大家热点药房
+				orgs = ::Admin::Organization.where(:type_code=>'2').order("search_count desc").page(1).per(5)
+			elsif params[:history].present?
+				# 客户获取历史记录药房
+				his = ::Customer::PharmacyHistory.where(user_id:current_user.id).order("use_count desc").page(1).per(5)
+				orgs = his.map{|x| o = ::Admin::Organization.find(x.pharmacy_id); o.type_code=='2' ? o : nil }.compact
+			else
+				# 客户搜索药房
+				orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+			end
 			res = []
 			orgs.each{|o|
 				re = JSON.parse(o.to_json)
@@ -196,8 +230,17 @@ class InterfacesController < ApplicationController
 				end
 				res<<re
 			}
-			res.sort_by!{|x| x["num"]}
-			render json:{rows:res,total:orgs.total_count,flag:true}
+			if params[:hot].present?||params[:history].present?||params[:near].present?
+				# 历史记录 / 大家常用
+			else
+				# 药房搜索按距离排序
+				res.sort_by!{|x| x["num"]}
+			end
+			if params[:history].present?||params[:near].present?
+				render json:{rows:res,total:orgs.count,flag:true}
+			else
+				render json:{rows:res,total:orgs.total_count,flag:true}
+			end
 		end
 	end
 	def get_yanzhengma

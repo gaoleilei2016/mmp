@@ -489,7 +489,7 @@ class Ims::Order < ApplicationRecord
       p "modal   hahahahha"
       p attrs
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      # ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
+      ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
     end
 

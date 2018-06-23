@@ -61,10 +61,11 @@ document.onkeydown = function(){
 document.notice_data = [];
 $.ims_notice = function(data){
   // alert(data)
+  console.log("ims_notice")
   org_id = $("#organization_id").val()
   if (data&&data.org_id == org_id) {
     document.notice_data = data
-    $("#notice_input").click()
+    $(document).find("#notice_input").click()
   }
 }
 window.current_template_obj = {

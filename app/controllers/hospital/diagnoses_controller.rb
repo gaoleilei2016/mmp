@@ -1,9 +1,11 @@
 #encoding:utf-8
 # 诊断控制器
 class Hospital::DiagnosesController < ApplicationController
-	before_action :set_diagnose, only: [:show, :edit, :update, :destroy]
-
-
+	before_action :set_cur_org
+  before_action :set_cur_dep
+  before_action :set_encounter
+	before_action :set_diagnose, only: [:edit, :update, :destroy]
+  before_action :change?, only: [:edit, :update, :destroy, :sort]
 
 	# GET
 	# 根据就诊id返回诊断
@@ -100,10 +102,36 @@ class Hospital::DiagnosesController < ApplicationController
 	end
 
 	private
+    # 获取当前机构 没有就提示
+    def set_cur_org
+      @cur_org =  current_user.organization
+      return render json:{flag:false, info: "当前用户没有分配机构 请分配机构后再重试"} if @cur_org.nil?
+    end
+
+    # 获取当前科室 没有就提示
+    def set_cur_dep
+      @cur_dep =  ::Hospital::Sets::Department.find(current_user.cur_loc_id) rescue nil
+      return render json:{flag:false, info: "当前用户没有设置当前科室 请设置当前科室后再重试"} if @cur_dep.nil?
+    end
+
+    # 获取当前就诊信息
+    def set_cur_encounter
+    	@cur_encounter =  ::Hospital::Encounter.find(params[:encounter_id]) rescue nil
+      return render json:{flag:false, info: "无效就诊id 请刷新重试 或联系管理员"} if @cur_encounter.nil?
+      return render json:{flag:false, info: "非本人创建数据 不可操作"} if @cur_encounter.author_id != @cur_encounter.id
+    end
+
 		# Use callbacks to share common setup or constraints between actions.
 	  def set_diagnose
-	    @diagnose = Hospital::Diagnose.find(params[:id])
+	    @diagnose = Hospital::Diagnose.find(params[:id]) rescue nil
+	    return render json:{flag: false, info:"无效诊断id"} if @diagnose.nil?
+      return render json:{flag: false, info:"不能操作非本机构数据"} if @diagnose.org_id != @cur_org.id
 	  end
+
+	  def change?
+      flag = @diagnose.doctor_id == current_user.id ? true : false
+      return render json:{flag: false, info: "不能操作非本人创建的数据"} if !flag
+    end
 
 	  def diagnose_params
 	  	params[:diagnosis]
@@ -117,11 +145,12 @@ class Hospital::DiagnosesController < ApplicationController
 				system: args[:system],				
 				status: "A",
 				encounter_id: params[:encounter_id],
-				doctor_id: args[:doctor_id]||current_user.id,
+				doctor_id: current_user.id,
 				type_code: args[:type][:code],
 				type_display: args[:type][:display],
 				note: args[:note],
-				fall_ill_at: args[:fall_ill_at]
+				fall_ill_at: args[:fall_ill_at],
+				org_id: @cur_org.id
 	  	}
 	  	return ret
 	  end
@@ -133,12 +162,13 @@ class Hospital::DiagnosesController < ApplicationController
 				display: args[:display],
 				system: args[:system],				
 				encounter_id: params[:encounter_id],
-				doctor_id: args[:doctor_id]||current_user.id,
+				doctor_id: current_user.id,
 				type_code: args[:type][:code],
 				type_display: args[:type][:display],
 				note: args[:note],
 				status: args[:status],
-				fall_ill_at: args[:fall_ill_at]
+				fall_ill_at: args[:fall_ill_at],
+				org_id: @cur_org.id
 	  	}
 	  	return ret
 	  end

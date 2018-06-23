@@ -2,6 +2,12 @@ class Customer::PortalController < ApplicationController
 	layout "customer"
 	def index
 	end
+	def pullrefresh_main
+	end
+	def pullrefresh_sub
+	end
+	def full_screen
+	end
 	def pay
 		# p '~~~~~~~ pay',params
 		@order = ::Orders::Order.find(params[:id])

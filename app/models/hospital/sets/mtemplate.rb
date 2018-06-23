@@ -1,10 +1,20 @@
 class ::Hospital::Sets::Mtemplate < ApplicationRecord
 
-	belongs_to :organization,  class_name: "::Admin::Organization",       foreign_key: 'org_id', optional: true
-	belongs_to :author,  class_name: "::User",       foreign_key: 'author_id', optional: true
-	belongs_to :location,  class_name: "::Hospital::Sets::Department",       foreign_key: 'location_id', optional: true
+	validates :org_id, :status, :title, :sharing_scope_code, :sharing_scope_display, :disease_code, :disease_display, :author_id, :author_display, :location_id, :location_display, presence: {message: "不能为空"}
+
+	belongs_to :organization,  class_name: "::Admin::Organization",       foreign_key: 'org_id'
+	belongs_to :author,  class_name: "::User",       foreign_key: 'author_id'
+	belongs_to :location,  class_name: "::Hospital::Sets::Department",       foreign_key: 'location_id'
 	has_many :orders, class_name: "Hospital::Order", foreign_key: 'mtemplate_id'
 
+	def initialize args = {}
+		super args
+		# 默认状态是已激活
+		self.status ||= "A"
+		# 默认权限是自己
+		self.sharing_scope_code ||= "0"
+		self.sharing_scope_display ||= "自己"
+	end
 
 	def to_web_front
 		ret = {
@@ -40,27 +50,3 @@ class ::Hospital::Sets::Mtemplate < ApplicationRecord
 	class<<self
 	end
 end
-
-
-
-# rails g model Hospital::Sets::Mtemplate enable_print_pres:boolean uoperator_id:integer print_pres_html:text org_id:integer
-
-# field :org_id                         ,integer
-# field :status                     , type: String        # 状态
-# field :title                      , type: String        # 主题本文，模板名称
-# field :note                       , type: String        # 备注
-# field :sharing_scope_code              , type: String        # 共享范围  
-# field :sharing_scope_display              , type: String        # 共享范围  
-# field :disease_code                    , type: String        # 病种
-# field :disease_display                    , type: String        # 病种
-# field :author_id                     , type: String        # 作者
-# field :author_display                     , type: String        # 作者
-# field :location_id                   , type: String        # 科室
-# field :location_display                   , type: String        # 科室
-# field :search_str                 , type: String  # 搜索字段
-# field :orders                     , type: Array    # 0-*  Cosds::Order    [{id:"",display:""}]
-
-
-
-
-# rails g model Hospital::Sets::Mtemplate org_id:integer status:string title:string note:string sharing_scope_code:string sharing_scope_display:string disease_code:string disease_display:string author_id:integer author_display:string location_id:integer location_display:string search_str:string
