@@ -24,7 +24,7 @@ class Ims::PreHeader < ApplicationRecord
 			begin
 				details = (prescription[:orders]||[]).map{|detail| 
 					{
-						:serialno=> detail[:serialno],
+						:drug_id=> detail[:serialno],
 						:title=> detail[:title],
 						:specification=> detail[:specification],
 						:single_qty_value=> detail[:single_qty][:value],
@@ -58,7 +58,7 @@ class Ims::PreHeader < ApplicationRecord
 						:measure_val=> detail[:measure_val],
 						:measure_unit=> detail[:measure_unit],
 						:type_type=> detail[:type_type],
-						:hospital_prescription_order_id=> detail[:id],
+						:ori_detail_id=> detail[:id],
 					}
 				}
 				return {} if details.blank?
@@ -105,7 +105,7 @@ class Ims::PreHeader < ApplicationRecord
 					:order_at=>order.try(:created_at) ,
 					:hospital_prescription_at=>prescription[:created_at] ,
 					:hospital_prescription_id=>prescription[:id] ,
-					:is_returned=>false ,
+					# :is_returned=>false ,
 					:details=>details_1,
 				}
 				return header
