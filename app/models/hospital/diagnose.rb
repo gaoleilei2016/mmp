@@ -8,7 +8,10 @@ class ::Hospital::Diagnose < ApplicationRecord
 	validates :display, :org_id, :doctor_id, presence: {message: "不能为空"}
 
 	# 非交叉数据验证
-	validates :status, presence: {message: "不能为空"}, if: -> { encounter_id.present? }
+	# 就诊诊断
+	validates :status, :type_code, presence: {message: "不能为空"}, if: -> { encounter_id.present? }
+
+	# 处方诊断不需要做其他多余的验证
 
 
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id', optional: true
@@ -18,10 +21,10 @@ class ::Hospital::Diagnose < ApplicationRecord
 
 	def initialize args = {}
 		super args
-		self.status = "A"
+		self.status ||= "A"
 	end
 
-	# 设置排序字段
+	# 就诊诊断 设置排序字段
 	def set_rank
 		self.rank = (::Hospital::Diagnose.where(encounter_id: self.encounter_id, type_code: self.type_code).order(rank: :desc).first.rank rescue 0) + 1
 	end
