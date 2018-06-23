@@ -243,16 +243,18 @@ class ::Hospital::Prescription < ApplicationRecord
 	###=== 处方状态流转  ===###
 
 	def link_diagnoses(args, cur_user)
-		self.reload
 		args.each_with_index do |fhir_coding_diagnose, i|
-			::Hospital::Diagnose.create({
+			cur_diagnose = ::Hospital::Diagnose.new({
 				rank: i+1,
 				code: fhir_coding_diagnose[:code],
 				display: fhir_coding_diagnose[:display],
 				system: "ICD10",
 				prescription: self,
-				doctor: cur_user
+				doctor: cur_user,
+				org_id: cur_user.organization&.id
 			})
+			cur_diagnose.save
+			p cur_diagnose.errors
 		end
 	end
 
