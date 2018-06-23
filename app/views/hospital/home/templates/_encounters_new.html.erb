@@ -93,13 +93,15 @@ window.current_template_obj = {
 				rules: {
 					name: [
 			      { required: true, message: '姓名不能为空'},
+			      { min: 1, max: 50, message: '长度在 1 到 50 个字符' }
 			    ],
 					"gender.code": [
 			      { required: true, message: '性别不能为空'},
 			    ],
 			    age: [
 			      { required: true, message: '年龄不能为空'},
-			      { type: 'number', message: '年龄必须为数字值'}
+			      { type: 'number', message: '年龄必须为数字值'},
+			      { pattern: /^(?:[1-9]?\d|100)$/, message: '年龄在0-100之间'}
 			    ],
 			    birth_date: [
 			    	{ required: false, message: '出生日期不能为空'},
@@ -112,10 +114,14 @@ window.current_template_obj = {
 			    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
 			    ],
 			    address: [
-			    	{ required: false, message: '地址不能为空'},
+			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
 			    ],
 			    contact_name: [
+			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
 			    	{ required: false, message: '监护人不能为空'},
+			    ],
+			    unit_name: [
+			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
 			    ],
 				},
 				birthPickerOptions: {
@@ -317,28 +323,41 @@ window.current_template_obj = {
   		SetIdCardInfo: function (json) {
   			console.log("读卡信息为", json);
   			var _this = this;
-  			var res = json.result;
-  			_this.encounter.address = res.address; // 地址
-  			_this.encounter.iden = res.code; // 身份证号
-  			_this.encounter.name = res.name; // 名字
-  			_this.encounter.photo = res.photo; // 照片
-  			_this.encounter.type = "by_iden"; // 身份证方式提交的数据
-  			_this.getBirthdayFromIdCard(res.code); // 生日、年龄
-  			_this.loadingidcard = false; // 取消正在加载身份证数据
-  			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
-  			for(var i=0; i<genders.length; i++) {
-  				if(genders[i].display == res.gender) {
-  					_this.encounter.gender = genders[i];
-  					break;
-  				}
-  			}
-  			for(var i=0; i<nations.length; i++) {
-  				if(nations[i].display.indexOf(res.folk)>-1) {
-  					_this.encounter.nation = nations[i];
-  					break;
-  				}
-  			}
-  			_this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+  			var card = json.result;
+  			Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
+  				var res = response.data;
+  				if(res.flag) {
+  					_this.encounter = res.data;
+  					
+		  			_this.encounter.address = card.address; // 地址
+		  			_this.encounter.iden = card.code; // 身份证号
+		  			_this.encounter.name = card.name; // 名字
+		  			_this.encounter.photo = card.photo; // 照片
+		  			_this.encounter.type = "by_iden"; // 身份证方式提交的数据
+		  			_this.getBirthdayFromIdCard(card.code); // 生日、年龄
+		  			_this.loadingidcard = false; // 取消正在加载身份证数据
+		  			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
+		  			for(var i=0; i<genders.length; i++) {
+		  				if(genders[i].display == card.gender) {
+		  					_this.encounter.gender = genders[i];
+		  					break;
+		  				}
+		  			}
+		  			for(var i=0; i<nations.length; i++) {
+		  				if(nations[i].display.indexOf(card.folk)>-1) {
+		  					_this.encounter.nation = nations[i];
+		  					break;
+		  				}
+		  			}
+		  			_this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+		  			_this.activeTab = "orders";
+  					_this.orders = [];
+  				} else {
+    				_this.$message.error(res.info);
+    			}
+  			}, function(response) {
+      		_this.$message.error("获取就诊模型初始值失败，请联系管理员。");
+      	})
   			// _this.createEncounterBySomeMethods({row: _this.encounter, type: "by_iden"});
   		},
   		focusEncSearchInp: function (flag) {
@@ -381,6 +400,9 @@ window.current_template_obj = {
   			_this.encmodalloading = true;
 				if(json.modal){
 					_this[json.modal] = true;
+					_this.encounter = {};
+					_this.encounter.diagnoses = [];
+					_this.encounter.allergens = [];
 				}
   			Vue.resource('/hospital/people.json').get({search: json.search}).then( function(response) {
   				var res = response.data;
@@ -401,6 +423,7 @@ window.current_template_obj = {
   		// 编辑encounter
   		editEncounter: function (row) {
   			this.encounter = row;
+  			this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
   			this.isShowEncountersDialog = false;
   			// 重新加载页面主业务数据
   			this.activeTab = "orders";
@@ -413,22 +436,35 @@ window.current_template_obj = {
   		// 用一些特殊的方式创建encounter，在曾经就诊的基础上创建
   		createEncounterBySomeMethods: function (json) {
   			var _this = this, row = json.row;
-  			_this.encounter.name = row.name;
-  			_this.encounter.gender = row.gender;
-  			_this.encounter.age = row.age;
-  			_this.encounter.phone = row.phone;
-  			_this.encounter.iden = row.iden;
-  			_this.encounter.birth_date = row.birth_date;
-  			_this.encounter.address = row.address;
-  			_this.encounter.contact_name = row.contact_name;
-  			_this.encounter.type = json.type;
-  			if(json.type=="by_person") { // 通过患者创建新的就诊
-  				_this.encounter.person_id = row.id;
-  				_this.encounter.diagnoses = [];
-	  			_this.isShowEncountersDialog = false;
-	  		}
-	  		// 提示填写诊断
-	  		_this.$refs["encdiagnose"].focus();
+  			Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
+  				var res = response.data;
+  				if(res.flag) {
+  					_this.encounter = res.data;
+  					_this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+		  			_this.encounter.name = row.name;
+		  			_this.encounter.gender = row.gender;
+		  			_this.encounter.age = row.age;
+		  			_this.encounter.phone = row.phone;
+		  			_this.encounter.iden = row.iden;
+		  			_this.encounter.birth_date = row.birth_date;
+		  			_this.encounter.address = row.address;
+		  			_this.encounter.contact_name = row.contact_name;
+		  			_this.encounter.type = json.type;
+		  			if(json.type=="by_person") { // 通过患者创建新的就诊
+		  				_this.encounter.person_id = row.id;
+		  				_this.encounter.diagnoses = [];
+			  			_this.isShowEncountersDialog = false;
+			  		}
+			  		// 提示填写诊断
+			  		_this.$refs["encdiagnose"].focus();
+  					_this.activeTab = "orders";
+  					_this.orders =[];
+  				} else {
+    				_this.$message.error(res.info);
+    			}
+  			}, function(response) {
+      		_this.$message.error("获取就诊模型初始值失败，请联系管理员。");
+      	})
   		// 	if(json.type=="by_person") { // 通过就诊创建新的就诊
   		// 		encounter = json.row;
   		// 	}
@@ -607,6 +643,13 @@ window.current_template_obj = {
 				// encounter中选择诊断
 				handleSelectDiagnosis: function(item) {
 					if(item.type=="hand") {
+						if(this.diagnoseInput.length>30) {
+							this.$message({
+			          message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
+			          type: 'warning'
+			        });
+							return false;
+						}
 						this.encounter.diagnoses.push({code: "", display: this.diagnoseInput});
 					} else {
 			    	this.encounter.diagnoses.push({code: item.code, display: item.display});
@@ -618,7 +661,15 @@ window.current_template_obj = {
 				handleFormSelectDiagnosis: function(item) {
 					var _this = this, code = "", display = _this.diagnosis.display;
 					console.log("=============选择诊断",item, display)
-					if(item.code) {
+					if(!item.code) {
+						if(display.length>30) {
+							this.$message({
+			          message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
+			          type: 'warning'
+			        });
+							return false;
+						}
+					} else {
 					  code = item.code;
 					  display = item.display;
 					}
@@ -795,6 +846,12 @@ window.current_template_obj = {
 	    },
 	    handleTagInputConfirm: function () {
 	      var inputTagValue = this.inputTagValue;
+	      if(inputTagValue.length>20) {
+	      	this.$message({
+	          message: "过敏信息太长",
+	          type: 'warning'
+	        });
+	      }
 	      if (inputTagValue) {
 	        this.encounter.allergens.push(inputTagValue);
 	      }

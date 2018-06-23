@@ -10,7 +10,7 @@ class Ims::GetData < ApplicationRecord
 		                            :username => "root",
 		                            :password => "Tenmind@207",
 		                            :port => "3306",
-		                            :database => "mmp"
+		                            :database => "mmp_lgl"
 		                            )
 				# sql = "select code,name,py from dictarea limit 5";
 				sql = "CALL p_getYPDataList('#{args[:search]}',#{args[:i_days]},'#{args[:org_id]}');"

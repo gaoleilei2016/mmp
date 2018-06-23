@@ -26,10 +26,10 @@ class Hospital::EncountersController < ApplicationController
 	# GET
   # GET /hospital/encounters/new.json
   def new
-    @encounter = Hospital::Encounter.new
+    # @encounter = Hospital::Encounter.new
     res = {
       name: "",  # 姓名
-      gender: {code: "", display: ""},  # 性别
+      gender: {code: "0", display: "男"},  # 性别
       age: "",  # 年龄
       birth_date: "",  # 出生日期
       iden: "",  # 身份证号码
@@ -45,11 +45,11 @@ class Hospital::EncountersController < ApplicationController
       blood: {code: "", display: ""},  # 血型
       height: "",  # 身高cm
       weight: "",  # 体重kg
-      location: {id: "", display: ""}, # 取药点
+      drugstore_location: {id: "", display: ""}, # 取药点
     }
     respond_to do |format|
       format.html # new.html.erb
-      format.json { render json: {flag: true, info:"", data: @encounter} }
+      format.json { render json: {flag: true, info:"", data: res} }
     end
   end
 
@@ -88,6 +88,7 @@ class Hospital::EncountersController < ApplicationController
     p current_user.cur_loc_id
     case params[:encounter][:type].to_s
     when "by_person"
+      create_data = format_encounter_create_params
       cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
       return render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
       cur_org = current_user.organization
@@ -95,6 +96,8 @@ class Hospital::EncountersController < ApplicationController
       encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id, hospital_oid: cur_org.id, hospital_name: cur_org.name)
       @encounter = ::Hospital::Encounter.new(encounter_info)
       if @encounter.save
+        ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
+        ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
         render json: {flag: true, info:"success", data: @encounter.to_web_front}
       else
         render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}

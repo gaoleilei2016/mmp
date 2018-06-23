@@ -30,7 +30,7 @@
 		height: 0;
 	}
 	.list_info{
-		padding: 20px 0;
+		padding: 10px 5px;
 		border-bottom: 1px solid #333;
 	}
 	.list_info .item{
@@ -54,10 +54,10 @@
 	<div v-if="prescription" style="padding: 0 12px;">
 		<div style="position: relative;text-align: center;padding: 13px 0;">
 			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
-			<h4 style="font-weight: 500;">处方签</h4>
-			<h4 style="border: 1px solid #333;padding: 5px;position: absolute;right: 8px;top: 35px;margin: 0;">{{prescription.type.display}}</h4>
+			<h4 style="font-weight: 500;">处方笺</h4>
+			<span style="border: 1px solid;padding: 5px;position: absolute;right: 0;top: 15px;margin: 0; font-weight: 500;">{{prescription.type.display}}</span>
 		</div>
-		<div style="padding: 0 0 8px;border-bottom: 1px solid #333;">
+		<div style="padding: 0 0 8px;border-bottom: 1px solid #666;">
 			<span>处方号: {{prescription.prescription_no}}</span>
 			<span style="float: right;">{{prescription.created_at}}</span>
 		</div>
@@ -73,13 +73,14 @@
 			<div class="clear"></div>
 		</div>
 		<div class="list_info">
-			<p class="item">药品清单</p>
+			<!-- <p class="item">药品清单</p> -->
+			<span style="font-size: 200%;">℞</span>
 			<div class="drug_item" v-for="drug in prescription.orders">
-				<div class="item" style="width: 39.9%;">{{drug.title}}</div>
-				<div class="item" style="width: 20%;">{{drug.specification}}</div>
-				<div class="item" style="width: 20%;">{{drug.route.display}}</div>
-				<div class="item" style="width: 20%;">{{drug.frequency.display}}</div>
-				<div>数量：{{drug.total_quantity}} {{drug.unit}}　单价：{{format_float(drug.price)}}</div>
+				<div style="display: inline-block; width: calc(100% - 160px);">{{drug.title}}</div>
+				<div style="display: inline-block; width: 40px;">{{drug.dose.value}}{{drug.dose.unit}}</div>
+				<div style="display: inline-block; width: 40px;">{{drug.route.display}}</div>
+				<div style="display: inline-block; width: 60px;">{{drug.frequency.display}}</div>
+				<div style="margin: 10px 0;">- 数量：{{drug.total_quantity}} {{drug.unit}}　单价：{{format_float(drug.price)}}</div>
 			</div>
 		</div>
 		<div style="padding-top: 6px;">
