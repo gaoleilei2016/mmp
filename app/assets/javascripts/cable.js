@@ -6,7 +6,9 @@
 
 (function() {
   this.App || (this.App = {});
-
-  App.cable = ActionCable.createConsumer();
+  var data = JSON.parse($.ajax({url:"/wechat/websocket.json",async:false}).responseText);
+  console.log(data,'-----------');
+  var url = 'ws://'+data.host+'/cable?uid='+data.uid;
+  App.cable = ActionCable.createConsumer(url);
 
 }).call(this);
