@@ -16,8 +16,6 @@ class ::Hospital::Diagnose < ApplicationRecord
 	belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
 	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'org_id', optional: true
 
-
-
 	def initialize args = {}
 		super args
 		self.status = "A"
