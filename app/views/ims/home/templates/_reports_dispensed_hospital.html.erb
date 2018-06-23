@@ -62,7 +62,7 @@
 				    align="left"
 				    label="药品名称">
 				    <template slot-scope="scope">
-				      <span v-if="scope.row.name" style="display: inline-block; width: 70px;">{{ scope.row.name }}</span>
+				      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
 				    </template>
 				  </el-table-column>
 				  <el-table-column
@@ -70,7 +70,7 @@
 				    align="left"
 				    label="规格">
 				    <template slot-scope="scope">
-				    	<i v-if="scope.row.iden" class="fa fa-lg fa-fw text-muted-light"></i>{{ scope.row.iden }}
+				    	<i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>{{ scope.row.specification }}
 				    </template>
 				  </el-table-column>
 				  <el-table-column
@@ -78,7 +78,7 @@
 				    align="right"
 				    label="数量">
 				    <template slot-scope="scope">
-				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    	<i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_qty }}
 				    </template>
 				  </el-table-column>
 				  <el-table-column
@@ -86,7 +86,7 @@
 				    align="center"
 				    label="单位">
 				    <template slot-scope="scope">
-				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    	<i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
 				    </template>
 				  </el-table-column>
 				  <el-table-column
@@ -94,7 +94,7 @@
 				    align="right"
 				    label="单价">
 				    <template slot-scope="scope">
-				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    	<i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
 				    </template>
 				  </el-table-column>
 				  <el-table-column
@@ -102,7 +102,7 @@
 				    align="right"
 				    label="金额">
 				    <template slot-scope="scope">
-				    	<i v-if="scope.row.phone" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.phone }}
+				    	<i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
 				    </template>
 				  </el-table-column>
 
@@ -144,7 +144,7 @@ window.current_template_obj = {
 			cardTabsOptions: options,
 			multipleSelection: [],
 
-			dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'),
+			dispensed_hospitalsResource: Vue.resource('/ims/reports/drug_report.json'),
 			dispensed_hospitals: [],
 			prescriptions: [],
 			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
