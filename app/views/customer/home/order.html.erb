@@ -55,7 +55,7 @@
 				$("#loading").show();
 				$.ajax({
 					url:'/interfaces/get_orders.json?id=<%= params[:id] %>',
-					data:{per:10},
+					// data:{per:10},
 					success:function(json) {
 						if (json.flag) {
 							_this.order = json.order;
