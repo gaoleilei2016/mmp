@@ -172,7 +172,7 @@ class Hospital::PrescriptionsController < ApplicationController
   #   prescription_ids: []
   # }
   def read_prescription
-    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil? || params[:prescription_ids].is_array
+    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil?
     ::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
     render json:{flag: true, info:"success"}
   end
