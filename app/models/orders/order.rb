@@ -363,7 +363,10 @@ class Orders::Order < ApplicationRecord
 									flag:true, #true已收费  false 退费
 									info:'您有新的线下支付订单！', #订单金额
 								}
+								p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
 								::NoticeChannel.publish(data)
+								p data
+								p "++++++++++++++++++++++++++++++"
 								# ::NoticeBroadcastJob.perform_later(data:data)
 							end
 						end
