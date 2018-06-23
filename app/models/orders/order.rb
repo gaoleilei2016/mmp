@@ -56,7 +56,7 @@ class Orders::Order < ApplicationRecord
 		::Admin::Organization.find(source_org_id) rescue nil
 	end
 
-	#取消订单 Orders::Order.find(id).cancel_order(cur_user)(手自一体)
+	#取消订单（线上使用）Orders::Order.find(id).cancel_order(cur_user)(手自一体)
 	def cancel_order(cur_user=nil,reason='')
 		current_user = current_user||User.find(user_id)
 		result = {ret_code:'-1',info:'当前订单不允许取消'}
@@ -65,11 +65,11 @@ class Orders::Order < ApplicationRecord
 			::Orders::Order.transaction do
 				case status.to_s
 				when '1'
-					prescriptions.each{|x|x.back_wait_charge({}, current_user)}
+					prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 					result = {ret_code:'0',info:'订单已取消。'}
-				when payment_type.to_s == '1' && cur_user && '2'
+				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
 					# arg0 = {
 					# 	# 退费人
 					# 	return_charge_opt: {
@@ -121,7 +121,7 @@ class Orders::Order < ApplicationRecord
 	end
 
 	
-	##退药方法 attrs = {reason:'',current_user:''}
+	##退药方法（药店使用） attrs = {reason:'',current_user:''}
 	def cancel_medical(attrs={})
 		attrs = attrs.deep_symbolize_keys
 		begin
