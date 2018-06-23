@@ -88,6 +88,7 @@ class Hospital::EncountersController < ApplicationController
     p current_user.cur_loc_id
     case params[:encounter][:type].to_s
     when "by_person"
+      create_data = format_encounter_create_params
       cur_person = ::Person.find(params[:encounter][:person_id]) rescue nil
       return render json: {flag: false, info:"person_id 无效"} if cur_person.nil?
       cur_org = current_user.organization
@@ -95,6 +96,8 @@ class Hospital::EncountersController < ApplicationController
       encounter_info.merge!(person_id: cur_person.id, author_id: current_user.id, hospital_oid: cur_org.id, hospital_name: cur_org.name)
       @encounter = ::Hospital::Encounter.new(encounter_info)
       if @encounter.save
+        ::Hospital::Irritability.batch_update(create_data[:irritabilities], cur_person, current_user)
+        ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
         render json: {flag: true, info:"success", data: @encounter.to_web_front}
       else
         render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}

@@ -1,3 +1,7 @@
+<%= javascript_include_tag '/assets/jquery/jquery-1.9.1', 'data-turbolinks-track': 'reload' %>
+<%= javascript_include_tag 'cable', 'data-turbolinks-track': 'reload' %>
+<%= javascript_include_tag '/assets/channels/notice', 'data-turbolinks-track': 'reload' %>
+
 <%= flash[:notice] %>
 
 <form action="/pay/wx/pay" method="post">
