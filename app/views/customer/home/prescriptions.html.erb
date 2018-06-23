@@ -119,16 +119,27 @@
 				// console.log( '~~~~~~',pulltype );
 				var _this = this;
 				$("#loading").show();
+				var per = 3;
+				var page = Math.ceil(_this.prescriptions.length/per)+1;
 				$.ajax({
-					url:'/hospital/prescriptions/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page=1&per=3',
+					url:'/hospital/prescriptions/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page='+page+'&per='+per,
 					success:function(json) {
 						if (pulltype=='pulldown') {
+							if (json.flag) {
+								_this.prescriptions = json.data;
+							}
 							mui('#vue_content').pullRefresh().endPulldownToRefresh();
+							mui('#vue_content').pullRefresh().enablePullupToRefresh();
 						}else if(pulltype=='pullup'){
-							mui('#vue_content').pullRefresh().endPullupToRefresh(false); //参数为true代表没有更多数据了。
+							if (json.flag) {
+								json.data.map(function(item) {
+									_this.prescriptions.push(item);
+								})
+							}
+							// console.log( _this.prescriptions.length,json.count );
+							mui('#vue_content').pullRefresh().endPullupToRefresh(_this.prescriptions.length>=json.count); //参数为true代表没有更多数据了。
 						}
 						if (json.flag) {
-							_this.prescriptions = json.data;
 						}else{
 							_this.$message(json.info);
 						}
