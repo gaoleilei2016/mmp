@@ -16,6 +16,11 @@ module ::Hospital::Interface
     ::Hospital::Prescription.find_by_sql(sql)
   end
 
+  def self.get_prescriptions_count_by_phone(phone)
+    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone}"
+    ::Hospital::Prescription.find_by_sql(sql).count
+  end
+
 
 
   # 根据处方ids 获取处方信息

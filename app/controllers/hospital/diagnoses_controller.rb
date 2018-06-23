@@ -1,9 +1,10 @@
 #encoding:utf-8
 # 诊断控制器
 class Hospital::DiagnosesController < ApplicationController
-	before_action :set_diagnose, only: [:show, :edit, :update, :destroy]
-
-
+	before_action :set_cur_org
+  before_action :set_cur_dep
+	before_action :set_diagnose, only: [:edit, :update, :destroy]
+  before_action :change?, only: [:edit, :update, :destroy,:sort]
 
 	# GET
 	# 根据就诊id返回诊断
@@ -100,10 +101,29 @@ class Hospital::DiagnosesController < ApplicationController
 	end
 
 	private
+    # 获取当前机构 没有就提示
+    def set_cur_org
+      @cur_org =  current_user.organization
+      return render json:{flag:false, info: "当前用户没有分配机构 请分配机构后再重试"} if @cur_org.nil?
+    end
+
+    # 获取当前科室 没有就提示
+    def set_cur_dep
+      @cur_dep =  ::Hospital::Sets::Department.find(current_user.cur_loc_id) rescue nil
+      return render json:{flag:false, info: "当前用户没有设置当前科室 请设置当前科室后再重试"} if @cur_dep.nil?
+    end
+
 		# Use callbacks to share common setup or constraints between actions.
 	  def set_diagnose
-	    @diagnose = Hospital::Diagnose.find(params[:id])
+	    @diagnose = Hospital::Diagnose.find(params[:id]) rescue nil
+	    return render json:{flag: false, info:"无效的模板id"} if @diagnose.nil?
+      return render json:{flag: false, info:"不能操作非自己创建的数据"} if @diagnose.org_id != @cur_org.id
 	  end
+
+	  def change?
+      flag = @mtemplate.author_id == current_user.id ? true : false
+      return render json:{flag: false, info: "不能操作非本人创建的模板"} if !flag
+    end
 
 	  def diagnose_params
 	  	params[:diagnosis]

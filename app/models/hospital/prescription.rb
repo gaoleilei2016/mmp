@@ -65,6 +65,29 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+	# 处方废弃
+	# {
+	# 	# 废弃人
+	# 	abandonor: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 废弃时间
+	# 	abandon_at: Time
+	# }
+	def not_audit_to_abandon(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 1 # 已审核的处方可以废弃
+				self.abandonor_id = args[:abandonor][:id] 
+				self.abandonor_display = args[:abandonor][:display]
+				self.abandon_at = args[:abandon_at]
+				self.status = 7
+			self.orders.update_all(status: 7) if self.save
+		else
+			false
+		end
+	end
+
 	# 待收费处方  生成订单之后待收费
 	# {
 	# 	# 创建订单人
@@ -376,6 +399,13 @@ class ::Hospital::Prescription < ApplicationRecord
 	end
 
 	class<<self
+		def overtime(prescription_ids)
+		  ::Hospital::Prescription.find(prescription_ids).update_all(is_overtime: true)
+		end
+
+		def set_overtime_schedule(prescription_ids)
+
+		end
 
 	end
 
