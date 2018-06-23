@@ -19,26 +19,25 @@ class Hospital::PrescriptionsController < ApplicationController
 	def show
 		respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {flag: true, info:"", data: @prescription} }
+      format.json { render json: {flag: true, info:"", data: @prescription.to_web_front} }
     end
 	end
 
 	# GET
   # GET /hospital/prescriptions/new.json
   def new
-    @prescription = Hospital::Prescription.new
-    res = {
-      title: "",
-    }
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: {flag: true, info:"", data: @prescription} }
-    end
+    # @prescription = Hospital::Prescription.new
+    # respond_to do |format|
+    #   format.html # new.html.erb
+    #   format.json { render json: {flag: true, info:"", data: @prescription} }
+    # end
+    render json:{flag: false, info: "暂未支持该方法"}
   end
 
 	# GET
   # /hospital/prescriptions/:id/edit
 	def edit
+    render json:{flag: false, info: "暂未支持该方法"}
 	end
 
 	# POST
@@ -51,6 +50,7 @@ class Hospital::PrescriptionsController < ApplicationController
     respond_to do |format|
       if @prescription.save
         p "prescription save"
+        p args[:diagnoses_args]
         @prescription.link_diagnoses(args[:diagnoses_args], current_user)
         p "link_diagnoses save"
         @prescription.link_orders(args[:cur_orders], current_user)
@@ -70,9 +70,8 @@ class Hospital::PrescriptionsController < ApplicationController
         format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
         format.json { render json: {flag: true, info:"", data: @prescription.to_web_front} }
       else
-        @prescription.
         format.html { render action: "new" }
-        format.json { render json: @prescription.errors, status: :unprocessable_entity }
+        format.json { render json: {flag: false, info: @prescription.errors.messages.join("、")} }
       end
     end
 	end
@@ -80,15 +79,16 @@ class Hospital::PrescriptionsController < ApplicationController
 	# PUT
   # PUT /hospital/prescriptions/:id
   def update
-    respond_to do |format|
-      if @prescription.update_attributes(params[:prescription])
-        format.html { redirect_to @prescription, notice: 'prescription was successfully updated.' }
-        format.json { render json: {flag: true, info:"", data: @prescription} }
-      else
-        format.html { render action: "edit" }
-        format.json { render json: @prescription.errors, status: :unprocessable_entity }
-      end
-    end
+    # respond_to do |format|
+    #   if @prescription.update_attributes(params[:prescription])
+    #     format.html { redirect_to @prescription, notice: 'prescription was successfully updated.' }
+    #     format.json { render json: {flag: true, info:"", data: @prescription} }
+    #   else
+    #     format.html { render action: "edit" }
+    #     format.json { render json: {flag: false, info: @prescription.errors.messages.join("、")} }
+    #   end
+    # end
+    render json:{flag: false, info: "暂未支持该方法"}
   end
 
 	# DELETE
