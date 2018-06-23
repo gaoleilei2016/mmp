@@ -16,6 +16,24 @@
 	.no_active_background .mui-active{
 		background: none !important;
 	}
+	.mui-checkbox input[type=checkbox]:before, .mui-radio input[type=radio]:before{
+		font-size: 20px;
+	}
+	.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
+		color: #F55742;
+	}
+	.alert_card .mui-table-view-cell>a:not(.mui-btn).mui-active{
+		background: none;
+	}
+	.alert_card .fapiao_list_item{
+		padding-right: 24px;
+	}
+	.alert_card.edit_card .fapiao_list_item{
+		padding-right: 44px;
+	}
+	.alert_card.edit_card .fapiao_default_item{
+		display: none;
+	}
 </style>
 <div id="vue_content" v-cloak>
 	<header class="my_top_nav mui-bar mui-bar-nav">
@@ -56,8 +74,8 @@
 			</li>
 		</ul>
 		<ul id="" class="mui-table-view mui-table-view-chevron" style="margin: 16px 0 0px;">
-			<li class="mui-table-view-cell mui-media">
-				<a href="javascript:$('#common_mask,#xxxxx1').show();" class="mui-navigate-right">
+			<li :key="1" class="mui-table-view-cell mui-media">
+				<a href="javascript:console.log( 'xxxxxxxxxx 1' );$('#common_mask,#xxxxx1').show(200);" class="mui-navigate-right">
 					<div class="mui-media-body">
 						支付方式
 						<span class='mui-pull-right' style="color: #999;">
@@ -67,8 +85,8 @@
 					</div>
 				</a>
 			</li>
-			<li class="mui-table-view-cell mui-media">
-				<a href="javascript:mui.toast('暂无可用');" class="mui-navigate-right">
+			<li :key="2" class="mui-table-view-cell mui-media">
+				<a href="javascript:console.log( 'xxxxxxxxxx 2' );$('#common_mask,#xxxxx2').show(200);" class="mui-navigate-right">
 					<div class="mui-media-body">
 						抵用券
 						<span class='mui-pull-right' style="color: #999;">暂无可用</span>
@@ -76,15 +94,15 @@
 					</div>
 				</a>
 			</li>
-			<li class="mui-table-view-cell">
+			<li :key="999" class="mui-table-view-cell">
 				<span>发票</span>
 				<div class="mui-switch mui-switch-mini">
 					<div class="mui-switch-handle"></div>
 				</div>
 			</li>
-			<template v-if="fapiao">
-				<li class="mui-table-view-cell">
-					<a href="javascript:$('#common_mask,#xxxxx2').show();" class="mui-navigate-right">
+			<!-- <template v-if="fapiao"> -->
+				<li :key="3" class="mui-table-view-cell fapiao_li" style="display: none;">
+					<a href="javascript:console.log( 'xxxxxxxxxx 3' );$('#common_mask,#xxxxx3').show(200);" class="mui-navigate-right">
 						<span>发票类型</span>
 						<span class='mui-pull-right' style="color: #999;">
 							<template v-if="fapiao_type=='zhi'">纸质发票</template>
@@ -92,22 +110,24 @@
 						</span>
 					</a>
 				</li>
-				<li class="mui-table-view-cell">
-					<a href="javascript:$('#common_mask,#xxxxx3').show();" class="mui-navigate-right">
+				<li :key="4" class="mui-table-view-cell fapiao_li" style="display: none;">
+					<a href="javascript:console.log( 'xxxxxxxxxx 4' );$('#common_mask,#xxxxx4').show(200);" class="mui-navigate-right">
 						<span>发票内容</span>
 						<span class='mui-pull-right' style="color: #999;">明细</span>
 					</a>
 				</li>
-				<li class="mui-table-view-cell">
-					<a href="javascript:$('#xxxxx4').show(300);" class="mui-navigate-right">
+				<li :key="5" class="mui-table-view-cell fapiao_li" style="display: none;">
+					<a href="javascript:console.log( 'xxxxxxxxxx 5' );$('#xxxxx5').show(200);fapiao_vue.get_fapiaos();fapiao_vue.edit_card=false;fapiao_vue.reset_form();" class="mui-navigate-right">
 						<span>发票抬头</span>
-						<span class='mui-pull-right' style="color: #999;"></span>
+						<span class='mui-pull-right' style="color: #999;">{{fapiao.name}}</span>
 					</a>
 				</li>
-			</template>
+			<!-- </template> -->
 		</ul>
 		<p style="font-size: 10px;padding: 10px 14px;margin: 0;">温馨提示：本平台只对处方药品作信息展示。 所有处方均来源于医院并授权许可，真实有效。 所有药品均由具备资质的药店提供。</p>
-		<form action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
+		<form id="submit_form" action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
+			<input type="text" name="order[invoice_id]" v-model="fapiao.id">
+			<input type="text" name="order[fapiao_type]" v-model="fapiao_type">
 			<input type="text" name="order[payment_type]" v-model="pay_type">
 			<input type="text" name="order[hospital_id]" v-model="prescription.org_id">
 			<input type="text" name="order[hospital_name]" v-model="prescription.org_name">
@@ -123,70 +143,247 @@
 		<div style="overflow: hidden;padding-right: 10px;text-align: right;"><span style="font-size: .7em;">总金额</span> <span style="color: #F55742;"><span style="font-size: .7em;">¥</span> {{format_float(prescription.total_price)}}</span></div>
 	</div>
 </div>
-<div id="common_mask" onclick="$('#common_mask,.alert_card').hide();" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
+<div id="common_mask" onclick="$('#common_mask,.alert_card').hide(200);" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: none;"></div>
 <div id="xxxxx1" class="alert_card" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
 	<p style="text-align: center;padding: 12px;font-size: 12px;">支付方式</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
 		<li class="mui-table-view-cell mui-selected">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#common_mask,#xxxxx1').hide();">在线支付</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='online';$('#common_mask,#xxxxx1').hide(200);">在线支付</a>
 		</li>
 		<li class="mui-table-view-cell">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='offline';$('#common_mask,#xxxxx1').hide();">到店支付</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.pay_type='offline';$('#common_mask,#xxxxx1').hide(200);">到店支付</a>
 		</li>
 	</ul>
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
-			<a href="javascript:$('#common_mask,#xxxxx1').hide();"><b>关闭</b></a>
+			<a href="javascript:$('#common_mask,#xxxxx1').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
 </div>
 <div id="xxxxx2" class="alert_card" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
-	<p style="text-align: center;padding: 12px;font-size: 12px;">发票类型</p>
+	<p style="text-align: center;padding: 12px;font-size: 12px;">抵用券</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
 		<li class="mui-table-view-cell mui-selected">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='zhi';$('#common_mask,#xxxxx2').hide();">纸质发票</a>
-		</li>
-		<li class="mui-table-view-cell">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='dian';$('#common_mask,#xxxxx2').hide();">电子发票</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="$('#common_mask,#xxxxx2').hide(200);">暂无可用</a>
 		</li>
 	</ul>
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
-			<a href="javascript:$('#common_mask,#xxxxx2').hide();"><b>关闭</b></a>
+			<a href="javascript:$('#common_mask,#xxxxx2').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
 </div>
 <div id="xxxxx3" class="alert_card" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
+	<p style="text-align: center;padding: 12px;font-size: 12px;">发票类型</p>
+	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
+		<li class="mui-table-view-cell mui-selected">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='zhi';$('#common_mask,#xxxxx3').hide(200);">纸质发票</a>
+		</li>
+		<li class="mui-table-view-cell">
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='dian';$('#common_mask,#xxxxx3').hide(200);">电子发票</a>
+		</li>
+	</ul>
+	<ul class="mui-table-view">
+		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
+			<a href="javascript:$('#common_mask,#xxxxx3').hide(200);"><b>关闭</b></a>
+		</li>
+	</ul>
+</div>
+<div id="xxxxx4" class="alert_card" style="background: #fff;position: fixed;z-index: 999;width: 100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
 	<p style="text-align: center;padding: 12px;font-size: 12px;">发票内容</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
 		<li class="mui-table-view-cell mui-selected">
-			<a class="mui-navigate-right" href="javascript:;" onclick="$('#common_mask,#xxxxx3').hide();">明细</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="$('#common_mask,#xxxxx4').hide(200);">明细</a>
 		</li>
 	</ul>
 	<ul class="mui-table-view">
 		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
-			<a href="javascript:$('#common_mask,#xxxxx3').hide();"><b>关闭</b></a>
+			<a href="javascript:$('#common_mask,#xxxxx4').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
 </div>
-<div id="xxxxx4" class="alert_card" style="background: #fff;position: fixed;z-index: 999;width: 100%;height:100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
-	<p style="text-align: center;padding: 12px;font-size: 12px;">发票抬头</p>
-	<ul class="mui-table-view">
-		<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
-			<a href="javascript:$('#common_mask,#xxxxx4').hide(300);"><b>关闭</b></a>
+<div id="xxxxx5" class="alert_card" :class="{edit_card:edit_card}" style="background: #fff;position: fixed;z-index: 999;width: 100%;height:100%;left:0 !important;right:0 !important;bottom: 0;display: none;">
+	<div style="text-align: center;line-height: 40px;font-size: 12px;border-bottom: 1px solid #ddd;">
+		<a href="javascript:$('#common_mask,#xxxxx5').hide(200);" style="position: absolute;left: 6px;top: 2px;"><span class="mui-icon mui-icon-left-nav"></span></a>
+		选择抬头
+		<a href="javascript:;" v-if="edit_card" @click="edit_card=false;reset_form();" class="common_red" style="position: absolute;right: 6px;top: 2px;">取消</a>
+		<a href="javascript:;" v-else @click="edit_card=true;" class="common_red" style="position: absolute;right: 6px;top: 2px;">管理</a>
+	</div>
+	<ul class="mui-table-view" style="margin-top: 12px;">
+		<li @click="click_fapiao_item(item)" v-for="item in fapiaos" class="mui-table-view-cell fapiao_list_item">
+			<span>{{item.name}}</span>
+			<p style="float: right;">{{f_type_code_label(item.type_code)}}</p>
+			<div v-if="item.default=='true'" class="fapiao_default_item common_bg_red" style="transform:rotate(45deg);position: absolute;right: -30px;top: -16px;padding: 20px 20px 0 20px;font-size: 12px;">默认</div>
+			<div v-if="edit_card" class="common_red" style="position: absolute;right: 14px;top: 12px;" @click="delete_taitou($event,item)"><i class="fal fa-trash-alt"></i></div>
 		</li>
 	</ul>
+	<div style="position: absolute;bottom: 0;width: 100%;border: 1px solid #ddd;">
+		<div>
+			<div class="mui-input-group" style="margin-bottom: 10px;">
+				<div style="border-bottom: 1px solid #ddd;padding: 4px 0;">
+					<div class="mui-radio mui-left mui-pull-left">
+						<label style="line-height: 28px;padding-left: 50px;">企业</label>
+						<input name="radio1" type="radio" value="1" v-model="ruleForm.type_code">
+					</div>
+					<div class="mui-radio mui-left mui-pull-left">
+						<label style="line-height: 28px;padding-left: 50px;">个人</label>
+						<input name="radio1" type="radio" value="2" v-model="ruleForm.type_code">
+					</div>
+					<div class="mui-checkbox mui-left mui-pull-right">
+						<label style="line-height: 28px;padding-left: 50px;">是否是默认</label>
+						<input name="checkbox" v-model="ruleForm.default" type="checkbox">
+					</div>
+					<div class="clear"></div>
+				</div>
+				<div class="mui-input-row" style="">
+					<input v-model="ruleForm.name" type="text" placeholder="请输入抬头名称">
+				</div>
+				<div v-if="ruleForm.type_code=='1'" class="mui-input-row">
+					<input v-model="ruleForm.shuihao" type="text" placeholder="请输入纳税人识别号 或 社会统一征信代码">
+				</div>
+			</div>
+			<ul class="mui-table-view">
+				<li class="mui-table-view-cell" style="background: #F55742;color: #fff;text-align: center;">
+					<template v-if="edit_card">
+						<a @click="save_taitou" href="javascript:;" v-if="ruleForm.id"><b>保存并使用抬头</b></a>
+						<a href="javascript:mui.toast('未选中行');" v-else><b>选中后可编辑</b></a>
+					</template>
+					<a @click="save_taitou" href="javascript:;" v-else><b>添加并使用新抬头</b></a>
+				</li>
+			</ul>
+		</div>
+	</div>
 </div>
 <script type="text/javascript">
+	var fapiao_vue = new Vue({
+		el:"#xxxxx5",
+		data:{
+			fapiaos:[],
+			edit_card:false,
+			ruleForm:{
+				type_code:'1',
+				default:true,
+			},
+		},
+		methods:{
+			click_fapiao_item:function(item) {
+				var _this = this;
+				if (_this.edit_card) {
+					_this.ruleForm = _.cloneDeep(item);
+				}else{
+					current_app.fapiao = item;
+					$('#common_mask,#xxxxx5').hide(200);
+				}
+			},
+			f_type_code_label:function(code) {
+				if (code=='1') {
+					return '企业';
+				}else if(code=='2'){
+					return '个人';
+				}
+			},
+			get_fapiaos:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/fapiao',
+					success:function(json) {
+						_this.fapiaos = json.rows;
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun,
+				})
+			},
+			get_default_fapiao:function() {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/fapiao?default=yes',
+					success:function(json) {
+						current_app.fapiao = json.fapiao||{};
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun,
+				})
+			},
+			reset_form:function() {
+				this.ruleForm = {
+					type_code:'1',
+					default:true,
+				};
+			},
+			save_taitou:function() {
+				var _this = this;
+				if(!_this.ruleForm.name){
+					mui.toast('名称不能为空');
+					return false;
+				}
+				if(_this.ruleForm.type_code=='1'&&(!_this.ruleForm.shuihao)){
+					mui.toast('税号不能为空');
+					return false;
+				}
+				if (_this.ruleForm.type_code=='2') {
+					_this.ruleForm.shuihao = '';
+				}
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/fapiao',
+					type:'post',
+					data:{fapiao:_this.ruleForm},
+					success:function(json) {
+						if (_this.ruleForm.id) {
+							// _this.get_fapiaos();
+							mui.toast(json.info);
+						}else{
+						}
+						current_app.fapiao = json.fapiao;
+						$('#common_mask,#xxxxx5').hide(200);
+						_this.reset_form();
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun,
+				})
+			},
+			delete_taitou:function(e,item) {
+				var _this = this;
+				$("#loading").show();
+				$.ajax({
+					url:'/customer/fapiao/'+item.id,
+					type:'delete',
+					success:function(json) {
+						_this.get_fapiaos();
+						mui.toast(json.info);
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:error_fun,
+				})
+				e.stopPropagation();
+				return false;
+			}
+		},
+		mounted:function() {
+			// this.get_fapiaos();
+			// this.get_default_fapiao();
+		}
+	})
 	$("#bottom_tabs").remove();
 	var current_app = new Vue({
 		el:"#vue_content",
 		data:{
 			current_pharmacy:{},
 			prescription:{},
-			fapiao:false,
+			use_fapiao:false,
 			pay_type:'online', // online | offline
 			fapiao_type:'zhi', // zhi | dian
+			fapiao:{},
 		},
 		methods:{
 			submit_form:function(e) {
@@ -199,22 +396,17 @@
 					mui.toast('药房获取失败');
 					return false;
 				}
+				if (_this.use_fapiao&&(!_this.fapiao.id)) {
+					mui.toast('未选择发票抬头');
+					return false;
+				}
 				// $("#loading").show();
 				e.target.disabled = true;
-				$('form').submit();
+				$('#submit_form').submit();
 			},
 			format_float:function(value) {
 				return (parseFloat(value)||0).toFixed(2);
 			},
-			// get_current_pharmacy:function(item) {
-			// 	var _this = this;
-			// 	$.ajax({
-			// 		url:"/interfaces/get_current_pharmacy",
-			// 		success:function(json) {
-			// 			_this.current_pharmacy = json.pharmacy;
-			// 		}
-			// 	})
-			// },
 			get_prescriptions:function() {
 				var _this = this;
 				$("#loading").show();
@@ -241,7 +433,15 @@
 			this.get_prescriptions();
 			mui('.mui-content .mui-switch').each(function() {
 				this.addEventListener('toggle', function(event) {
-					_this.fapiao = event.detail.isActive;
+					_this.use_fapiao = event.detail.isActive;
+					setTimeout(function function_name(argument) {
+						if(_this.use_fapiao){
+							fapiao_vue.get_default_fapiao();
+							$(".mui-table-view-cell.fapiao_li").show();
+						}else{
+							$(".mui-table-view-cell.fapiao_li").hide();
+						}
+					},250)
 				});
 			});
 			// mui('body').on('tap', '.mui-popover-action li>a', function() {

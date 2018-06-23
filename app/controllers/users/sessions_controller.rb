@@ -52,10 +52,10 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   # DELETE /resource/sign_out
-  def destroy
-    session[:openid] = nil
-    super
-  end
+  # def destroy
+  #   session[:openid] = nil # 微信/网页 支付方式由此决定
+  #   super
+  # end
 
   # protected
 

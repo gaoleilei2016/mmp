@@ -1,4 +1,5 @@
 class Hospital::Sets::InisController < ApplicationController
+  before_action :set_cur_org
 	before_action :set_ini, only: [:show, :edit, :update, :destroy]
 	# GET
   # /hospital/sets/inis
@@ -27,40 +28,36 @@ class Hospital::Sets::InisController < ApplicationController
     end
 	end
 
-	# GET
-  # GET /hospital/sets/inis/new.json
-  def new
-    @ini = Hospital::Sets::Ini.new
-    res = {
-      title: "",  # 药品名
-    }
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: {flag: true, info:"", data: @ini} }
-    end
-  end
+	# # GET
+ #  # GET /hospital/sets/inis/new.json
+ #  def new
+ #    @ini = Hospital::Sets::Ini.new
+ #    respond_to do |format|
+ #      format.html # new.html.erb
+ #      format.json { render json: {flag: true, info:"", data: @ini} }
+ #    end
+ #  end
 
-	# GET
-  # /hospital/sets/inis/:id/edit
-	def edit
-	end
+	# # GET
+ #  # /hospital/sets/inis/:id/edit
+	# def edit
+	# end
 
-	# POST
-  # /hospital/sets/inis
-	def create
-    p "Hospital::Sets::InisController create",params
-		@ini = Hospital::Sets::Ini.new(format_ini_create_args)
-
-    respond_to do |format|
-      if @ini.save
-        format.html { redirect_to @ini, notice: 'ini was successfully created.' }
-        format.json { render json: {flag: true, info:"", data: @ini.to_web_front} }
-      else
-        format.html { render action: "new" }
-        format.json { render json: {flag: false , info: @ini.errors} }
-      end
-    end
-	end
+	# # POST
+ #  # /hospital/sets/inis
+	# def create
+ #    p "Hospital::Sets::InisController create",params
+	# 	@ini = Hospital::Sets::Ini.new(format_ini_create_args)
+ #    respond_to do |format|
+ #      if @ini.save
+ #        format.html { redirect_to @ini, notice: 'ini was successfully created.' }
+ #        format.json { render json: {flag: true, info:"", data: @ini.to_web_front} }
+ #      else
+ #        format.html { render action: "new" }
+ #        format.json { render json: {flag: false , info: @ini.errors} }
+ #      end
+ #    end
+	# end
 
 	# PUT
   # PUT /hospital/sets/inis/:id
@@ -71,7 +68,8 @@ class Hospital::Sets::InisController < ApplicationController
         format.json { render json: {flag: true, info:"", data: @ini.to_web_front} }
       else
         format.html { render action: "edit" }
-        format.json { render json: {flag: false , info: @ini.errors} }
+        err_info = ::Hospital.format_errors_message(@ini.class.to_s, @ini.errors.messages)
+        format.json { render json: {flag: false , info: err_info.join(" ")} }
       end
     end
   end
@@ -94,10 +92,24 @@ class Hospital::Sets::InisController < ApplicationController
     end
 	end
 
+  # 获取本人机构当前人员列表
+  def get_org_user_list
+    user_list = ::Hospital::Sets::Ini.get_cur_org_users(current_user)
+    render json:{flag: true, info: "success", data: user_list}
+  end
+
 	private
+    # 获取当前机构 没有就提示
+    def set_cur_org
+      @cur_org =  current_user.organization
+      return render json:{flag:false, info: "当前用户没有分配机构 请分配机构后再重试"} if @cur_org.nil?
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_ini
-      @ini = Hospital::Sets::Ini.find(params[:id])
+      @ini = Hospital::Sets::Ini.find(params[:id]) rescue nil
+      return render json:{flag: false, info:"无效基础设置id"} if @ini.nil?
+      return render json:{flag: false, info:"不能操作非本人机构以外的数据"} if @ini.org_id != @cur_org.id
     end
 
     def ini_params
@@ -109,7 +121,9 @@ class Hospital::Sets::InisController < ApplicationController
       ret = {
         enable_print_pres: ini_args[:enable_print_pres],
         uoperator_id: current_user.id,
-        print_pres_html: ini_args[:print_pres_html]
+        print_pres_html: ini_args[:print_pres_html],
+        prescription_audit_id: (ini_args[:prescription_audit]||{})[:id],
+        encounter_search_time: ini_args[:encounter_search_time].to_i
       }
       return ret
     end
