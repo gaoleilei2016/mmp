@@ -26,10 +26,10 @@ class Hospital::EncountersController < ApplicationController
 	# GET
   # GET /hospital/encounters/new.json
   def new
-    @encounter = Hospital::Encounter.new
+    # @encounter = Hospital::Encounter.new
     res = {
       name: "",  # 姓名
-      gender: {code: "", display: ""},  # 性别
+      gender: {code: "0", display: "男"},  # 性别
       age: "",  # 年龄
       birth_date: "",  # 出生日期
       iden: "",  # 身份证号码
@@ -45,11 +45,11 @@ class Hospital::EncountersController < ApplicationController
       blood: {code: "", display: ""},  # 血型
       height: "",  # 身高cm
       weight: "",  # 体重kg
-      location: {id: "", display: ""}, # 取药点
+      drugstore_location: {id: "", display: ""}, # 取药点
     }
     respond_to do |format|
       format.html # new.html.erb
-      format.json { render json: {flag: true, info:"", data: @encounter} }
+      format.json { render json: {flag: true, info:"", data: res} }
     end
   end
 
