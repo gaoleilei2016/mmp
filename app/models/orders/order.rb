@@ -116,6 +116,7 @@ class Orders::Order < ApplicationRecord
 		rescue Exception => e
 			p e.backtrace
 			p '我的，都是我的！'
+			result = {ret_code:'-1',info:'订单取消异常!'}
 		ensure
 			self.update_attributes(_locked:0)
 		end
@@ -170,10 +171,11 @@ class Orders::Order < ApplicationRecord
 		rescue Exception => e
 			p e.backtrace
 			p '我的，都是我的！'
+			result = {ret_code:'-1',info:'退药异常。',amt:0.0}
 		ensure
 			update_attributes(_locked:0)
-			return result
 		end
+		result
 	end
 
 	# private
@@ -236,10 +238,12 @@ class Orders::Order < ApplicationRecord
 				::NoticeChannel.publish(data)
 				# ::NoticeBroadcastJob.perform_later(data:data)
 			end
+			rsult = {ret_code:'0',info:'订单结算成功！'}
 		rescue Exception => e
 			p e.backtrace
+			rsult = {ret_code:'-1',info:'订单结算异常！'}
 		end
-		{ret_code:'0',info:'订单结算成功！'}
+		result
 	end
 
 	class << self
@@ -530,6 +534,7 @@ class Orders::Order < ApplicationRecord
 			rescue Exception => e
 				p e.backtrace
 				p '我的，都是我的！'
+				result = {ret_code:'-1',info:'订单完成异常！'}
 			ensure
 				order.update_attributes(_locked:0)
 			end
