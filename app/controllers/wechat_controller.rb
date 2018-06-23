@@ -29,6 +29,11 @@ class WechatController < ApplicationController
     end
   end
 
+  def websocket
+    uid = current_user.organization_id
+    render json: {host: request.host_with_port, uid: uid}
+  end
+
   # 已支付调用
   def pay
     begin
