@@ -264,6 +264,9 @@
 									<i class="fal fa-fw fa-cog" style="font-size: 26px;float: right;"></i>
 								</a>
 							</li>
+							<li class="mui-table-view-cell">
+								<a href="javascript:;" id="async_weixin_info">同步微信个人信息（头像、昵称）</a><!-- 第一次注册的用户自动点击同步 -->
+							</li>
 							<li class="mui-table-view-cell" style="text-align: center;">
 								<a href="/users/sign_out" style="color: #F55742;">退出登录</a>
 							</li>
@@ -283,6 +286,33 @@
 			</div>
 			<!--页面主内容区结束-->
 		</div>
+		<script type="text/javascript">
+			$("#async_weixin_info").on('tap',function(e) {
+				mui.toast("正在同步微信个人信息",{duration:12000});
+				$("#loading").show();
+				$.ajax({
+					url:'/interfaces/wechat_user.json',
+					type:'post',
+					success:function(json) {
+						alert(json.msg);
+						if (json.error==false) {
+						// mui.toast(json.msg);
+						<% if flash[:async_weixin] %>
+						location.href='/users/qrcode'
+						<% else %>
+						location.reload();
+						<% end -%>
+					}else{
+					}
+				},
+				complete:function() {
+					$("#loading").hide();
+				},
+				error:error_fun
+			})
+			})
+
+		</script>
 		<!--单页面结束-->
 		<div id="account" class="mui-page">
 			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
