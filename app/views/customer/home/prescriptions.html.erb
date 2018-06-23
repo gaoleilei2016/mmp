@@ -41,7 +41,7 @@
 <div id="vue_content" class="mui-content mui-scroll-wrapper" v-cloak>
 	<div class="mui-scroll">
 		<div>
-			<ul class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
+			<ul @click="alert('xxx')" class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
 				<li class="mui-table-view-cell">
 					<a :href="'/customer/home/prescription?id='+item.id">
 						<span>No: {{item.prescription_no}}（{{item.name}}）</span>

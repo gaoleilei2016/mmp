@@ -39,6 +39,7 @@ class CreateImsPreDetails < ActiveRecord::Migration[5.1]
       t.integer :status
       t.integer :hospital_prescription_detail_id
       t.integer :ori_detail_id
+      t.integer :header_id
 
       t.timestamps
     end

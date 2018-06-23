@@ -488,9 +488,10 @@ class Ims::Order < ApplicationRecord
     def order_message attrs
       p "modal   hahahahha"
       p attrs
+      str = attrs[:message]
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
-      # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      ActionCable.server.broadcast 'notice_channel', data:str
+      # NoticeBroadcastJob.perform_later data:str
     end
 
   end
