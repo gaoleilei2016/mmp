@@ -1,145 +1,353 @@
 <style type="text/css">
-	.report_panel .el-tabs{
-		height: 100%;
-	}
-	.report_panel .el-tabs__content{
-		height: calc(100% - 39px);
-	}
-
-	.report_panel .el-tabs__content table{
-			width: 100%;
-			border-collapse:collapse;}
-	.report_panel .el-tabs__content table tbody td{ text-align: left;
-					border-top: 1px solid #000;border-left: 1px solid #000;}
-	.report_panel .el-tabs__content table tr:nth-last-child(1) td{border-top: 1px solid #000;border-left: 1px solid #000; border-right:1px solid #000; border-bottom: 1px solid #000;}
-	.report_panel .el-tabs__content table	thead th{text-align: left; border-left: 1px solid #000; border-top: 1px solid #000; font-weight: 200px;}
-	.report_panel .el-tabs__content table	thead th:nth-last-child(1){ border-right: 1px solid #000; }
-	.report_panel .el-tabs__content table	thead th.title{text-align: center; font-size: 18px; border:none;}
-	#ims_report_div .el-menu{height:100%;}
 </style>
 <template>
-	<div id="ims_report_div" style="padding:0px;">
+    <!-- 接诊管理、统计页面 -->
+    <div id="encounters_index_div">
+        <el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>报表</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+        <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+            <div style="">
+                <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+                    <el-col :span="8">
+                        <small>日期</small>
+                        <el-date-picker
+                      v-model="filter.range"
+                      type="datetimerange"
+                      :picker-options="rangePickerOptions"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      size="mini"
+                      style="width: 100%;"
+                      align="right">
+                    </el-date-picker>
+                    </el-col>
+                    <el-col :span="2" style="padding-top: 18px;">
+                        <el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+                    </el-col>
+                </el-row>
+            <el-table
+              :data="encounters"
+              :height="tableHeight"
+              @selection-change="handleSelectionChange"
+              class="thiner-row"
+              style="width: 100%">
+                <el-table-column
+                    min-width="250"
+                    align="left"
+                    label="药品名称">
+                    <template slot-scope="scope">
+                      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="240"
+                    align="left"
+                    label="规格">
+                    <template slot-scope="scope">
+                        <i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.specification }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="170"
+                    align="right"
+                    label="数量">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.total_qty }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="140"
+                    align="center"
+                    label="单位">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="170"
+                    align="right"
+                    label="单价">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="250"
+                    align="right"
+                    label="金额">
+                    <template slot-scope="scope" hidden=true>
+                      <i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
+                    </template>
+                  </el-table-column>
+                  <!-- <el-table-column
+                    min-width=""
+                    label="">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.ids" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.ids }}
+                    </template>
+                  </el-table-column> -->
+            </el-table>
+            </div>
+      </el-tabs>
+      <!-- 分页标记 -->
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[10, 25, 50, 100, 200]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="dataCount">
+      </el-pagination>
 
-		<div style="float:left;width:150px; height:100%;background-color: #38495b;">
-			<el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
-			  <el-menu-item index="1">
-			    <i class="el-icon-document"></i>
-			    <span slot="title">报表1</span>
-			  </el-menu-item>
-			  <el-menu-item index="2">
-			    <i class="el-icon-document"></i>
-			    <span slot="title">报表2</span>
-			  </el-menu-item>
-			  <el-menu-item index="3">
-			    <i class="el-icon-document"></i>
-			    <span slot="title">报表3</span>
-			  </el-menu-item>
-			</el-menu>
-		</div>
 
-		<div style="float:left;width:calc(100% - 155px); height:100%;">
-				<el-row  :gutter="5" style="margin-bottom: 10px;">
-					<el-col :span="8">
-						<small>日期</small>
-						<el-date-picker
-				      v-model="filter.range"
-				      type="datetimerange"
-				      :picker-options="rangePickerOptions"
-				      range-separator="至"
-				      start-placeholder="开始日期"
-				      end-placeholder="结束日期"
-				      size="mini"
-				      style="width: 100%;"
-				      align="right">
-				    </el-date-picker>
-					</el-col>
+      <el-dialog
+          title="药品列表"
+          :visible.sync="isShowOrdersDialog"
+          width="90%">
+          <el-table
+            :data="orders"
+            class="thiner-row"
+            style="width: 100%">
+            <%#= render "hospital/home/render/orders_table_common.html" %>
+          </el-table>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="isShowOrdersDialog = false" size="mini">关 闭</el-button>
+          </span>
+        </el-dialog>
 
-					<el-col :span="2" style="padding-top: 18px;">
-						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
-					</el-col>
-				</el-row>
+        <el-dialog
+          title="处方列表"
+          :visible.sync="isShowPresDialog"
+          width="90%">
+          <el-table
+            :data="prescriptions"
+            class="thiner-row"
+            style="width: 100%">
+            <%#= render "hospital/home/render/prescriptions_table_common.html" %>
+          </el-table>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="isShowPresDialog = false" size="mini">关 闭</el-button>
+          </span>
+        </el-dialog>
 
-				  	<table class="" v-for="item in report_data_1">
-				  		<thead>
-				  			<tr>
-				  				<th colspan="5" class="title">发药报表</th>
-				  			</tr>		  			
-				  			<tr>
-				  				<th colspan="5">医院名称：{{item.source}}</th>
-				  			</tr>
-				  			<tr>
-				  				<th>药品名称</th>
-				  				<th>规格</th>
-				  				<th>单位</th>
-				  				<th>数量</th>
-				  				<th>金额</th>
-				  			</tr>
-				  		</thead>
-				  		<tbody>
-				  			<tr v-for="line in item.lines">
-				  				<td>{{line.name}}</td>
-				  				<td>{{line.specification}}</td>
-				  				<td>{{line.qty}}</td>
-				  				<td>{{line.unit}}</td>
-				  				<td>{{line.amount}}</td>
-				  			</tr>
-				  		</tbody>
-				  	</table>
-				  					
-		</div>
-
-	</div>
+        <!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+            <prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
+        </div> -->
+    </div>
 </template>
+
+<!-- 处方显示模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
 <script type="text/javascript">
 window.current_template_obj = {
-	data:function(){
-		return {
-			report_data_1:[{source:"医院",lines:[{name:"234",specification:"23sw3",qty:"23",unit:"23",amount:"23.45"}]}],
-			isCollapse: true,
-			filter: {
-				range: "",
-			},
-        rangePickerOptions: {
-          shortcuts: [{
-            text: '最近一周',
-            onClick:function(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近一个月',
-            onClick:function(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', [start, end]);
-            }
-          }, {
-            text: '最近三个月',
-            onClick:function(picker) {
-              const end = new Date();
-              const start = new Date();
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit('pick', [start, end]);
-            }
-          }]
-        },
-        value4: [new Date(2000, 10, 10, 10, 10), new Date(2000, 10, 11, 10, 10)],
-        value5: ''			
-		}
-	},
-	methods:{
-		getData:function(){},
-      handleOpen:function(key, keyPath) {
-        console.log(key, keyPath);
+    data:function(){
+        var options = [{code: "0", display: "处方发药汇总-医院"},{code: "1", display: "处方退药汇总-医院"}];
+        return {
+            activeName: options[0].code,
+            cardTabsOptions: options,
+            multipleSelection: [],
+
+            encountersResource: Vue.resource('/ims/reports/drug_report.json'),
+            encounters: [],
+            prescriptions: [],
+            ordersResource: Vue.resource('/ims/reports/drug_report.json'),
+            orders: [],
+            // ordersStatus: presStatusOptions,
+            // prescriptionsStatus: presStatusOptions,
+
+            encounter: {},
+            orgname: "",
+            isShowfilters: false, // 高级搜索
+            filter: {
+                range: "",
+            },
+
+            rangePickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
       },
-      handleClose:function(key, keyPath) {
-        console.log(key, keyPath);
-      }		
-	},
-	mounted:function(){
-	}
+
+            isShowOrdersDialog: false, // 显示医嘱详细模态框
+            isShowPresDialog: false, // 显示处方详细
+            // 搜索
+        search: "", // 搜索内容
+        tableHeight: 200, // 表格高度
+        // 分页相关
+        currentPage: 1, // 当前页
+        pageSize: 25, // 默认一页显示25条
+        dataCount: 100, // 总数据条数
+        }
+    },
+    components: {
+        // 处方打印组件
+        'prescriptionprint': {
+            props: ['encounter', 'prescription'],
+          template: "#prescription-print-template",
+        },
+    },
+    watch: {
+        search: function (newValue, oldValue) {
+        this.getData();
+    },
+    },
+    mounted: function() {
+        this.$nextTick(function(){
+            this.init();
+        })
+    },
+    methods: {
+        init: function () {
+            var _this = this;
+            _this.orgname = $("#current_org_name").val();
+            // 获取基础设置内容
+            Vue.resource("/ims/reports/drug_report.json").get().then(function(response) {
+                var res = response.data;
+                if(res.flag) {
+            $("#prescription-print-template").html(res.data.print_pres_html)
+        }
+            },function() {
+            _this.$message.error("获取初始值失败，请联系管理员。");
+          })
+      var clientHeight = document.body.clientHeight;
+      _this.tableHeight = clientHeight - 340;
+      _this.getData();
+        },
+        getData: function () {
+            var _this = this;
+            _this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+                var res = response.data;
+            if(res.flag) {
+          _this.encounters = res.data;
+          _this.dataCount = res.count;
+            }else{
+                _this.$message.error(res.info);
+            }
+      },function(response) {
+        _this.$message.error("后台出错，获取患者列表失败。");
+      })
+        },
+        // 每页条数改变
+    handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+        this.currentPage = val;
+      this.getData();
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+        this.multipleSelection = val;
+        console.log(val)
+    },
+    // 选择tab
+        handleTabClick: function (tab, event) {
+
+        },
+        // 判断性别，根据性别显示图标
+    judgeGender: function (gender) {
+        if(!gender){ gender = ""; }
+      var html = '';
+        if(gender.indexOf('男')>-1){
+            html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+        }else if(gender.indexOf('女')>-1){
+            html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+        }else{
+            html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+        }
+        return html;
+      },
+      // 显示处方列表模态框
+    openOrdersDialog: function (row) {
+        this.isShowOrdersDialog = true;
+        this.getOrders(row.id);
+    },
+    // 显示处方列表模态框
+        openPresDialog: function (row) {
+            this.isShowPresDialog = true;
+        this.getPrescriptions(row.id);
+        },
+        getOrders: function (encounter_id) {
+        var _this = this;
+        _this.orders = [];
+        _this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
+            var res = response.data;
+            if(res.flag) {
+                _this.orders = res.data;
+            } else {
+                _this.$message.error(res.info);
+            }
+        }, function (response) {
+            _this.$message.error("获取药品列表失败，请联系管理员。");
+        })
+    },
+    // 获取处方列表
+    getPrescriptions: function (encounter_id) {
+        var _this = this;
+        _this.prescriptions = [];
+        Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
+            var res = response.data;
+            if(res.flag) {
+                _this.prescriptions = res.data;
+            } else {
+                _this.$message.error(res.info);
+            }
+        }, function (response) {
+            _this.$message.error("获取处方列表失败，请联系管理员。");
+        })
+    },
+    // 查询诊断
+    querySearchDiagnoseAsync: function(queryString, cb) {
+            var _this = this;
+            Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+            var res = response.data;
+            if (res.flag) {
+                    cb(res.data);
+                    // 设置下拉选择的第一项为高亮
+                    var el = _this.$refs["diagnose"];
+                    if(el) {
+                        el.highlightedIndex = 0
+                    }
+                }
+          },function() {
+            _this.$message.error("获取诊断列表失败，请联系管理员。");
+          })
+        },
+        // 选择疾病
+    handleSelectDisease: function (item) {
+        this.filter.disease = item.display;
+    },
+    },
 }
 </script>
