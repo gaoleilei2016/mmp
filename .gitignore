@@ -16,4 +16,3 @@ config/unicorn*
 config/mongoid.yml
 config/rabbitmq.yml
 config/setup/ip.yml
-db
