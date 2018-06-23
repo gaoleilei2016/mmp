@@ -27,26 +27,10 @@
 	<h1 class="mui-title">我的订单</h1>
 </header>
 <div class="mui-content" id="vue_content">
-	<div class="mui-slider" style="height: 100%;">
-		<div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
-			<a class="mui-control-item" href="#item1mobile">
-				可使用
-			</a>
-			<a class="mui-control-item" href="#item2mobile">
-				全部订单
-			</a>
-		</div>
-		<div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-6"></div>
-		<div class="mui-slider-group" style="height: calc( 100% - 40px );">
-			<div id="item1mobile" style="overflow: auto;" class="mui-slider-item mui-control-content mui-active">
-				<div v-for="order in not_used_orders" style="margin-bottom: 16px;">
-					<my-order :order="order"></my-order>
-				</div>
-			</div>
-			<div id="item2mobile" style="overflow: auto;" class="mui-slider-item mui-control-content">
-				<div v-for="order in orders" style="margin-bottom: 16px;">
-					<my-order :order="order"></my-order>
-				</div>
+	<div class="mui-scroll">
+		<div>
+			<div v-for="order in orders" style="margin-bottom: 16px;">
+				<my-order :order="order"></my-order>
 			</div>
 		</div>
 	</div>
@@ -59,24 +43,42 @@
 			orders:[],
 		},
 		computed:{
-			not_used_orders:function() {
-				return this.orders.filter(function(item) {
-					return item.status=='1'||item.status=='2';
-				})
-			}
+			// not_used_orders:function() {
+			// 	return this.orders.filter(function(item) {
+			// 		return item.status=='1'||item.status=='2';
+			// 	})
+			// }
 		},
 		methods:{
-			get_orders:function() {
+			get_orders:function(pulltype) {
 				var _this = this;
 				$("#loading").show();
 				var per = 3;
-				var page = Math.ceil(_this.orders.length/per)+1;
+				if (pulltype=='pulldown') {
+					var page = 1;
+				}else{
+					var page = Math.ceil(_this.orders.length/per)+1;
+				}
 				$.ajax({
 					url:'/interfaces/get_orders.json?page='+page+'&per='+per,
 					// data:{per:10},
 					success:function(json) {
+						if (pulltype=='pulldown') {
+							if (json.flag) {
+								_this.orders = json.rows;
+							}
+							mui('#vue_content').pullRefresh().endPulldownToRefresh();
+							mui('#vue_content').pullRefresh().enablePullupToRefresh();
+						}else if(pulltype=='pullup'){
+							if (json.flag) {
+								json.rows.map(function(item) {
+									_this.orders.push(item);
+								})
+							}
+							// console.log( _this.orders.length,json.total );
+							mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
+						}
 						if (json.flag) {
-							_this.orders = json.rows;
 						}else{
 							mui.toast(json.info);
 						}
@@ -89,9 +91,32 @@
 					}
 				})
 			},
+			pulldown:function() {
+				// console.log( '~~~~~~~~ 1' );
+				this.get_orders('pulldown');
+			},
+			pullup:function() {
+				// console.log( '~~~~~~~~ 2' );
+				this.get_orders('pullup');
+			},
 		},
 		mounted:function() {
-			this.get_orders();
+			var _this = this;
+			mui.init({
+				pullRefresh: {
+					container: '#vue_content',
+					down: {
+						style:'circle',
+						callback: _this.pulldown
+					},
+					up: {
+						auto:true,
+						contentrefresh: '正在加载...',
+						callback: _this.pullup
+					}
+				}
+			});
+			_this.get_orders();
 			// $("#vue_content").on("touchstart",function(e) {
 			// 	console.log( 'xxxxxxxx 0',e );
 			// })

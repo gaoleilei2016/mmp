@@ -417,7 +417,7 @@
 							_this.prescription = json.prescription;
 							_this.current_pharmacy = json.pharmacy;
 						}else{
-							_this.$message(json.info);
+							mui.toast(json.info);
 						}
 					},
 					complete:function() {
