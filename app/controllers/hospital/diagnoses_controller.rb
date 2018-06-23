@@ -157,7 +157,14 @@ class Hospital::DiagnosesController < ApplicationController
 	  end
 
 	  def can_sort?
-	  	
+	  	@tag = ::Hospital::Diagnose.find(params[:tag_id])
+	  	@exchange = ::Hospital::Diagnose.find(params[:exchange_id])
+	  	if @tag.org_id != @cur_org.id || @exchange.org_id != @cur_org.id
+	  		return render json:{flag: false, info: "不能操作非本机构数据"}
+	  	end
+	  	if @tag.doctor_id != current_user.id || @exchange.doctor_id != current_user.id
+	  		return render json:{flag: false, info: "不能操作非本人创建数据"}
+	  	end
 	  end
 
 	  def format_encounter_diagnose_update_args
