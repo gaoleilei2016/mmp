@@ -20,6 +20,10 @@ class Ims::ReportsController < ApplicationController
   # detail 需要查看明细前端传
   def dispensed_hospital
   	@data = Ims::Report.hospital_report params.merge({status:"4",hospital:true,org_id:current_user.organization_id})
+  	respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: {flag: true, info:"", data: @data} }
+    end
   end
 
   # 处方发药汇总-发药人
@@ -61,6 +65,10 @@ class Ims::ReportsController < ApplicationController
   # 处方药品汇总表(不按发药、退药分)
   def drug_report
   	@data = Ims::Report.drug_report params.merge({org_id:current_user.organization_id})
+  	respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: {flag: true, info:"", data: @data} }
+    end
   end
 
   # 处方发药汇总表
