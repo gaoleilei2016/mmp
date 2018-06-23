@@ -83,6 +83,7 @@ class Orders::Order < ApplicationRecord
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
 						ch:order.target_org_id,#药房id
+						org_id:order.target_org_id,#药房id
 						status:order.status, #订单状态
 						order_id:order.id, #订单id
 						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
@@ -226,6 +227,7 @@ class Orders::Order < ApplicationRecord
 				update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 				data = {
 							ch:target_org_id,#药房id
+							org_id:target_org_id,#药房id
 							status:status, #订单状态
 							order_id:id, #订单id
 							created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
@@ -351,6 +353,7 @@ class Orders::Order < ApplicationRecord
 							if attrs[:invoice_id].blank?
 								data = {
 									ch:order.target_org_id,#药房id
+									org_id:order.target_org_id,#药房id
 									status:order.status, #订单状态
 									order_id:order.id, #订单id
 									created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
