@@ -116,7 +116,12 @@
 					}
 				}
 			});
-			_this.get_orders();
+			// _this.get_orders();
+			$("#vue_content").on('tap','.order_item',function(e) {
+				// alert($(this).attr('data-href'))
+				location.href = $(this).attr('data-href');
+			})
+
 			// $("#vue_content").on("touchstart",function(e) {
 			// 	console.log( 'xxxxxxxx 0',e );
 			// })
