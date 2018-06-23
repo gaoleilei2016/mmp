@@ -100,6 +100,7 @@ zh-CN:
         organization: "机构"
         uoperator: "最后更新人"
       mtemplate:
+        id: "模板数据id"
         org_id: "机构id"
         status: "模板状态"
         title: "模板名称"
@@ -117,3 +118,24 @@ zh-CN:
         organization: "机构"
         author: "作者"
         location: "科室"
+    diagnose:
+      id: "诊断数据id"
+      code: "诊断编码"
+      display: "诊断名称"
+      system: "诊断编码系统"
+      status: "诊断状态"
+      rank: "诊断序号"
+      encounter_id: "就诊id"
+      doctor_id: "医生id"
+      created_at: "创建时间"
+      updated_at: "更新时间"
+      prescription_id: "处方id"
+      note: "诊断备注"
+      fall_ill_at: "发病时间"
+      type_code: "诊断类型编码"
+      type_display: "诊断类型名称"
+      org_id: "机构id"
+    encounter: 
+
+
+
