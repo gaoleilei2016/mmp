@@ -2,7 +2,8 @@ module ::Hospital
 	METEDATA = {
 		"Hospital::Sets::Department" => "hospital.sets.department.",
 		"Hospital::Sets::Ini" => "hospital.sets.ini.",
-		"Hospital::Sets::Mtemplate" => "hospital.sets.mtemplate."
+		"Hospital::Sets::Mtemplate" => "hospital.sets.mtemplate.",
+		"Hospital::Diagnose" => "hospital.diagnose."
 	}
   def self.table_name_prefix
     'hospital_'

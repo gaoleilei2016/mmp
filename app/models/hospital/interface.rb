@@ -11,8 +11,8 @@ module ::Hospital::Interface
     sort == "DESC" ? "DESC" : "ASC"
     page = page.to_i
     per = per.to_i
-    limit = page * per
-    sql.concat(" ORDER BY a.`created_at` #{sort} LIMIT #{limit}")
+    offest = (page-1) * per
+    sql.concat(" ORDER BY a.`created_at` #{sort} LIMIT #{per} OFFEST #{offest}")
     ::Hospital::Prescription.find_by_sql(sql)
   end
 
