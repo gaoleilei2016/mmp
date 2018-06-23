@@ -24,6 +24,7 @@ class InterfacesController < ApplicationController
 			ret<<re
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
+		# render json:{flag:true,rows:[{},{},{}],total:4}
 	end
 	#支付
 	def pay_order
