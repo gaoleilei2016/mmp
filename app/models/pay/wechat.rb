@@ -1,10 +1,12 @@
 #encoding: utf-8
 
 require 'rest-client'
+require 'digest/md5'
 
 class Pay::Wechat
 
   class << self
+    # 退款
     def refund(ref)
       datas = handle_send_datas(refund_datas(ref))
       res = send_cert_data(datas)
@@ -24,6 +26,33 @@ class Pay::Wechat
         total_fee: handle_order_total_fee(ref.order.total_fee.to_f), refund_fee: handle_order_total_fee(ref.refund_fee.to_f),
         refund_desc: ref.reason, notify_url: wx.refund_notify_url
       }
+    end
+
+    # {"out_refund_no"=>"1529371940", "out_trade_no"=>"205", "refund_account"=>"REFUND_SOURCE_UNSETTLED_FUNDS", 
+    #   "refund_fee"=>"1", "refund_id"=>"50000207132018061905135218977", "refund_recv_accout"=>"支付用户零钱", 
+    #   "refund_request_source"=>"API", "refund_status"=>"SUCCESS", "settlement_refund_fee"=>"1", 
+    #   "settlement_total_fee"=>"1", "success_time"=>"2018-06-19 09:32:23", "total_fee"=>"1", 
+    #   "transaction_id"=>"4200000134201806198379455778"}
+    def refund_callback_value(req_info)
+      begin
+        str = Base64.decode64(req_info) #先对结果进行base64解码
+        aes_data = aes_ecb_decrypt(str) #得到xml字符串
+        res = Hash.from_xml(aes_data)['root']
+        {error: false, res: res}
+      rescue Exception => e
+        {error: true, state: :fail, msg: e.message}
+      end
+    end
+
+    def aes_ecb_decrypt(req_info)
+      aes = OpenSSL::Cipher::AES.new("256-ECB")
+      aes.decrypt
+      aes.key = md5_pay_key
+      aes.update(req_info) + aes.final
+    end
+
+    def md5_pay_key
+      Digest::MD5.hexdigest(wx.pay_key)
     end
 
     # 在服务器上导出
@@ -53,11 +82,15 @@ class Pay::Wechat
       Hash.from_xml(res.body)['xml']
     end
 
+    # H5支付
     def payment(args)
       begin
         write_log_return({state: :start, msg: '微信付款开始'})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
+        order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
+        return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
+        return get_payment_url(order) if order&&order.update_attributes(args.merge({pay_type: 'wechat', trade_type: 'WEB'})) #如果订单已存在就直接支付
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'WEB'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
         get_payment_url(order)
@@ -141,6 +174,9 @@ class Pay::Wechat
         write_log_return({state: :start, msg: '微信公众号付款开始', desc: args.to_s})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '微信支付未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Wechat.usable
+        order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
+        return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
+        return public_info(order) if order&&order.update_attributes(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
         order = Pay::Order.new(args.merge({pay_type: 'wechat', trade_type: 'JSAPI'}))
         return write_log_return({state: :error, msg: '创建支付记录报错', desc: order.errors.full_messages.join(',')}) unless order.save
         public_info(order)
@@ -157,22 +193,22 @@ class Pay::Wechat
       ret = handle_send_datas(datas)
       res = Hash.from_xml(RestClient.post(wx.pay_url, ret).body)['xml']
       p '2222222222222222222222222222', res
-      data = ''
+      data = {}
       if res['err_code_des'].eql?('该订单已支付')
         data = { state: :success, msg: '支付成功', desc: '支付已完成'}
       elsif res['return_code'].eql?('SUCCESS')
         if res['result_code'].eql?('SUCCESS')
           data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
         else
-          data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
+          data = {state: :fail, msg: '请求失败', desc: res['err_code_des']}
         end
       else
-        data = { state: :fail, msg: '请求失败', desc: "#{res['return_msg']}" }
+        data = { state: :fail, msg: '请求失败', desc: "#{res['err_code_des']}" }
       end
-      write_log_return(data)
+      write_log_return(data.merge({rec: order}))
       if order.update_attributes({status: data[:state], status_desc: data[:desc]})
         if data[:state].eql?(:succ)
-          pay = {appId: wx.appid, timeStamp: Time.now.to_i, nonceStr: new_pass(32), package: "prepay_id=#{prepay_id}", signType: 'MD5'}
+          pay = {appId: wx.appid, timeStamp: Time.now.to_i, nonceStr: new_pass(32), package: "prepay_id=#{data[:prepay_id]}", signType: 'MD5'}
           data.merge(pay).merge({sign: handle_jsapi_datas(pay)})
         else
           data

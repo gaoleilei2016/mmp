@@ -37,13 +37,10 @@ class PayController < ApplicationController
         write_log("-----订单金额不等----#{res['out_trade_no']}----#{res['total_fee']}")
         wx.update_attributes({status: :fail, status_desc: '订单金额不等'})
       end
+      render json: {return_code: 'SUCCESS', return_msg: 'OK'}.to_json
     rescue Exception => e
       write_log("----处理通知出错-----#{e.message}")
     end
-    # respond_to do |f|
-    #   f.json{ render json: 'true'}
-    # end
-    render json: 'true'
   end
 
   def write_log(msg)
@@ -67,6 +64,7 @@ class PayController < ApplicationController
   #   "buyer_logon_id"=>"992***@qq.com", "point_amount"=>"0.00", "controller"=>"pay", 
   #   "action"=>"alipay"}
   def alipay
+    # params = request.request_parameters
     begin
       write_ali_log("------收到支付宝支付通知-----#{params.inspect}")
       ali = Pay::Order.find_by(out_trade_no: params['out_trade_no'])
@@ -90,9 +88,10 @@ class PayController < ApplicationController
   # 支付测试
   def wx
     num = rand(1000)
-    args = {cost_name: '测试费', out_trade_no: "20180613#{num}", total_fee: 0.01, title: '花溪',
+    args = {cost_name: '测试费', out_trade_no: "20180613", total_fee: 0.01, title: '花溪',
       return_url: 'http://mmp.tenmind.com/pay/index'}
     res = Pay::Wechat.payment(args)
+    p '222222222222222222', res
     if res[:state].eql?(:succ)
       redirect_to res[:pay_url]
     else
@@ -103,7 +102,7 @@ class PayController < ApplicationController
 
   def ali
     num = rand(10000000)
-    args = {cost_name: '测试费', out_trade_no: "20180615#{num}", total_fee: 0.01, title: '花溪',
+    args = {cost_name: '测试费', out_trade_no: "20180615", total_fee: 0.01, title: '花溪',
       return_url: 'http://mmp.tenmind.com/pay/index'}
     res = Pay::Alipay.payment(args)
     if res[:state].eql?(:succ)
