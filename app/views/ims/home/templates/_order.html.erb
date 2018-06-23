@@ -209,8 +209,8 @@ window.current_template_obj = {
             lines:[{
               name:data1.title,
               specification:data1.specification,
-              qty:data1.single_qty_value,
-              unit:data1.single_qty_unit,
+              qty:data1.total_quantity,
+              unit:data1.unit,
             }]
           })
           if (ori_data.length>1) {
@@ -520,6 +520,7 @@ window.current_template_obj = {
     },
     get_order:function (id,e) {
       var _this = this;
+      console.log("===========================id  = "+id)
       if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       if (!id) {
         id="";
@@ -675,6 +676,7 @@ window.current_template_obj = {
       $.each(boxs,function(k,v){
         ids.push($(v).val())
       })
+      console.log("111111111111=====id== "+ids)
       if(ids&&ids.length>0){}else{
         _this.$message('没有数据！');
         return false;
