@@ -870,6 +870,10 @@ window.current_template_obj = {
     	// 搜索药品，查询药品
     	searchDrugs: function (queryString, cb) {
     		var _this = this;
+    		if(!queryString) {
+    			cb([]);
+    			return false;
+    		}
     		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
 			    var res = response.data;
 			    if (res.flag) {
@@ -1150,6 +1154,9 @@ window.current_template_obj = {
 				          message: "生成医嘱模板成功，请在模板列表中查看。",
 				          type: 'success'
 				        });
+				        if(!_this.mtemplates) {
+				        	_this.mtemplates = [];
+				        }
 		      			// 将创建的模板添加到使用模板列表
 		      			_this.mtemplates.push(res.data);
 		      			// 关闭模态框

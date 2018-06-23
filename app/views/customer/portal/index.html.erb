@@ -12,11 +12,11 @@
 		color:#fff;
 	}*/
 	html,body,.mui-content{
-		height: 100%;
-		overflow: hidden;
+		/*height: 100%;*/
+		/*overflow: hidden;*/
 	}
 	.mui-content{
-		overflow: auto;
+		/*overflow: auto;*/
 	}
 	#search_content .search_results{
 		opacity: 0
@@ -107,13 +107,59 @@
 			<template v-else>
 				<div style="padding-left: 16px;">
 					<p style="padding: 16px 0 0 8px;margin: 0;" class="common_red" v-if="pharmacys">未找到匹配项，可以试试：</p>
+					<p style="padding: 16px 0 0 8px;">离我最近</p>
+					<div style="min-height: 20px;">
+						<ul class="mui-table-view">
+							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in near_pharmacys">
+								<div>
+									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<div class="mui-media-body">
+										<div>
+											{{item.name}}
+											<p style="float: right;">{{item.distance}}</p>
+										</div>
+										<p class="mui-ellipsis">{{item.addr}}</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+						<!-- <span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in history_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span> -->
+					</div>
 					<p style="padding: 16px 0 0 8px;">历史记录</p>
-					<div style="min-height: 100px;">
-						<span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in history_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span>
+					<div style="min-height: 20px;">
+						<ul class="mui-table-view">
+							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in history_pharmacys">
+								<div>
+									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<div class="mui-media-body">
+										<div>
+											{{item.name}}
+											<p style="float: right;">{{item.distance}}</p>
+										</div>
+										<p class="mui-ellipsis">{{item.addr}}</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+						<!-- <span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in history_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span> -->
 					</div>
 					<p style="padding: 16px 0 0 8px;">大家常用</p>
-					<div style="min-height: 100px;">
-						<span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in hot_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span>
+					<div style="min-height: 20px;">
+						<ul class="mui-table-view">
+							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in hot_pharmacys">
+								<div>
+									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<div class="mui-media-body">
+										<div>
+											{{item.name}}
+											<p style="float: right;">{{item.distance}}</p>
+										</div>
+										<p class="mui-ellipsis">{{item.addr}}</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+						<!-- <span @click="click_to_save_user_pharmacy(item)" class="mui-badge" v-for="item in hot_pharmacys" :key="item.id" style="margin: 0 8px 14px;">{{item.name}}</span> -->
 					</div>
 				</div>
 			</template>
@@ -137,19 +183,20 @@
 					</div>
 				</label>
 			</div>
-			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 30px;top: 10px;color: #E62677;text-align: center;">
+			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 14px;top: 10px;color: #E62677;text-align: center;">
 				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
 				<template v-for="prescription in organ.prescriptions">
-					<li class="mui-table-view-cell" style="padding-left: 0;">
+					<li class="mui-table-view-cell" style="padding-left: 0;padding-right: 0;">
 						<div class="mui-checkbox mui-left">
 							<input v-model="organ.prescription_ids" name="checkbox" :value="prescription.id" type="checkbox" style="top: 0px;left: 0px;">
-							<label style="padding-left: 26px;padding-right: 0;">
+							<label style="padding-left: 26px;padding-right: 36px;">
 								<span>处方号: {{prescription.prescription_no}}</span>
 								<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
 							</label>
+							<a :href="'/customer/home/prescription?return=root&id='+prescription.id" class="common_red" style="position: absolute;right: 0;top: 0;">查看</a>
 						</div>
 					</li>
 					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
@@ -190,6 +237,7 @@
 			pharmacys:null,
 			hot_pharmacys:null,
 			history_pharmacys:null,
+			near_pharmacys:null,
 			search_str:'',
 			organs:[],
 		},
@@ -224,21 +272,24 @@
 		computed:{
 		},
 		methods:{
-			get_hot_pharmacy:function(history) {
+			get_hot_pharmacy:function(type) {
 				var _this = this;
 				$.ajax({
 					url:'/interfaces/get_pharmacy.json',
 					data:{
 						lng:_this.point.lng,lat:_this.point.lat,
-						hot: history ? null : "true",
-						history: history ? "true" : null,
+						hot: type=='hot' ? "true" : undefined,
+						history: type=='history' ? "true" : undefined,
+						near: type=='near' ? "true" : undefined,
 					},
 					success:function(json) {
 						if (json.flag) {
-							if (history) {
-								_this.history_pharmacys = json.rows;
-							}else{
+							if (type=='hot') {
 								_this.hot_pharmacys = json.rows;
+							}else if (type=='history') {
+								_this.history_pharmacys = json.rows;
+							}else if (type=='near') {
+								_this.near_pharmacys = json.rows;
 							}
 						}else{
 							mui.toast("请刷新后重试");
@@ -397,8 +448,9 @@
 			$("#search_input").on("focus",function(e) {
 				$("#search_content").addClass("on");
 				$("#bottom_tabs").hide(300);
-				_this.get_hot_pharmacy();
+				_this.get_hot_pharmacy('hot');
 				_this.get_hot_pharmacy('history');
+				_this.get_hot_pharmacy('near');
 			})
 		}
 	})
