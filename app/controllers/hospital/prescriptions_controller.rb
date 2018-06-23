@@ -94,11 +94,24 @@ class Hospital::PrescriptionsController < ApplicationController
 	# DELETE
   # /hospital/prescriptions/:id
 	def destroy
-		@prescription.update_attributes(:status=>7)
-
     respond_to do |format|
-      format.html { redirect_to prescriptions_url }
-      format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      args = {
+        abandonor: {
+          id: current_user.id,
+          display: current_user.name
+        },
+        abandon_at: Time.now
+      }
+      case @prescription.status
+      when 1
+        @prescription.abandon(args, current_user)
+        format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      when 2
+        @prescription.not_audit_to_abandon(args, current_user)
+        format.json { render json: {flag: true, info:"处方作废成功", data: @prescription} }
+      else
+        format.json { render json: {flag: false, info:"该状态不予许作废处方 如需作废 请联系管理员处理"} }
+      end
     end
 	end
 
@@ -114,13 +127,17 @@ class Hospital::PrescriptionsController < ApplicationController
     return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
     ret = []
     ::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| {org_id: _prescription.organization.id, org_name: _prescription.organization.name}}.each do |cur_org, _prescriptions|
-      cur_org[:prescriptions] = _prescriptions.map{|x| x.to_web_front}
+      prescription_ids = []
+      cur_org[:prescriptions] = _prescriptions.map{|x| 
+        prescription_ids<<x.id
+        x.to_web_front
+      }
       # ret << cur_org
-      # prescription_ids = []
       # total_price = 0.0
       # _status = []
       # orders = _prescriptions.map { |e| prescription_ids<<e.id;_status<<e.status;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      # cur_org[:prescription_ids] = prescription_ids
+      cur_org[:prescription_ids] = prescription_ids
+      cur_org[:prescription_ids2] = prescription_ids
       # cur_org[:total_price] = total_price
       # cur_org[:orders] = orders
       # cur_org[:status] = _status
@@ -130,26 +147,23 @@ class Hospital::PrescriptionsController < ApplicationController
     render json: {flag: true, info: "success", data: ret}
   end
   # GET
-  # /hospital/prescriptions/get_prescriptions_by_phone
+  # /hospital/prescriptions/get_all_prescriptions_by_phone
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
   # 获取所有处方以及过期等状态
   def get_all_prescriptions_by_phone
-    cur_phone = params[:phone]
-    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+    cur_phone = params[:phone].to_s
+    return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
     ret = []
-    ::Hospital::Interface.get_prescriptions_by_phone(cur_phone).each do |_prescription|
-      # re = JSON.parse(_prescription.to_json)
-      # total_price = 0.0
-      # orders = _prescription.orders.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
-      # re[:total_price] = total_price
-      # re[:orders] = orders
-      # re[:organ] = Admin::Organization.find(_prescription.organization_id)
-      # ret << re
+    page = params[:page]||1
+    per = params[:per]||5
+    sort = "DESC"
+    ::Hospital::Interface.get_prescriptions_by_phone_with_sort(cur_phone, page, per, sort).each do |_prescription|
       ret << _prescription.to_web_front
     end
-    render json: {flag: true, info: "success", data: ret}
+    count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
+    render json: {flag: true, info: "success", data: ret, count: count}
   end
 
   # PUT
@@ -158,7 +172,7 @@ class Hospital::PrescriptionsController < ApplicationController
   #   prescription_ids: []
   # }
   def read_prescription
-    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil? || params[:prescription_ids].is_array
+    return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil?
     ::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
     render json:{flag: true, info:"success"}
   end
@@ -221,7 +235,6 @@ class Hospital::PrescriptionsController < ApplicationController
         diagnoses_args: diagnoses_args,
         cur_orders: cur_orders
       }
-      p ret
       return ret
     end
 end

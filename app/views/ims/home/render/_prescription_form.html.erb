@@ -1,51 +1,50 @@
-<div class="prescription_content" v-for="(info,index) in detail" style="height:100%;">
+<div class="prescription_content" style="height:100%;" >
 	<div style="">
 			<div class="prescription_form_title separate">
 				<h3 style="text-align:center;">
-					<b class="prescription_source_type">{{info.source_org_name}}</b><br>
-					<b>{{info.pre_type}}</b>
+					<b class="prescription_source_type">{{pre.source_org_name}}</b><br>
+					<b>{{pre.pre_type}}</b>
 				</h3>
-				<span class="prescription_reg_style">{{info.pre_type}}</span>
 			 	<div class="el-row" style="font-size:15px; overflow:hidden;border-bottom:1px solid #ddd;">
-			  	<div class="el-col-12 text-left">处方号：<span>{{info.order_code}}</span></b></div>
-			  	<div class="el-col-12" style="text-align:right;">处方时间：<span>{{format_time(info.created_at)}}</span></b></div>
+			  	<div class="el-col-12 text-left">处方号：<span>{{pre.order_code}}</span></b></div>
+			  	<div class="el-col-12" style="text-align:right;">处方时间：<span>{{ pre.created_at | formatDate('yyyy-MM-dd HH:MM')}}</span></b></div>
 			 	</div>					
 			</div>
 
 			<div style="line-height:17px; border-bottom:1px solid #ddd;">
 			 	<div class="el-row">
-					<div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{info.patient_name}}</span></div>
-					<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{info.patient_sex}}</span></div>
-					<div class="el-col el-col-10 text-left patient_age" style="word-break:keep-all;">年龄:<span style="font-weight:bold;">{{info.patient_age}}</span></div>
+					<div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{pre.patient_name}}</span></div>
+					<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{pre.patient_sex}}</span></div>
+					<div class="el-col el-col-10 text-left patient_age" style="word-break:keep-all;">年龄:<span style="font-weight:bold;">{{pre.patient_age}}</span></div>
 			 	</div> 
 
 			 	<div class="el-row">
-					<div class="el-col el-col-14 text-left">病历号:<span>{{info.patient_no}}</span></div>
-					<div class="el-col el-col-10 text-left patient_nature">医疗类别: <span>{{info.patient_nature}}</span></div>					
+					<div class="el-col el-col-14 text-left">病历号:<span>{{pre.patient_no}}</span></div>
+					<div class="el-col el-col-10 text-left patient_nature">医疗类别: <span>{{pre.patient_nature}}</span></div>					
 			 	</div>
 
 			 	<div class="el-row">
-					<div class="el-col el-col-14 text-left patient_addr biller_loc_name">科室/地址:{{info.biller_loc_name}}</div>
+					<div class="el-col el-col-14 text-left patient_addr biller_loc_name">科室/地址:{{pre.biller_loc_name}}</div>
 					<!-- <div class="el-col el-col-10 text-left billing_at">开单时间: <span></span></div>				 -->
 			 	</div>
 
 			 	<div class="el-row">
-			 		<div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{info.diagnoses}}</span></div>
-			   	<div class="el-col-10 text-left patient_iden">身份证: <span>{{info.patient_iden}}</span></div>
+			 		<div class="el-col-14 text-left diagnoses" style="padding-right:0;">临床诊断: <span>{{pre.diagnoses}}</span></div>
+			   	<div class="el-col-10 text-left patient_iden">身份证: <span>{{pre.patient_iden}}</span></div>
 			 	</div>
 			</div>
 
-			<div class="prescription_item_info separate" style="border-bottom:1px solid #ddd;">
+			<div class="prescription_item_pre separate" style="border-bottom:1px solid #ddd;">
 				<div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R:</div>
-				<div class="item_list" v-for="(line,index) in info.pres.details">
+				<div class="item_list" v-for="(line,index) in pre.details">
 					<div class="el-row" style="margin-left:1px;"> 
 						<div class="el-col-2" style="width:22%;">{{line.name}}</div>
-						<div class="el-col-2" style="width:19%;">{{line.specifications}}</div>
+						<div class="el-col-2" style="width:18%;">{{line.specifications}}</div>
 						<div class="el-col-2" style="width:8%;">{{line.quantity}}{{line.unit}}</div>
 						<div class="el-col-2" style="width:10%;">{{line.route}}</div>
-						<div class="el-col-2" style="width:18%;">{{line.frequency}}</div>
+						<div class="el-col-2" style="width:17%;">{{line.frequency}}</div>
 						<div class="el-col-2" style="width:10%;">{{line.dose}}</div>
-						<div class="el-col-2" style="width:16%;">{{format_price(line.net_amt)}}</div>
+						<div class="el-col-2" style="width:15%; text-align:right;">{{format_price(line.net_amt)}}</div>
 						<!-- <div class="el-col-2 text-center" style="width:30%;">{{line.firm}}</div> -->
 					</div>
 			  </div>
@@ -55,8 +54,8 @@
 
 	<div class="prescription_footer">
 		<div class="el-row" style="margin:0;">
-			<div class="el-col-12">医生: <span>{{info.doctor}}</span></div>
-			<div class="el-col-12 text-right total_amount" style="float:right;">金额: <span>{{format_price(info.amt)}}</span></div>
+			<div class="el-col-12">医生: <span>{{pre.doctor}}</span></div>
+			<div class="el-col-12 text-right total_amount" style="float:right;text-align:right;">金额: <span>{{format_price(pre.amt)}}</span></div>
 		</div>
 	</div>
 

@@ -45,8 +45,12 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
   #   dep_id: 
   # }
   def set_cur_department
-    current_user.cur_loc_id = params[:dep_id]
-    current_user.cur_loc_display = ::Hospital::Sets::Department.find(params[:dep_id]).name
+    @department = ::Hospital::Sets::Department.find(params[:dep_id]) rescue nil
+    return render json:{flag: false, info:"无效的科室id"} if @department.nil?
+    return render json:{flag: false, info:"不能设置状态为活动之外的科室为当前科室"} if @department.status != "A"
+    return render json:{flag: false, info:"不能操作非本人机构以外的科室数据"} if @department.org_id != @cur_org.id
+    current_user.cur_loc_id = @department.id
+    current_user.cur_loc_display = @department.name
     respond_to do |format|
       if current_user.save
         format.json { render json: {flag: true, info:"success", data: {id: current_user.cur_loc_id, display: current_user.cur_loc_display}} }
@@ -67,7 +71,8 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
         format.json { render json: {flag: true, info:"success", data: @department} }
       else
         format.html { render action: "new" }
-        format.json { render json: {flag: false , info: @department.errors} }
+        err_info = ::Hospital.format_errors_message(@department.class.to_s, @department.errors.messages)
+        format.json { render json: {flag: false , info: err_info.join(" ")} }
       end
     end
 	end
@@ -77,11 +82,13 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
   def update
     p "Hospital::Sets::DepartmentsController update",params
     respond_to do |format|
+      update_args = format_department_update_args
       if @department.update_attributes({name: params[:department][:name]})
         format.json { render json: {flag: true, info:"success", data: @department} }
       else
         format.html { render action: "edit" }
-        format.json { render json: {flag: false , info: @department.errors} }
+        err_info = ::Hospital.format_errors_message(@department.class.to_s, @department.errors.messages)
+        format.json { render json: {flag: false , info: err_info.join(" ")} }
       end
     end
   end
@@ -109,10 +116,12 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
       return render json:{flag: false, info:"不能操作非本人机构以外的科室数据"} if @department.org_id != @cur_org.id 
     end
 
+    # 获取前端传的科室参数
     def department_params
       params[:department]
     end
 
+    # 格式化新建参数
     def format_department_create_args
       department_args = department_params
       ret = {
@@ -120,6 +129,17 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
         name: department_args[:name],
         jianpin: nil,
         status: "A",
+        note: department_args[:note]
+      }
+      return ret
+    end
+
+    # 格式化更新参数
+    def format_department_update_args
+      department_args = department_params
+      ret = {
+        name: department_args[:name],
+        note: department_args[:note]
       }
       return ret
     end

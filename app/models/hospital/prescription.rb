@@ -65,6 +65,29 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
+	# 处方废弃
+	# {
+	# 	# 废弃人
+	# 	abandonor: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	# 	# 废弃时间
+	# 	abandon_at: Time
+	# }
+	def not_audit_to_abandon(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 1 # 已审核的处方可以废弃
+				self.abandonor_id = args[:abandonor][:id] 
+				self.abandonor_display = args[:abandonor][:display]
+				self.abandon_at = args[:abandon_at]
+				self.status = 7
+			self.orders.update_all(status: 7) if self.save
+		else
+			false
+		end
+	end
+
 	# 待收费处方  生成订单之后待收费
 	# {
 	# 	# 创建订单人
@@ -90,7 +113,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	#待收费转为已审核
+	# 待收费转为已审核
 	def back_wait_charge(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 2 # 已审核的处方可以变为待收费
@@ -127,6 +150,24 @@ class ::Hospital::Prescription < ApplicationRecord
 			false
 		end
 	end
+
+	# 已收费退费转为已审核
+	# args = {
+	# 	reason: ""
+	# }
+	def charged_back_to_audit(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 3 # 已审核的处方可以变为待收费
+			self.status = 1
+			self.charger_id = nil
+			self.charger_display = nil
+			self.charge_at = nil
+			self.orders.update_all(status: 1) if self.save
+		else
+			false
+		end
+	end
+
 
 	# 已收费后可以退费
 	# {
@@ -174,7 +215,30 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	#没有退药流程
+	# 退药
+	# {
+	# 	# 退药人
+	# 	return_drug_opter: {
+	# 		id: User.id,
+	# 		display: User.name
+	# 	},
+	#   return_drug_store_id:
+	# 	# 退药时间
+	# 	return_drug_opt_at: Time
+	# }
+	def return_drug(args, cur_user)
+		args.deep_symbolize_keys!
+		if status == 4
+			self.status = 8
+			return_drug_opter_id = args[:return_drug_opter][:id]
+			return_drug_opter_display = args[:return_drug_opter][:display]
+			return_drug_store_id = args[:return_drug_store_id]
+			return_drug_opt_at = args[:return_drug_opt_at]
+			self.orders.update_all(status: 8) if  self.save
+		else
+			false
+		end
+	end
 
 	###=== 处方状态流转  ===###
 
@@ -294,7 +358,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			diagnoses: self.diagnoses,
 			# 该处方对应的医嘱
 			orders: self.orders.map { |e| e.to_web_front  },
-			price: self.orders.map{|e| e.price }.reduce(:+),
+			price: self.orders.map{|e| e.price*e.total_quantity }.reduce(:+),
 			specialmark: self.specialmark,
 			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
 			updated_at: self.updated_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
@@ -325,7 +389,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_encounter = self.encounter
 		cur_org = self.organization
 		cur_doctor = self.doctor
-		price = self.orders.map{|e| e.price }.reduce(:+)
+		price = self.orders.map{|e| e.price*e.total_quantity }.reduce(:+)
 		total_fee = price.round(2)
 		url = "http://huaxi.tenmind.com/"
 		#发送短信息
@@ -335,6 +399,13 @@ class ::Hospital::Prescription < ApplicationRecord
 	end
 
 	class<<self
+		def overtime(prescription_ids)
+		  ::Hospital::Prescription.find(prescription_ids).update_all(is_overtime: true)
+		end
+
+		def set_overtime_schedule(prescription_ids)
+
+		end
 
 	end
 

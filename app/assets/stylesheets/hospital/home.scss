@@ -158,6 +158,10 @@ $card-border-radius: 2px;
 	.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
 		margin-bottom: 5px;
 	}
+	// 复制弹出框表单
+	.mtemplate-form .el-form-item--mini.el-form-item, .mtemplate-form .el-form-item--small.el-form-item {
+		margin-bottom: 15px;
+	}
 	// 弹出框的头部padding
 	.el-dialog__body {
 		padding-top: 10px; 
@@ -302,6 +306,7 @@ $card-border-radius: 2px;
 	    }
 		}
 	}
+
 }
 
 // 页面上显示的处方

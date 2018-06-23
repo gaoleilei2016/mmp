@@ -14,7 +14,7 @@
       <el-button v-if="ini.enable_print_pres && scope.row.status!='7'" type="text" size="mini" @click="printPrescription(scope.$index, scope.row)"><i class="fa fa-fw fa-lg fa-print"></i></el-button>
       <!-- <el-button type="text" size="mini" @click="showPrescription(scope.$index, scope.row)">查看</el-button> -->
       <el-button type="text" size="mini" @click="copyPrescription(scope.$index, scope.row)">复制<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
-      <el-button v-if="scope.row.status=='0'" type="text" size="mini" @click="deletePrescription(scope.$index, scope.row)" class="text-danger">作废<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
+      <el-button v-if="/0|1/.test(scope.row.status)" type="text" size="mini" @click="deletePrescription(scope.$index, scope.row)" class="text-danger">作废<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i></el-button>
     </template>
   </el-table-column>
 </el-table>

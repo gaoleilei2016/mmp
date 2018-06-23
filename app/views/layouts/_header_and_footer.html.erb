@@ -162,10 +162,11 @@
     <div class="nav-right">
       <el-dropdown trigger="click">
         <span class="el-dropdown-link" style="color: #CAE6E7;">
-          您好，<%= current_user.try(:login) %>
+          您好
           <% if current_user.organization %>
           ，<%= current_user.organization.name %>
           <% end %>
+          ，<%= current_user.try(:name) %>
           <span id="header_show_dep_span"><%= current_user.cur_loc_display %></span>
           <i class="el-icon-caret-bottom el-icon--right"></i>
         </span>

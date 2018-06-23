@@ -53,12 +53,18 @@ Rails.application.routes.draw do
     end
     resources :portal do
       collection do
+        
+        get :pullrefresh_main
+        get :pullrefresh_sub
+        get :full_screen
+
         get :map
         get :settlement
         get :pay
       end
     end
     resources :report
+    resources :fapiao
   end
   ########### customer ##########
   ############################
@@ -70,6 +76,7 @@ Rails.application.routes.draw do
       resources :inis do
         collection do
           get :cur_org_ini
+          get :get_org_user_list
         end
       end
       resources :departments do 
@@ -137,6 +144,8 @@ Rails.application.routes.draw do
       collection do
         get :get_orders         # 获取订单
         get :get_order          # 获取订单
+        get :get_prescriptions  # 获取处方信息
+        get :get_prescription   # 获取处方信息 
         get :charging_pre       # 收费
         get :dispensing_order   # 发药
         get :return_order       # 退药
@@ -149,13 +158,38 @@ Rails.application.routes.draw do
         get :return_drug           # 退药
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
+        post :order_setting  #订单设置
       end
     end
 
+    # 设置
     resources :settings do
       collection do
         get :get_cur_set
         post :save_settings
+      end
+    end
+
+    # 统计
+    resources :reports do
+      collection do
+        get :sale_report                          # 销售统计
+        get :dispensed_hospital                   # 处方发药汇总-医院
+        get :dispensed_name                       # 处方发药汇总-发药人
+        get :dispensed_hospital_and_name          # 处方发药汇总-医院及发药人
+        get :dispensed_name_and_hospital          # 处方发药汇总-发药人及医院
+        get :returned_hospital                    # 处方退药汇总-医院
+        get :returned_name                        # 处方退药汇总-发药人
+        get :returned_hospital_and_name           # 处方退药汇总-医院及发药人
+        get :returned_name_and_hospital           # 处方退药汇总-发药人及医院
+        get :drug_report                          # 处方药品汇总表
+        get :drug_dispensed_report                # 处方发药汇总表
+        get :drug_returned_report                 # 处方退药汇总表
+        get :drug_dispensed_fact                  # 处方发药汇总-厂家
+        get :drug_returned_fact                   # 处方退药汇总-厂家
+        get :order_static                         # 订单统计(针对未交费、待发药)
+
+        post :report_detail                       # 报表查看明细
       end
     end
 
@@ -181,5 +215,6 @@ Rails.application.routes.draw do
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
 
   match '/wechat/login',  to: 'wechat#login', via: [:get]
+  match '/wechat/public_pay', to: 'wechat#pay', via: [:post]
   ########### hujun_end   ##########
 end

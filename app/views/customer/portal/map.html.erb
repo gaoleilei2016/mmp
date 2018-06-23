@@ -56,18 +56,18 @@
 			// return false;
 			// console.log( e.point );
 			// alert("xxxxx")
-			if (e.point.lat==26.62990674&&e.point.lng==106.7091771) {
-				mui.toast("未知的当前位置");
-				map.centerAndZoom(new_point,14);
-				map.removeOverlay(e.marker);
-			}else{
+			// if (e.point.lat==26.62990674&&e.point.lng==106.7091771) {
+			// 	mui.toast("未知的当前位置");
+			// 	map.centerAndZoom(new_point,14);
+			// 	map.removeOverlay(e.marker);
+			// }else{
 				// var walking = new BMap.WalkingRoute(map, {renderOptions:{map: map, autoViewport: true}});
 				// console.log( map.getOverlays() );
 				var walking = new BMap.DrivingRoute(map, {renderOptions:{map: map, autoViewport: true}});
 				walking.search(e.point,new_point);
 				// console.log( walking );
 				// walking.clearResults();
-			}
+			// }
 			// map.removeOverlay(last_marker);
 			last_marker = e.marker;
 			// console.log( last_marker );
