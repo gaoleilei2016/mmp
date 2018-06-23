@@ -5,7 +5,8 @@ class Hospital::DiagnosesController < ApplicationController
   before_action :set_cur_dep
   before_action :set_cur_encounter
   before_action :set_diagnose, only: [:edit, :update, :destroy]
-  before_action :change?, only: [:edit, :update, :destroy, :sort]
+  before_action :change?, only: [:edit, :update, :destroy]
+  before_action :can_sort?, only: [:sort]
 
 	# GET
 	# 根据就诊id返回诊断
@@ -118,7 +119,7 @@ class Hospital::DiagnosesController < ApplicationController
     def set_cur_encounter
       @cur_encounter =  ::Hospital::Encounter.find(params[:encounter_id]) rescue nil
       return render json:{flag:false, info: "无效就诊id 请刷新重试 或联系管理员"} if @cur_encounter.nil?
-      return render json:{flag:false, info: "非本人创建数据 不可操作"} if @cur_encounter.author_id != @cur_encounter.id
+      return render json:{flag:false, info: "非本人创建数据 不可操作"} if @cur_encounter.author_id != current_user.id
     end
 
 		# Use callbacks to share common setup or constraints between actions.
@@ -153,6 +154,10 @@ class Hospital::DiagnosesController < ApplicationController
 				org_id: @cur_org.id
 	  	}
 	  	return ret
+	  end
+
+	  def can_sort?
+	  	
 	  end
 
 	  def format_encounter_diagnose_update_args
