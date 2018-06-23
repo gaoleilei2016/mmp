@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180620012135) do
+ActiveRecord::Schema.define(version: 20180623093641) do
 
   create_table "admin_hospital_pharmacys", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "pharmacy_id"
@@ -25,10 +25,11 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.string "jianpin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "yaofang_type"
     t.string "addr"
     t.float "lat", limit: 53
     t.float "lng", limit: 53
+    t.boolean "yaofang_type"
+    t.integer "search_count"
   end
 
   create_table "char2letter", primary_key: "PY", id: :string, limit: 1, collation: "utf8_general_ci", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gbk" do |t|
@@ -54,7 +55,7 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "dictarea", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "dictarea", primary_key: "serialno", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "序号" do |t|
     t.string "supcode", limit: 30, comment: "上级"
     t.string "code", limit: 30, null: false, comment: "编码"
     t.string "name", limit: 100, null: false, comment: "名称"
@@ -64,7 +65,7 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.index ["name", "py", "wb"], name: "idx_area_name"
   end
 
-  create_table "dictdata", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "dictdata", primary_key: "serialno", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "序号" do |t|
     t.string "ii_root", limit: 30, comment: "机构代码(查询包含空,和具体机构信息)"
     t.string "oid", limit: 30, comment: "字典识别码"
     t.string "code", limit: 30, null: false, comment: "编码"
@@ -78,14 +79,14 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.index ["oid"], name: "idx_dict_oid"
   end
 
-  create_table "dictdatagroup", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "dictdatagroup", primary_key: "serialno", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "序号" do |t|
     t.string "oid", limit: 30, comment: "字典识别码"
     t.string "name", limit: 100, null: false, comment: "名称"
     t.text "remark", comment: "备注"
     t.index ["oid"], name: "idx_dictgp_oid", unique: true
   end
 
-  create_table "dictdisease", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "疾病字典表" do |t|
+  create_table "dictdisease", primary_key: "serialno", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "疾病字典表" do |t|
     t.string "codetype", limit: 6, comment: "代码类别(9:ICD9,10:ICD10)"
     t.string "ICD10", limit: 20, null: false, comment: "ICD10编码"
     t.string "ICD9", limit: 20, comment: "ICD9,ICD码"
@@ -101,7 +102,7 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.index ["name", "py", "wb"], name: "ICD_name"
   end
 
-  create_table "dictmedicine", primary_key: "serialno", id: :integer, comment: "序号", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "药品字典表" do |t|
+  create_table "dictmedicine", primary_key: "serialno", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", comment: "药品字典表" do |t|
     t.string "ecode", limit: 20, comment: "易用码"
     t.string "effect_code", limit: 20, comment: "药品功效编码"
     t.string "name", limit: 120, null: false, comment: "通用名称"
@@ -250,6 +251,7 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.decimal "measure_val", precision: 10
     t.string "measure_unit"
     t.string "type_type", default: "Instance"
+    t.bigint "org_id"
   end
 
   create_table "hospital_prescriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=gb2312", comment: "处方头信息表" do |t|
@@ -291,6 +293,8 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.integer "return_charge_opt_id"
     t.string "return_charge_opt_display"
     t.datetime "return_charge_at"
+    t.boolean "is_read"
+    t.string "ceshi"
   end
 
   create_table "hospital_sets_departments", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -311,6 +315,8 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.integer "org_id", null: false, comment: "机构id"
     t.datetime "created_at", null: false, comment: "创建时间"
     t.datetime "updated_at", null: false, comment: "更新时间"
+    t.integer "encounter_search_time"
+    t.bigint "prescription_audit_id"
   end
 
   create_table "hospital_sets_mtemplates", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -329,6 +335,49 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.string "search_str", comment: "查询模糊字段"
     t.datetime "created_at", null: false, comment: "创建时间"
     t.datetime "updated_at", null: false, comment: "更新时间"
+  end
+
+  create_table "ims_ipds", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "drug_id"
+    t.string "title"
+    t.string "specification"
+    t.string "single_qty_value"
+    t.string "single_qty_unit"
+    t.string "dose_value"
+    t.string "dose_unit"
+    t.string "route_code"
+    t.string "route_display"
+    t.string "frequency_code"
+    t.string "frequency_display"
+    t.string "course_of_treatment_value"
+    t.string "course_of_treatment_unit"
+    t.string "formul_code"
+    t.string "formul_display"
+    t.float "qty", limit: 24
+    t.float "send_qty", limit: 24
+    t.float "return_qty", limit: 24
+    t.string "unit"
+    t.string "price"
+    t.float "amount", limit: 24
+    t.string "note"
+    t.string "order_type"
+    t.integer "encounter_id"
+    t.integer "author_id"
+    t.string "author_name"
+    t.string "factory_name"
+    t.string "base_unit"
+    t.string "sale_unit"
+    t.string "purch_unit"
+    t.string "mul"
+    t.string "purch_mul"
+    t.string "measure_val"
+    t.string "measure_unit"
+    t.string "type_type"
+    t.integer "status"
+    t.integer "hospital_prescription_detail_id"
+    t.integer "ori_detail_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "ims_orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -356,16 +405,16 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.datetime "updated_at", null: false, comment: "更新时间"
   end
 
-  create_table "ims_prescription_details", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "drug_id"
-    t.string "title"
-    t.string "specification"
-    t.string "single_qty_value"
-    t.string "single_qty_unit"
-    t.string "dose_value"
-    t.string "dose_unit"
-    t.string "route_value"
-    t.string "route_unit"
+  create_table "ims_pre_details", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.bigint "drug_id"
+    t.string "title", limit: 50
+    t.string "specification", limit: 20
+    t.string "single_qty_value", limit: 20
+    t.string "single_qty_unit", limit: 10
+    t.string "dose_value", limit: 20
+    t.string "dose_unit", limit: 10
+    t.string "route_code", limit: 10
+    t.string "route_display"
     t.string "frequency_code"
     t.string "frequency_display"
     t.string "course_of_treatment_value"
@@ -379,24 +428,29 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.string "price"
     t.float "amount", limit: 24
     t.string "note"
-    t.string "status"
     t.string "order_type"
-    t.string "encounter_id"
-    t.string "author_id"
+    t.bigint "encounter_id"
+    t.bigint "author_id"
     t.string "author_name"
     t.string "factory_name"
     t.string "base_unit"
+    t.string "sale_unit"
+    t.string "purch_unit"
     t.string "mul"
+    t.string "purch_mul"
     t.string "measure_val"
     t.string "measure_unit"
     t.string "type_type"
-    t.integer "hospital_prescription_order_id"
+    t.bigint "status"
+    t.bigint "hospital_prescription_detail_id"
+    t.bigint "ori_detail_id"
+    t.bigint "header_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "ims_prescription_headers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "prescription_no"
+  create_table "ims_pre_headers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "prescription_no"
     t.string "note"
     t.string "type_code"
     t.string "type_name"
@@ -412,32 +466,49 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.string "occupation_name"
     t.string "phone"
     t.string "address"
-    t.string "org_id"
-    t.string "org_display"
+    t.integer "source_org_id"
+    t.string "source_org_name"
     t.string "patient_no"
-    t.string "author_id"
-    t.string "author_display"
-    t.string "encounter_loc_id"
-    t.string "encounter_loc_display"
+    t.integer "author_id"
+    t.string "author_name"
+    t.integer "auditor_id"
+    t.string "auditor_name"
+    t.datetime "audit_at"
+    t.integer "charger_id"
+    t.string "charger_name"
+    t.datetime "charge_at"
+    t.integer "encounter_loc_id"
+    t.string "encounter_loc_name"
     t.float "total_amount", limit: 24
-    t.string "orders"
-    t.string "delivery_id"
+    t.integer "delivery_id"
     t.string "delivery_name"
+    t.integer "delivery_org_id"
+    t.string "delivery_org_name"
     t.datetime "delivery_at"
-    t.string "return_id"
+    t.integer "return_id"
     t.string "return_name"
+    t.integer "return_org_id"
+    t.string "return_org_name"
     t.datetime "return_at"
-    t.string "drug_store_id"
+    t.integer "drug_store_id"
     t.string "drug_store_name"
     t.datetime "effective_start"
     t.datetime "effective_end"
     t.string "diagnoses"
     t.string "specialmark"
     t.string "status"
-    t.string "bill_id"
-    t.datetime "bill_at"
+    t.integer "order_id"
+    t.string "order_code"
+    t.datetime "order_at"
+    t.integer "create_bill_opt_id"
+    t.string "create_bill_opt_name"
     t.datetime "hospital_prescription_at"
     t.integer "hospital_prescription_id"
+    t.boolean "is_return"
+    t.integer "ori_id"
+    t.string "ori_code"
+    t.string "tookcode"
+    t.string "reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -532,6 +603,7 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.integer "_locked"
     t.string "invoice_id"
     t.integer "settle_times"
+    t.integer "is_send_medical"
   end
 
   create_table "pay_alipays", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -641,6 +713,113 @@ ActiveRecord::Schema.define(version: 20180620012135) do
     t.string "title", default: ""
     t.float "lat", limit: 53
     t.float "lng", limit: 53
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "pre_details", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "drug_id"
+    t.string "title"
+    t.string "specification"
+    t.string "single_qty_value"
+    t.string "single_qty_unit"
+    t.string "dose_value"
+    t.string "dose_unit"
+    t.string "route_code"
+    t.string "route_display"
+    t.string "frequency_code"
+    t.string "frequency_display"
+    t.string "course_of_treatment_value"
+    t.string "course_of_treatment_unit"
+    t.string "formul_code"
+    t.string "formul_display"
+    t.float "qty", limit: 24
+    t.float "send_qty", limit: 24
+    t.float "return_qty", limit: 24
+    t.string "unit"
+    t.string "price"
+    t.float "amount", limit: 24
+    t.string "note"
+    t.string "order_type"
+    t.integer "encounter_id"
+    t.integer "author_id"
+    t.string "author_name"
+    t.string "factory_name"
+    t.string "base_unit"
+    t.string "sale_unit"
+    t.string "purch_unit"
+    t.string "mul"
+    t.string "purch_mul"
+    t.string "measure_val"
+    t.string "measure_unit"
+    t.string "type_type"
+    t.integer "status"
+    t.integer "hospital_prescription_detail_id"
+    t.integer "ori_detail_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "pre_headers", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "prescription_no"
+    t.string "note"
+    t.string "type_code"
+    t.string "type_name"
+    t.string "confidentiality_code"
+    t.string "confidentiality_name"
+    t.string "name"
+    t.string "gender_code"
+    t.string "gender_name"
+    t.string "age"
+    t.datetime "birth_date"
+    t.string "iden"
+    t.string "occupation_code"
+    t.string "occupation_name"
+    t.string "phone"
+    t.string "address"
+    t.integer "source_org_id"
+    t.string "source_org_name"
+    t.string "patient_no"
+    t.integer "author_id"
+    t.string "author_name"
+    t.integer "auditor_id"
+    t.string "auditor_name"
+    t.datetime "audit_at"
+    t.integer "charger_id"
+    t.string "charger_name"
+    t.datetime "charge_at"
+    t.integer "encounter_loc_id"
+    t.string "encounter_loc_name"
+    t.float "total_amount", limit: 24
+    t.integer "delivery_id"
+    t.string "delivery_name"
+    t.integer "delivery_org_id"
+    t.string "delivery_org_name"
+    t.datetime "delivery_at"
+    t.integer "return_id"
+    t.string "return_name"
+    t.integer "return_org_id"
+    t.string "return_org_name"
+    t.datetime "return_at"
+    t.integer "drug_store_id"
+    t.string "drug_store_name"
+    t.datetime "effective_start"
+    t.datetime "effective_end"
+    t.string "diagnoses"
+    t.string "specialmark"
+    t.string "status"
+    t.integer "order_id"
+    t.string "order_code"
+    t.datetime "order_at"
+    t.integer "create_bill_opt_id"
+    t.string "create_bill_opt_name"
+    t.datetime "hospital_prescription_at"
+    t.integer "hospital_prescription_id"
+    t.boolean "is_return"
+    t.integer "ori_id"
+    t.string "ori_code"
+    t.string "tookcode"
+    t.string "reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

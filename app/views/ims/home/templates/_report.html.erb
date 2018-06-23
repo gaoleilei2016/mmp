@@ -1,0 +1,301 @@
+<style type="text/css">
+</style>
+<template>
+  <div id="ims_order_main">
+    <el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
+
+      <el-menu-item index="1" @click.native="show_panel('out_order',$event)">
+        <i class="el-icon-goods"></i>
+        <span >处方发药汇总-医院</span>  
+      </el-menu-item>
+
+      <el-menu-item index="2" @click.native="show_panel('return_drug',$event)">
+        <i class="el-icon-sold-out"></i>
+        <span >处方退药汇总-医院</span>  
+      </el-menu-item>
+
+      <el-menu-item index="3" @click.native="show_panel('reports',$event)">
+        <i class="el-icon-document"></i>
+        <span >处方药品汇总表</span>
+      </el-menu-item>
+
+      <el-menu-item index="4" @click.native="show_panel('settings',$event)">
+        <i class="el-icon-setting"></i>
+        <span >设置</span>
+      </el-menu-item>
+      
+    </el-menu>
+
+    <div class="function_panel out_order">
+      <%= render "ims/home/render/out_order"%>
+    </div>
+
+    <div class="function_panel return_drug" style="display:none;">
+      <%= render "ims/home/render/return_order"%>
+    </div>
+
+    <div class="function_panel reports" style="display:none;">
+      <%= render "ims/home/render/order_reports"%>
+    </div>
+
+    <div class="function_panel settings" style="display:none;">
+      <%= render "ims/home/render/settings"%>
+    </div>
+
+    <el-button @click="change" id="notice_input" style="display:none;"></el-button>
+    <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
+  </div>
+</template>
+
+<!-- 处方显示模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
+<script type="text/javascript">
+window.current_template_obj = {
+    data:function(){
+        var options = [{code: "0", display: "处方发药汇总-医院"},{code: "1", display: "处方退药汇总-医院"}];
+        return {
+            activeName: options[0].code,
+            cardTabsOptions: options,
+            multipleSelection: [],
+
+            reportsResource: Vue.resource('/ims/reports/drug_report.json'),
+            reports: [],
+            dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'), // 处方发药汇总-医院
+            dispensed_hospitals: {k:[{}]},
+            returned_hospitalsResource: Vue.resource('/ims/reports/returned_hospital.json'),
+            returned_hospitals: {k:[{}]},
+           
+
+            orgname: "",
+            isShowfilters: false, // 高级搜索
+            filter: {
+                range: "",
+            },
+
+            rangePickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
+
+            isShowOrdersDialog: false, // 显示医嘱详细模态框
+            isShowPresDialog: false, // 显示处方详细
+            // 搜索
+        search: "", // 搜索内容
+        tableHeight: 200, // 表格高度
+        // 分页相关
+        currentPage: 1, // 当前页
+        pageSize: 25, // 默认一页显示25条
+        dataCount: 100, // 总数据条数
+        }
+    },
+    components: {
+        // 处方打印组件
+        'prescriptionprint': {
+            props: ['encounter', 'prescription'],
+          template: "#prescription-print-template",
+        },
+    },
+    watch: {
+        search: function (newValue, oldValue) {
+        this.getData();
+    },
+    },
+    // mounted: function() {
+    //     this.$nextTick(function(){
+    //         this.init();
+    //     })
+    // },
+    methods: {
+      //   init: function () {
+      //       var _this = this;
+      //       _this.orgname = $("#current_org_name").val();
+      //       // 获取基础设置内容
+      //       Vue.resource("/ims/reports/drug_report.json").get().then(function(response) {
+      //           var res = response.data;
+      //           if(res.flag) {
+      //       $("#prescription-print-template").html(res.data.print_pres_html)
+      //   }
+      //       },function() {
+      //       _this.$message.error("获取初始值失败，请联系管理员。");
+      //     })
+      // var clientHeight = document.body.clientHeight;
+      // _this.tableHeight = clientHeight - 340;
+      // _this.getData();
+      //   },
+      getData: function () {
+          var _this = this;
+          _this.reportsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.reports = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+      get_dispensed_hospitals: function () {
+          var _this = this;
+          _this.dispensed_hospitalsResource.get({s_time: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.dispensed_hospitals = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+
+      get_returned_hospitals: function () {
+          var _this = this;
+          _this.returned_hospitalsResource.get({s_time: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.returned_hospitals = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+
+      // 处方药品汇总表
+      get_drug_report:function (s_time,e_time) {
+        var _this = this;
+        // if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+        // if (!id) {
+        //   id="";
+        //   _this.$notify({
+        //     title: '提示',
+        //     message: '订单信息不全！',
+        //     duration: 0
+        //   });
+        //   return ""
+        // };
+        _this.$http.get('/ims/reports/drug_report?start_time='+s_time+'&end_time='+e_time).then(function(response) {
+          console.log(response.data)
+          res = response.data
+          if(res.flag) {
+            _this.reports = res.data;
+            _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+          // _this._data.detail = [response.data.order]
+        },function(response){
+          _this.$notify({
+            title: '提示',
+            message: '服务器请求出错了',
+            duration: 0
+          });
+        });
+      },
+        // 每页条数改变
+    handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+        this.currentPage = val;
+      this.getData();
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+        this.multipleSelection = val;
+        console.log(val)
+    },
+    // 选择tab
+        handleTabClick: function (tab, event) {
+
+        },
+        // 判断性别，根据性别显示图标
+    judgeGender: function (gender) {
+        if(!gender){ gender = ""; }
+      var html = '';
+        if(gender.indexOf('男')>-1){
+            html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+        }else if(gender.indexOf('女')>-1){
+            html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+        }else{
+            html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+        }
+        return html;
+      },
+   
+    // 获取处方列表
+    getPrescriptions: function (encounter_id) {
+        var _this = this;
+        _this.prescriptions = [];
+        Vue.resource("/hospital/reports/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
+            var res = response.data;
+            if(res.flag) {
+                _this.prescriptions = res.data;
+            } else {
+                _this.$message.error(res.info);
+            }
+        }, function (response) {
+            _this.$message.error("获取处方列表失败，请联系管理员。");
+        })
+    },
+    // 查询诊断
+    querySearchDiagnoseAsync: function(queryString, cb) {
+            var _this = this;
+            Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+            var res = response.data;
+            if (res.flag) {
+                    cb(res.data);
+                    // 设置下拉选择的第一项为高亮
+                    var el = _this.$refs["diagnose"];
+                    if(el) {
+                        el.highlightedIndex = 0
+                    }
+                }
+          },function() {
+            _this.$message.error("获取诊断列表失败，请联系管理员。");
+          })
+        },
+        // 选择疾病
+    handleSelectDisease: function (item) {
+        this.filter.disease = item.display;
+    },
+    },
+}
+</script>

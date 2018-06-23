@@ -2,13 +2,15 @@
   <div v-for="pre in platform_data">
     <div class="" style="padding:8px;">
       <label v-bind:for="pre.id">
-        <input type="checkbox" v-bind:value="pre.id" v-bind:id="pre.id">
+        <!-- <input type="checkbox" v-bind:value="pre.id" v-bind:id="pre.id"> -->
+        <el-checkbox label="pre.name">
         <span style="display:none;" class="pre_id">{{pre.id}}</span>
         <span class="padding"><b>{{pre.name}}</b></span>
         <span class="padding"><b>{{pre.sex}}</b></span>
         <span class="padding"><b>{{pre.age}}岁</b></span>
-        <span class="padding"><b>地址：{{pre.address}}</b></span>
-        <span class="padding"><b>身份证号：{{pre.iden}}</b></span>
+        <span class="padding"><b><span style="color:rgb(195, 192, 192);">地址：</span>{{pre.address}}</b></span>
+        <span class="padding"><b><span style="color:rgb(195, 192, 192);">身份证号：</span>{{pre.iden}}</b></span>
+      </el-checkbox>
       </label>
 	  </div>
 
@@ -19,22 +21,22 @@
       <el-table-column
         prop="name"
         label="名称"
-        style="width:30%">
+        style="min-width:35%;">
       </el-table-column>
       <el-table-column
         prop="specification"
         label="规格"
-        style="width:30%">
+        style="min-width:30%;">
       </el-table-column>
       <el-table-column
         prop="qty"
         label="数量"
-        style="width:20%">
+        style="">
       </el-table-column>
       <el-table-column
         prop="unit"
         label="单位"
-        style="width:20%">
+        style="">
       </el-table-column>
     </el-table>
 

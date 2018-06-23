@@ -1,4 +1,3 @@
-
 		<style>
 			html,
 			body {
@@ -206,7 +205,7 @@
 						</ul> -->
 						<div style="padding: 20px;padding-top: 30px;">
 							<a href="#account" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;overflow: hidden;">
-								<img src="/assets/admin/TM.png" style="width: 100%;">
+								<img src="/assets/admin/TM.png" style="width: 100%;height: 100%;">
 							</a>
 							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;">
 								<div style="position: absolute; bottom: 8px;left: 10px;color: #666;"><%= current_user.name.present? ? current_user.name : current_user.login %></div>
@@ -231,7 +230,7 @@
 						<ul class="mui-table-view" style="font-size: 16px;">
 							<li class="mui-table-view-cell">
 								<a href="/customer/home/prescriptions">
-									<span>我的处方 <span class="mui-badge common_bg_red mine_prescriptions_red_badge" style="display: none;">new</span></span>
+									<span>我的处方 <span class="mui-badge common_bg_red mine_prescriptions_red_badge show_count" style="display: none;">new</span></span>
 									<i class="fal fa-fw fa-prescription-bottle-alt" style="font-size: 26px;float: right;"></i>
 								</a>
 							</li>

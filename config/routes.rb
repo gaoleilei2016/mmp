@@ -53,12 +53,18 @@ Rails.application.routes.draw do
     end
     resources :portal do
       collection do
+        
+        get :pullrefresh_main
+        get :pullrefresh_sub
+        get :full_screen
+
         get :map
         get :settlement
         get :pay
       end
     end
     resources :report
+    resources :fapiao
   end
   ########### customer ##########
   ############################
@@ -167,7 +173,23 @@ Rails.application.routes.draw do
     # 统计
     resources :reports do
       collection do
-        get :sale_report          # 销售统计
+        get :sale_report                          # 销售统计
+        get :dispensed_hospital                   # 处方发药汇总-医院
+        get :dispensed_name                       # 处方发药汇总-发药人
+        get :dispensed_hospital_and_name          # 处方发药汇总-医院及发药人
+        get :dispensed_name_and_hospital          # 处方发药汇总-发药人及医院
+        get :returned_hospital                    # 处方退药汇总-医院
+        get :returned_name                        # 处方退药汇总-发药人
+        get :returned_hospital_and_name           # 处方退药汇总-医院及发药人
+        get :returned_name_and_hospital           # 处方退药汇总-发药人及医院
+        get :drug_report                          # 处方药品汇总表
+        get :drug_dispensed_report                # 处方发药汇总表
+        get :drug_returned_report                 # 处方退药汇总表
+        get :drug_dispensed_fact                  # 处方发药汇总-厂家
+        get :drug_returned_fact                   # 处方退药汇总-厂家
+        get :order_static                         # 订单统计(针对未交费、待发药)
+
+        post :report_detail                       # 报表查看明细
       end
     end
 
@@ -193,5 +215,6 @@ Rails.application.routes.draw do
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
 
   match '/wechat/login',  to: 'wechat#login', via: [:get]
+  match '/wechat/public_pay', to: 'wechat#pay', via: [:post]
   ########### hujun_end   ##########
 end

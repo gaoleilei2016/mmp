@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-		<title>腾迈智医</title>
+		<title>华希医疗</title>
 		<link rel="icon" href="/assets/admin/TM.ico" />
 		<link href="/assets/plugins/mui/mui.min.css" rel="stylesheet" />
 		<!-- <link href="/assets/plugins/fontawesome/font-awesome.min.css" rel="stylesheet" /> -->
@@ -14,6 +14,7 @@
 		<script src="/assets/plugins/mui/mui.min.js"></script>
 		<script src="/assets/plugins/vue/vue-253.js"></script>
 		<script src="/assets/plugins/vue/vue-router.js"></script>
+		<script src="/assets/plugins/lodash.js"></script>
 		<script src="/assets/plugins/date_pattern.js"></script>
 		<script type="text/javascript">
 			//获取页面url参数   $.getUrlParam("ID")
@@ -92,7 +93,7 @@
 			.common_grey{
 				color: #8A8782;
 			}
-			.mui-bar .mui-icon-left-nav{
+			.mui-icon-left-nav{
 				color: #F55742;
 			}
 			[v-cloak]{
@@ -103,6 +104,16 @@
 				left: 25px;
 				padding: 4px;
 			}
+			.mui-popup-button{
+				color: #8A8782;
+			}
+			.mui-popup-button.mui-popup-button-bold{
+				font-weight: normal;
+				color: #F55742;
+			}
+			/*.mui-popup.mui-popup-in, .mui-popup-inner, .mui-popup-button:first-child, .mui-popup-button:last-child{
+				border-radius: 0;
+			}*/
 		</style>
 		<style type="text/css">
 /* 3个圆圈的加载样式
@@ -217,6 +228,7 @@
 									// _this.prescriptions = json.data;
 									if (json.count) {
 										$(".mine_prescriptions_red_badge").show();
+										$(".mine_prescriptions_red_badge.show_count").text(json.count);
 									}
 								}else{
 									_this.$message(json.info);

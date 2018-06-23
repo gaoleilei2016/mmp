@@ -34,6 +34,9 @@ class Pay::Alipay
         write_log_return({state: :start, msg: '支付宝付款开始', desc: args.to_s})
         return write_log_return({state: :error, msg: '无效的金额', desc: '支付金额必须大于等于0.01'}) unless args[:total_fee].to_f >= 0.01
         return write_log_return({state: :fail, msg: '支付宝未开通', desc: '若已开通,请检查项目下的配置'}) unless Set::Alibaba.usable
+        order = Pay::Order.find_by(out_trade_no: args[:out_trade_no]) #查找订单
+        return write_log_return({state: :fail, msg: '已支付', desc: '订单已支付'}) if order&.status&.eql?('success')
+        return get_payment_url(order) if order #如何订单存在就直接支付
         order = Pay::Order.new(args.merge({pay_type: 'alipay', trade_type: 'WEB'}))
         return write_log_return({state: :fail, msg: "创建支付记录报错", desc: order.errors.full_messages.join(',')}) unless order.save
         get_payment_url(order)
@@ -76,9 +79,30 @@ class Pay::Alipay
             product_code: ali.product_code,
             total_amount: order.total_fee.to_f,
             subject: order.title,
-            quit_url: order.return_url
+            quit_url: 'http://mmp.tenmind.com/pay'
           }.to_json(ascii_only: true),
           timestamp: current_time
+        )
+        return write_log_return({rec: order, state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https')
+        write_log_return({rec: order, state: :fail, msg: '支付失败', desc: payment_url})
+      rescue Exception => e
+        write_log_return({rec: order, state: :fail, msg: "支付错误", desc: e.message})
+      end
+    end
+
+    def page_pay_url(order)#order.return_url
+      begin
+        client = get_client
+        payment_url = client.page_execute_url(
+          method: 'alipay.trade.page.pay',
+          return_url: order.return_url,
+          notify_url: ali.notify_url,
+          biz_content: {
+           out_trade_no: order.out_trade_no,
+           product_code: ali.product_code,
+           total_amount: order.total_fee.to_f,
+           subject: 'Example #123',
+          }.to_json(ascii_only: true),
         )
         return write_log_return({rec: order, state: :succ, msg: '请求成功,请转到支付宝支付',  pay_url: payment_url }) if payment_url&.include?('https')
         write_log_return({rec: order, state: :fail, msg: '支付失败', desc: payment_url})

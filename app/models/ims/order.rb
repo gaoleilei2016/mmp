@@ -21,7 +21,7 @@ class Ims::Order < ApplicationRecord
         when '5'#已发药
          query.concat(" and status=5 ")
         when '7'#已退药
-         query.concat(" and (status=7 or status=6) ")
+         query.concat(" and is_send_medical>=1 and (status=7 or status=6) ")
         else
         end
         query.concat(' order by created_at desc')
@@ -122,7 +122,7 @@ class Ims::Order < ApplicationRecord
       end
     end
 
-    # 获取处方明细
+    # 获取处方信息
     def get_prescription args = {}
       p "===========================",args
       return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
@@ -157,6 +157,7 @@ class Ims::Order < ApplicationRecord
           :delivery_id => header.delivery_id,
           :delivery_name => header.delivery_name,
           :delivery_at => header.delivery_at,
+          :invoice_id => header.invoice_id,
           :is_returned => header.is_returned,
           details: (header.details||[]).map{|x| {
                     title: x.title,
@@ -197,10 +198,12 @@ class Ims::Order < ApplicationRecord
       end
     end
 
-    # 处方信息
+    # 订单及处方明细信息
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+      fp = ::Customer::Fapiao.find order.invoice_id rescue nil
+      invoice = fp.blank? ? {flag:false} : {flag:true,name:fp.name,shuihao:fp.shuihao}
       data = {
           type:'订单',
           is_order:true,
@@ -224,6 +227,7 @@ class Ims::Order < ApplicationRecord
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
           is_returned: order.is_returned,
+          invoice:invoice,
           details: order.details.map{|x| {
                   name: x.name,
                   quantity: x.quantity,
@@ -326,10 +330,11 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
         # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if order.is_returned==1
-        return {flag:false,:info=>"该订单已发药，不能退药。"} if order.status!="5"
+        return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
+        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==6||order.status.to_i==7||order.is_returned==1)
         headers = Ims::PreHeader.where(:bill_id=>order_id,delivery_org_id:args[:org_id])
         headers.map{|header| create_new_prescription header,current_user}
+        headers.update_all({is_returned:true,reason:reason,return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
         attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退药')}
         order.cancel_medical(attrs)
         {flag:true,info:'退药成功！'}
@@ -361,14 +366,14 @@ class Ims::Order < ApplicationRecord
           # t_exist = table_name_exist t_name
           # create_copy_table t_name,td_name unless t_exist
           # ================================
-          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
-          data = Orders::Order.order_completion(temp)
-          return {flag:false,info:data[:info]} if data[:ret_code].to_i!=0
           prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PreHeader.save_prescription send_data
+          return {flag:false,info:"发药失败: #{data[:info]}"} unless result[:flag]
+          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
+          data = Orders::Order.order_completion(temp)
         # end
-        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
+        return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")
@@ -389,16 +394,14 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
         return {flag:false,:info=>"该处方不是发药状态，不能退药。"} if header.status.to_s!="4"
         current_user = args[:current_user]
-        ::ActiveRecord::Base.transaction  do
-          update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
-          result = header.update_attributes!(update_data)
-          return {flag:false,info:'退药失败。'} unless result
-          header.reload
-          header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
-          create_new_prescription header,current_user
-          attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
-          # Orders::Order.find(header.bill_id).cancel_medical(attrs)
-        end
+        update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
+        result = header.update_attributes!(update_data)
+        return {flag:false,info:'退药失败。'} unless result
+        header.reload
+        header.details.map{|e| e.update_attributes!(return_qty:e.send_qty)}
+        create_new_prescription header,current_user
+        attrs = {prescription_ids:[header.id],current_user:current_user,reason:(args[:reason]||'退药')}
+        # Orders::Order.find(header.bill_id).cancel_medical(attrs)
         {flag:true,info:'退药成功！'} #: {flag:false,info:(result[:info]|| '退药失败。'),}
       rescue Exception => e
         print e.message rescue "  e.messag----"
@@ -415,6 +418,8 @@ class Ims::Order < ApplicationRecord
         new_header.ori_code = header.prescription_no
         new_header.return_name = current_user.name
         new_header.return_id = current_user.id
+        new_header.return_org_id = current_user.organization_id
+        new_header.return_org_name = current_user.organization.try(:id)
         new_header.return_at = Time.new
         new_header.total_amount = -header.total_amount.to_f
         new_header.status = '8'
@@ -429,7 +434,7 @@ class Ims::Order < ApplicationRecord
           dup_detail.header_id = nil
           details << dup_detail.attributes
         end
-        {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PreHeader.where(prescription_no:(header.prescription_no.to_s+"_T")).count>0
+        return {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PreHeader.where(prescription_no:(header.prescription_no.to_s+"_T")).count>0
         details_1 = Ims::PreDetail.create!(details)
         new_header.details = details_1
         new_header.save! ? {flag:true,info:'退药保存成功！'} : {flag:false,info:'退药保存失败。'}
@@ -452,30 +457,41 @@ class Ims::Order < ApplicationRecord
     end
     
     # 判断表名是否存在
-    def table_name_exist t_name
-      return false if t_name.blank?
-      Ims::PreHeader.find_by_sql("show tables like '#{t_name}';").blank? ? false : true
+    def table_name_exist org_id
+      begin
+        return false if org_id.blank?
+        t_name = 'iph_'+org_id
+        Ims::PreHeader.find_by_sql("show tables like '#{t_name}';").blank? ? create_copy_table(org_id) : true
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 判断表名是否存在 出错: " + e.backtrace.join("\n")
+        return false
+      end
     end
 
-    # 创建表(复制 ims_prescription_headers 表结构)
-    def create_copy_table t_name,td_name
-      sql = "CREATE TABLE #{t_name} LIKE iph "
-      sql_1 = "CREATE TABLE #{td_name} LIKE iph "
+    # 创建表(复制 ims_per_headers 表结构)
+    def create_copy_table org_id
+      t_name = 'iph_'+org_id
+      td_name = 'ipd_'+org_id
+      sql = "CREATE TABLE #{t_name} LIKE ims_per_headers "
+      sql_1 = "CREATE TABLE #{td_name} LIKE ims_per_details "
       ActiveRecord::Base.connection.execute sql
       ActiveRecord::Base.connection.execute sql_1
+      true
     end
 
 
     def send_message attrs
-      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
     end
 
     def order_message attrs
       p "modal   hahahahha"
       p attrs
+      str = attrs[:message]
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      # ActionCable.server.broadcast 'notice_channel', jobs:"sdfasd"
-      NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
+      ActionCable.server.broadcast 'notice_channel', data:str
+      # NoticeBroadcastJob.perform_later data:str
     end
 
   end
