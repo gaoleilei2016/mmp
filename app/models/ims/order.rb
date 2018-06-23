@@ -366,14 +366,14 @@ class Ims::Order < ApplicationRecord
           # t_exist = table_name_exist t_name
           # create_copy_table t_name,td_name unless t_exist
           # ================================
-          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
-          data = Orders::Order.order_completion(temp)
-          return {flag:false,info:data[:info]} if data[:ret_code].to_i!=0
           prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PreHeader.save_prescription send_data
+          return {flag:false,info:"发药失败: #{data[:info]}"} unless result[:flag]
+          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
+          data = Orders::Order.order_completion(temp)
         # end
-        return_data = result[:flag] ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
+        return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")
@@ -434,7 +434,7 @@ class Ims::Order < ApplicationRecord
           dup_detail.header_id = nil
           details << dup_detail.attributes
         end
-        {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PreHeader.where(prescription_no:(header.prescription_no.to_s+"_T")).count>0
+        return {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PreHeader.where(prescription_no:(header.prescription_no.to_s+"_T")).count>0
         details_1 = Ims::PreDetail.create!(details)
         new_header.details = details_1
         new_header.save! ? {flag:true,info:'退药保存成功！'} : {flag:false,info:'退药保存失败。'}
@@ -457,17 +457,27 @@ class Ims::Order < ApplicationRecord
     end
     
     # 判断表名是否存在
-    def table_name_exist t_name
-      return false if t_name.blank?
-      Ims::PreHeader.find_by_sql("show tables like '#{t_name}';").blank? ? false : true
+    def table_name_exist org_id
+      begin
+        return false if org_id.blank?
+        t_name = 'iph_'+org_id
+        Ims::PreHeader.find_by_sql("show tables like '#{t_name}';").blank? ? create_copy_table(org_id) : true
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 判断表名是否存在 出错: " + e.backtrace.join("\n")
+        return false
+      end
     end
 
-    # 创建表(复制 ims_prescription_headers 表结构)
-    def create_copy_table t_name,td_name
-      sql = "CREATE TABLE #{t_name} LIKE iph "
-      sql_1 = "CREATE TABLE #{td_name} LIKE iph "
+    # 创建表(复制 ims_per_headers 表结构)
+    def create_copy_table org_id
+      t_name = 'iph_'+org_id
+      td_name = 'ipd_'+org_id
+      sql = "CREATE TABLE #{t_name} LIKE ims_per_headers "
+      sql_1 = "CREATE TABLE #{td_name} LIKE ims_per_details "
       ActiveRecord::Base.connection.execute sql
       ActiveRecord::Base.connection.execute sql_1
+      true
     end
 
 
