@@ -80,8 +80,8 @@ class Ims::PreHeader < ApplicationRecord
 					:occupation_name=>prescription[:occupation][:display] ,
 					:phone=>prescription[:phone] ,
 					:address=>prescription[:address] ,
-					:org_id=>prescription[:org][:id] ,
-					:org_display=>prescription[:org][:display] ,
+					:source_org_id=>prescription[:org][:id] ,
+					:source_org_name=>prescription[:org][:display] ,
 					:patient_no=>prescription[:patient_no] ,
 					:author_id=>prescription[:author][:id] ,
 					:author_name=>prescription[:author][:display] ,
@@ -100,9 +100,9 @@ class Ims::PreHeader < ApplicationRecord
 					:diagnoses=>(prescription[:diagnoses]||[]).map{|s| s.display}.join(",") ,
 					:specialmark=>prescription[:specialmark] ,
 					:status=>'4' ,
-					:bill_id=>order.try(:id) ,
-					:bill_code=>order.try(:order_code) ,
-					:bill_at=>order.try(:created_at) ,
+					:order_id=>order.try(:id) ,
+					:order_code=>order.try(:order_code) ,
+					:order_at=>order.try(:created_at) ,
 					:hospital_prescription_at=>prescription[:created_at] ,
 					:hospital_prescription_id=>prescription[:id] ,
 					:is_returned=>false ,
@@ -117,6 +117,67 @@ class Ims::PreHeader < ApplicationRecord
 		end
 
 	end
+
+	# rails generate scaffold Ims::PreHeader 
+ #  prescription_no:integer 
+ #  note:string 
+ #  type_code:string 
+ #  type_name:string 
+ #  confidentiality_code:string 
+ #  confidentiality_name:string 
+ #  name:string 
+ #  gender_code:string 
+ #  gender_name:string 
+ #  age:string 
+ #  birth_date:datetime 
+ #  iden:string 
+ #  occupation_code:string 
+ #  occupation_name:string 
+ #  phone:string 
+ #  address:string 
+ #  source_org_id:integer 
+ #  source_org_name:string 
+ #  patient_no:string 
+ #  author_id:integer 
+ #  author_name:string 
+ #  auditor_id:integer
+ #  auditor_name:string
+ #  audit_at:datetime
+ #  charger_id:integer
+ #  charger_name:string
+ #  charge_at:datetime
+ #  encounter_loc_id:integer 
+ #  encounter_loc_name:string 
+ #  total_amount:float 
+ #  delivery_id:integer 
+ #  delivery_name:string 
+ #  delivery_org_id:integer
+ #  delivery_org_name:string
+ #  delivery_at:datetime 
+ #  return_id:integer 
+ #  return_name:string 
+ #  return_org_id:integer
+ #  return_org_name:string
+ #  return_at:datetime 
+ #  drug_store_id:integer 
+ #  drug_store_name:string 
+ #  effective_start:datetime 
+ #  effective_end:datetime 
+ #  diagnoses:string 
+ #  specialmark:string 
+ #  status:string 
+ #  order_id:integer 
+ #  order_code:string 
+ #  order_at:datetime 
+ #  create_bill_opt_id:integer
+ #  create_bill_opt_name:string
+ #  hospital_prescription_at:datetime 
+ #  hospital_prescription_id:integer 
+ #  is_return:boolean
+ #  ori_id:integer
+ #  ori_code:string
+ #  tookcode:string
+ #  reason:string
 
 	# :prescription_no           # => 处方号
 	# :note                      # => 处方备注
@@ -134,8 +195,8 @@ class Ims::PreHeader < ApplicationRecord
 	# :occupation_name           # => 职业名称
 	# :phone                     # => 电话号码
 	# :address                   # => 地址
-	# :org_id                    # => 医院机构
-	# :org_display               # => 医院名称
+	# :source_org_id             # => 医院机构
+	# :source_org_name           # => 医院名称
 	# :patient_no                # => 就诊号
 	# :author_id                 # => 医生id 作者id
 	# :author_name               # => 医生姓名 作者姓名   author_display

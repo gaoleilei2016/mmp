@@ -10,7 +10,7 @@ class CreateOrdersOrderDetails < ActiveRecord::Migration[5.1]
       t.string :dosage,default:'',comment:'剂型'
       t.float :price,default:0.0,comment:'单价'
       t.float :net_amt,default:0.0,comment:'总价'
-      t.string :persecipt_id,default:'',comment:'处方id'
+      # t.string :prescription_id,default:'',comment:'处方id'
       t.string :img_path,default:'',comment:'图片'
       t.string :firm,default:'',comment:'厂家'
 

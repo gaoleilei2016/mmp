@@ -82,7 +82,7 @@ class Orders::Order < ApplicationRecord
 					# prescriptions.each{|x|x.return_charge(arg0, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
-						org_id:order.target_org_id,#药房id
+						ch:order.target_org_id,#药房id
 						status:order.status, #订单状态
 						order_id:order.id, #订单id
 						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
@@ -92,7 +92,9 @@ class Orders::Order < ApplicationRecord
 						flag:false, #true已收费  false 退费
 						info:'您有一张订单结算被用户取消了！', #订单金额
 					}
-					::NoticeBroadcastJob.perform_later(data:data)
+					# {ch:’’,type:’’,event:’’,content:’’}
+					::NoticeChannel.publish(data)
+					# ::NoticeBroadcastJob.perform_later(data:data)
 					arg = {
 						reason:reason
 					}
@@ -223,7 +225,7 @@ class Orders::Order < ApplicationRecord
 			 	prescriptions.each{|x|x.charged(args, cur_user)}
 				update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 				data = {
-							org_id:target_org_id,#药房id
+							ch:target_org_id,#药房id
 							status:status, #订单状态
 							order_id:id, #订单id
 							created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
@@ -233,7 +235,8 @@ class Orders::Order < ApplicationRecord
 							flag:true, #true已收费  false 退费
 							info:'您有新的已结算订单！', #订单金额
 						}
-				::NoticeBroadcastJob.perform_later(data:data)
+				::NoticeChannel.publish(data)
+				# ::NoticeBroadcastJob.perform_later(data:data)
 			end
 			rsult = {ret_code:'0',info:'订单结算成功！'}
 		rescue Exception => e
@@ -347,7 +350,7 @@ class Orders::Order < ApplicationRecord
 						else
 							if attrs[:invoice_id].blank?
 								data = {
-									org_id:order.target_org_id,#药房id
+									ch:order.target_org_id,#药房id
 									status:order.status, #订单状态
 									order_id:order.id, #订单id
 									created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
@@ -357,7 +360,8 @@ class Orders::Order < ApplicationRecord
 									flag:true, #true已收费  false 退费
 									info:'您有新的线下支付订单！', #订单金额
 								}
-								::NoticeBroadcastJob.perform_later(data:data)
+								::NoticeChannel.publish(data)
+								# ::NoticeBroadcastJob.perform_later(data:data)
 							end
 						end
 						#订单创建成功之后改变处方状态

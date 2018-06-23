@@ -41,9 +41,9 @@
 <div id="vue_content" class="mui-content mui-scroll-wrapper" v-cloak>
 	<div class="mui-scroll">
 		<div>
-			<ul @click="alert('xxx')" class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
+			<ul :data-href="'/customer/home/prescription?id='+item.id" class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
 				<li class="mui-table-view-cell">
-					<a :href="'/customer/home/prescription?id='+item.id">
+					<a href="javascript:;">
 						<span>No: {{item.prescription_no}}（{{item.name}}）</span>
 						<span style="float: right;color: #F55742;">
 							<span v-if="item.status=='0'">未审核</span>
@@ -176,6 +176,11 @@
 				}
 			});
 			// _this.get_prescriptions();
+			$("#vue_content").on('tap','.prescription_item',function(e) {
+				// alert($(this).attr('data-href'))
+				location.href = $(this).attr('data-href');
+			})
+
 		}
 	})
 
