@@ -1,145 +1,50 @@
 <style type="text/css">
 </style>
 <template>
-    <!-- 接诊管理、统计页面 -->
-    <div id="encounters_index_div">
-        <el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
-          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item>报表</el-breadcrumb-item>
-        </el-breadcrumb>
-        <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
-        <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
-            <div style="">
-                <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
-                    <el-col :span="8">
-                        <small>日期</small>
-                        <el-date-picker
-                      v-model="filter.range"
-                      type="datetimerange"
-                      :picker-options="rangePickerOptions"
-                      range-separator="至"
-                      start-placeholder="开始日期"
-                      end-placeholder="结束日期"
-                      size="mini"
-                      style="width: 100%;"
-                      align="right">
-                    </el-date-picker>
-                    </el-col>
-                    <el-col :span="2" style="padding-top: 18px;">
-                        <el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
-                    </el-col>
-                </el-row>
-            <el-table
-              :data="encounters"
-              :height="tableHeight"
-              @selection-change="handleSelectionChange"
-              class="thiner-row"
-              style="width: 100%">
-                <el-table-column
-                    min-width="250"
-                    align="left"
-                    label="药品名称">
-                    <template slot-scope="scope">
-                      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    min-width="240"
-                    align="left"
-                    label="规格">
-                    <template slot-scope="scope">
-                        <i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.specification }}
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    min-width="170"
-                    align="right"
-                    label="数量">
-                    <template slot-scope="scope">
-                      <i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.total_qty }}
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    min-width="140"
-                    align="center"
-                    label="单位">
-                    <template slot-scope="scope">
-                      <i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    min-width="170"
-                    align="right"
-                    label="单价">
-                    <template slot-scope="scope">
-                      <i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
-                    </template>
-                  </el-table-column>
-                  <el-table-column
-                    min-width="250"
-                    align="right"
-                    label="金额">
-                    <template slot-scope="scope" hidden=true>
-                      <i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
-                    </template>
-                  </el-table-column>
-                  <!-- <el-table-column
-                    min-width=""
-                    label="">
-                    <template slot-scope="scope">
-                      <i v-if="scope.row.ids" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.ids }}
-                    </template>
-                  </el-table-column> -->
-            </el-table>
-            </div>
-      </el-tabs>
-      <!-- 分页标记 -->
-      <el-pagination
-        background
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[10, 25, 50, 100, 200]"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="dataCount">
-      </el-pagination>
+  <div id="ims_order_main">
+    <el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
 
+      <el-menu-item index="1" @click.native="show_panel('out_order',$event)">
+        <i class="el-icon-goods"></i>
+        <span >处方发药汇总-医院</span>  
+      </el-menu-item>
 
-      <el-dialog
-          title="药品列表"
-          :visible.sync="isShowOrdersDialog"
-          width="90%">
-          <el-table
-            :data="orders"
-            class="thiner-row"
-            style="width: 100%">
-            <%#= render "hospital/home/render/orders_table_common.html" %>
-          </el-table>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="isShowOrdersDialog = false" size="mini">关 闭</el-button>
-          </span>
-        </el-dialog>
+      <el-menu-item index="2" @click.native="show_panel('return_drug',$event)">
+        <i class="el-icon-sold-out"></i>
+        <span >处方退药汇总-医院</span>  
+      </el-menu-item>
 
-        <el-dialog
-          title="处方列表"
-          :visible.sync="isShowPresDialog"
-          width="90%">
-          <el-table
-            :data="prescriptions"
-            class="thiner-row"
-            style="width: 100%">
-            <%#= render "hospital/home/render/prescriptions_table_common.html" %>
-          </el-table>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="isShowPresDialog = false" size="mini">关 闭</el-button>
-          </span>
-        </el-dialog>
+      <el-menu-item index="3" @click.native="show_panel('reports',$event)">
+        <i class="el-icon-document"></i>
+        <span >处方药品汇总表</span>
+      </el-menu-item>
 
-        <!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
-            <prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
-        </div> -->
+      <el-menu-item index="4" @click.native="show_panel('settings',$event)">
+        <i class="el-icon-setting"></i>
+        <span >设置</span>
+      </el-menu-item>
+      
+    </el-menu>
+
+    <div class="function_panel out_order">
+      <%= render "ims/home/render/out_order"%>
     </div>
+
+    <div class="function_panel return_drug" style="display:none;">
+      <%= render "ims/home/render/return_order"%>
+    </div>
+
+    <div class="function_panel reports" style="display:none;">
+      <%= render "ims/home/render/order_reports"%>
+    </div>
+
+    <div class="function_panel settings" style="display:none;">
+      <%= render "ims/home/render/settings"%>
+    </div>
+
+    <el-button @click="change" id="notice_input" style="display:none;"></el-button>
+    <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
+  </div>
 </template>
 
 <!-- 处方显示模板 -->
@@ -154,15 +59,14 @@ window.current_template_obj = {
             cardTabsOptions: options,
             multipleSelection: [],
 
-            encountersResource: Vue.resource('/ims/reports/drug_report.json'),
-            encounters: [],
-            prescriptions: [],
-            ordersResource: Vue.resource('/ims/reports/drug_report.json'),
-            orders: [],
-            // ordersStatus: presStatusOptions,
-            // prescriptionsStatus: presStatusOptions,
+            reportsResource: Vue.resource('/ims/reports/drug_report.json'),
+            reports: [],
+            dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'), // 处方发药汇总-医院
+            dispensed_hospitals: {k:[{}]},
+            returned_hospitalsResource: Vue.resource('/ims/reports/returned_hospital.json'),
+            returned_hospitals: {k:[{}]},
+           
 
-            encounter: {},
             orgname: "",
             isShowfilters: false, // 高级搜索
             filter: {
@@ -220,42 +124,109 @@ window.current_template_obj = {
         this.getData();
     },
     },
-    mounted: function() {
-        this.$nextTick(function(){
-            this.init();
-        })
-    },
+    // mounted: function() {
+    //     this.$nextTick(function(){
+    //         this.init();
+    //     })
+    // },
     methods: {
-        init: function () {
-            var _this = this;
-            _this.orgname = $("#current_org_name").val();
-            // 获取基础设置内容
-            Vue.resource("/ims/reports/drug_report.json").get().then(function(response) {
-                var res = response.data;
-                if(res.flag) {
-            $("#prescription-print-template").html(res.data.print_pres_html)
-        }
-            },function() {
-            _this.$message.error("获取初始值失败，请联系管理员。");
-          })
-      var clientHeight = document.body.clientHeight;
-      _this.tableHeight = clientHeight - 340;
-      _this.getData();
-        },
-        getData: function () {
-            var _this = this;
-            _this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
-                var res = response.data;
-            if(res.flag) {
-          _this.encounters = res.data;
-          _this.dataCount = res.count;
-            }else{
-                _this.$message.error(res.info);
-            }
-      },function(response) {
-        _this.$message.error("后台出错，获取患者列表失败。");
-      })
-        },
+      //   init: function () {
+      //       var _this = this;
+      //       _this.orgname = $("#current_org_name").val();
+      //       // 获取基础设置内容
+      //       Vue.resource("/ims/reports/drug_report.json").get().then(function(response) {
+      //           var res = response.data;
+      //           if(res.flag) {
+      //       $("#prescription-print-template").html(res.data.print_pres_html)
+      //   }
+      //       },function() {
+      //       _this.$message.error("获取初始值失败，请联系管理员。");
+      //     })
+      // var clientHeight = document.body.clientHeight;
+      // _this.tableHeight = clientHeight - 340;
+      // _this.getData();
+      //   },
+      getData: function () {
+          var _this = this;
+          _this.reportsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.reports = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+      get_dispensed_hospitals: function () {
+          var _this = this;
+          _this.dispensed_hospitalsResource.get({s_time: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.dispensed_hospitals = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+
+      get_returned_hospitals: function () {
+          var _this = this;
+          _this.returned_hospitalsResource.get({s_time: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+              var res = response.data;
+          if(res.flag) {
+        _this.returned_hospitals = res.data;
+        _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+        },function(response) {
+          _this.$message.error("系统出错。");
+        })
+      },
+
+
+
+      // 处方药品汇总表
+      get_drug_report:function (s_time,e_time) {
+        var _this = this;
+        // if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
+        // if (!id) {
+        //   id="";
+        //   _this.$notify({
+        //     title: '提示',
+        //     message: '订单信息不全！',
+        //     duration: 0
+        //   });
+        //   return ""
+        // };
+        _this.$http.get('/ims/reports/drug_report?start_time='+s_time+'&end_time='+e_time).then(function(response) {
+          console.log(response.data)
+          res = response.data
+          if(res.flag) {
+            _this.reports = res.data;
+            _this.dataCount = res.count;
+          }else{
+              _this.$message.error(res.info);
+          }
+          // _this._data.detail = [response.data.order]
+        },function(response){
+          _this.$notify({
+            title: '提示',
+            message: '服务器请求出错了',
+            duration: 0
+          });
+        });
+      },
         // 每页条数改变
     handleSizeChange: function (val) {
       this.patPageSize = val;
@@ -288,35 +259,12 @@ window.current_template_obj = {
         }
         return html;
       },
-      // 显示处方列表模态框
-    openOrdersDialog: function (row) {
-        this.isShowOrdersDialog = true;
-        this.getOrders(row.id);
-    },
-    // 显示处方列表模态框
-        openPresDialog: function (row) {
-            this.isShowPresDialog = true;
-        this.getPrescriptions(row.id);
-        },
-        getOrders: function (encounter_id) {
-        var _this = this;
-        _this.orders = [];
-        _this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
-            var res = response.data;
-            if(res.flag) {
-                _this.orders = res.data;
-            } else {
-                _this.$message.error(res.info);
-            }
-        }, function (response) {
-            _this.$message.error("获取药品列表失败，请联系管理员。");
-        })
-    },
+   
     // 获取处方列表
     getPrescriptions: function (encounter_id) {
         var _this = this;
         _this.prescriptions = [];
-        Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
+        Vue.resource("/hospital/reports/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
             var res = response.data;
             if(res.flag) {
                 _this.prescriptions = res.data;

@@ -121,23 +121,24 @@ class Ims::Report
       begin
         org_id = args[:org_id]
         status = args[:status]
-        tbh ='pre_headers' # "iph_#{org_id}"
-        tbd = 'pre_details' # "ipd_#{org_id}"
+        tbh ='ims_pre_headers' # "iph_#{org_id}"
+        tbd = 'ims_pre_details' # "ipd_#{org_id}"
         return {flag:false,:info=>"药店机构为空。"} if org_id.blank?
         start_time = args[:start_time] || (Time.new - 1.day-8.hour).to_s(:db)
         end_time = args[:end_time] || (Time.new-8.hour).to_s(:db)
-        org_display = args[:hospital].blank? ? "": ",a.org_display" 
+        source_org_name = args[:hospital].blank? ? "": ",a.source_org_name" 
         author_name = args[:detail].blank? ? "": ",a.author_name"  
         factory_name = args[:factory_name].blank? ? "": ",b.factory_name"  
         opt_name = status.blank? ? "": (status=="4" ? ",a.delivery_name": ",a.return_name")
         c_d = status.blank? ? " and (a.status=4 or a.status=8 ) and a.delivery_at BETWEEN '#{start_time}' AND '#{end_time}' or a.return_at BETWEEN '#{start_time}' AND '#{end_time}'" : "and a.status=#{status} and "+(status=='4' ? 'a.delivery_at ' : 'a.return_at ')+"BETWEEN '#{start_time}' AND '#{end_time}'"
-        sql = "SELECT b.title,b.specification#{factory_name},b.unit,b.price,SUM(b.qty) as 'total_qty', round(sum(b.amount),2) as 'total_amount'#{org_display}#{author_name}#{opt_name},GROUP_CONCAT(a.id) as 'ids' FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id where a.drug_store_id=#{org_id} "+c_d+" GROUP BY b.title,b.specification#{factory_name},b.unit,b.price#{org_display}#{author_name}#{opt_name};"
+        sql = "SELECT b.title,b.specification#{factory_name},b.unit,b.price,SUM(b.qty) as 'total_qty', round(sum(b.amount),2) as 'total_amount'#{source_org_name}#{author_name}#{opt_name},GROUP_CONCAT(a.id) as 'ids' FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id where a.drug_store_id=#{org_id} "+c_d+" GROUP BY b.title,b.specification#{factory_name},b.unit,b.price#{source_org_name}#{author_name}#{opt_name};"
         result = Ims::PreHeader.find_by_sql(sql)
         JSON.parse(result.to_json)
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "============== 处方药品汇总 出错: " + e.backtrace.join("\n")
         result = {flag:false,:info=>"药店系统出错。"}
+        return []
       end
     end
 
@@ -145,8 +146,8 @@ class Ims::Report
     # 报表查看明细 通过id查询
     def report_detail args={}
       org_id = args[:org_id]
-      tbh ='pre_headers' # "iph_#{org_id}"
-      tbd = 'pre_details' # "ipd_#{org_id}"
+      tbh ='ims_pre_headers' # "iph_#{org_id}"
+      tbd = 'ims_pre_details' # "ipd_#{org_id}"
       ids = "("+args[:ids]+")"
       sql = "SELECT * FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id WHERE a.id in #{ids}"
       result = Ims::PreHeader.find_by_sql(sql)
