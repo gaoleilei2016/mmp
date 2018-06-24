@@ -64,7 +64,7 @@ Rails.application.routes.draw do
       end
     end
     resources :report
-    resources :fapiao
+    resources :invoice_headers
   end
   ########### customer ##########
   ############################

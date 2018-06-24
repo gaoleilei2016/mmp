@@ -30,6 +30,15 @@
 		<div style="padding-left: 12px;">
 			<div class="common_grey">订单编号：{{order.order_code}}</div>
 			<div class="common_grey">下单时间：{{new Date(order.created_at).pattern('yyyy-MM-dd HH:mm:ss')}}</div>
+			<div class="common_grey">发票：
+				<template v-if="order.invoice">
+					<span v-if="order.invoice.type_class=='1'">纸质发票</span>
+					<span v-if="order.invoice.type_class=='2'">电子发票</span>
+				</template>
+				<template v-else>
+					<span>无</span>
+				</template>
+			</div>
 		</div>
 		<div style="text-align: center;padding-bottom: 30px;">
 			<template v-if="order.status=='2'||(order.payment_type=='2'&&(order.status=='1'||order.status=='2'))">

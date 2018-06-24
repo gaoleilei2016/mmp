@@ -202,7 +202,7 @@ class Ims::Order < ApplicationRecord
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-      fp = ::Customer::Fapiao.find order.invoice_id rescue nil
+      fp = ::Customer::InvoiceHeader.find order.invoice_id rescue nil
       invoice = fp.blank? ? {flag:false} : {flag:true,name:fp.name,shuihao:fp.shuihao}
       data = {
           type:'订单',
