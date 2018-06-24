@@ -104,10 +104,10 @@ class InterfacesController < ApplicationController
 		end
 		re = Orders::Order.create_order_by_presc_ids(order)
 		flash[:notice] = re[:info]
-		session[:cart_prescription_ids] = nil
 		if re[:ret_code]!='0'
 			return redirect_to "/customer/portal/settlement"
 		end
+		session[:cart_prescription_ids] = nil
 		# p re
 		# flash[:notice] = re[:info]
 		if re[:order].payment_type.to_s == '2'
