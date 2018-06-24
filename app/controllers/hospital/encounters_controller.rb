@@ -218,38 +218,42 @@ class Hospital::EncountersController < ApplicationController
     end
 
     def format_encounter_create_params
-      args = encounter_params
-      encounter_agrs = {
-        name: args[:name].to_s.strip,
-        gender_code: args[:gender][:code], 
-        gender_display: args[:gender][:display], 
-        age: args[:age], 
-        birth_date: args[:birth_date], 
-        iden: args[:iden], 
-        phone: args[:phone].to_s.strip, 
-        address: args[:address], 
-        occupation_code: args[:occupation][:code], 
-        occupation_display: args[:occupation][:display], 
-        contact_name: args[:contact_name],
-        hospital_oid: @cur_org.id,
-        hospital_name: @cur_org.name,
-        nation_code: args[:nation][:code], 
-        nation_display: args[:nation][:display], 
-        marriage_code: args[:marriage][:code], 
-        marriage_display: args[:marriage][:display],
-        unit_name: args[:unit_name], 
-        blood_code: args[:blood][:code], 
-        blood_display: args[:blood][:display], 
-        height: args[:height], 
-        weight: args[:weight], 
-        encounter_loc_id: @cur_dep.id,
-        encounter_loc_display: @cur_dep.name,
-        drugstore_location_id: args[:drugstore_location][:id],
-        author_id: current_user.id,
-        photo: args[:photo]
-      }
-      diagnose_args = args[:diagnoses]  #诊断信息
-      allergen_args = args[:allergens] #过敏信息
+      args = encounter_params.delete_if {|key,value| value.blank?}
+      begin
+        encounter_agrs = {
+          name: args[:name].to_s.strip,
+          gender_code: (args[:gender]||{})[:code], 
+          gender_display: (args[:gender]||{})[:display], 
+          age: args[:age], 
+          birth_date: args[:birth_date], 
+          iden: args[:iden], 
+          phone: args[:phone].to_s.strip, 
+          address: args[:address], 
+          occupation_code: (args[:occupation]||{})[:code], 
+          occupation_display: (args[:occupation]||{})[:display], 
+          contact_name: args[:contact_name],
+          hospital_oid: @cur_org.id,
+          hospital_name: @cur_org.name,
+          nation_code: (args[:nation]||{})[:code], 
+          nation_display: (args[:nation]||{})[:display], 
+          marriage_code: (args[:marriage] || {})[:code], 
+          marriage_display: (args[:marriage] || {})[:display],
+          unit_name: args[:unit_name], 
+          blood_code: (args[:blood]||{})[:code], 
+          blood_display: (args[:blood]||{})[:display], 
+          height: args[:height], 
+          weight: args[:weight], 
+          encounter_loc_id: @cur_dep.id,
+          encounter_loc_display: @cur_dep.name,
+          drugstore_location_id: (args[:drugstore_location]||{})[:id],
+          author_id: current_user.id,
+          photo: args[:photo]
+        }
+      rescue Exception => e
+        raise "未知数据格式 #{e.message}"
+      end
+      diagnose_args = args[:diagnoses]||[]  #诊断信息
+      allergen_args = args[:allergens]||[] #过敏信息
       ret  = {
         encounter: encounter_agrs.delete_if {|key,value| value.blank?},
         diagnoses: diagnose_args, # ICD10 [{code: '', display: ''}]
