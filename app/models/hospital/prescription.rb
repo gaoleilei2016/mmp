@@ -7,7 +7,7 @@ class ::Hospital::Prescription < ApplicationRecord
 	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
 	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
-	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
+	belongs_to :bill, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
 
 
 
@@ -88,7 +88,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	# 待收费处方  生成订单之后待收费
+	# 已审核处方  生成订单之后待收费
 	# {
 	# 	# 创建订单人
 	# 	create_bill_opt: {
@@ -99,7 +99,8 @@ class ::Hospital::Prescription < ApplicationRecord
 	# 	bill_at: Time
 	#   bill_id: 
 	# }
-	def wait_charge(args, cur_user)
+	# def wait_charge(args, cur_user)
+	def commit_bill(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 1 # 已审核的处方可以变为待收费
 			self.status = 2
@@ -114,7 +115,12 @@ class ::Hospital::Prescription < ApplicationRecord
 	end
 
 	# 待收费转为已审核
-	def back_wait_charge(args, cur_user)
+	# def back_wait_charge(args, cur_user)
+	#  {
+	# 	args: {}
+	# 	cur_user: User
+	#  }
+	def cancel_bill(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 2 # 已审核的处方可以变为待收费
 			self.status = 1
@@ -347,6 +353,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			},
 			# 账单id
 			bill_id: self.bill_id,
+			bill_status: self.bill&.status.to_s,
 			# 处方权限
 			confidentiality: {
 				code: self.confidentiality_code,
