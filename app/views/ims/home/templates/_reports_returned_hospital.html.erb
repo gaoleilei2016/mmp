@@ -1,51 +1,12 @@
-<template>
-  <el-table
-    :data="tableData5"
-    style="width: 100%">
-    <el-table-column type="expand">
-      <template slot-scope="props">
-        <el-form label-position="left" inline class="demo-table-expand">
-          <el-form-item label="商品名称">
-            <span>{{ props.row.name }}</span>
-          </el-form-item>
-          <el-form-item label="所属店铺">
-            <span>{{ props.row.shop }}</span>
-          </el-form-item>
-          <el-form-item label="商品 ID">
-            <span>{{ props.row.id }}</span>
-          </el-form-item>
-          <el-form-item label="店铺 ID">
-            <span>{{ props.row.shopId }}</span>
-          </el-form-item>
-          <el-form-item label="商品分类">
-            <span>{{ props.row.category }}</span>
-          </el-form-item>
-          <el-form-item label="店铺地址">
-            <span>{{ props.row.address }}</span>
-          </el-form-item>
-          <el-form-item label="商品描述">
-            <span>{{ props.row.desc }}</span>
-          </el-form-item>
-
-        </el-form>
-      </template>
-    </el-table-column>
-    <el-table-column
-      label="商品 ID"
-      prop="id">
-    </el-table-column>
-    <el-table-column
-      label="商品名称"
-      prop="name">
-    </el-table-column>
-    <el-table-column
-      label="描述"
-      prop="desc">
-    </el-table-column>
-  </el-table>
-</template>
-
-<style>
+<style type="text/css">
+  .thiner-row thead > tr > th {
+    padding: 5px 0;
+    vertical-align: middle;
+  }
+  .thiner-row tbody > tr > td {
+    padding: 5px 0;
+    vertical-align: middle;
+  }
   .demo-table-expand {
     font-size: 0;
   }
@@ -58,51 +19,357 @@
     margin-bottom: 0;
     width: 50%;
   }
+  /* 二级表格表头背景 */
+  .inner-table .el-table__header th {
+    background-color: #F5F7FA !important;
+  }
+  .el-table .primary-row {
+    background: #E2F6F4 !important;
+  }
 </style>
+<template>
+  <!-- 接诊管理、统计页面 -->
+  <div id="reports_dispensed_hospital_div">
+    <el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item>报表</el-breadcrumb-item>
+    </el-breadcrumb>
+    <div class="float-right-btns" style="position: relative;">
+      <div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
+        <!-- <el-badge :value="printEles.length" class="item"> -->
+          <!-- <el-button size="mini" @click="print">打印</el-button> -->
+        <el-dropdown size="mini" split-button @click="print">
+          打印
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item><span @click="print">连续打印</span></el-dropdown-item>
+            <el-dropdown-item><span @click="print({break: true})">分页打印</span></el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        <!-- </el-badge> -->
+      </div>
+    </div>
+    <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+      <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+      <div style="">
+        <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+          <el-col :span="8">
+            <el-date-picker
+              v-model="filter.range"
+              type="datetimerange"
+              :picker-options="rangePickerOptions"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              size="mini"
+              style="width: 100%;"
+              align="right">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="6">
+            <el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input>
+          </el-col>
+          <el-col :span="2">
+            <el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+          </el-col>
+        </el-row>
+        <el-table
+          :data="dispensed_hospitals"
+          @selection-change="handleSelectionChange"
+          class="thiner-row"
+          default-expand-all
+          row-class-name="primary-row"
+          :show-header="false"
+          style="width: 100%">
+          <el-table-column
+            type="selection"
+            width="55">
+          </el-table-column>
+          <el-table-column type="expand" >
+            <template slot-scope="props">
+              <el-table
+                :data="(props.row.drugs||[])"
+                show-summary
+                class="inner-table"
+                style="width: 100%">
+                <el-table-column
+                  label=""
+                  width="60">
+                  <template slot-scope="scope">
+                    {{ scope.$index + 1 }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  label="药品名"
+                  min-width="200">
+                  <template slot-scope="scope">
+                    {{ scope.row.title }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  min-width="50"
+                  align="left"
+                  label="规格">
+                  <template slot-scope="scope">
+                    {{ scope.row.specification }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  min-width="50"
+                  prop = "total_qty"
+                  align="right"
+                  label="数量">
+                  <!-- <template slot-scope="scope">
+                    {{ scope.row.total_qty }}
+                  </template> -->
+                </el-table-column>
+                <el-table-column
+                  min-width="70"
+                  align="center"
+                  label="单位">
+                  <template slot-scope="scope">
+                    {{ scope.row.unit }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  min-width="80"
+                  align="right"
+                  label="单价">
+                  <template slot-scope="scope">
+                    {{ scope.row.price }}
+                  </template>
+                </el-table-column>
+                <el-table-column
+                  min-width="100"
+                  prop = "total_amount"
+                  align="right"
+                  label="金额">
+                  <template slot-scope="scope">
+                    {{ scope.row.total_amount | formatMoney(2) }}
+                  </template>
+                </el-table-column>
+              </el-table>
+            </template>
+          </el-table-column>
+          <el-table-column
+            type=""
+            width="30">
+            <template slot-scope="scope">
+              {{ scope.$index + 1 }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            min-width="240"
+            align="left"
+            label="">
+            <template slot-scope="scope">
+              {{ scope.row.name }}
+            </template>
+          </el-table-column>
+
+          <el-table-column
+            min-width="240"
+            align="left"
+            label="">
+            <template slot-scope="scope">
+              {{ scope.row.drug_count }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            min-width="240"
+            align="left"
+            label="">
+            <template slot-scope="scope">
+              {{ scope.row.total_amount }}
+            </template>
+          </el-table-column>
+          
+        </el-table>
+      </div>
+    </el-tabs>
+    <!-- 分页标记 -->
+   <!--  <el-pagination
+      background
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[10, 25, 50, 100, 200]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="dataCount">
+    </el-pagination> -->
+
+
+    <!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
+      <prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
+    </div> -->
+    <%= render "ims/home/render/print_report_table"%>
+    
+  </div>
+</template>
+
+<!-- 处方显示模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
 
 <script type="text/javascript">
 window.current_template_obj = {
   data:function(){
+    var options = [{code: "0", display: "处方发药汇总-医院"}];
     return {
-        tableData5: [{
-          id: '12987122',
-          name: '好滋好味鸡蛋仔',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
+      activeName: options[0].code,
+      cardTabsOptions: options,
+      multipleSelection: [],
+      printEles: [], // 打印的元素
+
+      dispensed_hospitalsResource: Vue.resource('/ims/reports/returned_hospital.json'),
+      dispensed_hospitals: [],
+      prescriptions: [],
+      ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+      orders: [],
+
+      encounter: {},
+      orgname: "",
+      isShowfilters: false, // 高级搜索
+      filter: {
+        range: "",
+        name: "",
+      },
+
+      rangePickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
         }, {
-          id: '12987123',
-          name: '好滋好味鸡蛋仔',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
+          text: '最近一个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
         }, {
-          id: '12987125',
-          name: '好滋好味鸡蛋仔',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
-        }, {
-          id: '12987126',
-          name: '好滋好味鸡蛋仔',
-          category: '江浙小吃、小吃零食',
-          desc: '荷兰优质淡奶，奶香浓而不腻',
-          address: '上海市普陀区真北路',
-          shop: '王小虎夫妻店',
-          shopId: '10333'
+          text: '最近三个月',
+          onClick: function (picker) {
+            var end = new Date();
+            var start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
         }]
+      },
+
+      isShowOrdersDialog: false, // 显示医嘱详细模态框
+      isShowPresDialog: false, // 显示处方详细
+      // 搜索
+      search: "", // 搜索内容
+      tableHeight: 200, // 表格高度
+      // 分页相关
+      currentPage: 1, // 当前页
+      pageSize: 25, // 默认一页显示25条
+      dataCount: 100, // 总数据条数
+    }
+  },
+  components: {
+    // 处方打印组件
+    'prescriptionprint': {
+      props: ['encounter', 'prescription'],
+      template: "#prescription-print-template",
+    },
+  },
+  watch: {
+    search: function (newValue, oldValue) {
+      this.getData();
+    },
+  },
+  mounted: function() {
+    this.$nextTick(function(){
+      this.init();
+    })
+  },
+  methods: {
+    init: function () {
+      var _this = this;
+      _this.orgname = $("#current_org_name").val();
+      // 获取基础设置内容
+      Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+        var res = response.data;
+        if(res.flag) {
+          $("#prescription-print-template").html(res.data.print_pres_html)
+        }
+      },function() {
+        _this.$message.error("获取初始值失败，请联系管理员。");
+      })
+      // var clientHeight = document.body.clientHeight;
+      // _this.tableHeight = clientHeight - 340;
+      _this.getData();
+    },
+    getData: function () {
+      var _this = this;
+      _this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+        var res = response.data;
+        if(res.flag) {
+          _this.dispensed_hospitals = res.data;
+          console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
+          _this.dataCount = res.count;
+        }else{
+          _this.$message.error(res.info);
+        }
+      },function(response) {
+        _this.$message.error("数据汇总出错。");
+      })
+    },
+    print: function (json) {
+      if(!this.printEles || this.printEles.length==0) {
+        this.printEles = this.dispensed_hospitals;
       }
+      this.$nextTick(function(){
+        var html = $(".ims-print-report-area").html(),
+            style = ".ims-print-report-table > table { width: 100%; -webkit-border-horizontal-spacing: 0px; -webkit-border-vertical-spacing: 0px; border-top: 1px solid #666; border-left: 1px solid #666; } .ims-print-report-table td { border-right: 1px solid #666; border-bottom: 1px solid #666; padding: 2px 5px; }";
+        if(json.break) {
+          style += ".ims-print-report-table { page-break-before:always; } ";
+        }
+        this.$parent.generatePdf({html: html, style_string: style});
+        this.printEles = [];
+      })
+    },
+    // 每页条数改变
+    handleSizeChange: function (val) {
+      this.patPageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+      this.currentPage = val;
+      this.getData();
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+      this.multipleSelection = val;
+      this.printEles = val;
+      console.log(val)
+    },
+    // 选择tab
+    handleTabClick: function (tab, event) {
+
+    },
+    // 判断性别，根据性别显示图标
+    judgeGender: function (gender) {
+      if(!gender){ gender = ""; }
+      var html = '';
+      if(gender.indexOf('男')>-1){
+        html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+      }else if(gender.indexOf('女')>-1){
+        html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+      }else{
+        html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+      }
+      return html;
+    },
+
   },
-  methods:{
-  },
-  mounted:function(){
-  }
 }
 </script>
-
