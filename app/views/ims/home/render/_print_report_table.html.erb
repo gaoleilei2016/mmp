@@ -13,14 +13,14 @@
 				<td align="right" width="10%">金额</td>
 			</tr>
 			<tr v-for="(drug, key) in (item.drugs||[])" :key="key">
-				<td>{{ drug.name }}</td>
+				<td>{{ drug.title }}</td>
 				<td align="center">{{ drug.specification }}</td>
 				<td align="center">{{ drug.total_qty }}</td>
 				<td align="center">{{ drug.unit }}</td>
 				<td align="right">{{ drug.price }}</td>
 				<td align="right">{{ drug.total_amount | formatMoney(2)}}</td>
 			</tr>
-			<tr><td colspan="3" style="border-right: none;">医院名称：{{item.name}}</td><td colspan="3" align="right">小计：</td></tr>
+			<tr><td colspan="3" style="border-right: none;">医院名称：{{item.name}}</td><td colspan="3" align="right">小计：{{item.total_amount | formatMoney(2)}}</td></tr>
 		</table>
 		<br/>
 	</div>

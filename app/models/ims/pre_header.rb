@@ -15,7 +15,7 @@ class Ims::PreHeader < ApplicationRecord
 			args[:prescriptions].each do |k,prescription|
 				header = prescription_data prescription,current_user,order
 				next if header.blank?
-				(prescription_headers << ::Ims::PreHeader.create!(header) ) unless ::Ims::PreHeader.where(prescription_no:prescription[:prescription_no]).count>0
+				(prescription_headers << ::Ims::PreHeader.create!(header) ) #unless ::Ims::PreHeader.where(prescription_no:prescription[:prescription_no]).count>0
 			end
 			prescription_headers.count==args[:prescriptions].count ? {flag:true,info:"处方保存成功！"} : {flag:false,info:"处方保存失败。"}
 		end
