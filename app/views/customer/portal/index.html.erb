@@ -429,7 +429,7 @@
 						if (json.flag) {
 							_this.organs = json.data;
 						}else{
-							_this.$message(json.info);
+							mui.toast(json.info);
 						}
 					},
 					complete:function() {

@@ -64,7 +64,7 @@ Rails.application.routes.draw do
       end
     end
     resources :report
-    resources :fapiao
+    resources :invoice_headers
   end
   ########### customer ##########
   ############################
@@ -86,6 +86,7 @@ Rails.application.routes.draw do
         end
       end
       resources :mtemplates # 医嘱模板管理
+      resources :codes # 编码表
     end
     resources :home
     # 就诊管理、统计

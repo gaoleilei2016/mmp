@@ -107,6 +107,15 @@
 		          <el-menu-item index="4-4-2">就诊</el-menu-item>
 		        </el-submenu>
 		      </el-submenu>
+		      <el-submenu index="5">
+		        <template slot="title">
+		          <i class="fa fa-fw fa-coffee"></i>
+		          <span>其他</span>
+		        </template>
+		        <el-menu-item index="5-1">
+			        <span slot="title">切换科室</span>
+			      </el-menu-item>
+		      </el-submenu>
 
 		    </el-menu>
 	  	</div>
@@ -333,12 +342,29 @@
 	  	<div name="4-4-1" class="card-wrapper">
 	  		<div class="page-header"><h4>4-4-1 处方单　<small></small></h4></div>
 	  		<p>启用打印处方功能：是、否</p>
-	  		<p>处方打印内容：html代码，<font class="text-danger">可以修改显示的文字，但是不要随意修改代码！！！</font></p>
+	  		<p>处方打印内容：html代码，文件在 public/hospital/print_prescription.html<font class="text-danger">这是初始源码，可以拷贝这里代码进行覆盖处方打印样式。</font></p>
+	  		<el-tabs value="print_pres_html1" type="card">
+			    <el-tab-pane label="页面" name="print_pres_html1">
+			    	
+			    </el-tab-pane>
+			    <el-tab-pane label="源码" name="print_pres_html2">
+			    	<textarea style="width: 100%; height: 400px;"></textarea>
+			    </el-tab-pane>
+			    <font class="text-danger">可以修改显示的文字，但是不要随意修改代码！！！</font>
+			  </el-tabs>
 	  		<p>处方审核人：用于自动审核，从人员列表中选择。</p>
 	  	</div>
 	  	<div name="4-4-2" class="card-wrapper">
 	  		<div class="page-header"><h4>4-4-2 就诊　<small></small></h4></div>
 	  		<p>就诊查询有效时间（天）</p>
+	  	</div>
+	  	<div class="card-wrapper" align="center">
+	  		<h3><i class="fa fa-fw fa-coffee"></i> 其他</h3>
+	  		<img src="/assets/hospital/diliver0.png" style="width: 50%;">
+	  	</div>
+	  	<div name="5-1" class="card-wrapper">
+	  		<div class="page-header"><h4>5-1 切换科室　<small></small></h4></div>
+	  		<p>点击右上角按钮，显示<img src="/assets/hospital/5-1-1.jpg">，选择“切换科室”，<img src="/assets/hospital/5-1-2.jpg"></p>
 	  	</div>
 
 	  	<div align="center">
@@ -364,6 +390,15 @@ window.current_template_obj = {
 		init: function () {
 			var clientHeight = document.body.clientHeight;
       this.menuHeight = clientHeight;
+
+      Vue.resource('/hospital/print_prescription.html').get().then(function(response) {
+		    var html = response.data;
+		    $("#pane-print_pres_html1").html(html);
+		    $("#pane-print_pres_html2 textarea").val(html);
+				console.log(res)
+		  },function() {
+		  	_this.$message.error("获取处方打印html失败，请联系管理员。");
+		  })
 		},
 		handleSelectMenu: function (key, keyPath) {
 			console.log(key, keyPath);

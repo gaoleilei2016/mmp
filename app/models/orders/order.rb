@@ -82,17 +82,20 @@ class Orders::Order < ApplicationRecord
 					# prescriptions.each{|x|x.return_charge(arg0, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
-						org_id:order.target_org_id,#药房id
-						status:order.status, #订单状态
-						order_id:order.id, #订单id
-						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
-						order_code:order.order_code, #订单号
-						patient_name:order.patient_name, #患者名字
-						amt:order.net_amt, #订单金额
+						ch:target_org_id,#药房id
+						org_id:target_org_id,#药房id
+						status:status, #订单状态
+						order_id:id, #订单id
+						created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+						order_code:order_code, #订单号
+						patient_name:patient_name, #患者名字
+						amt:net_amt, #订单金额
 						flag:false, #true已收费  false 退费
 						info:'您有一张订单结算被用户取消了！', #订单金额
 					}
-					::NoticeBroadcastJob.perform_later(data:data)
+					# {ch:’’,type:’’,event:’’,content:’’}
+					::NoticeChannel.publish(data) rescue nil
+					# ::NoticeBroadcastJob.perform_later(data:data)
 					arg = {
 						reason:reason
 					}
@@ -114,6 +117,7 @@ class Orders::Order < ApplicationRecord
 		rescue Exception => e
 			p e.backtrace
 			p '我的，都是我的！'
+			result = {ret_code:'-1',info:'订单取消异常!'}
 		ensure
 			self.update_attributes(_locked:0)
 		end
@@ -168,10 +172,11 @@ class Orders::Order < ApplicationRecord
 		rescue Exception => e
 			p e.backtrace
 			p '我的，都是我的！'
+			result = {ret_code:'-1',info:'退药异常。',amt:0.0}
 		ensure
 			update_attributes(_locked:0)
-			return result
 		end
+		result
 	end
 
 	# private
@@ -221,6 +226,7 @@ class Orders::Order < ApplicationRecord
 			 	prescriptions.each{|x|x.charged(args, cur_user)}
 				update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 				data = {
+							ch:target_org_id,#药房id
 							org_id:target_org_id,#药房id
 							status:status, #订单状态
 							order_id:id, #订单id
@@ -231,12 +237,15 @@ class Orders::Order < ApplicationRecord
 							flag:true, #true已收费  false 退费
 							info:'您有新的已结算订单！', #订单金额
 						}
-				::NoticeBroadcastJob.perform_later(data:data)
+				::NoticeChannel.publish(data) rescue nil
+				# ::NoticeBroadcastJob.perform_later(data:data)
 			end
+			rsult = {ret_code:'0',info:'订单结算成功！'}
 		rescue Exception => e
 			p e.backtrace
+			rsult = {ret_code:'-1',info:'订单结算异常！'}
 		end
-		{ret_code:'0',info:'订单结算成功！'}
+		result
 	end
 
 	class << self
@@ -343,6 +352,7 @@ class Orders::Order < ApplicationRecord
 						else
 							if attrs[:invoice_id].blank?
 								data = {
+									ch:order.target_org_id,#药房id
 									org_id:order.target_org_id,#药房id
 									status:order.status, #订单状态
 									order_id:order.id, #订单id
@@ -353,7 +363,11 @@ class Orders::Order < ApplicationRecord
 									flag:true, #true已收费  false 退费
 									info:'您有新的线下支付订单！', #订单金额
 								}
-								::NoticeBroadcastJob.perform_later(data:data)
+								p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
+								::NoticeChannel.publish(data) rescue nil
+								p data
+								p "++++++++++++++++++++++++++++++"
+								# ::NoticeBroadcastJob.perform_later(data:data)
 							end
 						end
 						#订单创建成功之后改变处方状态
@@ -526,6 +540,7 @@ class Orders::Order < ApplicationRecord
 			rescue Exception => e
 				p e.backtrace
 				p '我的，都是我的！'
+				result = {ret_code:'-1',info:'订单完成异常！'}
 			ensure
 				order.update_attributes(_locked:0)
 			end

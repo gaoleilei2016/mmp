@@ -12,6 +12,8 @@ class InterfacesController < ApplicationController
 			re["drugs"] = o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
+			# p '~~~~~~~~~~',::Customer::InvoiceHeader.find(o.invoice_id)
+			re["invoice"] = ::Customer::InvoiceHeader.find(o.invoice_id) rescue nil
 			return render json:{flag:true,order:re}
 		end
 		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
@@ -24,6 +26,8 @@ class InterfacesController < ApplicationController
 			ret<<re
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
+		# render json:{flag:true,rows:[{},{},{}],total:4}
+		# render json:{flag:true,rows:[],total:0}
 	end
 	#支付
 	def pay_order
@@ -87,15 +91,23 @@ class InterfacesController < ApplicationController
 
 	def save_order
 		# params[:order][:user_id] = current_user.id
+		# p '~~~~~~~~~~~~',params
 		order = JSON.parse(params[:order].to_json)
 		order[:current_user] = current_user
+		if params[:use_invoice_header].to_s=="true"
+			invoice_header = ::Customer::InvoiceHeader.find(params[:invoice_header_id]).dup
+			invoice_header.user_id = nil
+			invoice_header.type_class = params[:invoice_type_class]
+			invoice_header.content = params[:invoice_content]
+			invoice_header.save
+			order[:invoice_id] = invoice_header.id
+		end
 		re = Orders::Order.create_order_by_presc_ids(order)
 		flash[:notice] = re[:info]
 		session[:cart_prescription_ids] = nil
 		if re[:ret_code]!='0'
 			return redirect_to "/customer/portal/settlement"
 		end
-		# p '~~~~~~~~~~~~',re
 		# p re
 		# flash[:notice] = re[:info]
 		if re[:order].payment_type.to_s == '2'

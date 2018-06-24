@@ -32,6 +32,7 @@ class WechatController < ApplicationController
 
   def websocket
     uid = current_user.organization_id
+    p '33333333333333333333333333333333', uid
     render json: {host: request.host_with_port, uid: uid}
   end
 

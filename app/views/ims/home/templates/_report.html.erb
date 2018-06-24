@@ -1,50 +1,111 @@
 <style type="text/css">
 </style>
 <template>
-  <div id="ims_order_main">
-    <el-menu default-active="1-4-1" id="prescription_menu" class="el-col-4 el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
+    <!-- 报表 -->
+    <div id="reports_index_div">
+        <el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
+          <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+          <el-breadcrumb-item>报表</el-breadcrumb-item>
+        </el-breadcrumb>
+        <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
+        <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+            <div style="">
+                <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+                    <el-col :span="8">
+                        <small>日期</small>
+                        <el-date-picker
+                      v-model="filter.range"
+                      type="datetimerange"
+                      :picker-options="rangePickerOptions"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      size="mini"
+                      style="width: 100%;"
+                      align="right">
+                    </el-date-picker>
+                    </el-col>
+                    <el-col :span="2" style="padding-top: 18px;">
+                        <el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
+                    </el-col>
+                </el-row>
+            <el-table
+              :data="reports"
+              :height="tableHeight"
+              @selection-change="handleSelectionChange"
+              class="thiner-row"
+              style="width: 100%">
+                <el-table-column
+                    min-width="250"
+                    align="left"
+                    label="药品名称">
+                    <template slot-scope="scope">
+                      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="240"
+                    align="left"
+                    label="规格">
+                    <template slot-scope="scope">
+                        <i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.specification }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="170"
+                    align="right"
+                    label="数量">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i>&#12288;{{ scope.row.total_qty }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="140"
+                    align="center"
+                    label="单位">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="170"
+                    align="right"
+                    label="单价">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column
+                    min-width="250"
+                    align="right"
+                    label="金额">
+                    <template slot-scope="scope" hidden=true>
+                      <i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
+                    </template>
+                  </el-table-column>
+                  <!-- <el-table-column
+                    min-width=""
+                    label="">
+                    <template slot-scope="scope">
+                      <i v-if="scope.row.ids" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.ids }}
+                    </template>
+                  </el-table-column> -->
+            </el-table>
+            </div>
+      </el-tabs>
+      <!-- 分页标记 -->
+      <el-pagination
+        background
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-sizes="[10, 25, 50, 100, 200]"
+        :page-size="pageSize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="dataCount">
+      </el-pagination>
 
-      <el-menu-item index="1" @click.native="show_panel('out_order',$event)">
-        <i class="el-icon-goods"></i>
-        <span >处方发药汇总-医院</span>  
-      </el-menu-item>
-
-      <el-menu-item index="2" @click.native="show_panel('return_drug',$event)">
-        <i class="el-icon-sold-out"></i>
-        <span >处方退药汇总-医院</span>  
-      </el-menu-item>
-
-      <el-menu-item index="3" @click.native="show_panel('reports',$event)">
-        <i class="el-icon-document"></i>
-        <span >处方药品汇总表</span>
-      </el-menu-item>
-
-      <el-menu-item index="4" @click.native="show_panel('settings',$event)">
-        <i class="el-icon-setting"></i>
-        <span >设置</span>
-      </el-menu-item>
-      
-    </el-menu>
-
-    <div class="function_panel out_order">
-      <%= render "ims/home/render/out_order"%>
     </div>
-
-    <div class="function_panel return_drug" style="display:none;">
-      <%= render "ims/home/render/return_order"%>
-    </div>
-
-    <div class="function_panel reports" style="display:none;">
-      <%= render "ims/home/render/order_reports"%>
-    </div>
-
-    <div class="function_panel settings" style="display:none;">
-      <%= render "ims/home/render/settings"%>
-    </div>
-
-    <el-button @click="change" id="notice_input" style="display:none;"></el-button>
-    <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
-  </div>
 </template>
 
 <!-- 处方显示模板 -->

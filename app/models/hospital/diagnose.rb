@@ -64,7 +64,7 @@ class ::Hospital::Diagnose < ApplicationRecord
 						code: fhir_coding_diagnose[:code],
 						display: fhir_coding_diagnose[:display],
 						system: "ICD10",
-						type_code: 0,
+						type_code: '0',
 						type_display: "主诊断",
 						encounter: cur_encounter,
 						doctor: cur_user,
@@ -86,7 +86,7 @@ class ::Hospital::Diagnose < ApplicationRecord
 			def to_master_and_slaver(cur_diagnoses)
 				master, slaver = [], []
 				cur_diagnoses.each do |_diagnose|
-					if _diagnose.type_code == 0
+					if _diagnose.type_code.to_s == '0'
 						master << _diagnose.to_web_front
 					else
 						slaver << _diagnose.to_web_front
