@@ -637,13 +637,13 @@ window.current_template_obj = {
             duration:(stat ? 4500 : 0)
           })          
         };
+        _this._data.detail = [{pres:[{type:"处方"}]}]
         try{
           str = "div.function_panel.out_order"
           $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
