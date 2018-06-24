@@ -17,13 +17,13 @@
 </style>
 <%
   @is_dispensed=true
-  @is_hospital=true
-  @hospital = "医院"
+  @is_hospital=false
+  @hospital = "发药人"
   @dispensed = "发药"
 %>
 <template>
 	<!-- 接诊管理、统计页面 -->
-	<div id="reports_dispensed_hospital_div">
+	<div id="reports_dispensed_name_div">
 		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
 		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
 		  <el-breadcrumb-item>报表</el-breadcrumb-item>
@@ -67,7 +67,7 @@
 					</el-col>
 				</el-row>
 				<el-table
-		      :data="dispensed_hospitals"
+		      :data="dispensed_names"
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      default-expand-all
@@ -150,7 +150,7 @@
 				    align="left"
 				    label="">
 				    <template slot-scope="scope">
-				      <span style="color: darkkhaki;">医院名称：</span>{{ scope.row.name }}
+				      <span style="color: darkkhaki;">发药人：</span>{{ scope.row.name }}
 				    </template>
 				  </el-table-column>
 
@@ -202,15 +202,15 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
-		var options = [{code: "0", display: "处方发药汇总-医院"}];
+		var options = [{code: "0", display: "处方发药汇总-发药人"}];
 		return {
 			activeName: options[0].code,
 			cardTabsOptions: options,
 			multipleSelection: [],
 			printEles: [], // 打印的元素
 
-			dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'),
-			dispensed_hospitals: [],
+			dispensed_namesResource: Vue.resource('/ims/reports/dispensed_name.json'),
+			dispensed_names: [],
 			prescriptions: [],
 			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
 			orders: [],
@@ -298,11 +298,11 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
+			_this.dispensed_namesResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
-          _this.dispensed_hospitals = res.data;
-  				console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
+          _this.dispensed_names = res.data;
+  				console.log('dispensed_names----------',_this.dispensed_names)
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);
@@ -313,7 +313,7 @@ window.current_template_obj = {
 		},
 		print: function (json) {
 			if(!this.printEles || this.printEles.length==0) {
-				this.printEles = this.dispensed_hospitals;
+				this.printEles = this.dispensed_names;
 			}
 			this.$nextTick(function(){
 				var html = $(".ims-print-report-area").html(),
