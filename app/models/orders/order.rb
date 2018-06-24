@@ -369,7 +369,7 @@ class Orders::Order < ApplicationRecord
 							patient_name:order.patient_name, #患者名字
 							amt:order.net_amt, #订单金额
 							flag:true, #true已收费  false 退费
-							info:'您有新的线下支付订单！', #订单金额
+							info:'您有新的订单！', #订单金额
 						}
 						p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
 						::NoticeChannel.publish(data) rescue nil
