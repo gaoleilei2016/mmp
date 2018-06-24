@@ -56,7 +56,7 @@
 			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
 			<h4 style="font-weight: 500;">处方笺</h4>
 			<span style="border: 1px solid;padding: 5px;position: absolute;left: 0;top: 15px;margin: 0; font-weight: 500;" v-if="prescription.type.display">{{prescription.type.display.split("处方")[0]}}</span>
-			<span style="padding: 5px;position: absolute;right: 0;top: 15px;margin: 0; font-weight: 500; color: #F44868;">№{{prescription.prescription_no}}</span>
+			<span style="padding: 5px;position: absolute;right: -5px;top: 35px;margin: 0; font-weight: 500; color: #F44868;">№{{prescription.prescription_no}}</span>
 		</div>
 		<div style="padding: 0 0 8px;border-bottom: 1px solid #666;">
 			<span>{{prescription.encounter_loc.display}}</span>
@@ -90,8 +90,6 @@
 		<div style="padding-top: 6px;">
 			<div style="width: 49.9%;float: left;">审核、配方：{{prescription.auditor&&prescription.auditor.display}}</div>
 			<div style="width: 50%;float: left;">核对、发药：{{prescription.delivery&&prescription.delivery.display}}</div>
-			<!-- <div style="width: 49.9%;float: left;">医师：{{prescription.author.display}}</div> -->
-			<!-- <div style="width: 50%;float: left;">总计：{{prescription.price}}</div> -->
 		</div>
 	</div>
 </div>
