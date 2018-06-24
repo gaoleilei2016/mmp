@@ -119,9 +119,11 @@ window.current_template_obj = {
       var _this = this
       console.log("change++++++++++++++++++++")
       data = document.notice_data
-      $.each(this._data.order_lists,function(k,v){if(v.order_id == data.order_id){return false;}})
+      $.each(this._data.order_lists,function(k,v){
+        if(Number(v.order_id) == Number(data.order_id) )return false;
+      })
       if (data.flag) {
-        if (data.status == _this.out_list_panel) {
+        if (Number(data.status) == Number(_this.out_list_panel) ) {
           $("#yuyin")[0].play()
           temp = this._data.order_lists
           temp.push(data)
@@ -135,7 +137,7 @@ window.current_template_obj = {
       }else{
         temp = this._data.order_lists
         $.each(temp,function(k,v){
-          if (v.order_id == data.order_id) {
+          if (Number(v.order_id) == Number(data.order_id) ) {
             temp.splice(k,1)
             return false
           };
@@ -649,6 +651,44 @@ window.current_template_obj = {
         });
       });
     },
+    //退费
+    return_amount:function (id) {
+      var _this = this
+      if (id){}else{
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能退费！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/return_amount?id='+id).then(function(response) {
+        stat = response.data.flag ? true : false
+        info = response.data.info
+        type = stat ? "success" : "warning";
+        if (info) {
+          _this.$notify({
+            title: '提示',
+            message: info,
+            type:type,
+            duration:(stat ? 4500 : 0)
+          })          
+        };
+        try{
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".prescription_list_panel .is-active").click()
+        }catch(e){
+          _this._data.order_lists = []
+        }
+        _this._data.detail = [{}]
+
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },    
     //收费
     charging_pre:function(id){
       var _this = this
