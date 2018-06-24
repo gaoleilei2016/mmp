@@ -41,7 +41,6 @@
 		      :data="drug_reports"
 		      :height="tableHeight"
 		      @selection-change="handleSelectionChange"
-		      class="thiner-row"
 		      style="width: 100%">
 		     	<el-table-column
 			      type=""
@@ -128,7 +127,7 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
-		var options = [{code: "0", display: "处方发药汇总-医院"}];
+		var options = [{code: "0", display: "处方药品汇总表"}];
 		return {
 			activeName: options[0].code,
 			cardTabsOptions: options,
@@ -216,8 +215,8 @@ window.current_template_obj = {
 			},function() {
 		  	_this.$message.error("获取初始值失败，请联系管理员。");
 		  })
-      var clientHeight = document.body.clientHeight;
-      _this.tableHeight = clientHeight - 340;
+      // var clientHeight = document.body.clientHeight;
+      // _this.tableHeight = clientHeight - 340;
       _this.getData();
 		},
 		getData: function () {
