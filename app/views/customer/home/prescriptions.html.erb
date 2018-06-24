@@ -126,7 +126,7 @@
 					var page = Math.ceil(_this.prescriptions.length/per)+1;
 				}
 				$.ajax({
-					url:'/hospital/prescriptions/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page='+page+'&per='+per,
+					url:'/interfaces/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page='+page+'&per='+per,
 					success:function(json) {
 						if (pulltype=='pulldown') {
 							if (json.flag) {

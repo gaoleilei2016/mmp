@@ -2,6 +2,70 @@ class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
 	#############################
 	############ zyz ############
+	# GET
+	# /hospital/prescriptions/get_prescriptions_by_phone
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的首页，获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# 获取未取药的有效的处方，并按医院合并后下订单
+	def get_prescriptions_by_phone
+		cur_phone = params[:phone]
+		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+		ret = []
+		::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| 
+			{org_id: _prescription.organization.id, org_name: _prescription.organization.name }
+		}.each do |cur_org, _prescriptions|
+			prescription_ids = []
+			cur_org[:prescriptions] = _prescriptions.map{|x| 
+				prescription_ids<<x.id
+				x.to_web_front
+			}
+			cur_org[:prescription_ids] = prescription_ids
+			cur_org[:prescription_ids2] = prescription_ids
+			cur_org[:first_created_at] = _prescriptions[0].created_at
+			ret << cur_org
+		end
+		render json: {flag: true, info: "success", data: ret}
+	end
+	# GET
+	# /hospital/prescriptions/get_all_prescriptions_by_phone
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# 获取所有处方以及过期等状态
+	def get_all_prescriptions_by_phone
+		cur_phone = params[:phone].to_s
+		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
+		ret = []
+		page = params[:page]||1
+		per = params[:per]||5
+		sort = "DESC"
+		::Hospital::Interface.get_prescriptions_by_phone_with_sort(cur_phone, page, per, sort).each do |_prescription|
+			ret << _prescription.to_web_front
+		end
+		count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
+		render json: {flag: true, info: "success", data: ret, count: count}
+	end
+
+	# PUT
+	# 根据处方ids更新 处方已读
+	# {
+	#   prescription_ids: []
+	# }
+	# def read_prescription
+	# 	return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil?
+	# 	::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
+	# 	render json:{flag: true, info:"success"}
+	# end
+
+	# GET
+	# 获取未读处方的数量  通过电话查询
+	# {phone: ""}
+	def get_not_read_prescription
+		return render json:{flag: false, info:"没有电话号码或格式不正确"} if params[:phone].nil?
+		cur_phone = params[:phone]
+		count = ::Hospital::Interface.get_not_read_prescriptions_by_phone(cur_phone).count
+		render json:{flag: true, info: "success", count: count}
+	end
+
 	def get_orders
 		if params[:id]
 			o = ::Orders::Order.find(params[:id])
