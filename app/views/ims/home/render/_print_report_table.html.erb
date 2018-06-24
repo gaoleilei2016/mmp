@@ -1,6 +1,6 @@
 <div class="ims-print-report-area" style="display: none;" v-if="printEles && printEles.length>0">
 	<div class="ims-print-report-table" v-for="(item, index) in printEles" :key="index">
-		<h3 align="center">订单汇总表[已发药][医院]</h3>
+		<h3 align="center"><%=current_user.organization.name%><br/>处方<span v-if="item.total_amount<0">退药</span><span v-else>发药</span>汇总-医院</h3>
 		<table>
 			<tr><td colspan="6">医院名称：{{item.name}}</td></tr>
 			<tr><td colspan="6">时间：<span v-if="filter.range">{{filter.range[0] | formatDate}} - {{filter.range[1] | formatDate}}</span></td></tr>
