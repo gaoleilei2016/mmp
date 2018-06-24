@@ -192,41 +192,14 @@
 			<div class="mui-page-content">
 				<div class="mui-scroll-wrapper">
 					<div class="mui-scroll">
-						<!-- <ul class="mui-table-view mui-table-view-chevron">
-							<li class="mui-table-view-cell mui-media">
-								<a class="mui-navigate-right" href="#account">
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="<%= session[:user]["headimgurl"] rescue nil %>">
-									<div class="mui-media-body">
-										<%= current_user.name.present? ? current_user.name : current_user.login %>
-										<p class='mui-ellipsis'>账号:<%= current_user.login %></p>
-									</div>
-								</a>
-							</li>
-						</ul> -->
 						<div style="padding: 20px;padding-top: 30px;">
 							<a href="#account" style="width: 80px;height: 80px;float: right;border: 1px solid #ddd;border-radius: 50%;overflow: hidden;">
-								<img src="/assets/admin/TM.png" style="width: 100%;height: 100%;">
+								<img src="<%= current_user.headimgurl.present? ? current_user.headimgurl : '/assets/admin/TM.png' %>" style="width: 100%;height: 100%;">
 							</a>
 							<div style="overflow: hidden;height: 80px;font-size: 2em;font-weight: bold;position: relative;">
 								<div style="position: absolute; bottom: 8px;left: 10px;color: #666;"><%= current_user.name.present? ? current_user.name : current_user.login %></div>
 							</div>
 						</div>
-						<!-- <ul class="mui-table-view mui-table-view-chevron">
-							<li class="mui-table-view-cell">
-								<a href="/users/family" class="mui-navigate-right">
-									家庭管理
-									<i class="mui-pull-right update">0</i>
-								</a>
-							</li>
-						</ul>
-						<ul class="mui-table-view mui-table-view-chevron">
-							<li class="mui-table-view-cell">
-								<a href="/users/items" class="mui-navigate-right">
-									<span class="mui-badge mui-badge-success">new</span>
-									我的订单
-								</a>
-							</li>
-						</ul> -->
 						<ul class="mui-table-view" style="font-size: 16px;">
 							<li class="mui-table-view-cell">
 								<a href="/customer/home/prescriptions">
@@ -315,57 +288,49 @@
 		</script>
 		<!--单页面结束-->
 		<div id="account" class="mui-page">
-			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-				<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-					<span class="mui-icon mui-icon-left-nav"></span>设置
-				</button>
-				<h1 class="mui-center mui-title">账号与安全</h1>
-				<a href="/users/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;">
-					编辑
-				</a>
-			</div>
+			<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav"></div>
 			<div class="mui-page-content" style="padding-top: 46px;">
-						<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
-							<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
-								<span class="mui-icon mui-icon-left-nav"></span>
-							</button>
-							<h1 class="mui-center mui-title">账号与安全</h1>
-							<a href="/users/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;">
-								编辑
-							</a>
-						</div>
-						<ul class="mui-table-view">
-							<li class="mui-table-view-cell">
-								<a id="head" class="mui-navigate-right">头像
-								<span class="mui-pull-right head">
-									<img class="head-img mui-action-preview" id="head-img1" src="<%= session[:user]["headimgurl"] rescue nil %>"/>
-								</span>
-							</a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>姓名<span class="mui-pull-right"><%= session[:user]["name"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>账号<span class="mui-pull-right"><%= session[:user]["login"] rescue '未知' %></span></a>
-							</li>
-						</ul>
-						<ul class="mui-table-view">
-							<li class="mui-table-view-cell">
-								<a>性别<span class="mui-pull-right"><%= session[:user]["sex"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>出生日期<span class="mui-pull-right"><%= session[:user]["birth"] rescue '未知' %></span></a>
-							</li>
-							<!-- <li class="mui-table-view-cell">
-								<a>身高<span class="mui-pull-right"><%= session[:user]["height"] rescue '未知' %></span></a>
-							</li> -->
-							<!-- <li class="mui-table-view-cell">
-								<a>体重<span class="mui-pull-right"><%#= session[:user]["weight"] rescue '未知' %></span></a>
-							</li>
-							<li class="mui-table-view-cell">
-								<a>地址<span class="mui-pull-right"><%#= session[:user]["address"] rescue '未知' %></span></a>
-							</li> -->
-						</ul>
+				<div class="my_top_nav mui-navbar-inner mui-bar mui-bar-nav">
+					<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+						<span class="mui-icon mui-icon-left-nav"></span>
+					</button>
+					<h1 class="mui-center mui-title">账号与安全</h1>
+					<a href="/customer/home/user/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;color: #F55742;">
+						编辑
+					</a>
+				</div>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<a id="head" class="mui-navigate-right">头像
+						<span class="mui-pull-right head">
+							<img class="head-img mui-action-preview" id="head-img1" src="<%= current_user.headimgurl.present? ? current_user.headimgurl : '/assets/admin/TM.png' %>"/>
+						</span>
+					</a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>姓名<span class="mui-pull-right"><%= current_user["name"] rescue '未知' %></span></a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>账号<span class="mui-pull-right"><%= current_user["login"] rescue '未知' %></span></a>
+					</li>
+				</ul>
+				<ul class="mui-table-view">
+					<li class="mui-table-view-cell">
+						<a>性别<span class="mui-pull-right"><%= current_user["sex"] rescue '未知' %></span></a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>出生日期<span class="mui-pull-right"><%= current_user["birth"] rescue '未知' %></span></a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>身高<span class="mui-pull-right"><%= current_user["height"] rescue '未知' %></span></a>
+					</li>
+					<!-- <li class="mui-table-view-cell">
+						<a>体重<span class="mui-pull-right"><%#= current_user["weight"] rescue '未知' %></span></a>
+					</li>
+					<li class="mui-table-view-cell">
+						<a>地址<span class="mui-pull-right"><%#= current_user["address"] rescue '未知' %></span></a>
+					</li> -->
+				</ul>
 			</div>
 		</div>
 
