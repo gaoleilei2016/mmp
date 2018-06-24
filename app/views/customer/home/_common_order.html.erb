@@ -43,7 +43,7 @@
 						</li>
 					</ul>
 					<div style="line-height: 33px;">
-						合计 <span style="color: #F55742;">¥ {{format_float(order.total_price)}}</span>
+						合计 <span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(order.total_price)}}</span></span>
 						<span v-if="order.payment_type=='2'">（到店支付）</span>
 						<span style="float: right;" class="common_grey">{{order.reason}}</span>
 					</div>
