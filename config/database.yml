@@ -22,7 +22,8 @@ development:
   <<: *default
   password: Tenmind@207
   host: 192.168.2.207
-  database: mmp_lgl
+  # database: mmp_lgl
+  database: zyz
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".

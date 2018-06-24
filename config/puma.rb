@@ -2,7 +2,7 @@
 # environment 'production'
 environment 'development'
 threads 2, 16 # minimum 2 threads, maximum 32 threads
-workers 1
+workers 8
 
 app_name = 'mmp'
 
