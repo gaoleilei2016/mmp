@@ -12,7 +12,7 @@ vendor/*.*
 log/*.*
 .lock
 .rvmrc
-config/unicorn*
+config/puma.rb
 config/database.yml
 config/rabbitmq.yml
 config/setup/ip.yml
