@@ -20,7 +20,7 @@ class CreateImsPreDetails < ActiveRecord::Migration[5.1]
       t.float :send_qty
       t.float :return_qty
       t.string :unit
-      t.string :price
+      t.float :price
       t.float :amount
       t.string :note
       t.string :order_type
