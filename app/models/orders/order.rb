@@ -82,14 +82,14 @@ class Orders::Order < ApplicationRecord
 					# prescriptions.each{|x|x.return_charge(arg0, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
-						ch:order.target_org_id,#药房id
-						org_id:order.target_org_id,#药房id
-						status:order.status, #订单状态
-						order_id:order.id, #订单id
-						created_at:order.created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
-						order_code:order.order_code, #订单号
-						patient_name:order.patient_name, #患者名字
-						amt:order.net_amt, #订单金额
+						ch:target_org_id,#药房id
+						org_id:target_org_id,#药房id
+						status:status, #订单状态
+						order_id:id, #订单id
+						created_at:created_at.strftime("%Y-%m-%d %H:%M"), #订单创建时间
+						order_code:order_code, #订单号
+						patient_name:patient_name, #患者名字
+						amt:net_amt, #订单金额
 						flag:false, #true已收费  false 退费
 						info:'您有一张订单结算被用户取消了！', #订单金额
 					}
