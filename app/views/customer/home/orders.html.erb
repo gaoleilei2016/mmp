@@ -28,7 +28,7 @@
 </header>
 <div class="mui-content" id="vue_content">
 	<div class="mui-scroll">
-		<div>
+		<div style="min-height: 40px;">
 			<div v-for="order in orders" style="margin-bottom: 16px;">
 				<my-order :order="order"></my-order>
 			</div>
@@ -116,7 +116,12 @@
 					}
 				}
 			});
-			_this.get_orders();
+			// _this.get_orders();
+			$("#vue_content").on('tap','.order_item',function(e) {
+				// alert($(this).attr('data-href'))
+				location.href = $(this).attr('data-href');
+			})
+
 			// $("#vue_content").on("touchstart",function(e) {
 			// 	console.log( 'xxxxxxxx 0',e );
 			// })
