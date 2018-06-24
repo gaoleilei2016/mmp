@@ -65,9 +65,9 @@ class Orders::Order < ApplicationRecord
 			::Orders::Order.transaction do
 				case status.to_s
 				when '1'
-					prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
+					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
-					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+					prescriptions.each{|x|x.cancel_bill({}, current_user)}
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
 					prescriptions.each{|x|x.cancel_bill({}, current_user)}
@@ -328,7 +328,7 @@ class Orders::Order < ApplicationRecord
 						presc[:details].each do |k,details|
 							prescription = ::Hospital::Prescription.find(k)
 							order.prescriptions << prescription
-							prescription.order = order
+							prescription.bill = order
 							prescription.save
 							prescription.commit_bill(args, attrs[:current_user])#改变处方状态
 							details.each do |detail|
