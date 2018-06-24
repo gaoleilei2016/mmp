@@ -1,8 +1,8 @@
 #!/usr/bin/env puma
 # environment 'production'
 environment 'development'
-threads 2, 16 # minimum 2 threads, maximum 64 threads
-workers 8
+threads 2, 16 # minimum 2 threads, maximum 32 threads
+workers 1
 
 app_name = 'mmp'
 
