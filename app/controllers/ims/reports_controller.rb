@@ -29,6 +29,10 @@ class Ims::ReportsController < ApplicationController
   # 处方发药汇总-发药人
   def dispensed_name
   	@data = Ims::Report.name_report params.merge({status:"4",delivery_name:true,org_id:current_user.organization_id})
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: {flag: true, info:"", data: @data} }
+    end
   end
 
   # 处方发药汇总-医院及发药人
@@ -54,6 +58,10 @@ class Ims::ReportsController < ApplicationController
   # 处方退药汇总-发药人
   def returned_name
   	@data = Ims::Report.name_report params.merge({status:"8",delivery_name:true,org_id:current_user.organization_id})
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: {flag: true, info:"", data: @data} }
+    end
   end
 
   # 处方退药汇总-医院及发药人
