@@ -502,10 +502,10 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0){
           _this.set_order_list(response.data.data)
-            _this._data.detail = [{pres:[{type:"处方"}]}]
         }else{
           _this.set_order_list([])
         }
+        _this._data.detail = [{pres:[{type:"处方"}]}]
       },function(response){
         _this.set_order_list()
         _this.$notify({
