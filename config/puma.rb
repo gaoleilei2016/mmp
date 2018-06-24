@@ -25,3 +25,27 @@ application_path = "/home/tenmind/#{app_name}"
 worker_timeout 30
 
 daemonize false
+
+# 胡俊专用
+# threads_count = ENV.fetch("RAILS_MAX_THREADS") { 2 }
+# threads threads_count, threads_count
+# workers 3
+# port 6789
+# environment 'development'
+# application_path = "/home/hujun/work/mmp"
+# #这里一定要配置为项目路径下地current
+# pidfile "#{application_path}/tmp/puma.pid"
+# state_path "#{application_path}/tmp/puma.state"
+# stdout_redirect "#{application_path}/log/puma.stdout.log", "#{application_path}/log/puma.stderr.log"
+# bind "unix://#{application_path}/tmp/health.sock"
+# activate_control_app "unix://#{application_path}/tmp/pumactl.sock"
+
+# preload_app!
+
+# #后台运行
+# daemonize true
+
+# on_worker_boot do
+#   p '666666666666666666666666666666666'
+#   p Thread.new{NoticeChannel.redis.subscribe}
+# end
