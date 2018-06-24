@@ -153,8 +153,32 @@ class Pay::Wechat
       { error: true, msg: "无法获取用户的openid: #{op['errmsg']}" }
     end
 
+    # 获取用户信息
+    def get_wechat_info_by(openid)
+      begin
+        res = JSON.parse(RestClient.get(access_token_url).body)
+        return { state: :fail, msg: 'token获取失败', desc: res['errmsg'] } if res['errmsg']
+        info_url = get_user_info_url(res['access_token'], openid)
+        info = JSON.parse(RestClient.get(info_url).body)
+        return {state: :fail, msg: '获取用户信息失败', desc: info['errmsg']} if info['errmsg']
+        { state: :succ, msg: '获取用户信息成功', res: info }        
+      rescue Exception => e
+        {state: :error, msg: '错误', desc: e.message}
+      end
+    end
+
     def get_openid_url(code)
       "https://api.weixin.qq.com/sns/oauth2/access_token?appid=#{wx.appid}&secret=#{wx.appsecret}&code=#{code}&grant_type=authorization_code"
+    end
+
+    # 获取token的url(GET)
+    def access_token_url
+      "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=#{wx.appid}&secret=#{wx.appsecret}"
+    end
+
+    # 获取用户信息的url(GET)
+    def get_user_info_url(token, openid)
+      "https://api.weixin.qq.com/cgi-bin/user/info?access_token=#{token}&openid=#{openid}&lang=zh_CN"
     end
 
     def get_user_openid(url)

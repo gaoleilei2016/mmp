@@ -68,10 +68,10 @@ class Orders::Order < ApplicationRecord
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
-					::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
-					# ::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
+					# ::Orders::Order.cancel_bill(prescriptions,{},cur_user)#取消订单回调处方
 
 					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
@@ -90,13 +90,13 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
 				when '6'
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}
-					::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					result = {ret_code:'0',info:'订单已取消。'}
 					# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
@@ -318,7 +318,7 @@ class Orders::Order < ApplicationRecord
 						 status: attrs[:status]||'1'
 				 		)
 				 		#通知处方的数据
-				 		rgs = {
+				 		args = {
 							# 创建订单人
 							create_bill_opt: {
 								id: attrs[:current_user].id.to_s,
