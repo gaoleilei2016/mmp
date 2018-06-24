@@ -44,7 +44,7 @@
   	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
   	<!-- 模板弹出框 -->
   	<%= render "hospital/home/render/encounters_favorite_dialog" %>
-  	<!-- 复制弹出框 -->
+  	<!-- 引用弹出框 -->
   	<%= render "hospital/home/render/encounters_copy_dialog" %>
   	
 	</div>
@@ -199,12 +199,12 @@ window.current_template_obj = {
 					},
 				/* 药品模板 --- end */ 
 
-				/* 复制药品 --- start */ 
-					isShowCopyDialog: false, // 显示复制模态框
-					searchCopyEncStr: "", // 搜索要复制医嘱的对象
-					multipleCopyOrdersSelection: [], // 复制医嘱的勾选项
+				/* 引用药品 --- start */ 
+					isShowCopyDialog: false, // 显示引用模态框
+					searchCopyEncStr: "", // 搜索要引用医嘱的对象
+					multipleCopyOrdersSelection: [], // 引用医嘱的勾选项
 					copyordersloading: false, // 正在加载某个患者的医嘱
-				/* 复制药品 --- end */ 
+				/* 引用药品 --- end */ 
 
 				/* 处方 --- start */ 
 					prescriptions: [],
@@ -299,6 +299,9 @@ window.current_template_obj = {
 				if (_now.handleClose) {
 					_now.handleClose();
 				}
+				// if (now.indexOf("enc")>-1) {
+				// 	_this.submitEncounterForm('encounterForm');
+				// }
 
 				// el-select需要使用blur方法让下拉列表关闭
 				if (_now.handleBlur) {
@@ -949,7 +952,7 @@ window.current_template_obj = {
     			_this.$message.error("获取药品列表失败，请联系管理员。");
     		})
     	},
-    	// 其他使用药品列表的地方，复制某次就诊的药品
+    	// 其他使用药品列表的地方，引用某次就诊的药品
     	getEncOrders: function (encounter_id) {
     		var _this = this;
     		_this.encorders = [];
@@ -1294,18 +1297,18 @@ window.current_template_obj = {
       },
     /* 药品模板 --- end */
 
-    /* 复制药品 --- start */
-      // 打开复制医嘱
+    /* 引用药品 --- start */
+      // 打开引用医嘱
       openCopyModal: function () {
       	this.isShowCopyDialog = true;
       	this.getEncOrders(this.encounter.id);
       },
-      // 复制勾选医嘱
+      // 引用勾选医嘱
       handleCopyOrdersSelChange: function (val) {
       	this.multipleCopyOrdersSelection = val;
       },
 
-    /* 复制药品 --- end */
+    /* 引用药品 --- end */
 
     /* 处方操作 --- start */
     	// 获取处方列表
@@ -1429,11 +1432,11 @@ window.current_template_obj = {
 				Vue.set(_this.sendOrders, index + sort, _this.sendOrders[index]);  
 				Vue.set(_this.sendOrders, index, tempOption); 
     	},
-    	// 复制处方
+    	// 引用处方
 			copyPrescription: function (index, row) {
 				var _this = this,
 						btn = $(event.target);
-				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【复制】这些药品到本次就诊？', '复制', {
+				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【引用】这些药品到本次就诊？', '引用', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -1531,13 +1534,13 @@ window.current_template_obj = {
 		      });
 		      return false;
 				}
-				var ids = [], btn = $(event.target);
+				var ids = [], btn = event&&event.target ? $(event.target) : "";
 				orders.forEach(function(item, index) {
 					ids.push(item.id);
 				})
-				btn.attr("disabled", "disabled").find(".fa").show();
+				if (btn) { btn.attr("disabled", "disabled").find(".fa").show(); }
 				_this.$http.post('/hospital/encounters/quote_orders', {ids: ids, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-          btn.removeAttr("disabled").find(".fa").hide();
+          if (btn) { btn.removeAttr("disabled").find(".fa").hide();}
           var res = response.data;
           if(res.flag) {
       			_this.$message({
@@ -1550,15 +1553,15 @@ window.current_template_obj = {
 						_this.$message.error(res.info);
       		}
       		if(/modal|batch/.test(flag)) {
-      			_this.isShowHisOrdersDialog = false; // 关闭复制医嘱弹出框
-      			_this.isShowHisPresDialog = false; // 关闭复制处方弹出框
+      			_this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
+      			_this.isShowHisPresDialog = false; // 关闭引用处方弹出框
       		}
         }, function() {
-          btn.removeAttr("disabled").find(".fa").hide();
-          _this.$message.error("后台出错，复制医嘱失败。请联系管理员");
+          if (btn) { btn.removeAttr("disabled").find(".fa").hide(); }
+          _this.$message.error("后台出错，引用医嘱失败。请联系管理员");
           if(/modal|batch/.test(flag)) {
-      			_this.isShowHisOrdersDialog = false; // 关闭复制医嘱弹出框
-      			_this.isShowHisPresDialog = false; // 关闭复制处方弹出框
+      			_this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
+      			_this.isShowHisPresDialog = false; // 关闭引用处方弹出框
       		}
         });
 			},

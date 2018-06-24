@@ -29,14 +29,14 @@ class ::Hospital::Prescription < ApplicationRecord
 	# 	# 审核时间
 	# 	audit_at: Time
 	# }
-	def audit(args, cur_user)
+	def audit!(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 0 # 未审核
 				self.auditor_id = args[:auditor][:id] 
 				self.auditor_display = args[:auditor][:display]
 				self.audit_at = args[:audit_at]
 				self.status = 1
-			self.orders.update_all(status: 1) if self.save
+			self.orders.update_all(status: 1) if self.save!
 		else
 			false
 		end
@@ -103,12 +103,13 @@ class ::Hospital::Prescription < ApplicationRecord
 	def commit_bill(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 1 # 已审核的处方可以变为待收费
-			self.status = 2
+			# self.status = 2
+			self.status = 10
 			self.create_bill_opt_id = args[:create_bill_opt][:id]
 			self.create_bill_opt_display = args[:create_bill_opt][:display]
 			self.bill_at = args[:bill_at]
 			self.bill_id = args[:bill_id]
-			self.orders.update_all(status: 2) if  self.save
+			self.orders.update_all(status: 10) if  self.save
 		else
 			false
 		end
@@ -122,7 +123,7 @@ class ::Hospital::Prescription < ApplicationRecord
 	#  }
 	def cancel_bill(args, cur_user)
 		args.deep_symbolize_keys!
-		if status == 2 # 已审核的处方可以变为待收费
+		if status == 10 # 已审核的处方可以变为待收费
 			self.status = 1
 			self.create_bill_opt_id = nil
 			self.create_bill_opt_display = nil
@@ -248,7 +249,7 @@ class ::Hospital::Prescription < ApplicationRecord
 
 	###=== 处方状态流转  ===###
 
-	def link_diagnoses(args, cur_user)
+	def link_diagnoses!(args, cur_user)
 		args.each_with_index do |fhir_coding_diagnose, i|
 			cur_diagnose = ::Hospital::Diagnose.new({
 				rank: i+1,
@@ -259,17 +260,16 @@ class ::Hospital::Prescription < ApplicationRecord
 				doctor: cur_user,
 				org_id: cur_user.organization&.id
 			})
-			cur_diagnose.save
-			p cur_diagnose.errors
+			cur_diagnose.save!
 		end
 	end
 
-	def link_orders(cur_orders, cur_user)
+	def link_orders!(cur_orders, cur_user)
 		self.reload
 		cur_orders.each do |_order|
 			_order.status = 0
 			_order.prescription_id = self.id
-			_order.save
+			_order.save!
 		end
 	end
 
@@ -386,9 +386,9 @@ class ::Hospital::Prescription < ApplicationRecord
 		return ret
 	end
 
-	def set_tookcode
+	def set_tookcode!
 		self.tookcode = format("%06d", self.id)
-		self.save
+		self.save!
 	end
 
 	def send_to_check
