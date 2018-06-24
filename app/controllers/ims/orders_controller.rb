@@ -204,6 +204,12 @@ class Ims::OrdersController < ApplicationController
     render json:@data.to_json
   end
 
+  #退费
+  def return_amount
+    args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
+    @data = Ims::Order.return_drug params.merge(args)
+    render json:@data.to_json    
+  end
   # 下载错误处方返回
   # => 页面需传 订单 id(string) 
   def prescription_back
