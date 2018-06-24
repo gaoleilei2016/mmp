@@ -70,7 +70,11 @@ Rails.application.routes.draw do
     end
     resources :report
     resources :invoice_headers
-    resources :feedbacks
+    resources :feedbacks do
+      collection do
+        get :get_cur_feedbacks
+      end
+    end
   end
   ########### customer ##########
   ############################
