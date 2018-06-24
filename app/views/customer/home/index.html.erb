@@ -168,6 +168,9 @@
 	.mui-table-view:after,.mui-table-view:before{
 		height: 0;
 	}
+	input, select, textarea{
+		font-size: 14px;
+	}
 </style>
 <link rel="stylesheet" type="text/css" href="/assets/plugins/mui/feedback.css" />
 
@@ -237,7 +240,7 @@
 							<i class="fal fa-fw fa-cog" style="font-size: 26px;float: right;"></i>
 						</a>
 					</li>
-					<li class="mui-table-view-cell">
+					<li class="mui-table-view-cell hide">
 						<a href="javascript:;" id="async_weixin_info">同步微信个人信息（头像、昵称）</a><!-- 第一次注册的用户自动点击同步 -->
 					</li>
 					<li class="mui-table-view-cell" style="text-align: center;">
@@ -261,29 +264,31 @@
 </div>
 <script type="text/javascript">
 	$("#async_weixin_info").on('tap',function(e) {
-		mui.toast("正在同步微信个人信息",{duration:12000});
+		mui.toast("正在同步微信个人信息",{duration:8000});
 		$("#loading").show();
 		$.ajax({
-			url:'/interfaces/wechat_user.json',
+			url:'/wechat/info.json',
 			type:'post',
 			success:function(json) {
-				alert(json.msg);
-				if (json.error==false) {
-				// mui.toast(json.msg);
-				<% if flash[:async_weixin] %>
-				location.href='/users/qrcode'
-				<% else %>
-				location.reload();
-				<% end -%>
-			}else{
-			}
-		},
-		complete:function() {
-			$("#loading").hide();
-		},
-		error:error_fun
+				if (json.state=="succ") {
+					// alert(json.msg);
+					location.reload();
+				}else{
+					alert(json.desc);
+				}
+			},
+			complete:function() {
+				$("#loading").hide();
+			},
+			error:error_fun
+		})
 	})
-	})
+	// 第一次登录的用户提示同步微信数据
+	<%# session[:has_async_weixin_info] = false %>
+	<% if session[:openid]&&session[:has_async_weixin_info]!=true&&(!current_user.name.present?) %>
+	<% session[:has_async_weixin_info] = true %>
+	$("#async_weixin_info").trigger("tap");
+	<% end -%>
 
 </script>
 <!--单页面结束-->
@@ -369,9 +374,9 @@
 				</div>
 			</div>
 		</div>
-		<form action="/customer/feedback" method="post">
+		<form action="/customer/feedbacks" method="post">
 			<%= render "/customer/form_token" %>
-			<input type="text" name="feedback[score]" v-model="ruleForm.score">
+			<input type="hidden" name="feedback[score]" v-model="ruleForm.score">
 			<div class="row mui-input-row">
 				<textarea id='question' name="feedback[content]" class="mui-input-clear question" placeholder="请详细描述您的问题和意见..."></textarea>
 			</div>
@@ -409,39 +414,55 @@
 		},
 		methods:{},
 		mounted:function() {
+			var _this = this;
+			//应用评分
+			mui('.icons').on('drag','i',function(e){
+				var index = parseInt(this.getAttribute("data-index"));
+				var parent = this.parentNode;
+				var children = parent.children;
+				index += parseInt(e.detail.deltaX/22);
+				index<0 && (index=0);
+				index>children.length && (index=children.length);
+				for(var i=0;i<index;i++){
+					children[i].classList.remove('mui-icon-star');
+					children[i].classList.add('mui-icon-star-filled');
+				}
+				for (var i = index; i < 5; i++) {
+					children[i].classList.add('mui-icon-star')
+					children[i].classList.remove('mui-icon-star-filled')
+				}
+				starIndex = index;
+				_this.ruleForm.score = index;
+			});
+			//应用评分
+			mui('.icons').on('tap','i',function(){
+				var index = parseInt(this.getAttribute("data-index"));
+				var parent = this.parentNode;
+				var children = parent.children;
+				if(this.classList.contains("mui-icon-star")){
+					for(var i=0;i<index;i++){
+						children[i].classList.remove('mui-icon-star');
+						children[i].classList.add('mui-icon-star-filled');
+					}
+				}else{
+					for (var i = index; i < 5; i++) {
+						children[i].classList.add('mui-icon-star')
+						children[i].classList.remove('mui-icon-star-filled')
+					}
+				}
+				starIndex = index;
+				_this.ruleForm.score = index;
+			});
+			//选择快捷输入
+			mui('#feedback .mui-popover').on('tap','li',function(e){
+				document.getElementById("question").value = document.getElementById("question").value + this.children[0].innerHTML + "\n";
+				mui('#feedback .mui-popover').popover('toggle')
+			}) 
 		}
 	})
 </script>
 <!-- <script src='/assets/plugins/mui/feedback.js'></script> -->
 <script>
-	$("#async_weixin_info").on('tap',function(e) {
-		mui.toast("正在同步微信个人信息",{duration:12000});
-		$("#loading").show();
-		$.ajax({
-			url:'/users/wechat_info.json',
-			type:'post',
-			success:function(json) {
-				alert(json.msg);
-				if (json.error==false) {
-					// mui.toast(json.msg);
-					<% if flash[:async_weixin] %>
-					location.href='/users/qrcode'
-					<% else %>
-					location.reload();
-					<% end -%>
-				}else{
-				}
-			},
-			complete:function() {
-				$("#loading").hide();
-			},
-			error:error_fun
-		})
-	})
-	// 第一次登录的用户提示同步微信数据
-	<% if flash[:async_weixin] %>
-	$("#async_weixin_info").trigger("tap");
-	<% end -%>
 	mui.init();
 	//初始化单页view
 	var viewApi = mui('#app').view({

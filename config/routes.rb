@@ -49,6 +49,7 @@ Rails.application.routes.draw do
         get :orders
         get :order
         get :confirm_order
+        get :feedbacks
       end
     end
     resources :portal do
