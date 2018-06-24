@@ -113,16 +113,19 @@ window.current_template_obj = {
       $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
     },
     change:function(){
+      var _this = this
       console.log("change++++++++++++++++++++")
       data = document.notice_data
-      console.log(data)
+      $.each(this._data.order_lists,function(k,v){if(v.order_id == data.order_id){return false;}})
       if (data.flag) {
-        temp = this._data.order_lists
-        temp.push(data)
-        this._data.order_lists = temp
+        if (data.status == _this.out_list_panel) {
+          temp = this._data.order_lists
+          temp.push(data)
+          this._data.order_lists = temp
+        };
         this.$notify.success({
           title: '消息',
-          message: '您有新的订单生成',
+          message: data.info,
           showClose: false
         });
       }else{
@@ -514,6 +517,7 @@ window.current_template_obj = {
     },
     set_order_list:function(data){
       if (data) {
+        console.log(data)
         this._data.order_lists = data
         setTimeout(function(){
           $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
