@@ -90,7 +90,7 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
