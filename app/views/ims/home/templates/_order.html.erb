@@ -278,7 +278,7 @@ window.current_template_obj = {
             temp.map(function(item){
               amount = 0.0;
               if(item.lines){
-                item.lines.map.map(function(line){
+                item.lines.map(function(line){
                   amount += Number(line.amt)
                 })
               }
