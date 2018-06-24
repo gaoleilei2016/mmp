@@ -59,6 +59,10 @@ window.current_template_obj = {
 		return {
 			/* 基础设置 --- start */ 
 				orgname: "", // 机构名称
+				codeIni: {}, // 编码表
+				rates: [], // 频次编码表
+				routes: [], // 途径编码表
+				focusSelect: "", // 目前聚焦的哪个select框，用于筛选，code+简拼+名称
 				ini: {
 					enable_print_pres: true, // 启用打印处方功能
 					print_pres_html: "", // 处方打印内容
@@ -263,6 +267,15 @@ window.current_template_obj = {
 				},function() {
 				  _this.$message.error("获取初始值失败，请联系管理员。");
 				})
+			  // 设置的编码
+				Vue.resource('/hospital/sets/codes.json').get().then( function (response) {
+	        var res = response.data
+	        _this.codeIni = res.data;
+	        _this.routes = res.data.routes;
+          _this.rates = res.data.rates;
+	      }, function  (response) {
+	      	_this.$message.error('获取编码表报错，请联系管理员。');
+	      })
 			},
 			// 聚焦下一个
 	  	focusNext: function (now, next) {
@@ -300,6 +313,24 @@ window.current_template_obj = {
 					}
 				}
 
+	  	},
+	  	// 过滤编码表，名称+code+简拼
+	  	filterCodes: function (val) {
+	  		var _this = this, select = _this.focusSelect; // 为编码名称|ref内容
+	  		var field = select.split("|")[0], ele = select.split("|")[1];
+	  		if (val && field) {
+          var tempArr = [];
+          var val = val.toUpperCase();
+          (_this.codeIni[field]||[]).forEach(function (item, index) {
+          	if(item.code.indexOf(val)>-1 || item.display.indexOf(val)>-1 || item.jianpin.indexOf(val)>-1) {
+          		tempArr.push(item);
+          	}
+          })
+          _this[field] = tempArr;
+          _this.$refs[ele].hoverIndex = 0;
+        } else {
+          _this[field] = _this.codeIni[field];
+        }
 	  	},
   	/* 公共方法  ---- end */ 
 
@@ -1459,7 +1490,7 @@ window.current_template_obj = {
     				_this.$message.error(res.info);
     			}
     		}, function (response) {
-    			_this.$message.error("获取药品列表失败，请联系管理员。");
+    			_this.$message.error("获取历史就诊列表失败，请联系管理员。");
     		})
     	},
     	// 显示处方列表模态框

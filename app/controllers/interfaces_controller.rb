@@ -282,13 +282,92 @@ class InterfacesController < ApplicationController
 
   
 
-def get_medicine_by_name
+	def get_medicine_by_name
 		params[:name]
 		ret = ::User.find_by_sql("select *  from dictmedicine where dictmedicine.name  like '%#{params[:name]}%'")
 		render json:{rows:ret,total:ret.count}
 	end
 
-    ############ xixu ############
+  ############ xixu ############
+	#############################
+
+
+	#############################
+	############ dujuan ############
+	# 生成pdf方法
+	# POST
+  # /interfaces/generate_pdf
+  # pdf打印的公共方法
+  # style_files: [额外样式1，额外样式2]
+  # style_string： 样式字符串
+  # html： 打印html
+  # orientation：横向或纵向Portrait/Landscape
+  # margin：边距
+  # page_size: 默认A4
+  # page_height: 打印纸张的高度
+  # page_width: 打印纸张的宽度
+  # header: 页头
+  # footer：页码等
+  def generate_pdf
+    p params
+    style = ""
+    # 自定义打印样式
+    if params[:style_files].present?
+      (params[:style_files]||[]).each do |file|
+        # file  app/assets/stylesheets/crs/print.css，需.css文件，不需编译
+        style += (('<style type="text/css">'+File.open(Rails.root.join(file),'r:utf8'){|f| f.read}+'</style>') rescue '')
+      end
+    end
+    # 自定义样式
+    style += ('<style type="text/css">'+params[:style_string]+'</style>') if params[:style_string].present?
+    style = style.force_encoding("utf-8") # 强调编码，避免编码不一致
+    
+    @ctn_print_no = params[:ctn_print_no].to_i||0  # 续打页码，从0开始便是全部打印
+    # pdf文件内容
+    html = params[:html]||""
+
+    pdf = WickedPdf.new.pdf_from_string(
+      (style+html),
+      encoding: "UTF-8",
+      orientation: (params[:orientation]||"Portrait"), # 纵向或横向Portrait/Landscape
+      # header: {
+      #   line: params[:header]&&params[:header][:line]||false,
+      #   content: render_to_string(params[:header]&&params[:header][:url]||'/crs/setups/commons/_header.html', layout: 'wicked_pdf.html.erb'),
+      #   spacing: params[:header]&&params[:header][:spacing]||3
+      # },
+      footer: {
+        center: "第 [page] 页",
+        # content: render_to_string(params[:footer]&&params[:footer][:url]||'/crs/setups/commons/_footer.html', layout: 'wicked_pdf.html.erb'),
+        spacing: params[:footer]&&params[:footer][:spacing]||2
+      },
+      margin:{  top:      (params[:margin][:top].to_i rescue 10),                     # default 10 (mm)
+                bottom:   (params[:margin][:bottom].to_i rescue 10),
+                left:     (params[:margin][:left].to_i rescue 10),
+                right:    (params[:margin][:right].to_i rescue 10) },
+      page_size: params[:page_size]||"A4",         # A4, Letter, ...
+      page_height: params[:page_height],
+      page_width: params[:page_width]
+    )
+
+    foldername = 'pdfs' # pdf存储文件夹名称
+    dir = Rails.root.join('public',foldername) # 存储pdf路径Rails.root/public/pdfs
+    Dir.mkdir(dir) unless File::directory?(dir) # 如果不存在pdf存储目录，则创建
+
+    # 定时删除pdf文件语句    system "rm -rf #{Rails.root.join('public','pdfs','*.pdf')}"
+
+    filename = "#{(Time.now.to_f*1000).to_i}.pdf" # pdf文件名
+    save_path = Rails.root.join('public',foldername,filename)
+    # 写文件
+    File.open(save_path, 'wb') do |file|
+      file << pdf
+    end
+
+    respond_to do |format|
+      # 返回文件路径，页面接收到url，渲染并打印
+      format.json { render json: {flag: true, info: "", url: "/#{foldername}/#{filename}"} }
+    end
+  end
+  ############ dujuan ############
 	#############################
 
 end
