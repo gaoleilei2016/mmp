@@ -10,6 +10,7 @@ class WechatController < ApplicationController
   def login
     if wx_user_sign_in? #已经登录并且已登记过的
       session[:openid] = current_user.openid
+      session[:openname] = Set::Wechat.name
       redirect_to '/'
     else
       res = Pay::Wechat.get_openid(params[:code])
