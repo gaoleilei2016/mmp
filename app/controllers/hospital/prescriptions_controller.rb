@@ -45,35 +45,33 @@ class Hospital::PrescriptionsController < ApplicationController
 	def create
     p "Hospital::PrescriptionsController create", params
     args = format_prescription_create_args
-    return render json:{flag: false, info: "医嘱状态不能生成处方"} if !::Hospital::Order.can_to_prescription?(params[:prescription][:ids])
-		@prescription = ::Hospital::Prescription.new(args[:prescription])
-    respond_to do |format|
-      if @prescription.save
-        p "prescription save"
-        p args[:diagnoses_args]
-        @prescription.link_diagnoses(args[:diagnoses_args], current_user)
-        p "link_diagnoses save"
-        @prescription.link_orders(args[:cur_orders], current_user)
-        @prescription.set_tookcode
-        p "link_orders save"
-        # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
-        audit_args = {
-          auditor: {
-            id: current_user.id,
-            display: current_user.name
-          },
-          audit_at: Time.now
-        }
-        @prescription.audit(audit_args, current_user)
-        # 发送处方消息
-        @prescription.send_to_check()
-        format.html { redirect_to @prescription, notice: 'prescription was successfully created.' }
-        format.json { render json: {flag: true, info:"", data: @prescription.to_web_front} }
-      else
-        format.html { render action: "new" }
-        format.json { render json: {flag: false, info: @prescription.errors.messages.join("、")} }
+    # 审核人信息  每个医院维护的都不一样  通过设置  设置审核人
+    audit_args = {
+      auditor: {
+        id: current_user.id,
+        display: current_user.name
+      },
+      audit_at: Time.now
+    }
+    prescription_ids = []
+    return render json:{flag: false, info: "医嘱状态不能生成处方 请刷新重试"} if !::Hospital::Order.can_to_prescription?(params[:prescription][:ids])
+    group_orders = args[:cur_orders].group_by.with_index {|e, i| i/5} # 每个处方不超过五个药
+    ::ActiveRecord::Base.transaction  do
+      group_orders.values.each do |_orders|
+		    @prescription = ::Hospital::Prescription.new(args[:prescription])
+        @prescription.save!
+        @prescription.link_diagnoses!(args[:diagnoses_args], current_user) # 连接诊断
+        @prescription.link_orders!(_orders, current_user)  # 连接医嘱
+        @prescription.set_tookcode! #设置取药码
+        @prescription.audit!(audit_args, current_user) # 审核
+        prescription_ids << @prescription.id
       end
     end
+    ret = ::Hospital::Prescription.find(prescription_ids)
+    ret.each {|e| e.send_to_check()} # 发送处方生成成功信息
+    # ret = ret.map { |e| e.to_web_front  } # 返回数据格式化
+    render json: {flag: true, info:""}
+    # render json: {flag: false, info: @prescription.errors.messages.join("、")}
 	end
 
 	# PUT

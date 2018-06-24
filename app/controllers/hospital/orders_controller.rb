@@ -103,64 +103,72 @@ class Hospital::OrdersController < ApplicationController
     def format_order_create_args
       args = order_params
       dict_mediaction_info = ::Dict::Medication.find(args[:serialno]).to_order_info()
-      ret = {
-        serialno: args[:serialno],
-        title: args[:title],
-        specification: args[:specification],
-        formul_code: args[:formul][:code],
-        formul_display: args[:formul][:display],
-        single_qty_value: args[:single_qty][:value],
-        single_qty_unit: args[:single_qty][:unit],
-        dose_value: args[:dose][:value],
-        dose_unit: args[:dose][:unit],
-        route_code: args[:route][:code],
-        route_display: args[:route][:display],
-        frequency_code: args[:frequency][:code],
-        frequency_display: args[:frequency][:display],
-        course_of_treatment_value: args[:course_of_treatment][:value],
-        course_of_treatment_unit: args[:course_of_treatment][:unit],
-        total_quantity: args[:total_quantity],
-        unit: args[:unit],
-        price: args[:price],
-        note: args[:note],
-        status: 0,
-        order_type: 1, # 默认保存1 是药品医嘱
-        encounter_id: args[:encounter_id],
-        author_id: current_user.id,
-        type_type: args[:type]
-      }
-      ret.merge!(dict_mediaction_info)
+      begin
+        ret = {
+          serialno: args[:serialno],
+          title: args[:title],
+          specification: args[:specification],
+          formul_code: args[:formul][:code],
+          formul_display: args[:formul][:display],
+          single_qty_value: args[:single_qty][:value],
+          single_qty_unit: args[:single_qty][:unit],
+          dose_value: args[:dose][:value],
+          dose_unit: args[:dose][:unit],
+          route_code: args[:route][:code],
+          route_display: args[:route][:display],
+          frequency_code: args[:frequency][:code],
+          frequency_display: args[:frequency][:display],
+          course_of_treatment_value: args[:course_of_treatment][:value],
+          course_of_treatment_unit: args[:course_of_treatment][:unit],
+          total_quantity: args[:total_quantity],
+          unit: args[:unit],
+          price: args[:price],
+          note: args[:note],
+          status: 0,
+          order_type: 1, # 默认保存1 是药品医嘱
+          encounter_id: args[:encounter_id],
+          author_id: current_user.id,
+          type_type: args[:type]
+        }
+        ret.merge!(dict_mediaction_info)
+      rescue Exception => e
+        return render json: {flag: false, info: "未知数据结构 请传正确数据"}
+      end
       return ret
     end
 
     def format_order_update_args
       args = order_params
       dict_mediaction_info = ::Dict::Medication.find(args[:serialno]).to_order_info()
-      ret = {
-        serialno: args[:serialno],
-        title: args[:title],
-        specification: args[:specification],
-        formul_code: args[:formul][:code],
-        formul_display: args[:formul][:display],
-        single_qty_value: args[:single_qty][:value],
-        single_qty_unit: args[:single_qty][:unit],
-        dose_value: args[:dose][:value],
-        dose_unit: args[:dose][:unit],
-        route_code: args[:route][:code],
-        route_display: args[:route][:display],
-        frequency_code: args[:frequency][:code],
-        frequency_display: args[:frequency][:display],
-        course_of_treatment_value: args[:course_of_treatment][:value],
-        course_of_treatment_unit: args[:course_of_treatment][:unit],
-        total_quantity: args[:total_quantity],
-        unit: args[:unit],
-        price: args[:price],
-        note: args[:note],
-        order_type: 1, # 默认保存1 是药品医嘱
-        encounter_id: args[:encounter_id],
-        author_id: current_user.id
-      }
-      ret.merge!(dict_mediaction_info)
+      begin
+        ret = {
+          serialno: args[:serialno],
+          title: args[:title],
+          specification: args[:specification],
+          formul_code: args[:formul][:code],
+          formul_display: args[:formul][:display],
+          single_qty_value: args[:single_qty][:value],
+          single_qty_unit: args[:single_qty][:unit],
+          dose_value: args[:dose][:value],
+          dose_unit: args[:dose][:unit],
+          route_code: args[:route][:code],
+          route_display: args[:route][:display],
+          frequency_code: args[:frequency][:code],
+          frequency_display: args[:frequency][:display],
+          course_of_treatment_value: args[:course_of_treatment][:value],
+          course_of_treatment_unit: args[:course_of_treatment][:unit],
+          total_quantity: args[:total_quantity],
+          unit: args[:unit],
+          price: args[:price],
+          note: args[:note],
+          order_type: 1, # 默认保存1 是药品医嘱
+          encounter_id: args[:encounter_id],
+          author_id: current_user.id
+        }
+        ret.merge!(dict_mediaction_info)
+      rescue Exception => e
+        return render json: {flag: false, info: "未知数据结构 请传正确数据"}
+      end
       return ret
     end
 end
