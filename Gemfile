@@ -43,6 +43,11 @@ gem 'capistrano', '2.15.0'
 # # 分页
 gem 'kaminari'
 
+# 生成pdf，用于打印**********start #
+gem 'wicked_pdf', '~> 1.1'
+gem 'wkhtmltopdf-binary', '~> 0.12.3.1'
+# 生成pdf，用于打印 **********end #
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]

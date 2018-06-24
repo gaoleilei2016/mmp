@@ -6,6 +6,7 @@ class Hospital::Encounter < ApplicationRecord
 	has_many :orders, class_name: '::Hospital::Order', foreign_key: 'encounter_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'encounter_id'
 	belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
+	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'hospital_oid', optional: true
 
 	#1:  如果有person_id就直接取到person
 	#2:  如果没有就根据  身份证号、姓名、性别、联合查询  查询到的第一个人就当做是同一个人  然后建立关联   以后为了更严谨  需要加入更多的参数判别是不是同一人
@@ -103,8 +104,8 @@ class Hospital::Encounter < ApplicationRecord
 	end
 
 
+	# 根据新建的encounter格式化为person数据
 	def format_person_args
-		p self
 		ret = {
 			iden: self.iden,
 			name: self.name,
@@ -166,5 +167,16 @@ class Hospital::Encounter < ApplicationRecord
 			address: cur_person.pa_address
 		}
 		return encounter_info.delete_if {|key,value| value.blank?}
+	end
+
+	# 默认按就诊时间逆序排序 每页显示10条数据 只显示当前医生看过的就诊 本次查看的就诊也能在历史就诊出看到
+	def self.get_history_by_doctor(cur_encounter, cur_org ,cur_user, options = {page: 1, per: 10, sort: "DESC"})
+		page = options[:page].to_i
+		per = options[:per].to_i
+		sort = options[:sort].to_s.upcase == "DESC" ? "DESC" : "ASC"
+		ret = ::Hospital::Encounter.where(hospital_oid: cur_user.organization_id, author_id: cur_user.id, person_id: cur_encounter.person_id)
+		                           .order(created_at: sort).page(page).per(per)
+			                       # .where(:"id".nin => [cur_encounter.id])
+		ret.map { |e| e.to_web_front }
 	end
 end
