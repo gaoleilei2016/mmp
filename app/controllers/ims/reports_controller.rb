@@ -46,6 +46,10 @@ class Ims::ReportsController < ApplicationController
   # detail 需要查看明细前端传
   def returned_hospital
   	@data = Ims::Report.hospital_report params.merge({status:"8",hospital:true,org_id:current_user.organization_id})
+    respond_to do |format|
+      format.html # show.html.erb
+      format.json { render json: {flag: true, info:"", data: @data+@data} }
+    end
   end
 
   # 处方退药汇总-发药人
