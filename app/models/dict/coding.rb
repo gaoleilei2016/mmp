@@ -27,8 +27,8 @@ class ::Dict::Coding < ApplicationRecord
         wubi: self.wb,
         version: "",
         status: self.status,
-        created_at: self.created_at,
-        updated_at: self.updated_at
+        created_at: nil,
+        updated_at: nil
       }
     end
 
