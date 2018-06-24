@@ -318,7 +318,7 @@ class Orders::Order < ApplicationRecord
 						 status: attrs[:status]||'1'
 				 		)
 				 		#通知处方的数据
-				 		rgs = {
+				 		args = {
 							# 创建订单人
 							create_bill_opt: {
 								id: attrs[:current_user].id.to_s,
