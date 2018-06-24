@@ -26,10 +26,11 @@
   .el-table .primary-row {
     background: #E2F6F4 !important;
   }
+
 </style>
 <template>
   <!-- 接诊管理、统计页面 -->
-  <div id="reports_dispensed_hospital_div">
+  <div id="reports_returned_hospital_div">
     <el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>报表</el-breadcrumb-item>
@@ -66,23 +67,24 @@
             </el-date-picker>
           </el-col>
           <el-col :span="6">
-            <el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input>
+            <!-- <el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input> -->
           </el-col>
           <el-col :span="2">
             <el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
           </el-col>
         </el-row>
         <el-table
-          :data="dispensed_hospitals"
+          :data="returned_hospitals"
           @selection-change="handleSelectionChange"
           class="thiner-row"
           default-expand-all
+          show-summary
           row-class-name="primary-row"
           :show-header="false"
           style="width: 100%">
           <el-table-column
             type="selection"
-            width="55">
+            width="60">
           </el-table-column>
           <el-table-column type="expand" >
             <template slot-scope="props">
@@ -151,35 +153,29 @@
             </template>
           </el-table-column>
           <el-table-column
-            type=""
-            width="30">
-            <template slot-scope="scope">
-              {{ scope.$index + 1 }}
-            </template>
-          </el-table-column>
-          <el-table-column
             min-width="240"
             align="left"
             label="">
             <template slot-scope="scope">
-              {{ scope.row.name }}
+              <span style="color: darkkhaki;">医院名称：</span>{{ scope.row.name }}
             </template>
           </el-table-column>
 
-          <el-table-column
+       <!--    <el-table-column
             min-width="240"
             align="left"
             label="">
             <template slot-scope="scope">
-              {{ scope.row.drug_count }}
+              <span style="color: darkkhaki;">药品种数：</span>{{ scope.row.drug_count }}
             </template>
           </el-table-column>
-          <el-table-column
+ -->      <el-table-column
             min-width="240"
-            align="left"
+            prop = "total_amount"
+            align="right"
             label="">
             <template slot-scope="scope">
-              {{ scope.row.total_amount }}
+              <!-- <span style="color: darkkhaki;">总金额：</span>{{ scope.row.total_amount }} -->
             </template>
           </el-table-column>
           
@@ -213,24 +209,22 @@
 <script type="text/javascript">
 window.current_template_obj = {
   data:function(){
-    var options = [{code: "0", display: "处方发药汇总-医院"}];
+    var options = [{code: "0", display: "处方退药汇总-医院"}];
     return {
       activeName: options[0].code,
       cardTabsOptions: options,
       multipleSelection: [],
       printEles: [], // 打印的元素
 
-      dispensed_hospitalsResource: Vue.resource('/ims/reports/returned_hospital.json'),
-      dispensed_hospitals: [],
+      returned_hospitalsResource: Vue.resource('/ims/reports/returned_hospital.json'),
+      returned_hospitals: [],
       prescriptions: [],
-      ordersResource: Vue.resource('/hospital/orders{/id}.json'),
-      orders: [],
 
       encounter: {},
       orgname: "",
       isShowfilters: false, // 高级搜索
       filter: {
-        range: "",
+        range: [new Date().pattern('yyyy-MM-dd HH:mm:ss'),new Date().pattern('yyyy-MM-dd HH:mm:ss')],
         name: "",
       },
 
@@ -309,11 +303,11 @@ window.current_template_obj = {
     },
     getData: function () {
       var _this = this;
-      _this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+      _this.returned_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
         var res = response.data;
         if(res.flag) {
-          _this.dispensed_hospitals = res.data;
-          console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
+          _this.returned_hospitals = res.data;
+          console.log('returned_hospitals----------',_this.returned_hospitals)
           _this.dataCount = res.count;
         }else{
           _this.$message.error(res.info);
@@ -324,7 +318,7 @@ window.current_template_obj = {
     },
     print: function (json) {
       if(!this.printEles || this.printEles.length==0) {
-        this.printEles = this.dispensed_hospitals;
+        this.printEles = this.returned_hospitals;
       }
       this.$nextTick(function(){
         var html = $(".ims-print-report-area").html(),
