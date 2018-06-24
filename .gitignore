@@ -13,6 +13,6 @@ log/*.*
 .lock
 .rvmrc
 config/unicorn*
-config/mongoid.yml
+config/database.yml
 config/rabbitmq.yml
 config/setup/ip.yml
