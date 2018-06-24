@@ -13,7 +13,6 @@ class Hospital::DiagnosesController < ApplicationController
 	# 只能通过就诊id
 	# /hospital/diagnoses
 	def index
-		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 		ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
 		@all_diagnoses = ret[:master] + ret[:slaver]
@@ -29,7 +28,7 @@ class Hospital::DiagnosesController < ApplicationController
 	# 	display: 
 	# }
 	def create
-		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
+		p "create",params
 		@diagnose = ::Hospital::Diagnose.new(format_encounter_diagnose_create_args)
 		@diagnose.set_rank
 		if @diagnose.save
@@ -46,7 +45,6 @@ class Hospital::DiagnosesController < ApplicationController
 	# /hospital/diagnoses/sort
 	def sort
 		p "Hospital::DiagnosesController" , params
-		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		# tag_id 是被操作   exchange_id 被更换的是
 		case params[:sort].to_s
 		when "1" # 上移
@@ -74,13 +72,17 @@ class Hospital::DiagnosesController < ApplicationController
 	# PUT
 	# /hospital/diagnoses/:id
 	def update
-		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		respond_to do |format|
-	    if @diagnose.update_attributes(format_encounter_diagnose_update_args)
+			update_data = format_encounter_diagnose_update_args
+			if update_data[:type_code] != @diagnose.type_code
+				update_data[:rank] = ::Hospital::Diagnose.get_rank(params[:encounter_id], update_data[:type_code])
+			end
+	    if @diagnose.update_attributes(update_data)
 	    	@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
-			all_ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
+				all_ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
 	    	format.html { redirect_to @diagnose, notice: 'diagnose was successfully updated.'}
 	    	format.json { render json: {flag: true, info:"", master: all_ret[:master], data: @diagnose.to_web_front} }
+	    	# format.json { render json: {flag: true, info:"", master: all_ret[:master], data: all_ret[:master] + all_ret[:slaver]} }
 	    else
 	    	format.html { render action: "edit" }
 	    	format.json { render json: @diagnose.errors, status: :unprocessable_entity }
@@ -91,7 +93,6 @@ class Hospital::DiagnosesController < ApplicationController
 	# DELETE
 	# /hospital/diagnoses/:id
 	def destroy
-		return render json:{flag: false, info: "没有传encounter_id"} if params[:encounter_id].nil?
 		if @diagnose.destroy
 			@diagnoses = ::Hospital::Diagnose.where(encounter_id: params[:encounter_id]).order(:type_code).order(:rank)
 			ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
@@ -134,6 +135,17 @@ class Hospital::DiagnosesController < ApplicationController
       return render json:{flag: false, info: "不能操作非本人创建的数据"} if !flag
     end
 
+	  def can_sort?
+	  	@tag = ::Hospital::Diagnose.find(params[:tag_id])
+	  	@exchange = ::Hospital::Diagnose.find(params[:exchange_id])
+	  	if @tag.org_id != @cur_org.id || @exchange.org_id != @cur_org.id
+	  		return render json:{flag: false, info: "不能操作非本机构数据"}
+	  	end
+	  	if @tag.doctor_id != current_user.id || @exchange.doctor_id != current_user.id
+	  		return render json:{flag: false, info: "不能操作非本人创建数据"}
+	  	end
+	  end
+
 	  def diagnose_params
 	  	params[:diagnosis]
 	  end
@@ -154,17 +166,6 @@ class Hospital::DiagnosesController < ApplicationController
 				org_id: @cur_org.id
 	  	}
 	  	return ret
-	  end
-
-	  def can_sort?
-	  	@tag = ::Hospital::Diagnose.find(params[:tag_id])
-	  	@exchange = ::Hospital::Diagnose.find(params[:exchange_id])
-	  	if @tag.org_id != @cur_org.id || @exchange.org_id != @cur_org.id
-	  		return render json:{flag: false, info: "不能操作非本机构数据"}
-	  	end
-	  	if @tag.doctor_id != current_user.id || @exchange.doctor_id != current_user.id
-	  		return render json:{flag: false, info: "不能操作非本人创建数据"}
-	  	end
 	  end
 
 	  def format_encounter_diagnose_update_args
