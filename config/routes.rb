@@ -59,9 +59,9 @@ Rails.application.routes.draw do
     resources :portal do
       collection do
         
-        get :pullrefresh_main
-        get :pullrefresh_sub
-        get :full_screen
+        # get :pullrefresh_main
+        # get :pullrefresh_sub
+        # get :full_screen
 
         get :map
         get :settlement
