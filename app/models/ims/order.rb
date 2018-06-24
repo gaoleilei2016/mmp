@@ -47,7 +47,7 @@ class Ims::Order < ApplicationRecord
           patient_iden: order.patient_iden,
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
-          is_returned: order.is_returned,
+          # is_returned: order.is_returned,
           created_at: order.created_at,
           }
         }
@@ -158,7 +158,7 @@ class Ims::Order < ApplicationRecord
           :delivery_name => header.delivery_name,
           :delivery_at => header.delivery_at,
           :invoice_id => header.invoice_id,
-          :is_returned => header.is_returned,
+          # :is_returned => header.is_returned,
           details: (header.details||[]).map{|x| {
                     title: x.title,
                     specification: x.specification,
@@ -202,7 +202,7 @@ class Ims::Order < ApplicationRecord
     def get_order_data order 
       return {flag:false,:info=>"未找到订单信息"} if order.blank?
       prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-      fp = ::Customer::Fapiao.find order.invoice_id rescue nil
+      fp = ::Customer::InvoiceHeader.find order.invoice_id rescue nil
       invoice = fp.blank? ? {flag:false} : {flag:true,name:fp.name,shuihao:fp.shuihao}
       data = {
           type:'订单',
@@ -226,7 +226,7 @@ class Ims::Order < ApplicationRecord
           patient_iden: order.patient_iden,
           patient_phone: order.patient_phone,
           payment_type: order.payment_type,
-          is_returned: order.is_returned,
+          # is_returned: order.is_returned,
           invoice:invoice,
           details: order.details.map{|x| {
                   name: x.name,
@@ -331,7 +331,7 @@ class Ims::Order < ApplicationRecord
         # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
         return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==6||order.status.to_i==7||order.is_returned==1)
+        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==6||order.status.to_i==7)
         headers = Ims::PreHeader.where(:bill_id=>order_id,delivery_org_id:args[:org_id])
         headers.map{|header| create_new_prescription header,current_user}
         headers.update_all({is_returned:true,reason:reason,return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
@@ -356,7 +356,7 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到订单信息。"} if order.blank?
         return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
-        return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
+        # return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
         return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
         # ::ActiveRecord::Base.transaction  do
           # ============ 判断表是否存，不存在则创建 ====================
@@ -369,9 +369,10 @@ class Ims::Order < ApplicationRecord
           prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PreHeader.save_prescription send_data
-          return {flag:false,info:"发药失败: #{data[:info]}"} unless result[:flag]
+          return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
           temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
           data = Orders::Order.order_completion(temp)
+          data = {ret_code:0}
         # end
         return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
       rescue Exception => e
@@ -490,7 +491,7 @@ class Ims::Order < ApplicationRecord
       p attrs
       str = attrs[:message]
       # NoticeBroadcastJob.perform_later notice:"这是一段测试信息"
-      ActionCable.server.broadcast 'notice_channel', data:str
+      # ActionCable.server.broadcast 'notice_channel', data:str
       # NoticeBroadcastJob.perform_later data:str
     end
 

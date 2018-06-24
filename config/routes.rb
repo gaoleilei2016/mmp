@@ -65,7 +65,8 @@ Rails.application.routes.draw do
       end
     end
     resources :report
-    resources :fapiao
+    resources :invoice_headers
+    resources :feedbacks
   end
   ########### customer ##########
   ############################
@@ -218,5 +219,6 @@ Rails.application.routes.draw do
 
   match '/wechat/login',  to: 'wechat#login', via: [:get]
   match '/wechat/public_pay', to: 'wechat#pay', via: [:post]
+  match '/wechat/websocket', to: 'wechat#websocket', via: [:get]
   ########### hujun_end   ##########
 end

@@ -63,6 +63,8 @@ $.ims_notice = function(data){
   // alert(data)
   console.log("ims_notice")
   org_id = $("#organization_id").val()
+  console.log(org_id)
+  console.log(data)
   if (data&&data.org_id == org_id) {
     document.notice_data = data
     $(document).find("#notice_input").click()
@@ -111,14 +113,19 @@ window.current_template_obj = {
       $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
     },
     change:function(){
+      var _this = this
+      console.log("change++++++++++++++++++++")
       data = document.notice_data
+      $.each(this._data.order_lists,function(k,v){if(v.order_id == data.order_id){return false;}})
       if (data.flag) {
-        temp = this._data.order_lists
-        temp.push(data)
-        this._data.order_lists = temp
+        if (data.status == _this.out_list_panel) {
+          temp = this._data.order_lists
+          temp.push(data)
+          this._data.order_lists = temp
+        };
         this.$notify.success({
           title: '消息',
-          message: '您有新的订单生成',
+          message: data.info,
           showClose: false
         });
       }else{
@@ -209,8 +216,8 @@ window.current_template_obj = {
             lines:[{
               name:data1.title,
               specification:data1.specification,
-              qty:data1.single_qty_value,
-              unit:data1.single_qty_unit,
+              qty:data1.total_quantity,
+              unit:data1.unit,
             }]
           })
           if (ori_data.length>1) {
@@ -510,6 +517,7 @@ window.current_template_obj = {
     },
     set_order_list:function(data){
       if (data) {
+        console.log(data)
         this._data.order_lists = data
         setTimeout(function(){
           $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
@@ -520,6 +528,7 @@ window.current_template_obj = {
     },
     get_order:function (id,e) {
       var _this = this;
+      console.log("===========================id  = "+id)
       if(e)$(e.currentTarget).addClass("active").siblings("div").removeClass("active")
       if (!id) {
         id="";
@@ -675,6 +684,7 @@ window.current_template_obj = {
       $.each(boxs,function(k,v){
         ids.push($(v).val())
       })
+      console.log("111111111111=====id== "+ids)
       if(ids&&ids.length>0){}else{
         _this.$message('没有数据！');
         return false;

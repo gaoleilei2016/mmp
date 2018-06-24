@@ -12,6 +12,8 @@ class InterfacesController < ApplicationController
 			re["drugs"] = o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
+			# p '~~~~~~~~~~',::Customer::InvoiceHeader.find(o.invoice_id)
+			re["invoice"] = ::Customer::InvoiceHeader.find(o.invoice_id) rescue nil
 			return render json:{flag:true,order:re}
 		end
 		orders = ::Orders::Order.where(user_id:current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
@@ -24,6 +26,8 @@ class InterfacesController < ApplicationController
 			ret<<re
 		}
 		render json:{flag:true,rows:ret,total:orders.total_count}
+		# render json:{flag:true,rows:[{},{},{}],total:4}
+		# render json:{flag:true,rows:[],total:0}
 	end
 	#支付
 	def pay_order
@@ -35,7 +39,7 @@ class InterfacesController < ApplicationController
 		# order.net_amt ##订单号用机构id+订单号
 		order.increment(:settle_times,1)
 		order.save
-		args = {out_trade_no: "#{order.id}_#{order.settle_times}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
 		# p '~~~~~~~~~',args
 		case params[:pay_type]
 		when "Alipay"
@@ -63,7 +67,7 @@ class InterfacesController < ApplicationController
 		return (render json:{flag:false,info:"当前订单状态不允许退费。"})unless order
 		order.update_attributes(_locked:1)
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.id}_#{order.settle_times}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
 		res = Pay::Refund.carry_out(args)
 		order.update_attributes(_locked:0)
 		# p '~~~~~~~',res
@@ -87,15 +91,23 @@ class InterfacesController < ApplicationController
 
 	def save_order
 		# params[:order][:user_id] = current_user.id
+		# p '~~~~~~~~~~~~',params
 		order = JSON.parse(params[:order].to_json)
 		order[:current_user] = current_user
+		if params[:use_invoice_header].to_s=="true"
+			invoice_header = ::Customer::InvoiceHeader.find(params[:invoice_header_id]).dup
+			invoice_header.user_id = nil
+			invoice_header.type_class = params[:invoice_type_class]
+			invoice_header.content = params[:invoice_content]
+			invoice_header.save
+			order[:invoice_id] = invoice_header.id
+		end
 		re = Orders::Order.create_order_by_presc_ids(order)
 		flash[:notice] = re[:info]
 		session[:cart_prescription_ids] = nil
 		if re[:ret_code]!='0'
 			return redirect_to "/customer/portal/settlement"
 		end
-		# p '~~~~~~~~~~~~',re
 		# p re
 		# flash[:notice] = re[:info]
 		if re[:order].payment_type.to_s == '2'

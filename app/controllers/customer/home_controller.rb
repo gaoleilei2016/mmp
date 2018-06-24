@@ -2,6 +2,24 @@ class Customer::HomeController < ApplicationController
 	layout "customer"
 	def index
 	end
+	def edit
+	end
+	def update
+		p '~~~~~~~ update',params
+		current_user.update_attributes({
+			name: params[:users][:name],
+			sex: params[:users][:sex],
+			birth: params[:users][:birth],
+			height: params[:users][:height],
+		})
+		if current_user.valid?
+			flash[:notice] = '保存成功'
+			redirect_to '/customer/home'
+		else
+			flash[:notice] = "失败：#{current_user.errors.messages}"
+			render '/customer/home/edit'
+		end
+	end
 	def confirm_order
 		@order = ::Orders::Order.find(params[:id])
 		# p '~~~~~~',@order
