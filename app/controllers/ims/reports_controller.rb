@@ -19,10 +19,11 @@ class Ims::ReportsController < ApplicationController
   # 处方发药汇总-医院
   # detail 需要查看明细前端传
   def dispensed_hospital
+    p "fsdgfsdgsdg====================== ",params
   	@data = Ims::Report.hospital_report params.merge({status:"4",hospital:true,org_id:current_user.organization_id})
   	respond_to do |format|
       format.html # show.html.erb
-      format.json { render json: {flag: true, info:"", data: @data} }
+      format.json { render json: {flag: true, info:"", data: @data+@data} }
     end
   end
 
