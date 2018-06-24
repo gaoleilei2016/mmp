@@ -424,7 +424,7 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
+					url:'/interfaces/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
 							_this.organs = json.data;

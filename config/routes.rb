@@ -12,6 +12,9 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :get_prescriptions_by_phone
+      get :get_all_prescriptions_by_phone
+      get :get_not_read_prescription
       post :refund_order
       get :get_orders
       post :pay_order
@@ -56,9 +59,9 @@ Rails.application.routes.draw do
     resources :portal do
       collection do
         
-        get :pullrefresh_main
-        get :pullrefresh_sub
-        get :full_screen
+        # get :pullrefresh_main
+        # get :pullrefresh_sub
+        # get :full_screen
 
         get :map
         get :settlement
@@ -105,10 +108,10 @@ Rails.application.routes.draw do
     # 处方
     resources :prescriptions do
       collection do
-        get :get_all_prescriptions_by_phone
-        get :get_prescriptions_by_phone
-        get :get_not_read_prescription
-        put :read_prescription
+        # get :get_all_prescriptions_by_phone
+        # get :get_prescriptions_by_phone
+        # get :get_not_read_prescription
+        # put :read_prescription
       end
       member do
         post :set_drug_store
