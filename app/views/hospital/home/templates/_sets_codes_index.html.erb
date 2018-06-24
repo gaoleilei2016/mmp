@@ -2,19 +2,133 @@
 </style>
 <template>
 	<div id="sets_codes_index_div">
-		sets_codes_index
+		<div class="page-header">
+			<i class="fa fa-cog fa-4x fa-fw"></i>
+			<h3>编码表设置<small>门诊医生站的所用的选择项设置</small></h3>
+		</div>
+		<el-form :model="code" size="mini" :rules="rules" ref="ruleForm" label-width="200px" style="width: 80%; margin: 0 auto;">
+			<div class="page-header">
+				<h4>途径&#12288;<small>选择途径的列表内容&#12288;（编号&#12288;编码&#12288;名称&#12288;简拼）</small></h4>
+			</div>
+		  <el-form-item label="" prop="routes">
+			  <el-row v-for="(type, index) in code.routes" style="margin-top: 5px;">
+			  	<el-col :span="1">
+				  	{{ index+1 }}
+				  </el-col>
+				  <el-col :span="6">
+				  	<el-input v-model="type.code"></el-input>
+				  </el-col>
+				  <el-col :span="8" style="padding-left: 10px;">
+				  	<el-input v-model="type.display"></el-input>
+				  </el-col>
+				  <el-col :span="5" style="padding-left: 10px;">
+				  	<el-input v-model="type.jianpin"></el-input>
+				  </el-col>
+				  <el-col :span="4" style="padding-left: 10px;">
+				  	<span v-if="index==0" class="fa fa-lg fa-fw fa-plus text-primary" style="cursor: pointer;" @click="code.routes.push({code: '', display: '', jianpin: ''})"></span>
+				  	<span v-else class="fa fa-lg fa-fw fa-trash-o text-danger" style="cursor: pointer;" @click="confirmDelete(code.routes, index)"></span>
+				  </el-col>
+				</el-row>
+		  </el-form-item>
+		  <div class="page-header">
+				<h4>频次&#12288;<small>选择频次的列表内容&#12288;（编号&#12288;编码&#12288;名称&#12288;简拼）</small><span class="text-danger">初始编码将用于后台系统判断，请不要随意修改！</span></h4>
+			</div>
+		  <el-form-item label="" prop="rates">
+			  <el-row v-for="(item, index) in code.rates" style="margin-top: 5px;">
+			  	<el-col :span="1">
+				  	{{ index+1 }}
+				  </el-col>
+				  <el-col :span="6">
+				  	<el-input v-model="item.code" disabled></el-input>
+				  </el-col>
+				  <el-col :span="8" style="padding-left: 10px;">
+				  	<el-input v-model="item.display" disabled></el-input>
+				  </el-col>
+				  <el-col :span="5" style="padding-left: 10px;">
+				  	<el-input v-model="item.jianpin" disabled></el-input>
+				  </el-col>
+				  <el-col :span="4" style="padding-left: 10px;">
+				  	<!-- <span v-if="index==0" class="fa fa-lg fa-fw fa-plus text-primary" style="cursor: pointer;" @click="code.rates.push({code: '', display: '', jianpin: ''})"></span> -->
+				  	<!-- <span v-else class="fa fa-lg fa-fw fa-trash-o text-danger" style="cursor: pointer;" @click="confirmDelete(code.rates, index)"></span> -->
+				  </el-col>
+				</el-row>
+		  </el-form-item>
+
+		  <hr/>
+		  <el-form-item>
+		    <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+		    <el-button @click="resetForm('ruleForm')">重置</el-button>
+		  </el-form-item>
+		</el-form>
 	</div>
 </template>
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
 		return {
-			
+			code: {},
+      ruleForm: {
+				routes: [],  // 途径
+        rates: [],  // 频次
+      },
+      rules: {},
 		}
 	},
-	mounted:function(){
+	mounted: function () {
+		apps.sets_codes_index = this;
+		this.$nextTick(function(){
+			this.init();
+		})
 	},
 	methods:{
+		init: function () {
+  		var _this = this;
+
+      Vue.resource('/hospital/sets/codes.json').get().then( function (response) {
+        // 根据初始值的设置，对页面做配置显示
+        var res = response.data
+        _this.code = res.data;
+        console.log(res)
+      }, function  (response) {
+      	_this.$message.error('获取编码表报错，请联系管理员。');
+      })
+  	},
+  	// 确认是否删除
+  	confirmDelete: function (obj, index) {
+  		var _this = this;
+  		_this.$confirm('此操作将删除此项数据, 是否继续?', '删除', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then( function () {
+      	obj.splice(index, 1);
+    	}).catch( function () {
+    	})
+  	},
+  	submitForm: function (formName) {
+  		var _this = this;
+  		_this.$refs[formName].validate( function (valid) {
+  			console.log(_this.code)
+  			if(valid){
+  				Vue.resource('/hospital/sets/codes/'+_this.code._id).update({authenticity_token: $('[name="csrf-token"]').attr('content'), sets_code: _this.code}).then( function (response) {
+  					var res = response.data;
+  					_this.code = res.data;
+  					_this.$message({
+		          message: '保存成功。',
+		          type: 'success'
+		        });
+  				},function (response) {
+  					_this.$message.error('保存编码表报错，请联系管理员。');
+  				})
+  			}else {
+  				_this.$message.error('必填字段不能为空。');
+          return false;
+        }
+      });
+  	},
+  	resetForm: function (formName) {
+      this.$refs[formName].resetFields();
+    }
 	},
 }
 </script>

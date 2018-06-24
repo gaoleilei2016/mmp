@@ -389,6 +389,48 @@
               }
             })
           },
+          // dujuan 2018/6/24公共的生成pdf的方法
+          generatePdf: function (json) {
+            var _this = this;
+            json["authenticity_token"] = $('[name="csrf-token"]').attr('content');
+            if(!json.html) {
+              _this.$message({
+                message: '请传入打印内容。',
+                type: 'warning'
+              });
+            }
+            _this.loading = true;
+            _this.$http.post('/interfaces/generate_pdf', json).then( function(response) {
+              var res = response.body;
+              _this.loading = false;
+              if(res.flag) {
+                _this.printPdfPage(res.url);
+              }
+            }, function() {
+              _this.loading = false;
+              _this.$message.error("后台出错，打印报卡失败。请联系管理员");
+            });
+          },
+          // 打印pdf的方法
+          printPdfPage: function (url) {
+            // 获取打印pdf的iframe
+            var iframe = document.getElementById('print_pdf_iframe');
+            if (!iframe) {
+              iframe = document.createElement('iframe');
+              document.body.appendChild(iframe);
+
+              iframe.id = 'print_pdf_iframe';
+              iframe.style.display = 'none';
+            }
+            iframe.onload = function() {
+              setTimeout(function() {
+                iframe.focus();
+                iframe.contentWindow.print();
+              }, 1);
+            };
+
+            iframe.src = url;
+          },
           // reset_element_bug:function () {
           //  setTimeout(function() {
           //    $(".el-table__body-wrapper.is-scroll-left").css({overflow:'hidden'});
