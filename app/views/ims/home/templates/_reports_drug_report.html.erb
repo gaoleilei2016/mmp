@@ -7,22 +7,10 @@
 		padding: 5px 0;
 		vertical-align: middle;
 	}
-	.demo-table-expand {
-	  font-size: 0;
-	}
-	.demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-	}
-	.demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-	}
 </style>
 <template>
 	<!-- 接诊管理、统计页面 -->
-	<div id="reports_dispensed_hospital_div">
+	<div id="reports_drug_report_div">
 		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
 		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
 		  <el-breadcrumb-item>报表</el-breadcrumb-item>
@@ -60,95 +48,73 @@
 					</el-col>
 				</el-row>
 				<el-table
-		      :data="dispensed_hospitals"
+		      :data="drug_reports"
 		      :height="tableHeight"
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      style="width: 100%">
-		      <el-table-column type="expand">
-			      <template slot-scope="props">
-			      	<el-table
-						    :data="(props.row.drugs||[])"
-						    style="width: 100%">
-						    <el-table-column
-						      label=""
-						      width="30">
-						      <template slot-scope="scope">
-							      {{ scope.$index + 1 }}
-							    </template>
-						    </el-table-column>
-						    <el-table-column
-						      label="药品名"
-						      min-width="200">
-						      <template slot-scope="scope">
-							      {{ scope.row.title }}
-							    </template>
-						    </el-table-column>
-						    <el-table-column
-							    min-width="200"
-							    align="left"
-							    label="规格">
-							    <template slot-scope="scope">
-							    	{{ scope.row.specification }}
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="200"
-							    align="right"
-							    label="数量">
-							    <template slot-scope="scope">
-							    	{{ scope.row.total_qty }}
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="140"
-							    align="center"
-							    label="单位">
-							    <template slot-scope="scope">
-							    	{{ scope.row.unit }}
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="180"
-							    align="right"
-							    label="单价">
-							    <template slot-scope="scope">
-							    	{{ scope.row.price }}
-							    </template>
-							  </el-table-column>
-							  <el-table-column
-							    min-width="250"
-							    align="right"
-							    label="金额">
-							    <template slot-scope="scope">
-							    	{{ scope.row.total_amount }}
-							    </template>
-							  </el-table-column>
-						  </el-table>
-			      </template>
-			    </el-table-column>
-		     <el-table-column
+		     	<el-table-column
 			      type=""
-			      label="#"
 			      width="30">
-			      <template slot-scope="scope">
-				      {{ scope.$index + 1 }}
-				    </template>
 			    </el-table-column>
-		      <el-table-column
+		      	<el-table-column
 				    min-width="240"
 				    align="left"
-				    label="医院名称">
+				    label="药品名称">
 				    <template slot-scope="scope">
-				      {{ scope.row.name }}
+				      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
 				    </template>
 				  </el-table-column>
-				  
+				  <el-table-column
+				    min-width="200"
+				    align="left"
+				    label="规格">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>{{ scope.row.specification }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="200"
+				    align="right"
+				    label="数量">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_qty }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="140"
+				    align="center"
+				    label="单位">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="180"
+				    align="right"
+				    label="单价">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
+				    </template>
+				  </el-table-column>
+				  <el-table-column
+				    min-width="250"
+				    align="right"
+				    label="金额">
+				    <template slot-scope="scope">
+				    	<i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
+				    </template>
+				  </el-table-column>
+
+				   <el-table-column
+			      type=""
+			      width="30">
+			    </el-table-column>
 		    </el-table>
 			</div>
 	  </el-tabs>
 	  <!-- 分页标记 -->
-	 <!--  <el-pagination
+	  <el-pagination
 	  	background
 	    @size-change="handleSizeChange"
 	    @current-change="handleCurrentChange"
@@ -157,7 +123,7 @@
 	    :page-size="pageSize"
 	    layout="total, sizes, prev, pager, next, jumper"
 	    :total="dataCount">
-	  </el-pagination> -->
+	  </el-pagination>
 
 
 		<!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
@@ -178,8 +144,8 @@ window.current_template_obj = {
 			cardTabsOptions: options,
 			multipleSelection: [],
 
-			dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'),
-			dispensed_hospitals: [],
+			drug_reportsResource: Vue.resource('/ims/reports/drug_report.json'),
+			drug_reports: [],
 			prescriptions: [],
 			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
 			orders: [],
@@ -266,11 +232,10 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+			_this.drug_reportsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
-          _this.dispensed_hospitals = res.data;
-  				console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
+          _this.drug_reports = res.data;
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);

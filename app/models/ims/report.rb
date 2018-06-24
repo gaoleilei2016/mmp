@@ -158,13 +158,14 @@ class Ims::Report
     def hospital_report args = {}
       result = drug_report args
       p result
-      data = result.group_by{|e| e["org_display"]}
+      data = result.group_by{|e| e["source_org_name"]}
       unless args[:detail].blank?
         data1 ={}
+        # data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
         data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
         data = data1
       end
-      return data
+      return data.map{|k,v| {name:k,drugs:v}}
     end
 
     # 针对发药人的统计
@@ -178,12 +179,12 @@ class Ims::Report
       result = drug_report args
       data = {}
       if args[:type]=="hospital_and_name"
-        groups= result.group_by{|e| e["org_display"]}
+        groups= result.group_by{|e| e["source_org_name"]}
         groups.map{|k,v| data[k] = v.group_by{|e| e['delivery_name']}}
         return data
       end
       groups= result.group_by{|e| e["delivery_name"]}
-      groups.map{|k,v| data[k] = v.group_by{|e| e['org_display']}}
+      groups.map{|k,v| data[k] = v.group_by{|e| e['source_org_name']}}
       return data
     end
 
