@@ -118,14 +118,14 @@ class Orders::Order < ApplicationRecord
 	##退药退费方法（药店使用） attrs = {reason:'',current_user:''}
 	def cancel_medical(attrs={})
 		attrs = attrs.deep_symbolize_keys
+		result = {ret_code:'-1',info:'当前状态不需要退药。',amt:0.0}
 		begin
 			update_attributes(_locked:1)
-			result = {ret_code:'-1',info:'当前状态不需要退药。',amt:0.0}
 			case status.to_s
 			when '1'
 
 			when '2'
-				::Order::Order.transaction do
+				::Orders::Order.transaction do
 					if is_send_medical.to_i>0
 						update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:'药房退款')
 						# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
