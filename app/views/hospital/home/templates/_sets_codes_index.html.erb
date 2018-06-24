@@ -53,7 +53,52 @@
 				  </el-col>
 				</el-row>
 		  </el-form-item>
-
+		  <div class="page-header">
+				<h4>职业&#12288;<small>选择职业的列表内容&#12288;（编号&#12288;编码&#12288;名称&#12288;简拼）</small></h4>
+			</div>
+		  <el-form-item label="" prop="occupations">
+			  <el-row v-for="(type, index) in code.occupations" style="margin-top: 5px;">
+			  	<el-col :span="1">
+				  	{{ index+1 }}
+				  </el-col>
+				  <el-col :span="6">
+				  	<el-input v-model="type.code"></el-input>
+				  </el-col>
+				  <el-col :span="8" style="padding-left: 10px;">
+				  	<el-input v-model="type.display"></el-input>
+				  </el-col>
+				  <el-col :span="5" style="padding-left: 10px;">
+				  	<el-input v-model="type.jianpin"></el-input>
+				  </el-col>
+				  <el-col :span="4" style="padding-left: 10px;">
+				  	<span v-if="index==0" class="fa fa-lg fa-fw fa-plus text-primary" style="cursor: pointer;" @click="code.occupations.push({code: '', display: '', jianpin: ''})"></span>
+				  	<span v-else class="fa fa-lg fa-fw fa-trash-o text-danger" style="cursor: pointer;" @click="confirmDelete(code.occupations, index)"></span>
+				  </el-col>
+				</el-row>
+		  </el-form-item>
+		  <div class="page-header">
+				<h4>处方类型&#12288;<small>选择处方类型的列表内容&#12288;（编号&#12288;编码&#12288;名称&#12288;简拼）</small></h4>
+			</div>
+		  <el-form-item label="" prop="prescription_types">
+			  <el-row v-for="(type, index) in code.prescription_types" style="margin-top: 5px;">
+			  	<el-col :span="1">
+				  	{{ index+1 }}
+				  </el-col>
+				  <el-col :span="6">
+				  	<el-input v-model="type.code"></el-input>
+				  </el-col>
+				  <el-col :span="8" style="padding-left: 10px;">
+				  	<el-input v-model="type.display"></el-input>
+				  </el-col>
+				  <el-col :span="5" style="padding-left: 10px;">
+				  	<el-input v-model="type.jianpin"></el-input>
+				  </el-col>
+				  <el-col :span="4" style="padding-left: 10px;">
+				  	<span v-if="index==0" class="fa fa-lg fa-fw fa-plus text-primary" style="cursor: pointer;" @click="code.prescription_types.push({code: '', display: '', jianpin: ''})"></span>
+				  	<span v-else class="fa fa-lg fa-fw fa-trash-o text-danger" style="cursor: pointer;" @click="confirmDelete(code.prescription_types, index)"></span>
+				  </el-col>
+				</el-row>
+		  </el-form-item>
 		  <hr/>
 		  <el-form-item>
 		    <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
@@ -70,6 +115,8 @@ window.current_template_obj = {
       ruleForm: {
 				routes: [],  // 途径
         rates: [],  // 频次
+        occupations: [], // 职业
+				prescription_types: [], // 处方类型
       },
       rules: {},
 		}
