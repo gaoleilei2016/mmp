@@ -229,7 +229,7 @@ class Orders::Order < ApplicationRecord
 	class << self
 		#取消订单时回调处方
 		def cancel_bill(pres,arg={},current_user)
-			pres.each{|x|x.cancel_bill(arg, current_user);x.bill_id = '';x.order = nil;x.save}
+			pres.each{|x|x.cancel_bill(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
 		end
 		#检查订单定时器
 		def check_order_timer
@@ -280,7 +280,7 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("支付类别不能为空!")
 			end
-			if ::Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]).select{|x|x.order}.present?
+			if ::Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]).select{|x|x.bill}.present?
 				result[:ret_code] = '-1'
 				result[:info].concat("处方包含有效订单，无法继续生成!")
 			end
