@@ -3,7 +3,7 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   layout "users"
   skip_before_action :verify_authenticity_token
-  before_action :configure_sign_up_params, only: [:create]
+  # before_action :configure_sign_up_params, only: [:create]
   # before_action :configure_account_update_params, only: [:update]
 
   # GET /resource/sign_up
@@ -31,7 +31,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
       openid:session[:openid],
       openname:session[:openname],
     }
-    build_resource(sign_up_params)
+    # build_resource(sign_up_params)
+    # p '~~~~~~~~~~~',JSON.parse(params[:user].to_json)
+    build_resource(JSON.parse(params[:user].to_json))
     # # 图片验证码
     # unless verify_rucaptcha?
     #   flash[:login] = params[:login]
@@ -122,9 +124,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # protected
 
   # If you have extra params to permit, append them to the sanitizer.
-  def configure_sign_up_params
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:name,:sex,:birth])
-  end
+  # def configure_sign_up_params
+  #   devise_parameter_sanitizer.permit(:sign_up, keys: [:name,:sex,:birth])
+  # end
 
   # If you have extra params to permit, append them to the sanitizer.
   # def configure_account_update_params
