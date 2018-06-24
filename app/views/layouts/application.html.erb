@@ -273,6 +273,15 @@
           // common_data_prescription_types:[{code: "1", display: "普通处方"}, {code: "2", display: "急诊处方"}, {code: "3", display: "儿科处方"}, {code: "4", display: "毒麻药品处方"}, {code: "5", display: "第一类精神药品处方"}, {code: "6", display: "第二类精神药品处方"}, {code: "7", display: "抗生素处方"}], // 处方类型CodeSystem 2.16.156.1.675425699.1.50
           common_data_sharing_scopes:[{code: "0", display: "自己"}, {code: "1", display: "科室"}, {code: "2", display: "全院"}], 
           common_data_diagnosis_types:[{code: "0", display: "主诊断"}, {code: "1", display: "次要诊断"}], 
+          billStatusOptions: [
+            {value: "1", label: "待付款", type: "primary"},
+            {value: "2", label: "待领药", type: "warning"},
+            {value: "3", label: "未发货", type: "warning"},
+            {value: "4", label: "已发货", type: "success"},
+            {value: "5", label: "交易完成", type: "success"},
+            {value: "6", label: "已退药", type: "info"},
+            {value: "7", label: "交易关闭", type: "info"},
+          ], // 订单状态
           pickerOptions:{
             shortcuts: [{
               text: '今天',
