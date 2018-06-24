@@ -369,9 +369,9 @@ class Ims::Order < ApplicationRecord
           prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
           send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
           result = Ims::PreHeader.save_prescription send_data
-          return {flag:false,info:"发药失败: #{data[:info]}"} unless result[:flag]
+          return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
           temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
-          # data = Orders::Order.order_completion(temp)
+          data = Orders::Order.order_completion(temp)
           data = {ret_code:0}
         # end
         return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
