@@ -26,8 +26,8 @@ worker_timeout 30
 daemonize true
 
 on_worker_boot do
-   NoticeChannel.redis.subscribe
- end
+   Thread.new{NoticeChannel.redis.subscribe}
+end
 
 preload_app!
 
