@@ -62,6 +62,12 @@ window.current_template_obj = {
 				codeIni: {}, // 编码表
 				rates: [], // 频次编码表
 				routes: [], // 途径编码表
+				prescription_types: [], // 处方类型编码表
+				bloods: [], // 血型编码表
+				nations: [], // 民族编码表
+				marriages: [], // 婚姻编码表
+				occupations: [], // 职业编码表
+
 				focusSelect: "", // 目前聚焦的哪个select框，用于筛选，code+简拼+名称
 				ini: {
 					enable_print_pres: true, // 启用打印处方功能
@@ -273,6 +279,11 @@ window.current_template_obj = {
 	        _this.codeIni = res.data;
 	        _this.routes = res.data.routes;
           _this.rates = res.data.rates;
+          _this.prescription_types = res.data.prescription_types;
+          _this.bloods = res.data.bloods;
+          _this.nations = res.data.nations;
+					_this.marriages = res.data.marriages;
+					_this.occupations = res.data.occupations;
 	      }, function  (response) {
 	      	_this.$message.error('获取编码表报错，请联系管理员。');
 	      })
@@ -320,9 +331,10 @@ window.current_template_obj = {
 	  		var field = select.split("|")[0], ele = select.split("|")[1];
 	  		if (val && field) {
           var tempArr = [];
-          var val = val.toUpperCase();
+          var val = val.toUpperCase(), search = "";
           (_this.codeIni[field]||[]).forEach(function (item, index) {
-          	if(item.code.indexOf(val)>-1 || item.display.indexOf(val)>-1 || item.jianpin.indexOf(val)>-1) {
+          	search = item.code+item.display+item.jianpin;
+          	if(search.indexOf(val)>-1) {
           		tempArr.push(item);
           	}
           })
@@ -367,7 +379,7 @@ window.current_template_obj = {
 		  			_this.encounter.type = "by_iden"; // 身份证方式提交的数据
 		  			_this.getBirthdayFromIdCard(card.code); // 生日、年龄
 		  			_this.loadingidcard = false; // 取消正在加载身份证数据
-		  			var genders = _this.$parent.common_data_genders, nations = _this.$parent.common_data_nations;
+		  			var genders = _this.$parent.common_data_genders, nations = _this.nations;
 		  			for(var i=0; i<genders.length; i++) {
 		  				if(genders[i].display == card.gender) {
 		  					_this.encounter.gender = genders[i];
@@ -1005,8 +1017,8 @@ window.current_template_obj = {
     			price: drug.price, // 价格
     			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
     			single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
-    			route: _this.$parent.common_data_routes[0],// 频次
-    			frequency: _this.$parent.common_data_frequencys[0],// 频次
+    			route: _this.routes[0],// 频次
+    			frequency: _this.rates[0],// 频次
     			course_of_treatment: {value: "", unit: "天"},  // 疗程
     			total_quantity: 1, // 总量
     			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
@@ -1403,7 +1415,7 @@ window.current_template_obj = {
     			diagnoses.push(item.display);
     		})
     		_this.prescription = {
-    			type: _this.$parent.common_data_prescription_types[0], // 类型
+    			type: _this.prescription_types[0], // 类型
     			diagnoses: diagnoses, // 诊断
     			specialmark: false, // 特殊处方标记
     			ids: [], // 药品ids
