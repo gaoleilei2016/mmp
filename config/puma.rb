@@ -28,8 +28,8 @@ daemonize false
 
 # 胡俊专用
 # threads_count = ENV.fetch("RAILS_MAX_THREADS") { 2 }
-# threads threads_count, threads_count
-# workers 3
+# threads 2, 16
+# workers 8
 # port 3000
 # environment 'development'
 # application_path = "/home/hujun/work/mmp"
@@ -46,6 +46,6 @@ daemonize false
 # daemonize true
 
 # on_worker_boot do
-#   p '666666666666666666666666666666666'
-#   p Thread.new{NoticeChannel.redis.subscribe}
+#   # p '666666666666666666666666666666666'
+#   # p Thread.new{NoticeChannel.redis.subscribe}
 # end
