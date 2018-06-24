@@ -8,7 +8,8 @@ class Users::SessionsController < Devise::SessionsController
   # GET /resource/sign_in
   def new
     flash[:login] = params[:login] if params[:login].present?
-    return redirect_to "/users/sign_up?login=#{params[:login]}" if session[:openid]
+    # p '~~~~~~~~~',params[:weixin_sign_in],session[:openid]
+    return redirect_to "/users/sign_up?login=#{params[:login]}" if session[:openid]&&(!params[:weixin_sign_in].present?)
       # return redirect_to "/users/sign_up?login=#{params[:login]}" 
     # end
       # u = User.where(openid:session[:openid]).first

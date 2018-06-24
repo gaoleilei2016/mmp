@@ -90,7 +90,7 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i<=0#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -125,7 +125,15 @@ class Orders::Order < ApplicationRecord
 			when '1'
 
 			when '2'
-
+				::Order::Order.transaction do
+					if is_send_medical.to_i>0
+						update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:'药房退款')
+						# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
+					else
+						update_attributes(status:'1')
+					end
+				end
+				result = {ret_code:'0',info:'退费成功'}
 			when '3'
 
 			when '4'
