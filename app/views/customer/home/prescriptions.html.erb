@@ -40,10 +40,10 @@
 </header>
 <div id="vue_content" class="mui-content mui-scroll-wrapper" v-cloak>
 	<div class="mui-scroll">
-		<div>
-			<ul @click="alert('xxx')" class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
+		<div style="min-height: 40px;">
+			<ul :data-href="'/customer/home/prescription?id='+item.id" class="mui-table-view prescription_item" style="" v-for="item in prescriptions">
 				<li class="mui-table-view-cell">
-					<a :href="'/customer/home/prescription?id='+item.id">
+					<a href="javascript:;">
 						<span>No: {{item.prescription_no}}（{{item.name}}）</span>
 						<span style="float: right;color: #F55742;">
 							<span v-if="item.status=='0'">未审核</span>
@@ -120,7 +120,11 @@
 				var _this = this;
 				$("#loading").show();
 				var per = 3;
-				var page = Math.ceil(_this.prescriptions.length/per)+1;
+				if (pulltype=='pulldown') {
+					var page = 1;
+				}else{
+					var page = Math.ceil(_this.prescriptions.length/per)+1;
+				}
 				$.ajax({
 					url:'/hospital/prescriptions/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page='+page+'&per='+per,
 					success:function(json) {
@@ -141,7 +145,7 @@
 						}
 						if (json.flag) {
 						}else{
-							_this.$message(json.info);
+							mui.toast(json.info);
 						}
 					},
 					complete:function() {
@@ -176,6 +180,11 @@
 				}
 			});
 			// _this.get_prescriptions();
+			$("#vue_content").on('tap','.prescription_item',function(e) {
+				// alert($(this).attr('data-href'))
+				location.href = $(this).attr('data-href');
+			})
+
 		}
 	})
 

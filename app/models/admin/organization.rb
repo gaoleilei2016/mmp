@@ -18,7 +18,7 @@ class Admin::Organization < ApplicationRecord
         # return {state: :fail, msg: '参数错误', desc: '定位失败'} if lng.eql?(106.7091771)&&lat.eql?(26.62990674)
         num = (args[:num] || 1).to_i
         res = find_by_sql(sql_syntax({lat: lat, lng: lng, num: num}))
-        return {state: :empty, msg: '结果为空', desc: '没有找到最近的结果'} if res.nil?
+        return {state: :empty, msg: '结果为空', desc: '没有找到最近的结果'} if res.empty?
         get_result(lat, lng, res)
       rescue Exception => e
         {state: :fail, msg: '系统错误', desc: e.message}

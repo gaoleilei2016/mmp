@@ -6,6 +6,9 @@
     <%= javascript_include_tag "/assets/jquery/jquery-1.9.1","/assets/plugins/vue/vue-253","/assets/plugins/vue/vue-router","/assets/plugins/vue/vue-resource","/assets/plugins/lodash","/assets/plugins/vue/element-ui-240" %>
     <%= stylesheet_link_tag "/assets/plugins/element-ui/index","/assets/plugins/fontawesome/font-awesome.min","/assets/plugins/vue/display" %>
     <%= javascript_include_tag  %>
+
+    <%= javascript_include_tag 'cable', 'data-turbolinks-track': 'reload' %>
+
     <%= csrf_meta_tags %>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <!-- 定义360浏览器以极速模式（webkit内核）打开 -->

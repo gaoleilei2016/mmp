@@ -13,7 +13,7 @@ class Customer::PortalController < ApplicationController
 		@order = ::Orders::Order.find(params[:id])
 		# p '~~~~~~~~~~~~',@order
 		if session[:openid]
-			args = {out_trade_no: "#{@order.id}_#{@order.settle_times}", total_fee: @order.net_amt.to_f.round(2), title: "华希订单-#{@order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{@order.id}&pay_type=#{params[:pay_type]}"}
+			args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", total_fee: @order.net_amt.to_f.round(2), title: "华希订单-#{@order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{@order.id}&pay_type=#{params[:pay_type]}"}
 			args[:openid] = session[:openid]
 			# 微信内部支付
 			@res = Pay::Wechat.public_pay(args)
