@@ -207,7 +207,7 @@ class Ims::OrdersController < ApplicationController
   #退费
   def return_amount
     args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
-    @data = Ims::Order.return_drug params.merge(args)
+    @data = Ims::Order.return_amount params.merge(args)
     render json:@data.to_json    
   end
   # 下载错误处方返回
