@@ -94,7 +94,7 @@ class Orders::Order < ApplicationRecord
 						info:'您有一张订单结算被用户取消了！', #订单金额
 					}
 					# {ch:’’,type:’’,event:’’,content:’’}
-					::NoticeChannel.publish(data)
+					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
 					arg = {
 						reason:reason
@@ -237,7 +237,7 @@ class Orders::Order < ApplicationRecord
 							flag:true, #true已收费  false 退费
 							info:'您有新的已结算订单！', #订单金额
 						}
-				::NoticeChannel.publish(data)
+				::NoticeChannel.publish(data) rescue nil
 				# ::NoticeBroadcastJob.perform_later(data:data)
 			end
 			rsult = {ret_code:'0',info:'订单结算成功！'}
@@ -364,7 +364,7 @@ class Orders::Order < ApplicationRecord
 									info:'您有新的线下支付订单！', #订单金额
 								}
 								p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
-								::NoticeChannel.publish(data)
+								::NoticeChannel.publish(data) rescue nil
 								p data
 								p "++++++++++++++++++++++++++++++"
 								# ::NoticeBroadcastJob.perform_later(data:data)

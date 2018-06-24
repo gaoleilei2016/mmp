@@ -514,6 +514,7 @@ window.current_template_obj = {
     },
     set_order_list:function(data){
       if (data) {
+        console.log(data)
         this._data.order_lists = data
         setTimeout(function(){
           $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
