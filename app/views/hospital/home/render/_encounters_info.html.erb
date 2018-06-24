@@ -69,9 +69,9 @@
 				  	<el-form-item
 					    label="民族"
 					    prop="nation">
-					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" filterable>
+					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" :filter-method="filterCodes" @focus="focusSelect='nations|encnation'" ref="encnation" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_nations||[])"
+						      v-for="item in (nations||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -98,9 +98,9 @@
 				  	<el-form-item
 					    label="婚姻"
 					    prop="marriage">
-					    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='marriages|encmarriage'" ref="encmarriage" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_marriages||[])"
+						      v-for="item in (marriages||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -133,9 +133,9 @@
 					  <el-form-item
 					    label="职业"
 					    prop="occupation">
-					    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='occupations|encoccupation'" ref="encoccupation" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_occupations||[])"
+						      v-for="item in (occupations||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -252,9 +252,9 @@
 					<el-form-item
 				    label="血型"
 				    prop="blood">
-				    <el-select v-model="encounter.blood" value-key="code" placeholder="请选择" style="width: 100%;">
+				    <el-select v-model="encounter.blood" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='bloods|encblood'" ref="encblood" filterable>
 					    <el-option
-					      v-for="item in ($parent.common_data_bloods||[])"
+					      v-for="item in (bloods||[])"
 					      :key="item.code"
 					      :label="item.display"
 					      :value="item">

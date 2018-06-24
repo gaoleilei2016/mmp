@@ -65,21 +65,15 @@ class Orders::Order < ApplicationRecord
 			::Orders::Order.transaction do
 				case status.to_s
 				when '1'
-					prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
+					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
-					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
+					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
-					# arg0 = {
-					# 	# 退费人
-					# 	return_charge_opt: {
-					# 		id: current_user.id.to_s,
-					# 		display: current_user.name.to_s
-					# 	},
-					# 	# 退费时间
-					# 	return_charge_at: Time.now.to_s(:db)
-					# }
-					# prescriptions.each{|x|x.return_charge(arg0, current_user)}
+					# ::Orders::Order.cancel_bill(prescriptions,{},cur_user)#取消订单回调处方
+
+					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
 						ch:target_org_id,#药房id
@@ -96,18 +90,14 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					arg = {
-						reason:reason
-					}
-					prescriptions.each{|x|x.charge_back_to_audit(arg, current_user)}
-					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}#用来判断订单是否重复生成，是否可以继续生成
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
 				when '6'
-					prescriptions.each{|x|x.back_wait_charge({}, current_user)}
+					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
-					prescriptions.each{|x| x.bill_id = '';x.order = nil;x.save}
 					result = {ret_code:'0',info:'订单已取消。'}
 					# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
 				when '7'
@@ -143,20 +133,9 @@ class Orders::Order < ApplicationRecord
 			when '5'
 				::Orders::Order.transaction do
 					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
-					cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
-					# 退药
-					arg = {
-						return_charge_opter: {
-							id: attrs[:current_user].id.to_s,
-							display: attrs[:current_user].name.to_s
-						},
-						# 退费时间
-						return_drug_store_id: target_org_id,
-						return_drug_opt_at: Time.now.to_s(:db)
-					}
-					prescriptions.each{|x|x.return_drug(arg, attrs[:current_user])}
-
+					# cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
 					if self.payment_type.to_s == '2' #如果是线下支付的
+						::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
 						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
 					end
 				end
@@ -178,6 +157,8 @@ class Orders::Order < ApplicationRecord
 		end
 		result
 	end
+
+
 
 	# private
 	def cancel_order_by_private(prescriptions,cur_user,reason)
@@ -213,17 +194,17 @@ class Orders::Order < ApplicationRecord
 		return {ret_code:'-1',info:'当前订单状态异常，不允许结算。'}if status.to_s != '1'
 		begin
 			::Orders::Order.transaction do 
-				args = {
-					# 创建订单人
-					charger: {
-						id: cur_user.id,
-						display: cur_user.name
-						},
-					# 订单创建时间
-					charge_at: created_at.to_s(:db)
-				}
-				##通知处方订单已结算
-			 	prescriptions.each{|x|x.charged(args, cur_user)}
+				# args = {
+				# 	# 创建订单人
+				# 	charger: {
+				# 		id: cur_user.id,
+				# 		display: cur_user.name
+				# 		},
+				# 	# 订单创建时间
+				# 	charge_at: created_at.to_s(:db)
+				# }
+				# ##通知处方订单已结算
+			 # 	prescriptions.each{|x|x.charged(args, cur_user)}
 				update_attributes(pay_type:pay_type,status:'2',payment_at:Time.now.to_s(:db))
 				data = {
 							ch:target_org_id,#药房id
@@ -249,7 +230,11 @@ class Orders::Order < ApplicationRecord
 	end
 
 	class << self
-
+		#取消订单时回调处方
+		def cancel_bill(pres,arg={},current_user)
+			pres.each{|x|x.cancel_bill(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
+		end
+		#检查订单定时器
 		def check_order_timer
 			Orders::Order.where('payment_type = 1 and status = 1 and created_at > ?' ,Time.now - 28.minutes ).update_all(status:'7',reason:'超时关闭')
 			Orders::Order.where('payment_type = 1 and status = 1 and created_at < ?' ,Time.now - 30.minutes ).each{|x| 
@@ -298,7 +283,7 @@ class Orders::Order < ApplicationRecord
 				result[:ret_code] = '-1'
 				result[:info].concat("支付类别不能为空!")
 			end
-			if ::Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]).select{|x|x.order}.present?
+			if ::Hospital::Prescription.where("id in (?)",attrs[:prescription_ids]).select{|x|x.bill}.present?
 				result[:ret_code] = '-1'
 				result[:info].concat("处方包含有效订单，无法继续生成!")
 			end
@@ -332,11 +317,23 @@ class Orders::Order < ApplicationRecord
 						 person_id: presc[:person_id].to_s,
 						 status: attrs[:status]||'1'
 				 		)
+				 		#通知处方的数据
+				 		args = {
+							# 创建订单人
+							create_bill_opt: {
+								id: attrs[:current_user].id.to_s,
+								display: attrs[:current_user].name.to_s,
+							},
+							# 订单创建时间
+							bill_at: order.created_at.to_s(:db),
+						  	bill_id: order.id,
+						}
 						presc[:details].each do |k,details|
 							prescription = ::Hospital::Prescription.find(k)
 							order.prescriptions << prescription
-							prescription.order = order
+							prescription.bill = order
 							prescription.save
+							prescription.commit_bill(args, attrs[:current_user])#改变处方状态
 							details.each do |detail|
 								net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 								order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt,prescription_id:k}))
@@ -370,18 +367,6 @@ class Orders::Order < ApplicationRecord
 								# ::NoticeBroadcastJob.perform_later(data:data)
 							end
 						end
-						#订单创建成功之后改变处方状态
-						args = {
-							# 创建订单人
-							create_bill_opt: {
-								id: attrs[:current_user].id.to_s,
-								display: attrs[:current_user].name.to_s,
-							},
-							# 订单创建时间
-							bill_at: order.created_at.to_s(:db),
-						  	bill_id: order.id,
-						}
-						order.prescriptions.each{|pre| pre.wait_charge(args, attrs[:current_user])}
 					end
 				rescue Exception => e
 					p e.backtrace
@@ -500,31 +485,31 @@ class Orders::Order < ApplicationRecord
 					if result[:ret_code].to_s == '0'
 						#订单结算
 						if ["2","5"].include?attrs[:status].to_s
-							args = {
-								# 创建订单人
-								charger: {
-									id: attrs[:current_user].id,
-									display: attrs[:current_user].name
-									},
-								# 订单创建时间
-								charge_at: order.created_at.to_s(:db)
-							}
-							##通知处方订单已结算
-						 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
+							# args = {
+							# 	# 创建订单人
+							# 	charger: {
+							# 		id: attrs[:current_user].id,
+							# 		display: attrs[:current_user].name
+							# 		},
+							# 	# 订单创建时间
+							# 	charge_at: order.created_at.to_s(:db)
+							# }
+							# ##通知处方订单已结算
+						 # 	order.prescriptions{|x|x.charged(args, attrs[:current_user])}
 						 	#订单发药
 							if ["5"].include?attrs[:status].to_s
 								#发药标志改为1（已发药）
 								order.update_attributes(:is_send_medical=>1)
-							 	args2 = {
-									# 发药人
-									delivery: {
-										id: attrs[:current_user].id,
-										display: attrs[:current_user].name
-									},
-									# 发药时间
-									delivery_at: order.created_at.to_s(:db)
-								}
-								order.prescriptions{|x|x.send_drug(args2, attrs[:current_user])}
+							 # 	args2 = {
+								# 	# 发药人
+								# 	delivery: {
+								# 		id: attrs[:current_user].id,
+								# 		display: attrs[:current_user].name
+								# 	},
+								# 	# 发药时间
+								# 	delivery_at: order.created_at.to_s(:db)
+								# }
+								# order.prescriptions{|x|x.send_drug(args2, attrs[:current_user])}
 							end
 							p "order_completion订单更新状态拉:#{attrs[:status]},#{order.id.to_s}"
 							order.update_attributes(drug_user:attrs[:drug_user],

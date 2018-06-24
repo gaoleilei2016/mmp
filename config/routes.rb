@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       get :get_dicts
       get :get_addrs
       get :get_medicine_by_name
+      post :generate_pdf # 生成pdf
     end
   end
   ############################
@@ -49,6 +50,7 @@ Rails.application.routes.draw do
         get :orders
         get :order
         get :confirm_order
+        get :feedbacks
       end
     end
     resources :portal do
@@ -219,5 +221,6 @@ Rails.application.routes.draw do
   match '/wechat/login',  to: 'wechat#login', via: [:get]
   match '/wechat/public_pay', to: 'wechat#pay', via: [:post]
   match '/wechat/websocket', to: 'wechat#websocket', via: [:get]
+  match '/wechat/info',  to: 'wechat#info', via: [:post]
   ########### hujun_end   ##########
 end
