@@ -346,6 +346,28 @@ class Ims::Order < ApplicationRecord
       end
     end
 
+    # 退费(根据订单退药)
+    def return_amount args={}
+      begin
+        order_id = args[:id]
+        current_user = args[:current_user]
+        order = Orders::Order.find order_id rescue nil
+        return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+        # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
+        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
+        return {flag:false,:info=>"该订单不是收费状态，不能退费。"} if order.status.to_i!=2
+        return {flag:false,:info=>"该订单不是线下订单，不能退费。"} if order.payment_type.to_i!=2
+        return {flag:false,:info=>"该订单已发药，不能退费。"} if (order.status.to_i==5||order.status.to_i==6||order.status.to_i==7)
+        headers = Ims::PreHeader.where(:order_id=>order_id,delivery_org_id:args[:org_id])
+        attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退费')}
+        order.cancel_medical(attrs)
+        {flag:true,info:'退费成功！'}
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 退费 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
+    end
 
     # 发药
     def dispensing_order args = {}
