@@ -66,6 +66,7 @@ Rails.application.routes.draw do
     end
     resources :report
     resources :invoice_headers
+    resources :feedbacks
   end
   ########### customer ##########
   ############################
