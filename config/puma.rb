@@ -3,7 +3,7 @@
 environment 'development'
 threads 2, 16 # minimum 2 threads, maximum 32 threads
 workers 8
-
+port 3000
 app_name = 'mmp'
 
 application_path = "/home/tenmind/app/#{app_name}"
@@ -19,8 +19,10 @@ stdout_redirect "#{application_path}/shared/log/puma.stdout.log", "#{application
 # stdout_redirect "#{application_path}/log/puma.stdout.log", "#{application_path}/log/puma.stderr.log"
 
 
-# bind "unix://#{application_path}/shared/tmp/sockets/puma.sock"  #绑定sock
-bind 'tcp://192.168.2.207:3000'    #绑定端口4301
+bind "unix://#{application_path}/shared/sockets/puma.sock"  #绑定sock
+activate_control_app "unix://#{application_path}/shared/sockets/pumactl.sock"
+
+# bind 'tcp://192.168.2.207:3000'    #绑定端口4301
 worker_timeout 30
 
 daemonize true
