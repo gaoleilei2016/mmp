@@ -167,6 +167,7 @@ Rails.application.routes.draw do
         get :get_order_by_code  # 已发药或已退订单检索  
         post :operat_order_by_prescription   # 平台处方收费或收费并发药操作
         get :return_drug           # 退药
+        get :return_amount           # 退费
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
         post :order_setting  #订单设置
