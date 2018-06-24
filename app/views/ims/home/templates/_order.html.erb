@@ -124,11 +124,11 @@ window.current_template_obj = {
       })
       if (data.flag) {
         if (Number(data.status) == Number(_this.out_list_panel) ) {
-          $("#yuyin")[0].play()
           temp = this._data.order_lists
           temp.push(data)
           this._data.order_lists = temp
         };
+        $("#yuyin")[0].play()
         this.$notify.success({
           title: '消息',
           message: data.info,
