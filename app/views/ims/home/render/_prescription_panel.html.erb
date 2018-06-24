@@ -81,7 +81,7 @@
           </div>
           <div class="el-col-12">
             <span v-if="info.invoice">税号：{{info.invoice.shuihao||'无'}}</span>
-            <span>税号：无</span>
+            <span v-else>税号：无</span>
           </div>
         </div>
       </div>
