@@ -44,6 +44,9 @@
 
     <el-button @click="change" id="notice_input" style="display:none;"></el-button>
     <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
+    <audio id="yuyin" style="display:none;">
+      <source src="/assets/ims/newbill.mp3">
+    </audio>
 	</div>
 </template>
 <script type="text/javascript">
@@ -119,6 +122,7 @@ window.current_template_obj = {
       $.each(this._data.order_lists,function(k,v){if(v.order_id == data.order_id){return false;}})
       if (data.flag) {
         if (data.status == _this.out_list_panel) {
+          $("#yuyin")[0].play()
           temp = this._data.order_lists
           temp.push(data)
           this._data.order_lists = temp
