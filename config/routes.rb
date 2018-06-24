@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       get :get_dicts
       get :get_addrs
       get :get_medicine_by_name
+      post :generate_pdf # 生成pdf
     end
   end
   ############################

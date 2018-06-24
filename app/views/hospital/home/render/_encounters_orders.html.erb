@@ -44,9 +44,9 @@
 		</el-col>
 		<el-col :span="2">
 		  <el-form-item label="途径">
-		    <el-select v-model="order.route" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordroute" @keydown.enter.stop.native="focusNext('ordroute', 'ordfrequency')" filterable>
+		    <el-select v-model="order.route" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordroute" @keydown.enter.stop.native="focusNext('ordroute', 'ordfrequency')" :filter-method="filterCodes" @focus="focusSelect='routes|ordroute'" filterable>
 			    <el-option
-			      v-for="item in ($parent.common_data_routes||[])"
+			      v-for="item in routes"
 			      :key="item.code"
 			      :label="item.display"
 			      :value="item">
@@ -56,9 +56,9 @@
 		</el-col>
 		<el-col :span="2">
 		  <el-form-item label="频次">
-		  	<el-select v-model="order.frequency" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordfrequency" @keydown.enter.stop.native="focusNext('ordfrequency', 'ordcourseoftreatment')" filterable>
+		  	<el-select v-model="order.frequency" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordfrequency" @keydown.enter.stop.native="focusNext('ordfrequency', 'ordcourseoftreatment')" :filter-method="filterCodes" @focus="focusSelect='rates|ordfrequency'" filterable>
 			    <el-option
-			      v-for="item in ($parent.common_data_frequencys||[])"
+			      v-for="item in rates"
 			      :key="item.code"
 			      :label="item.display"
 			      :value="item">
