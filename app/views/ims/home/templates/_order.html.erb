@@ -742,7 +742,7 @@ window.current_template_obj = {
       var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
       var ids = []
       $.each(boxs,function(k,v){
-        ids.push($(v).val())
+        ids.push($(v).parents("label").find(".pre_id").text())
       })
       console.log("111111111111=====id== "+ids)
       if(ids&&ids.length>0){}else{
