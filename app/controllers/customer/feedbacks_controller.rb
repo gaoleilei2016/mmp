@@ -8,9 +8,9 @@ class Customer::FeedbacksController < ApplicationController
 		# p '~~~~~~~~~~~~~',params
 		feed = ::Customer::Feedback.create({
 			user_id:current_user.id,
-			content:params[:content],
-			contact:params[:contact],
-			score:params[:score],
+			content:params[:feedback][:content],
+			contact:params[:feedback][:contact],
+			score:params[:feedback][:score],
 		})
 		if feed.valid?
 			flash[:notice] = "保存成功"
