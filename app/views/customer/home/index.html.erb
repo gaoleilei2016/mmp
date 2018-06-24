@@ -374,11 +374,11 @@
 				</div>
 			</div>
 		</div>
-		<form action="/customer/feedbacks" method="post">
+		<form id="feedback_form" action="/customer/feedbacks" method="post">
 			<%= render "/customer/form_token" %>
 			<input type="hidden" name="feedback[score]" v-model="ruleForm.score">
 			<div class="row mui-input-row">
-				<textarea id='question' name="feedback[content]" class="mui-input-clear question" placeholder="请详细描述您的问题和意见..."></textarea>
+				<textarea id='question' name="feedback[content]" v-model="ruleForm.content" class="mui-input-clear question" placeholder="请详细描述您的问题和意见..."></textarea>
 			</div>
 			<p>QQ/邮箱/手机号</p>
 			<div class="mui-input-row">
@@ -395,7 +395,7 @@
 				</div>
 			</div>
 			<div class="mui-content-padded" style="margin: 30px 80px;">
-				<button class="mui-btn mui-btn-block mui-btn-primary" style="background: #F55742;border: 0;border-radius: 16px;padding: 4px;">提交</button>
+				<button type="button" @click="submit_form" class="mui-btn mui-btn-block mui-btn-primary" style="background: #F55742;border: 0;border-radius: 16px;padding: 4px;">提交</button>
 			</div>
 		</form>
 	</div>
@@ -407,12 +407,24 @@
 		el:"#feedback",
 		data:{
 			ruleForm:{
-				// content:'',
+				content:'',
 				// contact:'',
 				score:'',
 			}
 		},
-		methods:{},
+		methods:{
+			submit_form:function() {
+				if (!this.ruleForm.content) {
+					mui.toast("请填写您的描述");
+					return false;
+				}
+				if (!this.ruleForm.score) {
+					mui.toast("请选择您心目中的评分 ^v^");
+					return false;
+				}
+				$("#feedback_form").submit();
+			}
+		},
 		mounted:function() {
 			var _this = this;
 			//应用评分
