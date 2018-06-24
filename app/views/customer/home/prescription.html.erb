@@ -36,12 +36,12 @@
 	.list_info .item{
 		margin: 0;
 		padding: 0;
-		line-height: 26px;
+		line-height: 20px;
 		float: left;
 		width: 100%;
 	}
 	.list_info .drug_item:not(:last-child){
-		margin-bottom: 20px;
+		margin-bottom: 10px;
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
@@ -55,39 +55,43 @@
 		<div style="position: relative;text-align: center;padding: 13px 0;">
 			<h4 style="font-weight: 500;">{{prescription.org.display}}</h4>
 			<h4 style="font-weight: 500;">处方笺</h4>
-			<span style="border: 1px solid;padding: 5px;position: absolute;right: 0;top: 15px;margin: 0; font-weight: 500;">{{prescription.type.display}}</span>
+			<span style="border: 1px solid;padding: 5px;position: absolute;left: 0;top: 15px;margin: 0; font-weight: 500;" v-if="prescription.type.display">{{prescription.type.display.split("处方")[0]}}</span>
+			<span style="padding: 5px;position: absolute;right: 0;top: 15px;margin: 0; font-weight: 500; color: #F44868;">№{{prescription.prescription_no}}</span>
 		</div>
 		<div style="padding: 0 0 8px;border-bottom: 1px solid #666;">
-			<span>处方号: {{prescription.prescription_no}}</span>
-			<span style="float: right;">{{prescription.created_at}}</span>
+			<span>{{prescription.encounter_loc.display}}</span>
+			<span style="float: right;" v-if="prescription.created_at">{{prescription.created_at.split(" ")[0]}}</span>
 		</div>
 		<div class="list_info" style="">
-			<div class="item" style="width: 39.3%;">姓名：{{prescription.name}}</div>
-			<div class="item" style="width: 30.3%;">性别：{{prescription.gender.display}}</div>
-			<div class="item" style="width: 30.3%;">年龄：{{prescription.age}}</div>
-			<div class="item" style="">身份证号：{{prescription.iden}}</div>
-			<div class="item" style="">手机号：{{prescription.phone}}</div>
-			<div class="item" style="">住址：{{prescription.address}}</div>
-			<div class="item" style="width: 39.9%;">科室：{{prescription.encounter_loc.display}}</div>
-			<div class="item" style="width: 60%;">诊断：{{show_diagnoses(prescription.diagnoses)}}</div>
+			<div class="item" style="width: 50%;"><i class="far fa-fw fa-user" style="color: #337ab7;"></i> {{prescription.name}}&#12288;{{prescription.gender.display}}&#12288;{{prescription.age}}</div>
+			<div class="item" style="width: 50%;"><i class="far fa-fw fa-phone" style="color: #337ab7;"></i> {{prescription.phone}}</div>
+			<div class="item" style="width: 50%;"><i class="fal fa-fw fa-id-card" style="color: #337ab7;"></i> {{prescription.iden}}</div>
+			<div class="item" style="width: 50%;"><i class="far fa-fw fa-map-marker" style="color: #337ab7;"></i> {{prescription.address}}</div>
+			<div class="item">
+				<i class="far fa-fw fa-diagnoses" style="color: #337ab7;"></i> {{show_diagnoses(prescription.diagnoses)}}
+				<div style="float: right;"><i class="far fa-fw fa-user-md" style="color: #337ab7;"></i> {{prescription.author.display}}</div>
+			</div>
 			<div class="clear"></div>
 		</div>
 		<div class="list_info">
 			<!-- <p class="item">药品清单</p> -->
 			<span style="font-size: 200%;">℞</span>
-			<div class="drug_item" v-for="drug in prescription.orders">
-				<div style="display: inline-block; width: calc(100% - 160px);">{{drug.title}}</div>
-				<div style="display: inline-block; width: 40px;">{{drug.dose.value}}{{drug.dose.unit}}</div>
-				<div style="display: inline-block; width: 40px;">{{drug.route.display}}</div>
-				<div style="display: inline-block; width: 60px;">{{drug.frequency.display}}</div>
-				<div style="margin: 10px 0;">- 数量：{{drug.total_quantity}} {{drug.unit}}　单价：{{format_float(drug.price)}}</div>
+			<div style="min-height: 150px;">
+				<div class="drug_item" v-for="drug in prescription.orders">
+					<div>
+						{{drug.title}}&#12288;<small>{{drug.specification}}</small>
+						<small style="float: right;">{{drug.total_quantity}} {{drug.unit}}  × ¥{{format_float(drug.price)}}</small>
+					</div>
+					<div style="color: #666; font-size: 80%; line-height: 90%;">{{drug.route.display}}&#12288;{{drug.dose.value}}{{drug.dose.unit}}&#12288;{{drug.frequency.display}}</div>
+				</div>
 			</div>
+			<div class="drug_item" style="text-align: right;">总计：¥ {{prescription.price}}</div>
 		</div>
 		<div style="padding-top: 6px;">
 			<div style="width: 49.9%;float: left;">审核、配方：{{prescription.auditor&&prescription.auditor.display}}</div>
 			<div style="width: 50%;float: left;">核对、发药：{{prescription.delivery&&prescription.delivery.display}}</div>
-			<div style="width: 49.9%;float: left;">医师：{{prescription.author.display}}</div>
-			<div style="width: 50%;float: left;">总计：{{prescription.price}}</div>
+			<!-- <div style="width: 49.9%;float: left;">医师：{{prescription.author.display}}</div> -->
+			<!-- <div style="width: 50%;float: left;">总计：{{prescription.price}}</div> -->
 		</div>
 	</div>
 </div>

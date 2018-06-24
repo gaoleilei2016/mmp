@@ -643,7 +643,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -656,6 +656,9 @@ window.current_template_obj = {
     //退费
     return_amount:function (id) {
       var _this = this
+      if (!confirm("是否确认退费？")) {
+        return false;
+      };
       if (id){}else{
         _this.$notify({
           title: '提示',
@@ -681,7 +684,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -719,7 +722,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -777,6 +780,9 @@ window.current_template_obj = {
     },    
     return_order:function(id){
       var _this = this
+      if (!confirm("是否确认退药？")) {
+        return false;
+      };      
       if (this._data.return_reason_form.name.length>0){
 
       }else{
