@@ -319,7 +319,7 @@ class InterfacesController < ApplicationController
   # header: 页头
   # footer：页码等
   def generate_pdf
-    p params
+    # p params
     style = ""
     # 自定义打印样式
     if params[:style_files].present?
