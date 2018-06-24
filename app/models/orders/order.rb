@@ -38,7 +38,7 @@ class Orders::Order < ApplicationRecord
 #  shipping_code varchar(20)  NULL '物流单号',
 #  pay_type float NOT NULL '支付类型,Alipay ,Wechat',
 #  payment_type float NOT NULL '支付类别,1.在线支付,2.线下支付',
-#  status VARCHAR(4) NOT NULL '1待付款,2待领药,3未发货,4已发货,5交易完成,6已退药,7交易关闭'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
+#  status VARCHAR(4) NOT NULL '1待付款,2已收费,3未发货,4已发货,5交易完成,6已退药,7交易关闭'#未付款的取消叫做交易关闭，已付款的取消就是交易取消,
 #  PRIMARY KEY ( id )
 #  )
 
@@ -90,7 +90,7 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
+					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
@@ -132,7 +132,7 @@ class Orders::Order < ApplicationRecord
 
 			when '5'
 				::Orders::Order.transaction do
-					update_attributes(status:'6',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
+					update_attributes(status:'2',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					# cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
 					if self.payment_type.to_s == '2' #如果是线下支付的
 						::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
