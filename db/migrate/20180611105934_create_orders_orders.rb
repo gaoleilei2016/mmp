@@ -15,7 +15,7 @@ class CreateOrdersOrders < ActiveRecord::Migration[5.1]
       t.string :shipping_name , default:'',comment:'物流名称'
       t.string :shipping_code , default:'',comment:'物流单号'
       t.integer :payment_type , default:0,comment:'支付类别,1.在线支付,2.线下支付'
-      t.string :status , default:'',comment:'订单状态：1待付款,2待领药,3未发货,4已发货,5交易完成,6已退药,7交易关闭'
+      t.string :status , default:'',comment:'订单状态：1待付款,2已收费,3未发货,4已发货,5交易完成,6已退药,7交易关闭'
       t.string :patient_name , default:'',comment:'患者名字'
       t.string :patient_phone , default:'',comment:'患者手机'
       t.string :drug_user , default:'',comment:'发药人'

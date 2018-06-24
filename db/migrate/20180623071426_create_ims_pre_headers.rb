@@ -1,7 +1,7 @@
 class CreateImsPreHeaders < ActiveRecord::Migration[5.1]
   def change
     create_table :ims_pre_headers do |t|
-      t.integer :prescription_no
+      t.string :prescription_no
       t.string :note
       t.string :type_code
       t.string :type_name
@@ -55,7 +55,7 @@ class CreateImsPreHeaders < ActiveRecord::Migration[5.1]
       t.string :create_bill_opt_name
       t.datetime :hospital_prescription_at
       t.integer :hospital_prescription_id
-      t.boolean :is_return
+      t.boolean :is_returned
       t.integer :ori_id
       t.string :ori_code
       t.string :tookcode
