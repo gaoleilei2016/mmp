@@ -7,18 +7,6 @@
 		padding: 5px 0;
 		vertical-align: middle;
 	}
-	.demo-table-expand {
-	  font-size: 0;
-	}
-	.demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-	}
-	.demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-	}
 	/* 二级表格表头背景 */
 	.inner-table .el-table__header th {
 		background-color: #F5F7FA !important;
@@ -51,7 +39,7 @@
 		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
 	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
 			<div style="">
-				<el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+				<!-- <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
 					<el-col :span="8">
 						<el-date-picker
 				      v-model="filter.range"
@@ -71,18 +59,19 @@
 					<el-col :span="2">
 						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
 					</el-col>
-				</el-row>
+				</el-row> -->
 				<el-table
 		      :data="dispensed_hospitals"
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      default-expand-all
+		      show-summary
 		      row-class-name="primary-row"
 		      :show-header="false"
 		      style="width: 100%">
 		      <el-table-column
 			      type="selection"
-			      width="55">
+			      width="60">
 			    </el-table-column>
 		      <el-table-column type="expand" >
 			      <template slot-scope="props">
@@ -150,36 +139,30 @@
 						  </el-table>
 			      </template>
 			    </el-table-column>
-		     	<el-table-column
-			      type=""
-			      width="30">
-			      <template slot-scope="scope">
-				      {{ scope.$index + 1 }}
-				    </template>
-			    </el-table-column>
 		      <el-table-column
 				    min-width="240"
 				    align="left"
 				    label="">
 				    <template slot-scope="scope">
-				      {{ scope.row.name }}
+				      <span style="color: darkkhaki;">医院名称：</span>{{ scope.row.name }}
 				    </template>
 				  </el-table-column>
 
-				  <el-table-column
+				 <!--  <el-table-column
 				    min-width="240"
 				    align="left"
 				    label="">
 				    <template slot-scope="scope">
-				      {{ scope.row.drug_count }}
+				      <span style="color: darkkhaki;">药品种数：</span>{{ scope.row.drug_count }}
 				    </template>
-				  </el-table-column>
+				  </el-table-column> -->
 				  <el-table-column
 				    min-width="240"
-				    align="left"
+						prop = "total_amount"
+            align="right"
 				    label="">
 				    <template slot-scope="scope">
-				      {{ scope.row.total_amount }}
+				      <!-- <span style="color: darkkhaki;">总金额：</span>{{ scope.row.total_amount }} -->
 				    </template>
 				  </el-table-column>
 				  
@@ -336,6 +319,7 @@ window.current_template_obj = {
 				this.printEles = [];
 			})
 		},
+	
 		// 每页条数改变
   	handleSizeChange: function (val) {
       this.patPageSize = val;
