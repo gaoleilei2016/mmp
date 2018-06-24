@@ -97,6 +97,11 @@ window.current_template_obj = {
       platform_data:[],
       activeName2:'0',
       
+      return_reason:[
+        {value:"不想要了"},
+        {value:"患者已经买了该药品"},
+      ],
+
       setting_rules: {
         payment_expired: [
           { required: true, message: '效期不能为空'},
@@ -117,7 +122,6 @@ window.current_template_obj = {
     },
     change:function(){
       var _this = this
-      console.log("change++++++++++++++++++++")
       data = document.notice_data
       label = false
       $.each(this._data.order_lists,function(k,v){
