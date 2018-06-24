@@ -25,13 +25,13 @@
 	.alert_card .mui-table-view-cell>a:not(.mui-btn).mui-active{
 		background: none;
 	}
-	.alert_card .fapiao_list_item{
+	.alert_card .invoice_header_list_item{
 		padding-right: 24px;
 	}
-	.alert_card.edit_card .fapiao_list_item{
+	.alert_card.edit_card .invoice_header_list_item{
 		padding-right: 44px;
 	}
-	.alert_card.edit_card .fapiao_default_item{
+	.alert_card.edit_card .invoice_header_default_item{
 		display: none;
 	}
 </style>
@@ -100,34 +100,36 @@
 					<div class="mui-switch-handle"></div>
 				</div>
 			</li>
-			<!-- <template v-if="fapiao"> -->
-				<li :key="3" class="mui-table-view-cell fapiao_li" style="display: none;">
+			<!-- <template v-if="invoice_header"> -->
+				<li :key="3" class="mui-table-view-cell invoice_header_li" style="display: none;">
 					<a href="javascript:console.log( 'xxxxxxxxxx 3' );$('#common_mask,#xxxxx3').show(200);" class="mui-navigate-right">
 						<span>发票类型</span>
 						<span class='mui-pull-right' style="color: #999;">
-							<template v-if="fapiao_type=='zhi'">纸质发票</template>
-							<template v-if="fapiao_type=='dian'">电子发票</template>
+							<template v-if="invoice_type_class=='1'">纸质发票</template>
+							<template v-if="invoice_type_class=='2'">电子发票</template>
 						</span>
 					</a>
 				</li>
-				<li :key="4" class="mui-table-view-cell fapiao_li" style="display: none;">
+				<li :key="4" class="mui-table-view-cell invoice_header_li" style="display: none;">
 					<a href="javascript:console.log( 'xxxxxxxxxx 4' );$('#common_mask,#xxxxx4').show(200);" class="mui-navigate-right">
 						<span>发票内容</span>
-						<span class='mui-pull-right' style="color: #999;">明细</span>
+						<span class='mui-pull-right' style="color: #999;">{{invoice_content}}</span>
 					</a>
 				</li>
-				<li :key="5" class="mui-table-view-cell fapiao_li" style="display: none;">
-					<a href="javascript:console.log( 'xxxxxxxxxx 5' );$('#xxxxx5').show(200);fapiao_vue.get_fapiaos();fapiao_vue.edit_card=false;fapiao_vue.reset_form();" class="mui-navigate-right">
+				<li :key="5" class="mui-table-view-cell invoice_header_li" style="display: none;">
+					<a href="javascript:console.log( 'xxxxxxxxxx 5' );$('#xxxxx5').show(200);invoice_header_vue.get_invoice_headers();invoice_header_vue.edit_card=false;invoice_header_vue.reset_form();" class="mui-navigate-right">
 						<span>发票抬头</span>
-						<span class='mui-pull-right' style="color: #999;">{{fapiao.name}}</span>
+						<span class='mui-pull-right' style="color: #999;">{{invoice_header.name}}</span>
 					</a>
 				</li>
 			<!-- </template> -->
 		</ul>
 		<p style="font-size: 10px;padding: 10px 14px;margin: 0;">温馨提示：本平台只对处方药品作信息展示。 所有处方均来源于医院并授权许可，真实有效。 所有药品均由具备资质的药店提供。</p>
 		<form id="submit_form" action="/interfaces/save_order" method="post" style="display: none; margin: 16px 0 36px;">
-			<input type="text" name="order[invoice_id]" v-model="fapiao.id">
-			<input type="text" name="order[fapiao_type]" v-model="fapiao_type">
+			<input type="text" name="use_invoice_header]" v-model="use_invoice_header">
+			<input type="text" name="invoice_header_id]" v-model="invoice_header.id">
+			<input type="text" name="invoice_type_class" v-model="invoice_type_class">
+			<input type="text" name="invoice_content" v-model="invoice_content">
 			<input type="text" name="order[payment_type]" v-model="pay_type">
 			<input type="text" name="order[hospital_id]" v-model="prescription.org_id">
 			<input type="text" name="order[hospital_name]" v-model="prescription.org_name">
@@ -177,10 +179,10 @@
 	<p style="text-align: center;padding: 12px;font-size: 12px;">发票类型</p>
 	<ul class="mui-table-view mui-table-view-radio" style="margin-bottom: 70px;">
 		<li class="mui-table-view-cell mui-selected">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='zhi';$('#common_mask,#xxxxx3').hide(200);">纸质发票</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.invoice_type_class='1';$('#common_mask,#xxxxx3').hide(200);">纸质发票</a>
 		</li>
 		<li class="mui-table-view-cell">
-			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.fapiao_type='dian';$('#common_mask,#xxxxx3').hide(200);">电子发票</a>
+			<a class="mui-navigate-right" href="javascript:;" onclick="current_app.invoice_type_class='2';$('#common_mask,#xxxxx3').hide(200);">电子发票</a>
 		</li>
 	</ul>
 	<ul class="mui-table-view">
@@ -210,10 +212,10 @@
 		<a href="javascript:;" v-else @click="edit_card=true;" class="common_red" style="position: absolute;right: 6px;top: 2px;">管理</a>
 	</div>
 	<ul class="mui-table-view" style="margin-top: 12px;">
-		<li @click="click_fapiao_item(item)" v-for="item in fapiaos" class="mui-table-view-cell fapiao_list_item">
+		<li @click="click_invoice_header_item(item)" v-for="item in invoice_headers" class="mui-table-view-cell invoice_header_list_item">
 			<span>{{item.name}}</span>
 			<p style="float: right;">{{f_type_code_label(item.type_code)}}</p>
-			<div v-if="item.default=='true'" class="fapiao_default_item common_bg_red" style="transform:rotate(45deg);position: absolute;right: -30px;top: -16px;padding: 20px 20px 0 20px;font-size: 12px;">默认</div>
+			<div v-if="item.default=='true'" class="invoice_header_default_item common_bg_red" style="transform:rotate(45deg);position: absolute;right: -30px;top: -16px;padding: 20px 20px 0 20px;font-size: 12px;">默认</div>
 			<div v-if="edit_card" class="common_red" style="position: absolute;right: 14px;top: 12px;" @click="delete_taitou($event,item)"><i class="fal fa-trash-alt"></i></div>
 		</li>
 	</ul>
@@ -255,10 +257,10 @@
 	</div>
 </div>
 <script type="text/javascript">
-	var fapiao_vue = new Vue({
+	var invoice_header_vue = new Vue({
 		el:"#xxxxx5",
 		data:{
-			fapiaos:[],
+			invoice_headers:[],
 			edit_card:false,
 			ruleForm:{
 				type_code:'1',
@@ -266,12 +268,12 @@
 			},
 		},
 		methods:{
-			click_fapiao_item:function(item) {
+			click_invoice_header_item:function(item) {
 				var _this = this;
 				if (_this.edit_card) {
 					_this.ruleForm = _.cloneDeep(item);
 				}else{
-					current_app.fapiao = item;
+					current_app.invoice_header = item;
 					$('#common_mask,#xxxxx5').hide(200);
 				}
 			},
@@ -282,13 +284,13 @@
 					return '个人';
 				}
 			},
-			get_fapiaos:function() {
+			get_invoice_headers:function() {
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/customer/fapiao',
+					url:'/customer/invoice_headers',
 					success:function(json) {
-						_this.fapiaos = json.rows;
+						_this.invoice_headers = json.rows;
 					},
 					complete:function() {
 						$("#loading").hide();
@@ -296,13 +298,13 @@
 					error:error_fun,
 				})
 			},
-			get_default_fapiao:function() {
+			get_default_invoice_header:function() {
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/customer/fapiao?default=yes',
+					url:'/customer/invoice_headers?default=yes',
 					success:function(json) {
-						current_app.fapiao = json.fapiao||{};
+						current_app.invoice_header = json.invoice_header||{};
 					},
 					complete:function() {
 						$("#loading").hide();
@@ -331,16 +333,16 @@
 				}
 				$("#loading").show();
 				$.ajax({
-					url:'/customer/fapiao',
+					url:'/customer/invoice_headers',
 					type:'post',
-					data:{fapiao:_this.ruleForm},
+					data:{invoice_header:_this.ruleForm},
 					success:function(json) {
 						if (_this.ruleForm.id) {
-							// _this.get_fapiaos();
+							// _this.get_invoice_headers();
 							mui.toast(json.info);
 						}else{
 						}
-						current_app.fapiao = json.fapiao;
+						current_app.invoice_header = json.invoice_header;
 						$('#common_mask,#xxxxx5').hide(200);
 						_this.reset_form();
 					},
@@ -354,10 +356,10 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/customer/fapiao/'+item.id,
+					url:'/customer/invoice_headers/'+item.id,
 					type:'delete',
 					success:function(json) {
-						_this.get_fapiaos();
+						_this.get_invoice_headers();
 						mui.toast(json.info);
 					},
 					complete:function() {
@@ -370,8 +372,8 @@
 			}
 		},
 		mounted:function() {
-			// this.get_fapiaos();
-			// this.get_default_fapiao();
+			// this.get_invoice_headers();
+			// this.get_default_invoice_header();
 		}
 	})
 	$("#bottom_tabs").remove();
@@ -380,10 +382,11 @@
 		data:{
 			current_pharmacy:{},
 			prescription:{},
-			use_fapiao:false,
+			use_invoice_header:false,
 			pay_type:'online', // online | offline
-			fapiao_type:'zhi', // zhi | dian
-			fapiao:{},
+			invoice_type_class:'1', // 纸质1 | 电子2
+			invoice_content:'明细',
+			invoice_header:{},
 		},
 		methods:{
 			submit_form:function(e) {
@@ -396,7 +399,7 @@
 					mui.toast('药房获取失败');
 					return false;
 				}
-				if (_this.use_fapiao&&(!_this.fapiao.id)) {
+				if (_this.use_invoice_header&&(!_this.invoice_header.id)) {
 					mui.toast('未选择发票抬头');
 					return false;
 				}
@@ -433,13 +436,13 @@
 			this.get_prescriptions();
 			mui('.mui-content .mui-switch').each(function() {
 				this.addEventListener('toggle', function(event) {
-					_this.use_fapiao = event.detail.isActive;
+					_this.use_invoice_header = event.detail.isActive;
 					setTimeout(function function_name(argument) {
-						if(_this.use_fapiao){
-							fapiao_vue.get_default_fapiao();
-							$(".mui-table-view-cell.fapiao_li").show();
+						if(_this.use_invoice_header){
+							invoice_header_vue.get_default_invoice_header();
+							$(".mui-table-view-cell.invoice_header_li").show();
 						}else{
-							$(".mui-table-view-cell.fapiao_li").hide();
+							$(".mui-table-view-cell.invoice_header_li").hide();
 						}
 					},250)
 				});
