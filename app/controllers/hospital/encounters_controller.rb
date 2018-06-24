@@ -101,10 +101,10 @@ class Hospital::EncountersController < ApplicationController
     when "by_iden"
       create_data = format_encounter_create_params
       @encounter = ::Hospital::Encounter.new(create_data[:encounter])
-      cur_person = ::Person.find_by_iden(@encounter.iden).first  # 找到第一个符合Person信息
+      cur_person = ::Person.where(iden: @encounter.iden).order(created_at: :desc).first # 找到第一个符合Person信息
       if cur_person.nil?
         cur_person = ::Person.new(@encounter.format_person_args)
-        return json: {flag: false, info: "请填写必填数据"} if !cur_person.save
+        return render json: {flag: false, info: "请填写必填数据"} if !cur_person.save
       end
       @encounter.person_id = cur_person.id
       respond_to do |format|
