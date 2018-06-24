@@ -119,9 +119,11 @@ window.current_template_obj = {
       var _this = this
       console.log("change++++++++++++++++++++")
       data = document.notice_data
+      label = false
       $.each(this._data.order_lists,function(k,v){
-        if(Number(v.order_id) == Number(data.order_id) )return false;
+        if(Number(v.order_id) == Number(data.order_id) ) label = true;
       })
+      if (label) return false
       if (data.flag) {
         if (Number(data.status) == Number(_this.out_list_panel) ) {
           temp = this._data.order_lists
