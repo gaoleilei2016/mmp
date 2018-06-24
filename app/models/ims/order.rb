@@ -332,9 +332,10 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
         return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
         return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==6||order.status.to_i==7)
-        headers = Ims::PreHeader.where(:bill_id=>order_id,delivery_org_id:args[:org_id])
+        headers = Ims::PreHeader.where(:order_id=>order_id,delivery_org_id:args[:org_id])
         headers.map{|header| create_new_prescription header,current_user}
-        headers.update_all({is_returned:true,reason:reason,return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
+        # is_returned:true,
+        headers.update_all({reason:args[:reason],return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
         attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退药')}
         order.cancel_medical(attrs)
         {flag:true,info:'退药成功！'}
@@ -392,10 +393,11 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"未找到处方信息。"} if header.blank?
         # return {flag:false,:info=>"线上支付处方不能退药。"} if header.payment_type!="2"
         return {flag:false,:info=>"该处方为#{header.target_org_id}的发药处方，请前往该药店进行退药。"} if header.target_org_id.to_s!=args[:org_id].to_s
-        return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
+        # return {flag:false,:info=>"该处方已退药，不能再次退药。"} if header.is_returned==1
         return {flag:false,:info=>"该处方不是发药状态，不能退药。"} if header.status.to_s!="4"
         current_user = args[:current_user]
-        update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
+        update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,reason:args[:reason]}
+        # update_data = {return_id:current_user.id,return_name:current_user.name,return_org_id:current_user.organization_id,return_org_name:current_user.organization.name,return_at:Time.new,is_returned:true,reason:args[:reason]}
         result = header.update_attributes!(update_data)
         return {flag:false,info:'退药失败。'} unless result
         header.reload

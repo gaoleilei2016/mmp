@@ -63,7 +63,7 @@ class Ims::Report
 	      patient_iden: order.patient_iden,
 	      patient_phone: order.patient_phone,
 	      payment_type: order.payment_type,
-	      is_returned: order.is_returned,
+	      # is_returned: order.is_returned,
 	      details: order.details.map{|x| {
               name: x.name,
               quantity: x.quantity,
@@ -165,7 +165,7 @@ class Ims::Report
         data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
         data = data1
       end
-      return data.map{|k,v| {name:k,drugs:v}}
+      return data.map{|k,v| {name:k,drug_count:v.count,total_amount:v.map{|a| a["total_amount"]}.sum(),drugs:v}}
     end
 
     # 针对发药人的统计

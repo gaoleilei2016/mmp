@@ -120,11 +120,11 @@ window.current_template_obj = {
         temp = this._data.order_lists
         temp.push(data)
         this._data.order_lists = temp
-        this.$notify.success({
-          title: '消息',
-          message: '您有新的订单生成',
-          showClose: false
-        });
+        // this.$notify.success({
+        //   title: '消息',
+        //   message: '您有新的订单生成',
+        //   showClose: false
+        // });
       }else{
         temp = this._data.order_lists
         $.each(temp,function(k,v){

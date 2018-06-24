@@ -33,16 +33,6 @@
 				      align="right">
 				    </el-date-picker>
 					</el-col>
-					<el-col :span="6">
-						<!-- <small>疾病</small>
-						<el-autocomplete size="mini" v-model="filter.disease" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDisease" :debounce="300" style="width: 100%;">
-	            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="filter.disease=''"></i>
-	            <template slot-scope="props">
-	            	<span style="float: left">{{ props.item.display }}</span>
-      					<span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
-	            </template>
-	          </el-autocomplete> -->
-					</el-col>
 					<el-col :span="2" style="padding-top: 18px;">
 						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
 					</el-col>
@@ -114,7 +104,7 @@
 			</div>
 	  </el-tabs>
 	  <!-- 分页标记 -->
-	  <el-pagination
+	 <!--  <el-pagination
 	  	background
 	    @size-change="handleSizeChange"
 	    @current-change="handleCurrentChange"
@@ -123,7 +113,7 @@
 	    :page-size="pageSize"
 	    layout="total, sizes, prev, pager, next, jumper"
 	    :total="dataCount">
-	  </el-pagination>
+	  </el-pagination> -->
 
 
 		<!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
