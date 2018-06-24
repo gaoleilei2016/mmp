@@ -30,7 +30,7 @@ daemonize false
 # threads_count = ENV.fetch("RAILS_MAX_THREADS") { 2 }
 # threads threads_count, threads_count
 # workers 3
-# port 6789
+# port 3000
 # environment 'development'
 # application_path = "/home/hujun/work/mmp"
 # #这里一定要配置为项目路径下地current
