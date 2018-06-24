@@ -67,10 +67,13 @@ class Orders::Order < ApplicationRecord
 				when '1'
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
-					prescriptions.each{|x|x.cancel_bill({}, current_user)}
+					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
+					::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
-					prescriptions.each{|x|x.cancel_bill({}, current_user)}
+					# ::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
+
+					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
 					update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:reason)
 					data = {
 						ch:target_org_id,#药房id
