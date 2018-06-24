@@ -1,6 +1,8 @@
 #encoding:utf-8
 #处方
 class Hospital::PrescriptionsController < ApplicationController
+  before_action :set_cur_org
+  before_action :set_cur_encounter
 	before_action :set_prescription, only: [:show, :edit, :update, :destroy, :set_prescription]
 	# GET
   # /hospital/prescriptions
@@ -199,6 +201,17 @@ class Hospital::PrescriptionsController < ApplicationController
   end
 
 	private
+    # 获取当前机构 没有就提示
+    def set_cur_org
+      @cur_org =  current_user.organization
+      return render json:{flag:false, info: "当前用户没有分配机构 请分配机构后再重试"} if @cur_org.nil?
+    end
+    # 获取当前就诊信息
+    def set_cur_encounter
+      @cur_encounter =  ::Hospital::Encounter.find(params[:encounter_id]) rescue nil
+      return render json:{flag:false, info: "无效就诊id 请刷新重试 或联系管理员"} if @cur_encounter.nil?
+      return render json:{flag:false, info: "非本人创建数据 不可操作"} if @cur_encounter.author_id != current_user.id
+    end
     # Use callbacks to share common setup or constraints between actions.
     def set_prescription
       @prescription = Hospital::Prescription.find(params[:id])
@@ -210,30 +223,32 @@ class Hospital::PrescriptionsController < ApplicationController
 
     def format_prescription_create_args
       args = prescription_params
-      cur_orders = ::Hospital::Order.find(args[:ids])
-      cur_encounter = ::Hospital::Encounter.find(params[:encounter_id])
-      cur_org = current_user.organization
-      diagnoses_args = args[:diagnoses]
-      prescription = {
-        organization_id: cur_org.id,
-        status: 0,
-        note: args[:note],
-        type_code: args[:type][:code],
-        type_display: args[:type][:display],
-        bill_id: nil,
-        confidentiality_code: "0",
-        confidentiality_display: "医院",
-        doctor_id: current_user.id,
-        author_id: current_user.id,
-        encounter_id: cur_encounter.id,
-        effective_start: Time.now,
-        effective_end: Time.now + 1.day,
-      }
-      ret = {
-        prescription: prescription,
-        diagnoses_args: diagnoses_args,
-        cur_orders: cur_orders
-      }
+      begin
+        cur_orders = ::Hospital::Order.find(args[:ids])
+        diagnoses_args = args[:diagnoses]
+        prescription = {
+          organization_id: @cur_org.id,
+          status: 0,
+          note: args[:note],
+          type_code: (args[:type]||{})[:code],
+          type_display: (args[:type]||{})[:display],
+          bill_id: nil,
+          confidentiality_code: "0",
+          confidentiality_display: "医院",
+          doctor_id: current_user.id,
+          author_id: current_user.id,
+          encounter_id: @cur_encounter.id,
+          effective_start: Time.now,
+          effective_end: Time.now + 1.day,
+        }
+        ret = {
+          prescription: prescription,
+          diagnoses_args: diagnoses_args,
+          cur_orders: cur_orders
+        }
+      rescue Exception => e
+        raise "未知数据格式 #{e.message}"
+      end
       return ret
     end
 end
