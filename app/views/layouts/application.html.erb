@@ -7,7 +7,9 @@
     <%= stylesheet_link_tag "/assets/plugins/element-ui/index","/assets/plugins/fontawesome/font-awesome.min","/assets/plugins/vue/display" %>
     <%= javascript_include_tag  %>
 
+    <% if controller_path=="ims/home" %>
     <%= javascript_include_tag 'cable', 'data-turbolinks-track': 'reload' %>
+    <% end -%>
 
     <%= csrf_meta_tags %>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
