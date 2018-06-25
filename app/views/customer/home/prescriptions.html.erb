@@ -54,9 +54,20 @@
 							<span v-if="item.status=='2'">待收费</span>
 							<span v-if="item.status=='3'">已收费</span>
 							<span v-if="item.status=='4'">已发药</span>
+							<span v-if="item.status=='6'">失效</span>
 							<span v-if="item.status=='7'">废弃</span>
 							<span v-if="item.status=='8'">已退药</span>
-							<span v-if="item.status=='9'">已退费</span>
+							<!-- <span v-if="item.status=='9'">已退费</span> -->
+							<span v-if="item.status=='10'">
+								<!-- 完成 -->
+								<span v-if="item.bill_status=='1'">待付款</span>
+								<span v-if="item.bill_status=='2'">已收费</span>
+								<span v-if="item.bill_status=='3'">未发货</span>
+								<span v-if="item.bill_status=='4'">已发货</span>
+								<span v-if="item.bill_status=='5'">交易完成</span>
+								<span v-if="item.bill_status=='6'">已退药</span>
+								<span v-if="item.bill_status=='7'">交易关闭</span>
+							</span>
 						</span>
 						<span v-if="!item.is_read" class="mui-badge common_bg_red" style="position: absolute;right: 12px;top: 16px; padding: 4px;"></span>
 					</a>
