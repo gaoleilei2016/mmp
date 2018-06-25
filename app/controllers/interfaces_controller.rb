@@ -95,21 +95,29 @@ class InterfacesController < ApplicationController
 	end
 	#支付
 	def pay_order
-		order = ::Orders::Order.where("id=? and status = 1 ",params[:order_id]).last
+		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0",params[:order_id]).last
 		unless order
 			flash[:notice] = "订单状态不允许支付。"
 			redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
 		end
-		# order.net_amt ##订单号用机构id+订单号
-		order.increment(:settle_times,1)
-		order.save
-		args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
-		# p '~~~~~~~~~',args
-		case params[:pay_type]
-		when "Alipay"
-			res = Pay::Alipay.payment(args)
-		when "Wechat"
-			res = Pay::Wechat.payment(args)
+		res = {}
+		begin
+			order.update_attributes(:_locked=>1)
+			# order.net_amt ##订单号用机构id+订单号
+			order.increment(:settle_times,1)
+			order.save
+			args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+			# p '~~~~~~~~~',args
+			case params[:pay_type]
+			when "Alipay"
+				res = Pay::Alipay.payment(args)
+			when "Wechat"
+				res = Pay::Wechat.payment(args)
+			end
+		rescue Exception => e
+			p e
+		ensure 
+			order.update_attributes(:_locked=>0)
 		end
 		# p '~~~~~~~ 2',res
 		if res[:state].to_sym==:succ
