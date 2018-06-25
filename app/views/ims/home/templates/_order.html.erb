@@ -64,10 +64,7 @@ document.onkeydown = function(){
 document.notice_data = [];
 $.ims_notice = function(data){
   // alert(data)
-  console.log("ims_notice")
   org_id = $("#organization_id").val()
-  console.log(org_id)
-  console.log(data)
   if (data&&data.org_id == org_id) {
     document.notice_data = data
     $(document).find("#notice_input").click()
@@ -125,15 +122,16 @@ window.current_template_obj = {
       data = document.notice_data
       label = false
       $.each(this._data.order_lists,function(k,v){
-        if(Number(v.order_id) == Number(data.order_id) ) label = true;
+        if(v.order_id == data.order_id ) label = true;
       })
       if (label) return false
       if (data.flag) {
-        if (Number(data.status) == Number(_this.out_list_panel) ) {
-          temp = this._data.order_lists
-          temp.push(data)
-          this._data.order_lists = temp
-        };
+        // $.each(this._data.order_lists,function())
+        // if (data.status == _this.out_list_panel ) {
+        //   // temp = this._data.order_lists
+        //   // temp.push(data)
+        //   // this._data.order_lists = temp
+        // };
         $("#yuyin")[0].play()
         this.$notify.success({
           title: '消息',
@@ -143,7 +141,7 @@ window.current_template_obj = {
       }else{
         temp = this._data.order_lists
         $.each(temp,function(k,v){
-          if (Number(v.order_id) == Number(data.order_id) ) {
+          if (v.order_id == data.order_id ) {
             temp.splice(k,1)
             return false
           };
