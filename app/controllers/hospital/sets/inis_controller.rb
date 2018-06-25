@@ -5,7 +5,7 @@ class Hospital::Sets::InisController < ApplicationController
   # /hospital/sets/inis
 	def index
     p "Hospital::Sets::InisController index"
-    @inis = Hospital::Sets::Ini.all rescue []
+    @inis = ::Hospital::Sets::Ini.all rescue []
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: {flag: true, info:"", data: @inis} }
@@ -16,7 +16,7 @@ class Hospital::Sets::InisController < ApplicationController
   # /hospital/sets/inis/cur_org_ini
   def cur_org_ini
     p "Hospital::Sets::InisController cur_org_ini", params
-    @ini = Hospital::Sets::Ini.get_org_ini(current_user)
+    @ini = ::Hospital::Sets::Ini.get_org_ini(current_user)
     render json: {flag: true, info:"", data: @ini.to_web_front}
   end
 	# GET

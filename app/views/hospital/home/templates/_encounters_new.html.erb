@@ -299,8 +299,10 @@ window.current_template_obj = {
 				if (_now.handleClose) {
 					_now.handleClose();
 				}
+				// 姓名、性别、年龄、手机、诊断，填写之后自动保存
+				// if (/encname|encgender|encage|encphone|encdiagnose/.test(now)) {
 				// if (now.indexOf("enc")>-1) {
-				// 	_this.submitEncounterForm('encounterForm');
+					// _this.submitEncounterForm('encounterForm', false);
 				// }
 
 				// el-select需要使用blur方法让下拉列表关闭
@@ -527,16 +529,18 @@ window.current_template_obj = {
     //   	})
   		},
 			// 提交encounter信息
-			submitEncounterForm: function (formName) {
+			submitEncounterForm: function (formName, isBtn) {
 				var _this = this;
 	      _this.$refs[formName].validate( function (valid) {
 	        if (valid) {
 	        	if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
-	        		_this.$message({
-			          message: '诊断不能为空。',
-			          type: 'warning'
-			        });
-			        _this.$refs["encdiagnose"].focus();
+	        		if(isBtn) {// 按钮提交的时候弹出提示，自动提交的时候，不用提示
+		        		_this.$message({
+				          message: '诊断不能为空。',
+				          type: 'warning'
+				        });
+				        _this.$refs["encdiagnose"].focus();
+	        		}
 	        		return false;
 	        	}
 	          // 判断是否有id，有id的话，就是编辑，没有id为新建
@@ -559,10 +563,12 @@ window.current_template_obj = {
 	          	})
 	          }
 	        } else {
-	          _this.$message({
-		          message: '请按照规范录入数据。',
-		          type: 'warning'
-		        });
+	        	if(isBtn) { // 按钮提交的时候弹出提示，自动提交的时候，不用提示
+		          _this.$message({
+			          message: '请按照规范录入数据。',
+			          type: 'warning'
+			        });
+	        	}
 	          return false;
 	        }
 	      });

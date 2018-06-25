@@ -55,7 +55,7 @@ class ::Hospital::Sets::DepartmentsController < ApplicationController
       if current_user.save
         format.json { render json: {flag: true, info:"success", data: {id: current_user.cur_loc_id, display: current_user.cur_loc_display}} }
       else
-        format.json { render json: {flag: false , info: current_user.errors.message.values.flatten} }
+        format.json { render json: {flag: false , info: "#{current_user.errors.messages}"} }
       end
     end    
   end
