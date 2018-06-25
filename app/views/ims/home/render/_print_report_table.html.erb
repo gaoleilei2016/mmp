@@ -1,8 +1,9 @@
 <div class="ims-print-report-area" style="display: none;" v-if="printEles && printEles.length>0">
 	<div class="ims-print-report-table" v-for="(item, index) in printEles" :key="index">
-		<h3 align="center">订单汇总表[已发药][医院]</h3>
+		<!-- <h3 align="center"><%#=current_user.organization.name%><br/>处方<span v-if="item.total_amount<0">退药</span><span v-else>发药</span>汇总-医院</h3> -->
+		<h3 align="center"><%=current_user.organization.name%><br/>处方<%=@dispensed%>汇总-<%=@hospital%></h3>
 		<table>
-			<tr><td colspan="6">医院名称：{{item.name}}</td></tr>
+			<tr><td colspan="6"><%if @is_hospital%>医院名称<%else%><%=@dispensed%>人<%end %>：{{item.name}}</td></tr>
 			<tr><td colspan="6">时间：<span v-if="filter.range">{{filter.range[0] | formatDate}} - {{filter.range[1] | formatDate}}</span></td></tr>
 			<tr>
 				<td width="50%">药品名称</td>
@@ -20,7 +21,7 @@
 				<td align="right">{{ drug.price }}</td>
 				<td align="right">{{ drug.total_amount | formatMoney(2)}}</td>
 			</tr>
-			<tr><td colspan="3" style="border-right: none;">医院名称：{{item.name}}</td><td colspan="3" align="right">小计：{{item.total_amount | formatMoney(2)}}</td></tr>
+			<tr><td colspan="3" style="border-right: none;"><%if @is_hospital%>医院名称<%else%><%=@dispensed%>人<%end %>：{{item.name}}</td><td colspan="3" align="right">小计：{{item.total_amount | formatMoney(2)}}</td></tr>
 		</table>
 		<br/>
 	</div>

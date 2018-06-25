@@ -8,8 +8,8 @@
 						<!-- <span v-if="order.payment_type=='1'"> -->
 							<span v-if="order.status=='1'">待付款</span>
 							<span v-if="order.status=='2'">已收费</span>
-							<!-- <span v-if="order.status=='3'">未发货</span> -->
-							<!-- <span v-if="order.status=='4'">已发货</span> -->
+							<span v-if="order.status=='3'">未发货</span>
+							<span v-if="order.status=='4'">已发货</span>
 							<span v-if="order.status=='5'">交易完成</span>
 							<span v-if="order.status=='6'">已退药</span>
 							<span v-if="order.status=='7'">交易关闭</span>
@@ -43,7 +43,7 @@
 						</li>
 					</ul>
 					<div style="line-height: 33px;">
-						合计 <span style="color: #F55742;">¥ {{format_float(order.total_price)}}</span>
+						合计 <span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(order.total_price)}}</span></span>
 						<span v-if="order.payment_type=='2'">（到店支付）</span>
 						<span style="float: right;" class="common_grey">{{order.reason}}</span>
 					</div>

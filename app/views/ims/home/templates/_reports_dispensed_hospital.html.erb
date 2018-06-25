@@ -15,6 +15,12 @@
     background: #E2F6F4 !important;
   }
 </style>
+<%
+  @is_dispensed=true
+  @is_hospital=true
+  @hospital = "医院"
+  @dispensed = "发药"
+%>
 <template>
 	<!-- 接诊管理、统计页面 -->
 	<div id="reports_dispensed_hospital_div">
@@ -39,7 +45,7 @@
 		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
 	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
 			<div style="">
-				<!-- <el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
+				<el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
 					<el-col :span="8">
 						<el-date-picker
 				      v-model="filter.range"
@@ -54,12 +60,12 @@
 				    </el-date-picker>
 					</el-col>
 					<el-col :span="6">
-						<el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input>
+						<!-- <el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input> -->
 					</el-col>
 					<el-col :span="2">
 						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
 					</el-col>
-				</el-row> -->
+				</el-row>
 				<el-table
 		      :data="dispensed_hospitals"
 		      @selection-change="handleSelectionChange"
@@ -213,7 +219,7 @@ window.current_template_obj = {
 			orgname: "",
 			isShowfilters: false, // 高级搜索
 			filter: {
-				range: "",
+				range: [new Date().pattern('yyyy-MM-dd HH:mm:ss'),new Date().pattern('yyyy-MM-dd HH:mm:ss')],
 				name: "",
 			},
 
@@ -292,7 +298,7 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.dispensed_hospitals = res.data;

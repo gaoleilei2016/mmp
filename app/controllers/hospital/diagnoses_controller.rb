@@ -36,7 +36,7 @@ class Hospital::DiagnosesController < ApplicationController
 			ret = ::Hospital::Diagnose.to_master_and_slaver(@diagnoses)
 			render json: {flag: true, info: "success", master: ret[:master], data: @diagnose.to_web_front}
 		else
-			render json: {flag: false, info: @diagnose.errors.message.values.flatten}
+			render json: {flag: false, info: "#{@diagnose.errors.messages}"}
 		end
 	end
 
@@ -85,7 +85,7 @@ class Hospital::DiagnosesController < ApplicationController
 	    	# format.json { render json: {flag: true, info:"", master: all_ret[:master], data: all_ret[:master] + all_ret[:slaver]} }
 	    else
 	    	format.html { render action: "edit" }
-	    	format.json { render json: @diagnose.errors, status: :unprocessable_entity }
+	    	format.json { render json: {flag: false, info: "#{@diagnose.errors.messages}"} }
 	    end
 	  end
 	end
@@ -99,7 +99,7 @@ class Hospital::DiagnosesController < ApplicationController
 			@all_diagnoses = ret[:master] + ret[:slaver]
 			render json: {flag: true, info: "success", master: ret[:master], slaver: ret[:slaver], data: @all_diagnoses}
 		else
-			render json: {flag: false, info: @diagnose.errors.message.values.flatten, data: @diagnose.to_web_front}
+			render json: {flag: false, info: "#{@diagnose.errors.messages}", data: @diagnose.to_web_front}
 		end
 	end
 

@@ -95,7 +95,7 @@ class Hospital::EncountersController < ApplicationController
           ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
           render json: {flag: true, info:"success", data: @encounter.to_web_front}
         else
-          render json: {flag: true, info: @encounter.errors.messages.values.flatten, data:nil}
+          render json: {flag: true, info: "#{@encounter.errors.messages}", data:nil}
         end
       end
     when "by_iden"
@@ -114,7 +114,7 @@ class Hospital::EncountersController < ApplicationController
             ::Hospital::Diagnose.batch_update(create_data[:diagnoses], @encounter, current_user)
             format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
           else
-            format.json { render json: {flag: true, info:" 创建患者信息失败"} }
+            format.json { render json: {flag: true, info:"创建患者信息失败"} }
           end
         end
       end
@@ -164,7 +164,7 @@ class Hospital::EncountersController < ApplicationController
           format.json { render json: {flag: true, info:"", data: @encounter.to_web_front} }
         else
           format.html { render action: "edit" }
-          format.json { render json: @encounter.errors.messages.values.flatten, status: :unprocessable_entity }
+          format.json { render json: "#{@encounter.errors.messages}", status: :unprocessable_entity }
         end
       end
     end
@@ -183,12 +183,7 @@ class Hospital::EncountersController < ApplicationController
 	# DELETE
   # /hospital/encounters/:id
 	def destroy
-		@encounter.destroy
-
-    respond_to do |format|
-      format.html { redirect_to encounters_url }
-      format.json { head :no_content }
-    end
+    render json:{flag: false, info: "你没有权限删除就诊数据"}
 	end
 
 	private

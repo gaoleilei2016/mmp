@@ -395,7 +395,6 @@ window.current_template_obj = {
 		    var html = response.data;
 		    $("#pane-print_pres_html1").html(html);
 		    $("#pane-print_pres_html2 textarea").val(html);
-				console.log(res)
 		  },function() {
 		  	_this.$message.error("获取处方打印html失败，请联系管理员。");
 		  })

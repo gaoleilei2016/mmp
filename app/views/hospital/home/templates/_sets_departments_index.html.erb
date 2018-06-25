@@ -28,7 +28,7 @@
 						<span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
 					</el-col>
 					<el-col :span="10" style="text-align: right;">
-						<el-button size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建科室</el-button>
+						<el-button v-if="current_user_is_admin" size="mini" @click="openFormModal({action:'create'})" type="primary" plain>新建科室</el-button>
 					</el-col>
 				</el-row>
 				<el-table
@@ -75,7 +75,7 @@
 		        min-width="80">
 		        <template slot-scope="scope">
 			      	<el-button
-			        	v-if="scope.row.status!='O'"
+			        	v-if="scope.row.status!='O' && current_user_is_admin"
 			        	style="color: #a94442;"
 			          type="text"
 			          @click="abandonDepartment(scope.$index, scope.row)"
@@ -83,7 +83,7 @@
 			          作废
 			        </el-button>
 			        <el-button
-			        	v-if="scope.row.status!='O'"
+			        	v-if="scope.row.status!='O' && current_user_is_admin"
 			          type="text"
 			          @click="openFormModal({action:'edit', index: scope.$index, row: scope.row})"
 			          size="mini">
@@ -136,7 +136,9 @@
 window.current_template_obj = {
 	data:function(){
 		var cardTabsOptions = [{code: "0", display: "所有科室"}];
+		var isAdmin = ($("#current_user_is_admin").val()=="true" ? true : false);
 		return {
+			current_user_is_admin: isAdmin,
 			statusOptions: [
 				{value: "N", label: "新建", type: "primary"},
 				{value: "A", label: "活动", type: "primary"},

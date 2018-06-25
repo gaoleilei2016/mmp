@@ -56,6 +56,12 @@ $--link-hover-color: $--color-primary !default;
 -------------------------- */
 $--background-color-base: #f5f7fa !default;
 
+/* Background明显一点的背景颜色  2018/6/25 dujuan
+-------------------------- */ 
+$--background-color-success: #f0f9eb !default; // 浅绿
+$--background-color-info: #E7F7F6 !default; // 浅蓝
+
+
 /* Border
 -------------------------- */
 $--border-width-base: 1px !default;
