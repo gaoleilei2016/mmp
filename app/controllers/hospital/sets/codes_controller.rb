@@ -6,14 +6,14 @@ class Hospital::Sets::CodesController < ApplicationController
 	def index
     p "Hospital::Sets::CodesController index"
     code =  {
-      routes: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "routes"), # 使用途径
-      rates: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "rates"), #频次
+      routes: ::Hospital::DictCoding.where(system: "routes"), # 使用途径
+      rates: ::Hospital::DictCoding.where(system: "rates"), #频次
       nations: ::Dict::Coding.get_code_by_name("nation"), # 民族
       gender: ::Dict::Coding.get_code_by_name("gender"), # 性别
-      marriages: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "2.16.156.1.19449.1.2261.2"), # 婚姻
-      occupations: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "2.16.156.1.13610.1.364.2.1.202"), #职业
-      prescription_types: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "2.16.156.1.675425699.1.50"), # 处方类型
-      bloods: ::Hospital::DictCoding.where(org_id: @cur_org.id, system: "2.16.156.1.13610.1.364.4.50.5"), # 血型
+      marriages: ::Hospital::DictCoding.where(system: "2.16.156.1.19449.1.2261.2"), # 婚姻
+      occupations: ::Hospital::DictCoding.where(system: "2.16.156.1.13610.1.364.2.1.202"), #职业
+      prescription_types: ::Hospital::DictCoding.where(system: "2.16.156.1.675425699.1.50"), # 处方类型
+      bloods: ::Hospital::DictCoding.where(system: "2.16.156.1.13610.1.364.4.50.5"), # 血型
     }
     respond_to do |format|
       format.html # index.html.erb
@@ -45,7 +45,7 @@ class Hospital::Sets::CodesController < ApplicationController
     if @code.update_attributes(params[:code])
       render json: {flag: true, info: "success", data: @code}
     else
-      render json: {flag: false, info: @code.errors.messages.flatten.join(" ")}
+      render json: {flag: false, info: "#{@code.errors.messages}"}
     end
   end
 

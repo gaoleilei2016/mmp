@@ -52,7 +52,7 @@ class Hospital::OrdersController < ApplicationController
         format.json { render json: {flag: true, info:"success", data: @order.to_web_front} }
       else
         format.html { render action: "new" }
-        format.json { render json: {flag: false , info: @order.errors.messages.values.flatten} }
+        format.json { render json: {flag: false , info: "#{@order.errors.messages}"} }
       end
     end
 	end
@@ -67,7 +67,7 @@ class Hospital::OrdersController < ApplicationController
         format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
       else
         format.html { render action: "edit" }
-        format.json { render json: {flag: false , info: @order.errors} }
+        format.json { render json: {flag: false , info: "#{@order.errors.messages}"} }
       end
     end
   end
@@ -82,7 +82,7 @@ class Hospital::OrdersController < ApplicationController
         if @order.destroy
           format.json { render json: {flag: true, info: "删除成功"}  }
         else
-          format.json { render json: {flag: false, info: "删除失败 #{@order.errors.messages.values}"}  }
+          format.json { render json: {flag: false, info: "删除失败 #{@order.errors.messages}"}  }
         end
       else
         format.json { render json: {flag: false, info: "删除失败 不是新建状态"}  }
