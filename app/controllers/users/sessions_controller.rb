@@ -19,7 +19,8 @@ class Users::SessionsController < Devise::SessionsController
       # else
       # end
     str = request.user_agent
-    if str.include?('Mobile')
+    # p '~~~~~~~~~~',str
+    if str.include?('Mobile')&&(!str.include?('iPad'))
       render "/devise/sessions/new2.html.erb",layout:"customer"
       # if params[:type]=="use_psw"
       # else
