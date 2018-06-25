@@ -84,6 +84,7 @@
 			      	<el-table
 						    :data="(props.row.drugs||[])"
 						    show-summary
+						    sum-text = '小计'
 						    class="inner-table"
 						    style="width: 100%">
 						    <el-table-column
@@ -130,7 +131,7 @@
 							    align="right"
 							    label="单价">
 							    <template slot-scope="scope">
-							    	{{ scope.row.price }}
+							    	{{ scope.row.price | formatMoney(4) }}
 							    </template>
 							  </el-table-column>
 							  <el-table-column
