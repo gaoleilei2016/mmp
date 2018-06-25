@@ -13,16 +13,16 @@ default: &default
   adapter: mysql2
   encoding: utf8
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 64 } %>
-  username: mysql
+  username: mmp_root
   password: Tenmind@207
-  host: mmp_lgl
+  host: rm-wz934tgg64bf33b82.mysql.rds.aliyuncs.com
   # socket: /var/lib/mysql/mysql.sock
 
 development:
   <<: *default
   password: Tenmind@207
-  host: 192.168.2.207
-  database: mmp_lgl
+  host: rm-wz934tgg64bf33b82.mysql.rds.aliyuncs.com
+  database: mmp
   # database: zyz
 
 # Warning: The database defined as "test" will be erased and
@@ -30,7 +30,7 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: mmp_lgl
+  database: mmp
 
 # As with config/secrets.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -53,6 +53,6 @@ test:
 #
 production:
   <<: *default
-  database: mmp_lgl
-  username: mmp_lgl
+  database: mmp
+  username: mmp
   password: <%= ENV['MMP_DATABASE_PASSWORD'] %>
