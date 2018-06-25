@@ -18,14 +18,14 @@
 	<div id="feedbacks_index_right_div" class="">
 		<div style="margin-bottom: 6px;">
 			<div class="el-input el-input--small el-input--prefix el-input--suffix" style="width: 160px;">
-				<input v-model="searchTableInputValue" @keyup="get_timeout_feedbacks" autocomplete="off" placeholder="项目姓名、简码" type="text" rows="2" validateevent="true" class="el-input__inner">
+				<input v-model="searchTableInputValue" @keyup="get_timeout_feedbacks" autocomplete="off" placeholder="search" type="text" rows="2" validateevent="true" class="el-input__inner">
 				<span class="el-input__prefix" @click="get_feedbacks"><i class="el-icon-search el-input__icon"></i></span>
 				<span class="el-input__suffix" @click="searchTableInputValue='';get_feedbacks();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
 			</div>
-			<el-select size="small" v-model="selected_type_code" @change="get_feedbacks" clearable placeholder="类型">
+			<!-- <el-select size="small" v-model="selected_type_code" @change="get_feedbacks" clearable placeholder="类型">
 				<el-option label="所有" value=""></el-option>
 				<el-option v-for="item in $parent.common_data_org_type_code" :key="item.code" :label="item.display" :value="item.code"></el-option>
-			</el-select>
+			</el-select> -->
 			<el-button-group style="float: right;">
 				<el-button disabled size="small" type="primary" @click="add_feedback">多选回复</el-button>
 				<el-button disabled size="small" type="danger" @click="delete_feedback">删除</el-button>
