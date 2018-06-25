@@ -21,9 +21,9 @@ role :web, "39.108.131.226"                          # Your HTTP server, Apache/
 role :app, "39.108.131.226"                         # This may be the same as your `Web` server
 role :db,  "39.108.131.226", :primary => true # This is where Rails migrations will run
 
-# role :web, "192.168.2.207"                          # Your HTTP server, Apache/etc
-# role :app, "192.168.2.207"                         # This may be the same as your `Web` server
-# role :db,  "192.168.2.207", :primary => true # This is where Rails migrations will run2
+# role :web, "120.79.172.8"                          # Your HTTP server, Apache/etc
+# role :app, "120.79.172.8"                         # This may be the same as your `Web` server
+# role :db,  "120.79.172.8", :primary => true # This is where Rails migrations will run2
 # role :web, "199.199.199.234"                          # Your HTTP server, Apache/etc
 # role :app, "199.199.199.234"                         # This may be the same as your `Web` server
 # role :db,  "199.199.199.234", :primary => true # This is where Rails migrations will run
