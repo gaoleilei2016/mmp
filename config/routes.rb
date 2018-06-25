@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :gzh
       get :get_prescriptions_by_phone
       get :get_all_prescriptions_by_phone
       get :get_not_read_prescription
