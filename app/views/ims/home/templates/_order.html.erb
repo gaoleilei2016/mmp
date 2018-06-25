@@ -208,7 +208,7 @@ window.current_template_obj = {
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
-          order_status.push(data1.status)
+          order_status.push(data1.order_type)
           temp.push({
             id:data1.cfid,
             order_id:data1.order_id,
@@ -221,7 +221,7 @@ window.current_template_obj = {
             address:data1.address,
             iden:data1.iden,
             phone:data1.phone,
-            status:data1.cfstatus,
+            cfstatus:data1.cfstatus,
             amt:data1.price,
             created_at:data1.created_at,
             lines:[{
@@ -235,7 +235,7 @@ window.current_template_obj = {
             for(i=1;i<ori_data.length;i++){
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
-              order_status.push(for_data.status)
+              order_status.push(for_data.order_type)
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
@@ -260,7 +260,7 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:for_data.cfstatus,
+                      cfstatus:for_data.cfstatus,
                       amt:for_data.price,
                       created_at:for_data.created_at,
                       lines:[{
@@ -290,6 +290,7 @@ window.current_template_obj = {
                 temp2.push({
                   order_id:item.order_id,
                   order_code:item.order_code,
+                  order_type:item.order_type,
                   patient_name:item.name,
                   created_at:item.created_at,
                   amt:amount,
@@ -300,6 +301,7 @@ window.current_template_obj = {
                   temp2.push({
                     order_id:item.order_id,
                     order_code:item.order_code,
+                    order_type:item.order_type,
                     patient_name:item.name,
                     created_at:item.created_at,
                     amt:amount,
@@ -309,15 +311,21 @@ window.current_template_obj = {
               }
             })
             if (temp2.length>0) {
-              if(temp2[0].status == "2"){
+              if(temp2[0].order_type == "1"){
                 _this.out_list_panel = "1"
                 _this._data.order_lists = temp2
-              }else if(temp2[0].status == "3"){
+                setTimeout(function(){
+                  $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
+              }else if(temp2[0].order_type == "2"){
                 _this.out_list_panel = "2"
-                  _this._data.order_lists = temp2
-              }else if(temp2[0].status == "4"){
+                _this._data.order_lists = temp2
+                setTimeout(function(){
+                  $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
+              }else if(temp2[0].order_type == "5"){
                 _this.$notify({title: '提示',message: '订单已发药！'});  
-              }else if(temp2[0].status == "8"){
+              }else if(temp2[0].order_type == "7"){
                 _this.$notify({title: '提示',message: '订单已退药！'});  
               }else{
                 _this.$notify({title: '提示',message: '订单状态不对！'});  
@@ -372,7 +380,7 @@ window.current_template_obj = {
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
-          order_status.push(data1.status)
+          order_status.push(data1.order_type)
           temp.push({
             id:data1.cfid,
             order_id:data1.order_id,
@@ -385,7 +393,7 @@ window.current_template_obj = {
             address:data1.address,
             iden:data1.iden,
             phone:data1.phone,
-            status:data1.cfstatus,
+            cfstatus:data1.cfstatus,
             amt:data1.price,
             created_at:data1.created_at,
             lines:[{
@@ -399,7 +407,7 @@ window.current_template_obj = {
             for(i=1;i<ori_data.length;i++){
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
-              order_status.push(for_data.status)
+              order_status.push(for_data.order_status)
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
@@ -424,7 +432,7 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:for_data.cfstatus,
+                      cfstatus:for_data.cfstatus,
                       amt:for_data.price,
                       created_at:for_data.created_at,
                       lines:[{
@@ -443,42 +451,52 @@ window.current_template_obj = {
 
           if (flag_arr.indexOf(1)>=0) {
             stat = _this.activeName2
-            console.log("temp",temp)
-            console.log("temp.length",temp.length)
             temp.map(function(item){
+              amount = 0.0;
+              if(item.lines){
+                item.lines.map(function(line){
+                  amount += Number(line.amt)
+                })
+              }            
               if (temp2.length<=0) {
                 temp2.push({
                   order_id:item.order_id,
                   order_code:item.order_code,
                   patient_name:item.name,
                   created_at:item.created_at,
-                  amt:item.amt,
-                  status:item.status
+                  amt:amount,
+                  order_type:item.order_type
                 })
               }else{
-                if (item.status == temp2[0].status) {
+                if (item.order_type == temp2[0].order_type) {
                   temp2.push({
                     order_id:item.order_id,
                     order_code:item.order_code,
                     patient_name:item.name,
                     created_at:item.created_at,
-                    amt:item.amt,
-                    status:item.status
+                    amt:amount,
+                    order_type:item.order_type
                   })
                 };
               }
             })
             if (temp2.length>0) {
-              if(temp2[0].status == "2"){
+              if(temp2[0].order_code == "1"){
                 _this.$notify({title: '提示',message: '订单未发药！'});
-              }else if(temp2[0].status == "3"){
+              }else if(temp2[0].order_code == "2"){
                 _this.$notify({title: '提示',message: '订单未发药！'});
-              }else if(temp2[0].status == "5"){
+              }else if(temp2[0].order_code == "5"){
                 _this.return_list_panel = "5"
                 _this._data.return_order_lists = temp2
-              }else if(temp2[0].status == "8"){
-                 _this.return_list_panel = "8".
+                setTimeout(function(){
+                  $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
+                },200)                
+              }else if(temp2[0].order_code == "7"){
+                 _this.return_list_panel = "7"
                  _this._data.return_order_lists = temp2
+                setTimeout(function(){
+                  $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
               }else{
                 _this.$notify({title: '提示',message: '没有数据！'});  
               }
