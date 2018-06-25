@@ -62,11 +62,11 @@
 						</div>
 					</div>
 				</li>
-				<li class="mui-table-view-cell">
+				<!-- <li class="mui-table-view-cell">
 					<div>
 						掌柜回复：{{item.reply}}
 					</div>
-				</li>
+				</li> -->
 			</ul>
 		</div>
 	</div>
@@ -97,7 +97,7 @@
 					var page = Math.ceil(_this.feedbacks.length/per)+1;
 				}
 				$.ajax({
-					url:'/customer/feedbacks.json?page='+page+'&per='+per,
+					url:'/customer/feedbacks/get_cur_feedbacks.json?page='+page+'&per='+per,
 					success:function(json) {
 						if (pulltype=='pulldown') {
 							if (json.flag) {
@@ -151,12 +151,11 @@
 					}
 				}
 			});
-			// _this.get_feedbacks();
-			$("#vue_content").on('tap','.feedback_item',function(e) {
-				// alert($(this).attr('data-href'))
-				location.href = $(this).attr('data-href');
-			})
-
+			// // _this.get_feedbacks();
+			// $("#vue_content").on('tap','.feedback_item',function(e) {
+			// 	// alert($(this).attr('data-href'))
+			// 	location.href = $(this).attr('data-href');
+			// })
 		}
 	})
 

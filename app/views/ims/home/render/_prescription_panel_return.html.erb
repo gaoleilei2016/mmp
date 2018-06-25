@@ -93,7 +93,20 @@
   <el-dialog :visible.sync="return_reason_visible">
     <el-form :model="return_reason_form">
       <el-form-item label="退药原因">
-        <el-input v-model="return_reason_form.name" auto-complete="off"></el-input>
+        <!-- <el-input v-model="return_reason_form.name" auto-complete="off"></el-input> -->
+        <el-select
+          v-model="return_reason_form.name"
+          filterable
+          allow-create
+          default-first-option
+          placeholder="请选择退药原因">
+          <el-option
+            v-for="item in return_reason"
+            :key="item.value"
+            :label="item.value"
+            :value="item.value">
+          </el-option>
+        </el-select>
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">

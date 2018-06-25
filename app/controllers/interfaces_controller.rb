@@ -230,6 +230,11 @@ class InterfacesController < ApplicationController
 	# 获取用户选择的药房，默认最近的药房（用户传参：当前位置）
 	def get_current_pharmacy
 		# p '~~~~~~~',params, session[:current_pharmacy_id]
+		# 每次从微信浏览器进来的时候重置成最近的药房
+		if session[:openname]
+			session[:openname] = nil
+			session[:current_pharmacy_id] = nil
+		end
 		if session[:current_pharmacy_id]
 			# 自选
 			o = ::Admin::Organization.where(:type_code=>'2',id:session[:current_pharmacy_id]).first
@@ -383,7 +388,7 @@ class InterfacesController < ApplicationController
   # header: 页头
   # footer：页码等
   def generate_pdf
-    p params
+    # p params
     style = ""
     # 自定义打印样式
     if params[:style_files].present?

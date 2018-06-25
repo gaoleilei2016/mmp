@@ -97,6 +97,11 @@ window.current_template_obj = {
       platform_data:[],
       activeName2:'0',
       
+      return_reason:[
+        {value:"不想要了"},
+        {value:"患者已经买了该药品"},
+      ],
+
       setting_rules: {
         payment_expired: [
           { required: true, message: '效期不能为空'},
@@ -117,11 +122,12 @@ window.current_template_obj = {
     },
     change:function(){
       var _this = this
-      console.log("change++++++++++++++++++++")
       data = document.notice_data
+      label = false
       $.each(this._data.order_lists,function(k,v){
-        if(Number(v.order_id) == Number(data.order_id) )return false;
+        if(Number(v.order_id) == Number(data.order_id) ) label = true;
       })
+      if (label) return false
       if (data.flag) {
         if (Number(data.status) == Number(_this.out_list_panel) ) {
           temp = this._data.order_lists
@@ -635,13 +641,13 @@ window.current_template_obj = {
             duration:(stat ? 4500 : 0)
           })          
         };
+        _this._data.detail = [{pres:[{type:"处方"}]}]
         try{
           str = "div.function_panel.out_order"
           $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
 
       },function(response){
         _this.$notify({
@@ -654,6 +660,9 @@ window.current_template_obj = {
     //退费
     return_amount:function (id) {
       var _this = this
+      if (!confirm("是否确认退费？")) {
+        return false;
+      };
       if (id){}else{
         _this.$notify({
           title: '提示',
@@ -679,7 +688,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -717,7 +726,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -733,7 +742,7 @@ window.current_template_obj = {
       var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
       var ids = []
       $.each(boxs,function(k,v){
-        ids.push($(v).val())
+        ids.push($(v).parents("label").find(".pre_id").text())
       })
       console.log("111111111111=====id== "+ids)
       if(ids&&ids.length>0){}else{
