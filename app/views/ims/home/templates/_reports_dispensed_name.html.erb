@@ -25,8 +25,8 @@
 	<!-- 接诊管理、统计页面 -->
 	<div id="reports_dispensed_name_div">
 		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
-		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-		  <el-breadcrumb-item>报表</el-breadcrumb-item>
+		  <!-- <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item> -->
+		  <!-- <el-breadcrumb-item>报表</el-breadcrumb-item> -->
 		</el-breadcrumb>
 		<div class="float-right-btns" style="position: relative;">
 	  	<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
@@ -84,6 +84,7 @@
 			      	<el-table
 						    :data="(props.row.drugs||[])"
 						    show-summary
+						    sum-text = '小计'
 						    class="inner-table"
 						    style="width: 100%">
 						    <el-table-column
@@ -130,7 +131,7 @@
 							    align="right"
 							    label="单价">
 							    <template slot-scope="scope">
-							    	{{ scope.row.price }}
+							    	{{ scope.row.price | formatMoney(4)}}
 							    </template>
 							  </el-table-column>
 							  <el-table-column
