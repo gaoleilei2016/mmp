@@ -32,6 +32,7 @@ class NoticeChannel < ApplicationCable::Channel
       data = msg['msg']
       name = data['ch']
       data.delete('ch')
+      p "-------process id--------------------#{Process.pid}"
       ActionCable.server.broadcast ch_name(name), data
     end
 
@@ -61,6 +62,7 @@ class NoticeChannel < ApplicationCable::Channel
 
     # 启动时调用，订阅消息
     def subscribe
+      p '1111111111111111111111111'
       Thread.new do
         return false if @@count >= 2
         @@count += 1
