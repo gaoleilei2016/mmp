@@ -1,7 +1,10 @@
 class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
+	layout false
 	#############################
 	############ zyz ############
+	def gzh
+	end
 	# GET
 	# /hospital/prescriptions/get_prescriptions_by_phone
 	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的首页，获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
