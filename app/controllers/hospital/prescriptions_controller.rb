@@ -73,7 +73,7 @@ class Hospital::PrescriptionsController < ApplicationController
     ret.each {|e| e.send_to_check()} # 发送处方生成成功信息
     # ret = ret.map { |e| e.to_web_front  } # 返回数据格式化
     render json: {flag: true, info:""}
-    # render json: {flag: false, info: @prescription.errors.messages.join("、")}
+    # render json: {flag: false, info: @prescription.errors.messages.flatten.join("、")}
 	end
 
 	# PUT
@@ -85,7 +85,7 @@ class Hospital::PrescriptionsController < ApplicationController
     #     format.json { render json: {flag: true, info:"", data: @prescription} }
     #   else
     #     format.html { render action: "edit" }
-    #     format.json { render json: {flag: false, info: @prescription.errors.messages.join("、")} }
+    #     format.json { render json: {flag: false, info: @prescription.errors.messages.flatten.join("、")} }
     #   end
     # end
     render json:{flag: false, info: "暂未支持该方法"}
@@ -123,7 +123,7 @@ class Hospital::PrescriptionsController < ApplicationController
       if @prescription.update_attributes(drug_store_id: params[:pharmacy_id])
         format.json { render json: {flag: true, info:"设置处方发药房成功", data: @prescription} }
       else
-        format.json { render json: { flag: false, info: @prescription.errors }}
+        format.json { render json: { flag: false, info: "#{@prescription.errors.messages}" }}
       end
     end
   end
