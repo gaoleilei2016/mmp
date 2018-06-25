@@ -360,7 +360,7 @@ class Ims::Order < ApplicationRecord
         return {flag:false,:info=>"该订单已发药，不能退费。"} if (order.status.to_i==5||order.status.to_i==6||order.status.to_i==7)
         headers = Ims::PreHeader.where(:order_id=>order_id,delivery_org_id:args[:org_id])
         attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退费')}
-        order.cancel_medical(attrs)
+        result = order.cancel_medical(attrs)
         {flag:true,info:'退费成功！'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
