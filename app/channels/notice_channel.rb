@@ -54,12 +54,20 @@ class NoticeChannel < ApplicationCable::Channel
   end
 
   class MsgRedisClient
+
+    def initialize
+      @@count = 1
+    end
+
     # 启动时调用，订阅消息
     def subscribe
-      p '00000000000000000000000000000000000'
-      $redis.subscribe(queue_name) do |on|
-        on.message do |ch, msg|
-          NoticeChannel.send_message(JSON.parse(msg))
+      Thread.new do
+        return false if @@count >= 2
+        @@count += 1
+        $redis.subscribe(queue_name) do |on|
+          on.message do |ch, msg|
+            NoticeChannel.send_message(JSON.parse(msg))
+          end
         end
       end
     end
