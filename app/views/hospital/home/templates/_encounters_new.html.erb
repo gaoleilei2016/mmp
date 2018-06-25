@@ -293,17 +293,17 @@ window.current_template_obj = {
 	  		var _this = this;
 	  		var _now = _this.$refs[now],
 	  				_next = _this.$refs[next];
-				if(next=="encgender"){
+				if(next=="encgender" && (!_this.encounter.gender || !_this.encounter.gender.code)){
 					_this.encounter.gender = _this.$parent.common_data_genders[0];
 				}
 				if (_now.handleClose) {
 					_now.handleClose();
 				}
-				// 姓名、性别、年龄、手机、诊断，填写之后自动保存
-				// if (/encname|encgender|encage|encphone|encdiagnose/.test(now)) {
+				// 姓名、性别、年龄、手机、诊断，填写之后自动保存 encname|encgender|encage|encphone|encdiagnose
+				if (/encdiagnose/.test(now)) {
 				// if (now.indexOf("enc")>-1) {
-					// _this.submitEncounterForm('encounterForm', false);
-				// }
+					_this.submitEncounterForm('encounterForm', false);
+				}
 
 				// el-select需要使用blur方法让下拉列表关闭
 				if (_now.handleBlur) {
@@ -400,6 +400,8 @@ window.current_template_obj = {
 		  			_this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
 		  			_this.activeTab = "orders";
   					_this.orders = [];
+  					// 读取身份证后，自动聚焦手机输入框
+  					_this.$refs["encphone"].focus();
   				} else {
     				_this.$message.error(res.info);
     			}

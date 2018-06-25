@@ -50,7 +50,7 @@
 			</div>
 
 		  <hr style="border-top: 1px solid #eeeeee;"/>
-		  <el-form-item>
+		  <el-form-item v-if="current_user_is_admin">
 		    <el-button type="primary" @click="submitForm('ini')">保存</el-button>
 		    <el-button @click="resetForm('ini')">重置</el-button>
 		  </el-form-item>
@@ -60,6 +60,7 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
+		var isAdmin = ($("#current_user_is_admin").val()=="true" ? true : false);
 		return {
 			activeName1: "print_pres_html1",
 			ini: {
@@ -70,6 +71,7 @@ window.current_template_obj = {
 			},
 			rules: {},
 			users: [], // 用户列表，供审核人筛选
+			current_user_is_admin: isAdmin,
 		}
 	},
 	mounted: function () {
