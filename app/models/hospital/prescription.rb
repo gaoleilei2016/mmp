@@ -400,7 +400,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_doctor = self.doctor
 		price = self.orders.map{|e| e.price*e.total_quantity }.reduce(:+)
 		total_fee = price.round(2)
-		url = "http://huaxi.tenmind.com/"
+		url = "http://huaxi.tenmind.com/interfaces/gzh"
 		#发送短信息
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
 		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: self.tookcode, url: url, phone: cur_encounter.phone}
