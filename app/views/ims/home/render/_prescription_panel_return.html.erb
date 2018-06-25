@@ -90,16 +90,18 @@
     </div>
   </div>
 
-  <el-dialog :visible.sync="return_reason_visible">
+  <el-dialog :visible.sync="return_reason_visible" style="padding:10px; padding-left:38px;">
     <el-form :model="return_reason_form">
-      <el-form-item label="退药原因">
+      <el-form-item label="退药原因" style="margin-bottom:0;">
         <!-- <el-input v-model="return_reason_form.name" auto-complete="off"></el-input> -->
+      </el-form-item>
+
             <el-select
               v-model="return_reason_form.name"
               filterable
               allow-create
               default-first-option
-              placeholder="请选择退药原因">
+              placeholder="请选择退药原因" style="width:80%;">
               <el-option
                 v-for="item in return_reason"
                 :key="item.value"
@@ -107,7 +109,6 @@
                 :value="item.value">
               </el-option>
             </el-select>
-      </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button size="small" @click="return_reason_visible = false">取 消</el-button>
