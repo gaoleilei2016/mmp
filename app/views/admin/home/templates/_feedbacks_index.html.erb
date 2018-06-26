@@ -39,6 +39,7 @@
 			<el-table-column :show-overflow-tooltip="true" label="contact" prop="contact" width="100"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="score" prop="score" width="100"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="reply" prop="reply" width="100"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="created_at" prop="created_at" width="100"></el-table-column>
 		</el-table>
 		<el-pagination background ref="pg_data_table" :page-size="10" @size-change="get_feedbacks" @current-change="get_feedbacks" layout="total, sizes, prev, pager, next, jumper" :total="pg_data_table_total"></el-pagination>
 		<el-dialog :title="seleced_feedback.name" :visible.sync="dialogVisible" width="80%" top="62px">
