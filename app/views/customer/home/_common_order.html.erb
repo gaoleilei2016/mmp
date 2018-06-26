@@ -4,7 +4,7 @@
 			<li class="mui-table-view-cell">
 				<a href="javascript:;">
 					<span>No: {{order.order_code}}</span>
-					<span style="float: right;color: #F55742;">
+					<span class="common_red" style="float: right;">
 						<!-- <span v-if="order.payment_type=='1'"> -->
 							<span v-if="order.status=='1'">待付款</span>
 							<span v-if="order.status=='2'">已收费</span>
@@ -36,14 +36,14 @@
 									{{drug.name}}
 									<p class="mui-ellipsis">
 										<p style="padding-top: 6px;">{{drug.specifications}}</p>
-										<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.quantity}} {{drug.unit}}</p>
+										<p style="padding-top: 6px;"><span class="common_red" style="">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.quantity}} {{drug.unit}}</p>
 									</p>
 								</div>
 							</div>
 						</li>
 					</ul>
 					<div style="line-height: 33px;">
-						合计 <span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(order.total_price)}}</span></span>
+						合计 <span class="common_red" style="">¥ <span style="font-size: 1.5em;">{{format_float(order.total_price)}}</span></span>
 						<span v-if="order.payment_type=='2'">（到店支付）</span>
 						<span style="float: right;" class="common_grey">{{order.reason}}</span>
 					</div>

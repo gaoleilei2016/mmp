@@ -70,10 +70,6 @@
 	}
 	.mui-checkbox input[type=checkbox]:before, .mui-radio input[type=radio]:before{
 		font-size: 20px;
-		/*color: #F55742;*/
-	}
-	.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
-		color: #F55742;
 	}
 	.mui-table-view-cell:after{
 		left: 0;
@@ -184,7 +180,7 @@
 				</label>
 			</div>
 			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 14px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
+				<i class="fal fa-map-marker-alt common_red" style="font-size: 20px;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
@@ -207,7 +203,7 @@
 								{{drug.title}}
 								<p class="mui-ellipsis">
 									<p style="padding-top: 6px;">{{drug.specification}}</p>
-									<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
+									<p style="padding-top: 6px;"><span class="common_red">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
 								</p>
 							</div>
 						</div>
@@ -215,10 +211,10 @@
 				</template>
 			</ul>
 			<div style="line-height: 33px;">
-				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;color: #fff;" class="common_bg_red">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
 					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
-					<span style="color: #F55742;float: right;">
+					<span class="common_red" style="float: right;">
 						<span>¥</span>
 						<span style="font-size: 1.5em;">{{total_price(organ)}}</span>
 					</span>
