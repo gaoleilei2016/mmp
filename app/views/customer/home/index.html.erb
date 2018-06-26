@@ -244,7 +244,7 @@
 						<a href="javascript:;" id="async_weixin_info">同步微信个人信息（头像、昵称）</a><!-- 第一次注册的用户自动点击同步 -->
 					</li>
 					<li class="mui-table-view-cell" style="text-align: center;">
-						<a href="/users/sign_out" class="common_red" style=""><span class="common_red">退出登录</span></a>
+						<a href="/users/sign_out" class="common_green" style=""><span class="common_green">退出登录</span></a>
 					</li>
 				</ul>
 				<!-- <ul class="mui-table-view mui-table-view-chevron">
@@ -301,7 +301,7 @@
 			</button>
 			<h1 class="mui-center mui-title">账号与安全</h1>
 			<a href="/customer/home/user/edit" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="margin-right: 10px;">
-				<span class="common_red">编辑</span>
+				<span class="common_green">编辑</span>
 			</a>
 		</div>
 		<ul class="mui-table-view">
@@ -346,7 +346,7 @@
 			<button type="button" class="mui-left mui-action-back mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 				<span class="mui-icon mui-icon-left-nav"></span>
 			</button>
-			<a href="/customer/home/feedbacks" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right"><span class="common_red">反馈查询</span></a>
+			<a href="/customer/home/feedbacks" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right"><span class="common_green">反馈查询</span></a>
 			<h1 class="mui-center mui-title">问题反馈</h1>
 		</div>
 		<div class="mui-content-padded">
@@ -395,7 +395,7 @@
 				</div>
 			</div>
 			<div class="mui-content-padded" style="margin: 30px 80px;">
-				<button type="button" @click="submit_form" class="mui-btn mui-btn-block mui-btn-primary common_bg_red" style="border: 0;border-radius: 16px;padding: 4px;">提交</button>
+				<button type="button" @click="submit_form" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">提交</button>
 			</div>
 		</form>
 	</div>
@@ -492,9 +492,9 @@
 	//客服电话
 	document.getElementById("tel").addEventListener('tap', function() {
 		if(mui.os.plus){
-			plus.device.dial("85282580");
+			plus.device.dial("400-009-3379");
 		}else{
-			location.href = 'tel:85282580';
+			location.href = 'tel:400-009-3379';
 		}
 		
 	});
