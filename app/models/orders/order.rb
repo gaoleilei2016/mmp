@@ -59,7 +59,8 @@ class Orders::Order < ApplicationRecord
 	#取消订单（线上使用）Orders::Order.find(id).cancel_order(cur_user)(手自一体)
 	def cancel_order(cur_user=nil,reason='')
 		current_user = current_user||User.find(user_id)
-		result = {ret_code:'-1',info:'当前订单不允许取消'}
+		result = {ret_code:'-1',info:'当前订单不允许取消'} 
+		return result if _locked.to_i == 1
 		begin
 			update_attributes(_locked:1)
 			::Orders::Order.transaction do
