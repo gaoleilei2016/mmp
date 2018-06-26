@@ -56,7 +56,7 @@
 		</el-col>
 		<el-col :span="2">
 		  <el-form-item label="频次">
-		  	<el-select v-model="order.frequency" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordfrequency" @keydown.enter.stop.native="focusNext('ordfrequency', 'ordcourseoftreatment')" :filter-method="filterCodes" @focus="focusSelect='rates|ordfrequency'" filterable>
+		  	<el-select v-model="order.frequency" value-key="code" placeholder="请选择" style="width: 100%;" ref="ordfrequency" @keydown.enter.stop.native="focusNext('ordfrequency', 'ordcourseoftreatment')" :filter-method="filterCodes" @focus="focusSelect='rates|ordfrequency'"  @change="calculateQuantity()" filterable>
 			    <el-option
 			      v-for="item in rates"
 			      :key="item.code"
@@ -69,7 +69,7 @@
 		<!-- <el-col :span="5"> -->
 		<el-col :span="2">
 		  <el-form-item label="疗程">
-		    <el-input v-model.number="order.course_of_treatment&&order.course_of_treatment.value" ref="ordcourseoftreatment" @keydown.enter.stop.native="focusNext('ordcourseoftreatment', 'ordtotalquantity')">
+		    <el-input v-model.number="order.course_of_treatment&&order.course_of_treatment.value" ref="ordcourseoftreatment" @keydown.enter.stop.native="focusNext('ordcourseoftreatment', 'ordtotalquantity')" @change="calculateQuantity()">
 		    	<template slot="append">{{ order.course_of_treatment&&order.course_of_treatment.unit }}</template>
 		    </el-input>
 		  </el-form-item>
