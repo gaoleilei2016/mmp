@@ -48,7 +48,7 @@
 				<li class="mui-table-view-cell">
 					<a href="javascript:;">
 						<span>№{{item.prescription_no}}</span>
-						<span style="float: right;color: #F55742;">
+						<span style="float: right;" class="common_red">
 							<span v-if="item.status=='0'">未审核</span>
 							<span v-if="item.status=='1'">已审核</span>
 							<span v-if="item.status=='2'">待收费</span>
@@ -99,9 +99,9 @@
 											<span>{{drug.specification}}</span>
 										</p>
 										<p class="mui-ellipsis">
-											<span style="margin-right: 10px;color: #F55742;">{{drug.route.display}}</span>
-											<span style="margin-right: 10px;color: #F55742;">{{drug.dose.value}}{{drug.dose.unit}}</span>
-											<span style="color: #F55742;">{{drug.frequency.display}}</span>
+											<span style="margin-right: 10px;" class="common_red">{{drug.route.display}}</span>
+											<span style="margin-right: 10px;" class="common_red">{{drug.dose.value}}{{drug.dose.unit}}</span>
+											<span style="" class="common_red">{{drug.frequency.display}}</span>
 											<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
 										</p>
 									</div>
