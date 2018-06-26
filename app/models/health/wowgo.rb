@@ -26,33 +26,36 @@ class Health::Wowgo < ApplicationRecord
 
   validates_inclusion_of :api_code, :in => %w{new_user update_user}, :message => '目前只支持创建用户和更新用户信息接口'
 
-  before_save :startup
+  # before_save :startup
 
-  def startup
+  def push_info
     begin
       res         = execute
+      p '----------9999999999999999999999999999993333333333333333333',res.body, res.code
       return handle_success(res.body) if res.code.eql?(200)
       data        = callback_json(res.body)
-      return_code = data['ErrCode']
-      return_msg  = data['ErrMsg']
+      update_return_result({return_code: data['ErrCode'], return_msg: data['ErrMsg']})
     rescue Exception => e
-      return_code = 'error'
-      return_msg  = "系统错误:#{e.message}"  
+      update_return_result({return_code: 'error', return_msg: "系统错误:#{e.message}"})
     end
   end
 
   private
+  def update_return_result(args)
+    return {state: self.return_code, msg: '请求成功', desc: self.return_msg, userid: userid} if self.update_attributes(args)
+    {state: :error, msg: '错误', desc: self.errors.full_messages.join(',')}
+  end
+
   def callback_json(data)
     JSON.parse(data)
   end
 
   def handle_success(data)
-    unless data.empty?
-      data   = callback_json(data)
-      userid = data['UserId']
-    end
-    return_msg  = '更新用户成功'
-    return_code = 'succ'
+    return update_return_result({return_code: 'succ', return_msg: '成功'}) if data.empty?
+    data = callback_json(data)
+    return update_return_result({return_code: 'fail', return_msg: data['ErrMsg']}) if data['ErrCode']
+    self.userid = data['UserId']
+    update_return_result({return_code: 'succ', return_msg: data['ErrMsg'], userid: data['UserId']})
   end
 
   def get_headimg_data
@@ -68,9 +71,7 @@ class Health::Wowgo < ApplicationRecord
   def qr_code
     qrcode = Health::QrCode.find_by(code: user_name)
     return qrcode if qrcode
-    qr = Health::QrCode.new(code: user_name)
-    return qr if qr.save
-    raise '生成二维码错误'
+    Health::QrCode.create_qr_code(user_name)
   end
 
   def http_datas
@@ -82,8 +83,9 @@ class Health::Wowgo < ApplicationRecord
   end
 
   def execute
+    datas = http_datas
     site = RestClient::Resource.new(base_set.addr)
-    site[set.path].send(set.method, http_datas, headers)
+    site[set.path].send(set.method, datas, headers)
   end
 
   # 接口认证头
