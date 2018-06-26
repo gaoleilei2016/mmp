@@ -87,7 +87,7 @@
 					<div class="mui-media-body">
 						抵用券
 						<span class='mui-pull-right' style="color: #999;">暂无可用</span>
-						<!-- <span class='mui-pull-right common_red' style="">-5 元</span> -->
+						<!-- <span class='mui-pull-right common_green' style="">-5 元</span> -->
 					</div>
 				</a>
 			</li>
@@ -138,7 +138,7 @@
 		</form>
 	</div>
 	<div style="background: #fff;position: fixed;bottom: 0px;z-index: 997;height: 60px;width: 100%;font-size: 20px;line-height: 60px;">
-		<button type="button" @click="submit_form" class="common_bg_red" style="float: right;font-size: 20px;width: 130px;color: #fff;height: 100%;text-align: center;">提交订单</button>
+		<button type="button" @click="submit_form" class="common_bg_green" style="float: right;font-size: 20px;width: 130px;color: #fff;height: 100%;text-align: center;">提交订单</button>
 		<div style="overflow: hidden;padding-right: 10px;text-align: right;"><span style="font-size: .7em;">总金额</span> <span class="common_red"><span style="font-size: .7em;">¥</span> {{format_float(prescription.total_price)}}</span></div>
 	</div>
 </div>
@@ -154,7 +154,7 @@
 		</li>
 	</ul>
 	<ul class="mui-table-view">
-		<li class="mui-table-view-cell common_bg_red" style="color: #fff;text-align: center;">
+		<li class="mui-table-view-cell common_bg_green" style="color: #fff;text-align: center;">
 			<a href="javascript:$('#common_mask,#xxxxx1').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
@@ -167,7 +167,7 @@
 		</li>
 	</ul>
 	<ul class="mui-table-view">
-		<li class="mui-table-view-cell common_bg_red" style="color: #fff;text-align: center;">
+		<li class="mui-table-view-cell common_bg_green" style="color: #fff;text-align: center;">
 			<a href="javascript:$('#common_mask,#xxxxx2').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
@@ -183,7 +183,7 @@
 		</li>
 	</ul>
 	<ul class="mui-table-view">
-		<li class="mui-table-view-cell common_bg_red" style="color: #fff;text-align: center;">
+		<li class="mui-table-view-cell common_bg_green" style="color: #fff;text-align: center;">
 			<a href="javascript:$('#common_mask,#xxxxx3').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
@@ -196,7 +196,7 @@
 		</li>
 	</ul>
 	<ul class="mui-table-view">
-		<li class="mui-table-view-cell common_bg_red" style="color: #fff;text-align: center;">
+		<li class="mui-table-view-cell common_bg_green" style="color: #fff;text-align: center;">
 			<a href="javascript:$('#common_mask,#xxxxx4').hide(200);"><b>关闭</b></a>
 		</li>
 	</ul>
@@ -205,15 +205,15 @@
 	<div style="text-align: center;line-height: 40px;font-size: 12px;border-bottom: 1px solid #ddd;">
 		<a href="javascript:$('#common_mask,#xxxxx5').hide(200);" style="position: absolute;left: 6px;top: 2px;"><span class="mui-icon mui-icon-left-nav"></span></a>
 		选择抬头
-		<a href="javascript:;" v-if="edit_card" @click="edit_card=false;reset_form();" class="common_red" style="position: absolute;right: 6px;top: 2px;">取消</a>
-		<a href="javascript:;" v-else @click="edit_card=true;" class="common_red" style="position: absolute;right: 6px;top: 2px;">管理</a>
+		<a href="javascript:;" v-if="edit_card" @click="edit_card=false;reset_form();" class="common_green" style="position: absolute;right: 6px;top: 2px;">取消</a>
+		<a href="javascript:;" v-else @click="edit_card=true;" class="common_green" style="position: absolute;right: 6px;top: 2px;">管理</a>
 	</div>
 	<ul class="mui-table-view" style="margin-top: 12px;">
 		<li @click="click_invoice_header_item(item)" v-for="item in invoice_headers" class="mui-table-view-cell invoice_header_list_item">
 			<span>{{item.name}}</span>
 			<p style="float: right;">{{f_type_code_label(item.type_code)}}</p>
-			<div v-if="item.default=='true'" class="invoice_header_default_item common_bg_red" style="transform:rotate(45deg);position: absolute;right: -30px;top: -16px;padding: 20px 20px 0 20px;font-size: 12px;">默认</div>
-			<div v-if="edit_card" class="common_red" style="position: absolute;right: 14px;top: 12px;" @click="delete_taitou($event,item)"><i class="fal fa-trash-alt"></i></div>
+			<div v-if="item.default=='true'" class="invoice_header_default_item common_bg_green" style="transform:rotate(45deg);position: absolute;right: -30px;top: -16px;padding: 20px 20px 0 20px;font-size: 12px;">默认</div>
+			<div v-if="edit_card" class="common_green" style="position: absolute;right: 14px;top: 12px;" @click="delete_taitou($event,item)"><i class="fal fa-trash-alt"></i></div>
 		</li>
 	</ul>
 	<div style="position: absolute;bottom: 0;width: 100%;border: 1px solid #ddd;">
@@ -242,7 +242,7 @@
 				</div>
 			</div>
 			<ul class="mui-table-view">
-				<li class="mui-table-view-cell common_bg_red" style="color: #fff;text-align: center;">
+				<li class="mui-table-view-cell common_bg_green" style="color: #fff;text-align: center;">
 					<template v-if="edit_card">
 						<a @click="save_taitou" href="javascript:;" v-if="ruleForm.id"><b>保存并使用抬头</b></a>
 						<a href="javascript:mui.toast('未选中行');" v-else><b>选中后可编辑</b></a>

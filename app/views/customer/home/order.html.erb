@@ -43,7 +43,7 @@
 		<div style="text-align: center;padding-bottom: 30px;">
 			<template v-if="order.status=='2'||(order.payment_type=='2'&&(order.status=='1'||order.status=='2'))">
 				<img :src="order.base64_img" style="width: 100%;max-width: 222px;">
-				<div class="common_red">
+				<div class="common_green">
 					请向药店药师出示该二维码或订单编号
 				</div>
 			</template>
