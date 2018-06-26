@@ -63,7 +63,7 @@ class Ims::Report
 	      patient_iden: order.patient_iden,
 	      patient_phone: order.patient_phone,
 	      payment_type: order.payment_type,
-	      is_returned: order.is_returned,
+	      # is_returned: order.is_returned,
 	      details: order.details.map{|x| {
               name: x.name,
               quantity: x.quantity,
@@ -130,8 +130,8 @@ class Ims::Report
         author_name = args[:detail].blank? ? "": ",a.author_name"  
         factory_name = args[:factory_name].blank? ? "": ",b.factory_name"  
         opt_name = status.blank? ? "": (status=="4" ? ",a.delivery_name": ",a.return_name")
-        c_d = status.blank? ? " and (a.status=4 or a.status=8 ) and a.delivery_at BETWEEN '#{start_time}' AND '#{end_time}' or a.return_at BETWEEN '#{start_time}' AND '#{end_time}'" : "and a.status=#{status} and "+(status=='4' ? 'a.delivery_at ' : 'a.return_at ')+"BETWEEN '#{start_time}' AND '#{end_time}'"
-        sql = "SELECT b.title,b.specification#{factory_name},b.unit,b.price,SUM(b.qty) as 'total_qty', round(sum(b.amount),2) as 'total_amount'#{source_org_name}#{author_name}#{opt_name},GROUP_CONCAT(a.id) as 'ids' FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id where a.drug_store_id=#{org_id} "+c_d+" GROUP BY b.title,b.specification#{factory_name},b.unit,b.price#{source_org_name}#{author_name}#{opt_name};"
+        c_d = status.blank? ? " and (a.status=4 or a.status=8 ) and a.delivery_at BETWEEN '#{start_time}' AND '#{end_time}' or a.return_at BETWEEN '#{start_time}' AND '#{end_time}'" : "and a.status=#{status} and a.created_at BETWEEN '#{start_time}' AND '#{end_time}'"#(status=='4' ? 'a.delivery_at ' : 'a.return_at ')+"BETWEEN '#{start_time}' AND '#{end_time}'"
+        sql = "SELECT b.title,b.specification#{factory_name},b.unit,b.price,SUM(b.qty) as 'total_qty', round(sum(b.amount),2) as 'total_amount'#{source_org_name}#{author_name}#{opt_name.blank? ? nil : (opt_name+' as opt_name')},GROUP_CONCAT(a.id) as 'ids' FROM #{tbh} a INNER JOIN #{tbd} b on a.id=b.header_id where a.drug_store_id=#{org_id} "+c_d+" GROUP BY b.title,b.specification#{factory_name},b.unit,b.price#{source_org_name}#{author_name}#{opt_name};"
         result = Ims::PreHeader.find_by_sql(sql)
         JSON.parse(result.to_json)
       rescue Exception => e
@@ -158,19 +158,21 @@ class Ims::Report
     def hospital_report args = {}
       result = drug_report args
       p result
-      data = result.group_by{|e| e["org_display"]}
+      data = result.group_by{|e| e["source_org_name"]}
       unless args[:detail].blank?
         data1 ={}
+        # data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
         data.map{|k,v| data1[k] = v.group_by{|e| e['author_name']}}
         data = data1
       end
-      return data
+      return data.map{|k,v| {name:k,drug_count:v.count,total_amount:v.map{|a| a["total_amount"]}.sum(),drugs:v}}
     end
 
     # 针对发药人的统计
     def name_report args = {}
       result = drug_report args
-      result.group_by{|e| e["delivery_name"]}
+      data = result.group_by{|e| e["opt_name"]}
+      return data.map{|k,v| {name:k,drug_count:v.count,total_amount:v.map{|a| a["total_amount"]}.sum(),drugs:v}}
     end
 
     # 针对医院及发药人的
@@ -178,13 +180,13 @@ class Ims::Report
       result = drug_report args
       data = {}
       if args[:type]=="hospital_and_name"
-        groups= result.group_by{|e| e["org_display"]}
-        groups.map{|k,v| data[k] = v.group_by{|e| e['delivery_name']}}
+        groups= result.group_by{|e| e["source_org_name"]}
+        groups.map{|k,v| data[k] = v.group_by{|e| e['opt_name']}}
         return data
       end
-      groups= result.group_by{|e| e["delivery_name"]}
-      groups.map{|k,v| data[k] = v.group_by{|e| e['org_display']}}
-      return data
+      groups= result.group_by{|e| e["opt_name"]}
+      groups.map{|k,v| data[k] = v.group_by{|e| e['source_org_name']}}
+      return data.map{|k,v| {name:k,drug_count:v.count,total_amount:v.map{|a| a["total_amount"]}.sum(),drugs:v}}
     end
 
     # 针对厂家的

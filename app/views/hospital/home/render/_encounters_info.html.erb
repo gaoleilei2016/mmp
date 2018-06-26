@@ -69,9 +69,9 @@
 				  	<el-form-item
 					    label="民族"
 					    prop="nation">
-					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" filterable>
+					    <el-select v-model="encounter.nation" value-key="code" placeholder="请选择" style="width: 100%;" :disabled="disabledInput" :filter-method="filterCodes" @focus="focusSelect='nations|encnation'" ref="encnation" @keyup.enter.stop.native="focusNext('encnation', 'encmarriage')" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_nations||[])"
+						      v-for="item in (nations||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -98,9 +98,9 @@
 				  	<el-form-item
 					    label="婚姻"
 					    prop="marriage">
-					    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.marriage" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='marriages|encmarriage'" ref="encmarriage" @keyup.enter.stop.native="focusNext('encmarriage', 'encoccupation')" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_marriages||[])"
+						      v-for="item in (marriages||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -114,7 +114,7 @@
 				    label="身份证号"
 				    @change="getBirthdayFromIdCard"
 				    prop="iden">
-				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard" :disabled="disabledInput"></el-input>
+				    <el-input v-model="encounter.iden" prefix-icon="fa fa-id-card-o" @change="getBirthdayFromIdCard" ref="enciden" @keyup.enter.stop.native="focusNext('enciden', 'encbirthdate')" :disabled="disabledInput"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    label="出生日期"
@@ -125,6 +125,8 @@
 				      style="width: 100%"
 				      @change="getDecilAgeByBirthday"
 				      :picker-options="birthPickerOptions"
+				      ref="encbirthdate" 
+				      @keyup.enter.stop.native="focusNext('encbirthdate', 'enaddress')"
 				      :disabled="disabledInput"
 				      placeholder="XXXX-XX-XX">
 				    </el-date-picker>
@@ -133,9 +135,9 @@
 					  <el-form-item
 					    label="职业"
 					    prop="occupation">
-					    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+					    <el-select v-model="encounter.occupation" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='occupations|encoccupation'" ref="encoccupation" @keyup.enter.stop.native="focusNext('encoccupation', 'encunitname')" filterable>
 						    <el-option
-						      v-for="item in ($parent.common_data_occupations||[])"
+						      v-for="item in (occupations||[])"
 						      :key="item.code"
 						      :label="item.display"
 						      :value="item">
@@ -148,18 +150,18 @@
 				  <el-form-item
 				    label="住址"
 				    prop="address">
-				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline" :disabled="disabledInput"></el-input>
+				    <el-input v-model="encounter.address" prefix-icon="el-icon-location-outline" :disabled="disabledInput" ref="enaddress" @keyup.enter.stop.native="focusNext('enaddress', 'encontactname')"></el-input>
 				  </el-form-item>
 				  <el-form-item
 				    :label="encounter.age < 14 ? '监护人' : '联系人'"
 				    prop="contact_name">
-				    <el-input v-model="encounter.contact_name" prefix-icon="fa fa-chain"></el-input>
+				    <el-input v-model="encounter.contact_name" prefix-icon="fa fa-chain" ref="encontactname" @keyup.enter.stop.native="focusNext('encontactname', 'encnation')"></el-input>
 				  </el-form-item>
 				  <div v-if="showAllPatInfo">
 					  <el-form-item
 					    label="工作单位"
 					    prop="unit_name">
-					    <el-input v-model="encounter.unit_name"></el-input>
+					    <el-input v-model="encounter.unit_name" ref="encunitname" @keyup.enter.stop.native="focusNext('encunitname', 'encblood')"></el-input>
 					  </el-form-item>
 				  </div>
 				</el-col>
@@ -214,7 +216,7 @@
 				  <el-form-item>
 				    <el-button v-if="showAllPatInfo" icon="fa fa-angle-double-up fa-fw" @click="showAllPatInfo=false">收起</el-button>
 				    <el-button v-else icon="fa fa-angle-double-down fa-fw" @click="showAllPatInfo=true">更多</el-button>
-				    <el-button type="primary" @click="submitEncounterForm('encounterForm')" ref="encsave" plain>
+				    <el-button type="primary" @click="submitEncounterForm('encounterForm', true)" ref="encsave" plain>
 				    	<i class="fa fa-spinner fa-spin fa-fw fa-lg" style="display: none;"></i>
 				    	<template v-if="!encounter.id">保存</template>
 				    	<template v-else>更新</template>
@@ -252,9 +254,9 @@
 					<el-form-item
 				    label="血型"
 				    prop="blood">
-				    <el-select v-model="encounter.blood" value-key="code" placeholder="请选择" style="width: 100%;">
+				    <el-select v-model="encounter.blood" value-key="code" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='bloods|encblood'" ref="encblood" @keyup.enter.stop.native="focusNext('encblood', 'encheight')" filterable>
 					    <el-option
-					      v-for="item in ($parent.common_data_bloods||[])"
+					      v-for="item in (bloods||[])"
 					      :key="item.code"
 					      :label="item.display"
 					      :value="item">
@@ -266,14 +268,14 @@
 					<el-form-item
 				    label="身高"
 				    prop="height">
-				    <el-input v-model="encounter.height"><template slot="append">cm</template></el-input>
+				    <el-input v-model="encounter.height" ref="encheight" @keyup.enter.stop.native="focusNext('encheight', 'encweight')"><template slot="append">cm</template></el-input>
 				  </el-form-item>
 				</el-col>
 				<el-col :span="6">
 					<el-form-item
 				    label="体重"
 				    prop="weight">
-				    <el-input v-model="encounter.weight"><template slot="append">kg</template></el-input>
+				    <el-input v-model="encounter.weight" ref="encweight" @keyup.enter.stop.native="focusNext('encblood', 'encsave')"><template slot="append">kg</template></el-input>
 				  </el-form-item>
 				</el-col>
 				<el-col :span="7">

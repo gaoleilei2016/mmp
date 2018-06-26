@@ -12,6 +12,10 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      get :gzh
+      get :get_prescriptions_by_phone
+      get :get_all_prescriptions_by_phone
+      get :get_not_read_prescription
       post :refund_order
       get :get_orders
       post :pay_order
@@ -27,6 +31,7 @@ Rails.application.routes.draw do
       get :get_dicts
       get :get_addrs
       get :get_medicine_by_name
+      post :generate_pdf # 生成pdf
     end
   end
   ############################
@@ -49,14 +54,15 @@ Rails.application.routes.draw do
         get :orders
         get :order
         get :confirm_order
+        get :feedbacks
       end
     end
     resources :portal do
       collection do
         
-        get :pullrefresh_main
-        get :pullrefresh_sub
-        get :full_screen
+        # get :pullrefresh_main
+        # get :pullrefresh_sub
+        # get :full_screen
 
         get :map
         get :settlement
@@ -65,6 +71,11 @@ Rails.application.routes.draw do
     end
     resources :report
     resources :invoice_headers
+    resources :feedbacks do
+      collection do
+        get :get_cur_feedbacks
+      end
+    end
   end
   ########### customer ##########
   ############################
@@ -102,10 +113,10 @@ Rails.application.routes.draw do
     # 处方
     resources :prescriptions do
       collection do
-        get :get_all_prescriptions_by_phone
-        get :get_prescriptions_by_phone
-        get :get_not_read_prescription
-        put :read_prescription
+        # get :get_all_prescriptions_by_phone
+        # get :get_prescriptions_by_phone
+        # get :get_not_read_prescription
+        # put :read_prescription
       end
       member do
         post :set_drug_store
@@ -157,6 +168,7 @@ Rails.application.routes.draw do
         get :get_order_by_code  # 已发药或已退订单检索  
         post :operat_order_by_prescription   # 平台处方收费或收费并发药操作
         get :return_drug           # 退药
+        get :return_amount           # 退费
         get :prescription_back     # 下载错误处方返回      
         post :create_order  #生成订单
         post :order_setting  #订单设置

@@ -69,6 +69,7 @@
 							}
 							mui('#vue_content').pullRefresh().endPulldownToRefresh();
 							mui('#vue_content').pullRefresh().enablePullupToRefresh();
+							// mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
 						}else if(pulltype=='pullup'){
 							if (json.flag) {
 								json.rows.map(function(item) {
@@ -76,8 +77,8 @@
 								})
 							}
 							// console.log( _this.orders.length,json.total );
-							mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
 						}
+						mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
 						if (json.flag) {
 						}else{
 							mui.toast(json.info);
@@ -129,40 +130,40 @@
 			// 	console.log( 'xxxxxxxx 1',e );
 			// })
 			// alert( navigator.userAgent );
-			if( navigator.userAgent.indexOf("Mac")>-1 ){
-				$("#vue_content").on("touchstart", function(e) {
-					// e.preventDefault();
-					startX = e.originalEvent.changedTouches[0].pageX,
-					startY = e.originalEvent.changedTouches[0].pageY;
-				});
-				$("#vue_content").on("touchmove", function(e) {
-					// e.preventDefault();
-					moveEndX = e.originalEvent.changedTouches[0].pageX,
-					moveEndY = e.originalEvent.changedTouches[0].pageY,
-					X = moveEndX - startX,
-					Y = moveEndY - startY;
+			// if( navigator.userAgent.indexOf("Mac")>-1 ){
+			// 	$("#vue_content").on("touchstart", function(e) {
+			// 		// e.preventDefault();
+			// 		startX = e.originalEvent.changedTouches[0].pageX,
+			// 		startY = e.originalEvent.changedTouches[0].pageY;
+			// 	});
+			// 	$("#vue_content").on("touchmove", function(e) {
+			// 		// e.preventDefault();
+			// 		moveEndX = e.originalEvent.changedTouches[0].pageX,
+			// 		moveEndY = e.originalEvent.changedTouches[0].pageY,
+			// 		X = moveEndX - startX,
+			// 		Y = moveEndY - startY;
 
-					if ( Math.abs(X) > Math.abs(Y) && X > 0 ) {
-						// console.log("left 2 right");
-						e.preventDefault();
-						return false
-					}
-					else if ( Math.abs(X) > Math.abs(Y) && X < 0 ) {
-						// console.log("right 2 left");
-						e.preventDefault();
-						return false
-					}
-					else if ( Math.abs(Y) > Math.abs(X) && Y > 0) {
-						// console.log("top 2 bottom");
-					}
-					else if ( Math.abs(Y) > Math.abs(X) && Y < 0 ) {
-						// console.log("bottom 2 top");
-					}
-					else{
-						// console.log("just touch");
-					}
-				});
-			}
+			// 		if ( Math.abs(X) > Math.abs(Y) && X > 0 ) {
+			// 			// console.log("left 2 right");
+			// 			e.preventDefault();
+			// 			return false
+			// 		}
+			// 		else if ( Math.abs(X) > Math.abs(Y) && X < 0 ) {
+			// 			// console.log("right 2 left");
+			// 			e.preventDefault();
+			// 			return false
+			// 		}
+			// 		else if ( Math.abs(Y) > Math.abs(X) && Y > 0) {
+			// 			// console.log("top 2 bottom");
+			// 		}
+			// 		else if ( Math.abs(Y) > Math.abs(X) && Y < 0 ) {
+			// 			// console.log("bottom 2 top");
+			// 		}
+			// 		else{
+			// 			// console.log("just touch");
+			// 		}
+			// 	});
+			// }
 		}
 	})
 </script>

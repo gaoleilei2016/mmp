@@ -76,7 +76,7 @@
 		        min-width="80">
 		        <template slot-scope="scope">
 			      	<el-button
-			        	v-if="scope.row.status!='O'"
+			        	v-if="scope.row.status!='O' && activeName==cardTabsOptions[0].code"
 			        	style="color: #a94442;"
 			          type="text"
 			          @click="abandonTemplate(scope.$index, scope.row)"
@@ -84,7 +84,7 @@
 			          作废
 			        </el-button>
 			        <el-button
-			        	v-if="scope.row.status!='O'"
+			        	v-if="scope.row.status!='O' && activeName==cardTabsOptions[0].code"
 			          type="text"
 			          @click="openFormModal({action:'edit', index: scope.$index, row: scope.row})"
 			          size="mini">
@@ -165,6 +165,11 @@ window.current_template_obj = {
 	data:function(){
 		var options = this.$parent.common_data_sharing_scopes;
 		return {
+      codeIni: {}, // 编码表
+      rates: [], // 频次编码表
+      routes: [], // 途径编码表
+      focusSelect: "", // 目前聚焦的哪个select框，用于筛选，code+简拼+名称
+      
 			mtemplatesResource: Vue.resource('/hospital/sets/mtemplates{/id}.json'),
 			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
      	codeIni: {},
@@ -218,7 +223,36 @@ window.current_template_obj = {
        var clientHeight = document.body.clientHeight;
       _this.tableHeight = clientHeight - 290;
       _this.getData();
+
+      // 设置的编码
+      Vue.resource('/hospital/sets/codes.json').get().then( function (response) {
+        var res = response.data
+        _this.codeIni = res.data;
+        _this.routes = res.data.routes;
+        _this.rates = res.data.rates;
+      }, function  (response) {
+        _this.$message.error('获取编码表报错，请联系管理员。');
+      })
   	},
+    // 过滤编码表，名称+code+简拼
+    filterCodes: function (val) {
+      var _this = this, select = _this.focusSelect; // 为编码名称|ref内容
+      var field = select.split("|")[0], ele = select.split("|")[1];
+      if (val && field) {
+        var tempArr = [];
+        var val = val.toUpperCase(), search = "";
+        (_this.codeIni[field]||[]).forEach(function (item, index) {
+          search = item.code+item.display+item.jianpin;
+          if(search.indexOf(val)>-1) {
+            tempArr.push(item);
+          }
+        })
+        _this[field] = tempArr;
+        _this.$refs[ele].hoverIndex = 0;
+      } else {
+        _this[field] = _this.codeIni[field];
+      }
+    },
   	// 获取模板数据
   	getData: function () {
   		var _this = this;
@@ -350,8 +384,8 @@ window.current_template_obj = {
   			price: drug.price, // 价格
   			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
   			single_qty: {value: 1, unit: drug.unit}, // 单次数量
-  			route: _this.$parent.common_data_routes[0],// 频次
-  			frequency: _this.$parent.common_data_frequencys[0],// 频次
+  			route: _this.routes[0],// 频次
+  			frequency: _this.rates[0],// 频次
   			course_of_treatment: {value: "", unit: "天"},  // 疗程
   			total_quantity: 1, // 总量
   			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型

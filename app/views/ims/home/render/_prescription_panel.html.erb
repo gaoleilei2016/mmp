@@ -58,21 +58,26 @@
     <div class="el-row" style="padding-top:4px;margin-top:6px;margin-bottom:6px;">
       <div class="el-col-24">
         <div style="text-align:right;">合计：{{format_price(info.amt)}}</div>
-        <div class="btns" style="text-align:right;">
-          <span v-if="info.is_order&&info.status === '1'">
+        <div class="btns" style="text-align:right; min-height:30px;">
+          <span v-if="info.is_order&&info.status == '1'">
             <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">收费并发药</button>
           </span>
-          <span v-if="info.is_order&&info.status === '1'">
+          <span v-if="info.is_order&&info.status == '1'">
             <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="charging_pre(info.order_id)">收费</button>
           </span>
-          <span v-if="info.is_order&&info.status === '2' ">
+
+          <span v-if="info.is_order&&info.status == '2'&&info.payment_type == '2' ">
+            <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_amount(info.order_id)">退费</button>
+          </span>
+
+          <span v-if="info.is_order&&info.status == '2' ">
             <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">发药</button>
-          </span>      
+          </span>
           <!-- <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="out_order(info.order_id)">发药</button> -->
         </div>
       </div>
 
-    	<div class="el-col-24" style=" min-height:60px; border:1px solid #ddd;" >
+    	<div class="el-col-24" style=" min-height:60px; border:1px solid #ddd; margin-top:12px;" >
         <div style="color:#ADABAB;padding:0px 8px;">发票</div>
         <div class="el-row" style="padding:8px;">
           <div class="el-col-12">
@@ -81,7 +86,7 @@
           </div>
           <div class="el-col-12">
             <span v-if="info.invoice">税号：{{info.invoice.shuihao||'无'}}</span>
-            <span>税号：无</span>
+            <span v-else>税号：无</span>
           </div>
         </div>
       </div>

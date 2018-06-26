@@ -22,9 +22,9 @@
 			<el-col :span="6">
     		<el-form-item
 			    label="类型">
-			    <el-select v-model="prescription.type" value-key="code" placeholder="请选择" style="width: 100%;" filterable>
+			    <el-select v-model="prescription.type" value-key="code" ref="prestype" placeholder="请选择" style="width: 100%;" :filter-method="filterCodes" @focus="focusSelect='prescription_types|prestype'" filterable>
 				    <el-option
-				      v-for="item in ($parent.common_data_prescription_types||[])"
+				      v-for="item in (prescription_types||[])"
 				      :key="item.code"
 				      :label="item.display"
 				      :value="item">

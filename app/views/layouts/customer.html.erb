@@ -60,7 +60,7 @@
 				background: #fff;
 			}
 			.mui-bar-tab .mui-tab-item.mui-active{
-				color: #F55742;
+				color: #14ae8f;
 			}
 			.mui-icon.fa{
 				font-size: 22px;
@@ -83,6 +83,13 @@
 			.mui-table-view-cell:after{
 				background: rgba(200, 199, 204, 0.65);
 			}
+			.common_green{
+				color: #14ae8f;
+			}
+			.common_bg_green{
+				background: #14ae8f;
+				color: #fff;
+			}
 			.common_red{
 				color: #F55742;
 			}
@@ -94,7 +101,7 @@
 				color: #8A8782;
 			}
 			.mui-icon-left-nav{
-				color: #F55742;
+				color: #14ae8f;
 			}
 			[v-cloak]{
 				display: none;
@@ -109,11 +116,18 @@
 			}
 			.mui-popup-button.mui-popup-button-bold{
 				font-weight: normal;
-				color: #F55742;
+				color: #14ae8f;
 			}
 			/*.mui-popup.mui-popup-in, .mui-popup-inner, .mui-popup-button:first-child, .mui-popup-button:last-child{
 				border-radius: 0;
 			}*/
+			.mui-toast-container{
+				bottom: initial;
+				top: 60px;
+			}
+			.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
+				color: #14ae8f;
+			}
 		</style>
 		<style type="text/css">
 /* 3个圆圈的加载样式
@@ -133,7 +147,7 @@
   width: 20px;
   height: 20px;
   /*// background-color: #67CF22;*/
-  background-color: #F55742;
+  background-color: #14ae8f;
  
   border-radius: 100%;
   display: inline-block;
@@ -226,7 +240,7 @@
 						var _this = this;
 						$("#loading").show();
 						$.ajax({
-							url:'/hospital/prescriptions/get_not_read_prescription?phone=<%= current_user.login %>',
+							url:'/interfaces/get_not_read_prescription?phone=<%= current_user.login %>',
 							success:function(json) {
 								if (json.flag) {
 									// _this.prescriptions = json.data;
@@ -260,9 +274,9 @@
 	<script type="text/javascript">
 		<%# p '~~~~~~~~~~~~~~~~~', notice, alert, flash[:notice] %>
 		<% if flash[:notice].present? %>
-		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>");
+		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>",{duration:5000});
 		<% elsif notice.present?||alert.present? %>
-		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>");
+		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>",{duration:5000});
 		<% end -%>
 	</script>
 	<% if [["customer/portal", "index"],["customer/portal", "map"]].index([controller_path,action_name]) %>

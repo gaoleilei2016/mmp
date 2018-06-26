@@ -7,7 +7,20 @@
 		padding: 5px 0;
 		vertical-align: middle;
 	}
+	/* 二级表格表头背景 */
+	.inner-table .el-table__header th {
+		background-color: #F5F7FA !important;
+	}
+	.el-table .primary-row {
+    background: #E2F6F4 !important;
+  }
 </style>
+<%
+  @is_dispensed=true
+  @is_hospital=true
+  @hospital = "医院"
+  @dispensed = "发药"
+%>
 <template>
 	<!-- 接诊管理、统计页面 -->
 	<div id="reports_dispensed_hospital_div">
@@ -15,12 +28,25 @@
 		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
 		  <el-breadcrumb-item>报表</el-breadcrumb-item>
 		</el-breadcrumb>
+		<div class="float-right-btns" style="position: relative;">
+	  	<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
+	  		<!-- <el-badge :value="printEles.length" class="item"> -->
+					<!-- <el-button size="mini" @click="print">打印</el-button> -->
+				<el-dropdown size="mini" split-button @click="print">
+				  打印
+				  <el-dropdown-menu slot="dropdown">
+				    <el-dropdown-item><span @click="print">连续打印</span></el-dropdown-item>
+				    <el-dropdown-item><span @click="print({break: true})">分页打印</span></el-dropdown-item>
+				  </el-dropdown-menu>
+				</el-dropdown>
+				<!-- </el-badge> -->
+			</div>
+		</div>
 		<el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin-bottom: 10px;">
 	    <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
 			<div style="">
 				<el-row v-if="" :gutter="5" style="margin-bottom: 10px;">
 					<el-col :span="8">
-						<small>日期</small>
 						<el-date-picker
 				      v-model="filter.range"
 				      type="datetimerange"
@@ -34,87 +60,123 @@
 				    </el-date-picker>
 					</el-col>
 					<el-col :span="6">
-						<!-- <small>疾病</small>
-						<el-autocomplete size="mini" v-model="filter.disease" :fetch-suggestions="querySearchDiagnoseAsync" @select="handleSelectDisease" :debounce="300" style="width: 100%;">
-	            <i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="filter.disease=''"></i>
-	            <template slot-scope="props">
-	            	<span style="float: left">{{ props.item.display }}</span>
-      					<span style="float: right; color: #8492a6; font-size: 13px">{{ props.item.code }}</span>
-	            </template>
-	          </el-autocomplete> -->
+						<!-- <el-input size="mini" v-model="filter.name" placeholder="药品名称"></el-input> -->
 					</el-col>
-					<el-col :span="2" style="padding-top: 18px;">
+					<el-col :span="2">
 						<el-button size="mini" type="primary" style="padding-left: 0; padding-right: 0; width: 100%;" @click="getData" plain>搜索</el-button>
 					</el-col>
 				</el-row>
 				<el-table
 		      :data="dispensed_hospitals"
-		      :height="tableHeight"
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
+		      default-expand-all
+		      show-summary
+		      row-class-name="primary-row"
+		      :show-header="false"
 		      style="width: 100%">
-		     <el-table-column
-			      type=""
-			      width="30">
+		      <el-table-column
+			      type="selection"
+			      width="60">
+			    </el-table-column>
+		      <el-table-column type="expand" >
+			      <template slot-scope="props">
+			      	<el-table
+						    :data="(props.row.drugs||[])"
+						    show-summary
+						    class="inner-table"
+						    style="width: 100%">
+						    <el-table-column
+						      label=""
+						      width="60">
+						      <template slot-scope="scope">
+							      {{ scope.$index + 1 }}
+							    </template>
+						    </el-table-column>
+						    <el-table-column
+						      label="药品名"
+						      min-width="200">
+						      <template slot-scope="scope">
+							      {{ scope.row.title }}
+							    </template>
+						    </el-table-column>
+						    <el-table-column
+							    min-width="50"
+							    align="left"
+							    label="规格">
+							    <template slot-scope="scope">
+							    	{{ scope.row.specification }}
+							    </template>
+							  </el-table-column>
+							  <el-table-column
+							    min-width="50"
+							    prop = "total_qty"
+							    align="right"
+							    label="数量">
+							    <!-- <template slot-scope="scope">
+							    	{{ scope.row.total_qty }}
+							    </template> -->
+							  </el-table-column>
+							  <el-table-column
+							    min-width="70"
+							    align="center"
+							    label="单位">
+							    <template slot-scope="scope">
+							    	{{ scope.row.unit }}
+							    </template>
+							  </el-table-column>
+							  <el-table-column
+							    min-width="80"
+							    align="right"
+							    label="单价">
+							    <template slot-scope="scope">
+							    	{{ scope.row.price }}
+							    </template>
+							  </el-table-column>
+							  <el-table-column
+							    min-width="100"
+							    prop = "total_amount"
+							    align="right"
+							    label="金额">
+							    <template slot-scope="scope">
+							    	{{ scope.row.total_amount | formatMoney(2) }}
+							    </template>
+							  </el-table-column>
+						  </el-table>
+			      </template>
 			    </el-table-column>
 		      <el-table-column
 				    min-width="240"
 				    align="left"
-				    label="药品名称">
+				    label="">
 				    <template slot-scope="scope">
-				      <span v-if="scope.row.title" style="display: inline-block; width: 70px;">{{ scope.row.title }}</span>
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="200"
-				    align="left"
-				    label="规格">
-				    <template slot-scope="scope">
-				    	<i v-if="scope.row.specification" class="fa fa-lg fa-fw text-muted-light"></i>{{ scope.row.specification }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="200"
-				    align="right"
-				    label="数量">
-				    <template slot-scope="scope">
-				    	<i v-if="scope.row.total_qty" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_qty }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="140"
-				    align="center"
-				    label="单位">
-				    <template slot-scope="scope">
-				    	<i v-if="scope.row.unit" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.unit }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="180"
-				    align="right"
-				    label="单价">
-				    <template slot-scope="scope">
-				    	<i v-if="scope.row.price" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.price }}
-				    </template>
-				  </el-table-column>
-				  <el-table-column
-				    min-width="250"
-				    align="right"
-				    label="金额">
-				    <template slot-scope="scope">
-				    	<i v-if="scope.row.total_amount" class="fa fa-lg fa-fw text-muted-light"></i> {{ scope.row.total_amount }}
+				      <span style="color: darkkhaki;">医院名称：</span>{{ scope.row.name }}
 				    </template>
 				  </el-table-column>
 
-				   <el-table-column
-			      type=""
-			      width="30">
-			    </el-table-column>
+				 <!--  <el-table-column
+				    min-width="240"
+				    align="left"
+				    label="">
+				    <template slot-scope="scope">
+				      <span style="color: darkkhaki;">药品种数：</span>{{ scope.row.drug_count }}
+				    </template>
+				  </el-table-column> -->
+				  <el-table-column
+				    min-width="240"
+						prop = "total_amount"
+            align="right"
+				    label="">
+				    <template slot-scope="scope">
+				      <!-- <span style="color: darkkhaki;">总金额：</span>{{ scope.row.total_amount }} -->
+				    </template>
+				  </el-table-column>
+				  
 		    </el-table>
 			</div>
 	  </el-tabs>
 	  <!-- 分页标记 -->
-	  <el-pagination
+	 <!--  <el-pagination
 	  	background
 	    @size-change="handleSizeChange"
 	    @current-change="handleCurrentChange"
@@ -123,12 +185,14 @@
 	    :page-size="pageSize"
 	    layout="total, sizes, prev, pager, next, jumper"
 	    :total="dataCount">
-	  </el-pagination>
+	  </el-pagination> -->
 
 
 		<!-- <div class="print-prescription-wrapper" style="display: none;" v-if="printPresRow&&printPresRow.prescription_no">
 			<prescriptionprint :encounter="encounter" :prescription="printPresRow"></prescriptionprint>
 		</div> -->
+		<%= render "ims/home/render/print_report_table"%>
+		
 	</div>
 </template>
 
@@ -143,8 +207,9 @@ window.current_template_obj = {
 			activeName: options[0].code,
 			cardTabsOptions: options,
 			multipleSelection: [],
+			printEles: [], // 打印的元素
 
-			dispensed_hospitalsResource: Vue.resource('/ims/reports/drug_report.json'),
+			dispensed_hospitalsResource: Vue.resource('/ims/reports/dispensed_hospital.json'),
 			dispensed_hospitals: [],
 			prescriptions: [],
 			ordersResource: Vue.resource('/hospital/orders{/id}.json'),
@@ -154,7 +219,8 @@ window.current_template_obj = {
 			orgname: "",
 			isShowfilters: false, // 高级搜索
 			filter: {
-				range: "",
+				range: [new Date().pattern('yyyy-MM-dd HH:mm:ss'),new Date().pattern('yyyy-MM-dd HH:mm:ss')],
+				name: "",
 			},
 
 			rangePickerOptions: {
@@ -226,24 +292,40 @@ window.current_template_obj = {
 			},function() {
 		  	_this.$message.error("获取初始值失败，请联系管理员。");
 		  })
-      var clientHeight = document.body.clientHeight;
-      _this.tableHeight = clientHeight - 340;
+      // var clientHeight = document.body.clientHeight;
+      // _this.tableHeight = clientHeight - 340;
       _this.getData();
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.dispensed_hospitals = res.data;
+  				console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);
   			}
       },function(response) {
-      	_this.$message.error("后台出错，获取患者列表失败。");
+        _this.$message.error("数据汇总出错。");
       })
 		},
+		print: function (json) {
+			if(!this.printEles || this.printEles.length==0) {
+				this.printEles = this.dispensed_hospitals;
+			}
+			this.$nextTick(function(){
+				var html = $(".ims-print-report-area").html(),
+						style = ".ims-print-report-table > table { width: 100%; -webkit-border-horizontal-spacing: 0px; -webkit-border-vertical-spacing: 0px; border-top: 1px solid #666; border-left: 1px solid #666; } .ims-print-report-table td { border-right: 1px solid #666; border-bottom: 1px solid #666; padding: 2px 5px; }";
+				if(json.break) {
+					style += ".ims-print-report-table { page-break-before:always; } ";
+				}
+				this.$parent.generatePdf({html: html, style_string: style});
+				this.printEles = [];
+			})
+		},
+	
 		// 每页条数改变
   	handleSizeChange: function (val) {
       this.patPageSize = val;
@@ -257,6 +339,7 @@ window.current_template_obj = {
     // 勾选改变
     handleSelectionChange: function (val) {
     	this.multipleSelection = val;
+    	this.printEles = val;
     	console.log(val)
     },
     // 选择tab

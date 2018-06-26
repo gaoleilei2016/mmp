@@ -7,7 +7,7 @@ class ::Hospital::Prescription < ApplicationRecord
 	belongs_to :organization, class_name: '::Admin::Organization', foreign_key: 'organization_id' #处方所属机构
 	belongs_to :doctor, class_name: '::User', foreign_key: 'doctor_id'
 	belongs_to :drug_store, class_name: '::Admin::Organization', foreign_key: 'drug_store_id', optional: true
-	belongs_to :order, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
+	belongs_to :bill, class_name: '::Orders::Order', foreign_key: 'bill_id', optional: true
 
 
 
@@ -29,14 +29,14 @@ class ::Hospital::Prescription < ApplicationRecord
 	# 	# 审核时间
 	# 	audit_at: Time
 	# }
-	def audit(args, cur_user)
+	def audit!(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 0 # 未审核
 				self.auditor_id = args[:auditor][:id] 
 				self.auditor_display = args[:auditor][:display]
 				self.audit_at = args[:audit_at]
 				self.status = 1
-			self.orders.update_all(status: 1) if self.save
+			self.orders.update_all(status: 1) if self.save!
 		else
 			false
 		end
@@ -88,7 +88,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		end
 	end
 
-	# 待收费处方  生成订单之后待收费
+	# 已审核处方  生成订单之后待收费
 	# {
 	# 	# 创建订单人
 	# 	create_bill_opt: {
@@ -99,24 +99,31 @@ class ::Hospital::Prescription < ApplicationRecord
 	# 	bill_at: Time
 	#   bill_id: 
 	# }
-	def wait_charge(args, cur_user)
+	# def wait_charge(args, cur_user)
+	def commit_bill(args, cur_user)
 		args.deep_symbolize_keys!
 		if status == 1 # 已审核的处方可以变为待收费
-			self.status = 2
+			# self.status = 2
+			self.status = 10
 			self.create_bill_opt_id = args[:create_bill_opt][:id]
 			self.create_bill_opt_display = args[:create_bill_opt][:display]
 			self.bill_at = args[:bill_at]
 			self.bill_id = args[:bill_id]
-			self.orders.update_all(status: 2) if  self.save
+			self.orders.update_all(status: 10) if  self.save
 		else
 			false
 		end
 	end
 
 	# 待收费转为已审核
-	def back_wait_charge(args, cur_user)
+	# def back_wait_charge(args, cur_user)
+	#  {
+	# 	args: {}
+	# 	cur_user: User
+	#  }
+	def cancel_bill(args, cur_user)
 		args.deep_symbolize_keys!
-		if status == 2 # 已审核的处方可以变为待收费
+		if status == 10 # 已审核的处方可以变为待收费
 			self.status = 1
 			self.create_bill_opt_id = nil
 			self.create_bill_opt_display = nil
@@ -242,7 +249,7 @@ class ::Hospital::Prescription < ApplicationRecord
 
 	###=== 处方状态流转  ===###
 
-	def link_diagnoses(args, cur_user)
+	def link_diagnoses!(args, cur_user)
 		args.each_with_index do |fhir_coding_diagnose, i|
 			cur_diagnose = ::Hospital::Diagnose.new({
 				rank: i+1,
@@ -253,17 +260,16 @@ class ::Hospital::Prescription < ApplicationRecord
 				doctor: cur_user,
 				org_id: cur_user.organization&.id
 			})
-			cur_diagnose.save
-			p cur_diagnose.errors
+			cur_diagnose.save!
 		end
 	end
 
-	def link_orders(cur_orders, cur_user)
+	def link_orders!(cur_orders, cur_user)
 		self.reload
 		cur_orders.each do |_order|
 			_order.status = 0
 			_order.prescription_id = self.id
-			_order.save
+			_order.save!
 		end
 	end
 
@@ -347,6 +353,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			},
 			# 账单id
 			bill_id: self.bill_id,
+			bill_status: self.bill&.status.to_s,
 			# 处方权限
 			confidentiality: {
 				code: self.confidentiality_code,
@@ -379,9 +386,9 @@ class ::Hospital::Prescription < ApplicationRecord
 		return ret
 	end
 
-	def set_tookcode
+	def set_tookcode!
 		self.tookcode = format("%06d", self.id)
-		self.save
+		self.save!
 	end
 
 	def send_to_check
@@ -393,7 +400,7 @@ class ::Hospital::Prescription < ApplicationRecord
 		cur_doctor = self.doctor
 		price = self.orders.map{|e| e.price*e.total_quantity }.reduce(:+)
 		total_fee = price.round(2)
-		url = "http://huaxi.tenmind.com/"
+		url = "http://huaxi.tenmind.com/interfaces/gzh"
 		#发送短信息
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
 		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: self.tookcode, url: url, phone: cur_encounter.phone}

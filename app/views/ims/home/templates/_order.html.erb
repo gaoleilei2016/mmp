@@ -44,6 +44,9 @@
 
     <el-button @click="change" id="notice_input" style="display:none;"></el-button>
     <input style="display:none;" value="<%= current_user.try(:organization_id) %>" id="organization_id">
+    <audio id="yuyin" style="display:none;">
+      <source src="/assets/ims/newbill.mp3">
+    </audio>
 	</div>
 </template>
 <script type="text/javascript">
@@ -61,10 +64,7 @@ document.onkeydown = function(){
 document.notice_data = [];
 $.ims_notice = function(data){
   // alert(data)
-  console.log("ims_notice")
   org_id = $("#organization_id").val()
-  console.log(org_id)
-  console.log(data)
   if (data&&data.org_id == org_id) {
     document.notice_data = data
     $(document).find("#notice_input").click()
@@ -94,6 +94,11 @@ window.current_template_obj = {
       platform_data:[],
       activeName2:'0',
       
+      return_reason:[
+        {value:"不想要了"},
+        {value:"患者已经买了该药品"},
+      ],
+
       setting_rules: {
         payment_expired: [
           { required: true, message: '效期不能为空'},
@@ -113,22 +118,30 @@ window.current_template_obj = {
       $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
     },
     change:function(){
-      console.log("change++++++++++++++++++++")
+      var _this = this
       data = document.notice_data
-      console.log(data)
+      label = false
+      $.each(this._data.order_lists,function(k,v){
+        if(v.order_id == data.order_id ) label = true;
+      })
+      if (label) return false
       if (data.flag) {
-        temp = this._data.order_lists
-        temp.push(data)
-        this._data.order_lists = temp
+        // $.each(this._data.order_lists,function())
+        // if (data.status == _this.out_list_panel ) {
+        //   // temp = this._data.order_lists
+        //   // temp.push(data)
+        //   // this._data.order_lists = temp
+        // };
+        $("#yuyin")[0].play()
         this.$notify.success({
           title: '消息',
-          message: '您有新的订单生成',
+          message: data.info,
           showClose: false
         });
       }else{
         temp = this._data.order_lists
         $.each(temp,function(k,v){
-          if (v.order_id == data.order_id) {
+          if (v.order_id == data.order_id ) {
             temp.splice(k,1)
             return false
           };
@@ -180,6 +193,7 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_search_data?stat='+stat+'&search='+value).then(function(response) {
         temp = []
         temp2 = []
+        amount = 0.0;
         flag_arr = []
         order_status = []
         flag = true
@@ -194,7 +208,7 @@ window.current_template_obj = {
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
-          order_status.push(data1.status)
+          order_status.push(data1.order_type)
           temp.push({
             id:data1.cfid,
             order_id:data1.order_id,
@@ -207,7 +221,7 @@ window.current_template_obj = {
             address:data1.address,
             iden:data1.iden,
             phone:data1.phone,
-            status:data1.cfstatus,
+            cfstatus:data1.cfstatus,
             amt:data1.price,
             created_at:data1.created_at,
             lines:[{
@@ -215,13 +229,14 @@ window.current_template_obj = {
               specification:data1.specification,
               qty:data1.total_quantity,
               unit:data1.unit,
+              price:data1.price,
             }]
           })
           if (ori_data.length>1) {
             for(i=1;i<ori_data.length;i++){
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
-              order_status.push(for_data.status)
+              order_status.push(for_data.order_type)
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
@@ -230,6 +245,7 @@ window.current_template_obj = {
                     specification:for_data.specification,
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
+                    price:for_data.price,                    
                   })
                   break inter;
                 }else{
@@ -246,7 +262,7 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:for_data.cfstatus,
+                      cfstatus:for_data.cfstatus,
                       amt:for_data.price,
                       created_at:for_data.created_at,
                       lines:[{
@@ -254,6 +270,7 @@ window.current_template_obj = {
                         specification:for_data.specification,
                         qty:for_data.single_qty_value,
                         unit:for_data.single_qty_unit,
+                        price:for_data.price,
                       }]
                     })
                   };
@@ -266,13 +283,20 @@ window.current_template_obj = {
           if (flag_arr.indexOf(1)>=0) {
             stat = _this.activeName2
             temp.map(function(item){
+              amount = 0.0;
+              if(item.lines){
+                item.lines.map(function(line){
+                  amount += Number(line.price)
+                })
+              }
               if (temp2.length<=0) {
                 temp2.push({
                   order_id:item.order_id,
                   order_code:item.order_code,
+                  order_type:item.order_type,
                   patient_name:item.name,
                   created_at:item.created_at,
-                  amt:item.amt,
+                  amt:amount,
                   status:item.status
                 })
               }else{
@@ -280,24 +304,31 @@ window.current_template_obj = {
                   temp2.push({
                     order_id:item.order_id,
                     order_code:item.order_code,
+                    order_type:item.order_type,
                     patient_name:item.name,
                     created_at:item.created_at,
-                    amt:item.amt,
+                    amt:amount,
                     status:item.status
                   })
                 };
               }
             })
             if (temp2.length>0) {
-              if(temp2[0].status == "2"){
+              if(temp2[0].order_type == "1"){
                 _this.out_list_panel = "1"
                 _this._data.order_lists = temp2
-              }else if(temp2[0].status == "3"){
+                setTimeout(function(){
+                  $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
+              }else if(temp2[0].order_type == "2"){
                 _this.out_list_panel = "2"
-                  _this._data.order_lists = temp2
-              }else if(temp2[0].status == "4"){
+                _this._data.order_lists = temp2
+                setTimeout(function(){
+                  $(document).find("div.function_panel.out_order").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
+              }else if(temp2[0].order_type == "5"){
                 _this.$notify({title: '提示',message: '订单已发药！'});  
-              }else if(temp2[0].status == "8"){
+              }else if(temp2[0].order_type == "7"){
                 _this.$notify({title: '提示',message: '订单已退药！'});  
               }else{
                 _this.$notify({title: '提示',message: '订单状态不对！'});  
@@ -352,7 +383,7 @@ window.current_template_obj = {
         if(ori_data&&ori_data.length>0){
           data1 = ori_data[0]
           flag_arr.push(data1.r_status)
-          order_status.push(data1.status)
+          order_status.push(data1.order_type)
           temp.push({
             id:data1.cfid,
             order_id:data1.order_id,
@@ -365,7 +396,7 @@ window.current_template_obj = {
             address:data1.address,
             iden:data1.iden,
             phone:data1.phone,
-            status:data1.cfstatus,
+            cfstatus:data1.cfstatus,
             amt:data1.price,
             created_at:data1.created_at,
             lines:[{
@@ -373,13 +404,14 @@ window.current_template_obj = {
               specification:data1.specification,
               qty:data1.single_qty_value,
               unit:data1.single_qty_unit,
+              price:data1.price,
             }]
           })
           if (ori_data.length>1) {
             for(i=1;i<ori_data.length;i++){
               for_data = ori_data[i]
               flag_arr.push(for_data.r_status)
-              order_status.push(for_data.status)
+              order_status.push(for_data.order_status)
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
@@ -388,6 +420,7 @@ window.current_template_obj = {
                     specification:for_data.specification,
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
+                    price:for_data.price,                    
                   })
                   break inter;
                 }else{
@@ -404,7 +437,7 @@ window.current_template_obj = {
                       address:for_data.address,
                       iden:for_data.iden,
                       phone:for_data.phone,
-                      status:for_data.cfstatus,
+                      cfstatus:for_data.cfstatus,
                       amt:for_data.price,
                       created_at:for_data.created_at,
                       lines:[{
@@ -412,6 +445,7 @@ window.current_template_obj = {
                         specification:for_data.specification,
                         qty:for_data.single_qty_value,
                         unit:for_data.single_qty_unit,
+                        price:for_data.price,
                       }]
                     })
                   };
@@ -423,42 +457,52 @@ window.current_template_obj = {
 
           if (flag_arr.indexOf(1)>=0) {
             stat = _this.activeName2
-            console.log("temp",temp)
-            console.log("temp.length",temp.length)
             temp.map(function(item){
+              amount = 0.0;
+              if(item.lines){
+                item.lines.map(function(line){
+                  amount += Number(line.price)
+                })
+              }            
               if (temp2.length<=0) {
                 temp2.push({
                   order_id:item.order_id,
                   order_code:item.order_code,
                   patient_name:item.name,
                   created_at:item.created_at,
-                  amt:item.amt,
-                  status:item.status
+                  amt:amount,
+                  order_type:item.order_type
                 })
               }else{
-                if (item.status == temp2[0].status) {
+                if (item.order_type == temp2[0].order_type) {
                   temp2.push({
                     order_id:item.order_id,
                     order_code:item.order_code,
                     patient_name:item.name,
                     created_at:item.created_at,
-                    amt:item.amt,
-                    status:item.status
+                    amt:amount,
+                    order_type:item.order_type
                   })
                 };
               }
             })
             if (temp2.length>0) {
-              if(temp2[0].status == "2"){
+              if(temp2[0].order_code == "1"){
                 _this.$notify({title: '提示',message: '订单未发药！'});
-              }else if(temp2[0].status == "3"){
+              }else if(temp2[0].order_code == "2"){
                 _this.$notify({title: '提示',message: '订单未发药！'});
-              }else if(temp2[0].status == "5"){
+              }else if(temp2[0].order_code == "5"){
                 _this.return_list_panel = "5"
                 _this._data.return_order_lists = temp2
-              }else if(temp2[0].status == "8"){
-                 _this.return_list_panel = "8".
+                setTimeout(function(){
+                  $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
+                },200)                
+              }else if(temp2[0].order_code == "7"){
+                 _this.return_list_panel = "7"
                  _this._data.return_order_lists = temp2
+                setTimeout(function(){
+                  $(document).find("div.function_panel.return_drug").find(".prescription_list_panel .pre_list:first").click();
+                },200)                 
               }else{
                 _this.$notify({title: '提示',message: '没有数据！'});  
               }
@@ -499,10 +543,10 @@ window.current_template_obj = {
       _this.$http.get('/ims/orders/get_orders?stat='+stat).then(function(response) {
         if(response.data.data&&response.data.data.length>0){
           _this.set_order_list(response.data.data)
-            _this._data.detail = [{pres:[{type:"处方"}]}]
         }else{
           _this.set_order_list([])
         }
+        _this._data.detail = [{pres:[{type:"处方"}]}]
       },function(response){
         _this.set_order_list()
         _this.$notify({
@@ -556,6 +600,7 @@ window.current_template_obj = {
         }else{
           _this.set_return_order_lists([])
         }
+        _this._data.return_detail = [{pres:[{type:"处方"}]}]
       },function(response){
         _this.set_return_order_lists()
         _this.$notify({
@@ -619,13 +664,13 @@ window.current_template_obj = {
             duration:(stat ? 4500 : 0)
           })          
         };
+        _this._data.detail = [{pres:[{type:"处方"}]}]
         try{
           str = "div.function_panel.out_order"
           $(document).find(str).find(".prescription_list_panel .is-active").click()
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
 
       },function(response){
         _this.$notify({
@@ -635,6 +680,47 @@ window.current_template_obj = {
         });
       });
     },
+    //退费
+    return_amount:function (id) {
+      var _this = this
+      if (!confirm("是否确认退费？")) {
+        return false;
+      };
+      if (id){}else{
+        _this.$notify({
+          title: '提示',
+          message: '订单信息不全，不能退费！',
+        });       
+        return false
+      }
+      _this.$http.get('/ims/orders/return_amount?id='+id).then(function(response) {
+        stat = response.data.flag ? true : false
+        info = response.data.info
+        type = stat ? "success" : "warning";
+        if (info) {
+          _this.$notify({
+            title: '提示',
+            message: info,
+            type:type,
+            duration:(stat ? 4500 : 0)
+          })          
+        };
+        try{
+          str = "div.function_panel.out_order"
+          $(document).find(str).find(".prescription_list_panel .is-active").click()
+        }catch(e){
+          _this._data.order_lists = []
+        }
+        _this._data.detail = [{pres:[{type:"处方"}]}]
+
+      },function(response){
+        _this.$notify({
+          title: '提示',
+          message: '服务器请求出错了',
+          duration: 0
+        });
+      });
+    },    
     //收费
     charging_pre:function(id){
       var _this = this
@@ -663,7 +749,7 @@ window.current_template_obj = {
         }catch(e){
           _this._data.order_lists = []
         }
-        _this._data.detail = [{}]
+        _this._data.detail = [{pres:[{type:"处方"}]}]
 
       },function(response){
         _this.$notify({
@@ -679,7 +765,7 @@ window.current_template_obj = {
       var boxs = $(".platform_search_dialog").find("[type='checkbox']:checked")
       var ids = []
       $.each(boxs,function(k,v){
-        ids.push($(v).val())
+        ids.push($(v).parents("label").find(".pre_id").text())
       })
       console.log("111111111111=====id== "+ids)
       if(ids&&ids.length>0){}else{

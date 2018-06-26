@@ -1,7 +1,74 @@
 class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
+	layout false
 	#############################
 	############ zyz ############
+	def gzh
+	end
+	# GET
+	# /hospital/prescriptions/get_prescriptions_by_phone
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的首页，获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# 获取未取药的有效的处方，并按医院合并后下订单
+	def get_prescriptions_by_phone
+		cur_phone = params[:phone]
+		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
+		ret = []
+		::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| 
+			{org_id: _prescription.organization.id, org_name: _prescription.organization.name }
+		}.each do |cur_org, _prescriptions|
+			prescription_ids = []
+			cur_org[:prescriptions] = _prescriptions.map{|x| 
+				prescription_ids<<x.id
+				x.to_web_front
+			}
+			cur_org[:prescription_ids] = prescription_ids
+			cur_org[:prescription_ids2] = prescription_ids
+			cur_org[:first_created_at] = _prescriptions[0].created_at
+			ret << cur_org
+		end
+		render json: {flag: true, info: "success", data: ret}
+	end
+	# GET
+	# /hospital/prescriptions/get_all_prescriptions_by_phone
+	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+	# 获取所有处方以及过期等状态
+	def get_all_prescriptions_by_phone
+		cur_phone = params[:phone].to_s
+		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
+		ret = []
+		page = params[:page]||1
+		per = params[:per]||5
+		sort = "DESC"
+		::Hospital::Interface.get_prescriptions_by_phone_with_sort(cur_phone, page, per, sort).each do |_prescription|
+			ret << _prescription.to_web_front
+		end
+		count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
+		render json: {flag: true, info: "success", data: ret, count: count}
+	end
+
+	# PUT
+	# 根据处方ids更新 处方已读
+	# {
+	#   prescription_ids: []
+	# }
+	# def read_prescription
+	# 	return render json:{flag: false, info:"无效处方ids"} if params[:prescription_ids].nil?
+	# 	::Hospital::Prescription.where("id" => params[:prescription_ids]).update_all(is_read: true)
+	# 	render json:{flag: true, info:"success"}
+	# end
+
+	# GET
+	# 获取未读处方的数量  通过电话查询
+	# {phone: ""}
+	def get_not_read_prescription
+		return render json:{flag: false, info:"没有电话号码或格式不正确"} if params[:phone].nil?
+		cur_phone = params[:phone]
+		count = ::Hospital::Interface.get_not_read_prescriptions_by_phone(cur_phone).count
+		render json:{flag: true, info: "success", count: count}
+	end
+
 	def get_orders
 		if params[:id]
 			o = ::Orders::Order.find(params[:id])
@@ -31,21 +98,29 @@ class InterfacesController < ApplicationController
 	end
 	#支付
 	def pay_order
-		order = ::Orders::Order.where("id=? and status = 1 ",params[:order_id]).last
+		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0",params[:order_id]).last
 		unless order
 			flash[:notice] = "订单状态不允许支付。"
 			redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
 		end
-		# order.net_amt ##订单号用机构id+订单号
-		order.increment(:settle_times,1)
-		order.save
-		args = {out_trade_no: "#{order.id}_#{order.settle_times}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
-		# p '~~~~~~~~~',args
-		case params[:pay_type]
-		when "Alipay"
-			res = Pay::Alipay.payment(args)
-		when "Wechat"
-			res = Pay::Wechat.payment(args)
+		res = {}
+		begin
+			order.update_attributes(:_locked=>1)
+			# order.net_amt ##订单号用机构id+订单号
+			order.increment(:settle_times,1)
+			order.save
+			args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", total_fee: order.net_amt.to_f.round(2), title: "华希订单-#{order.order_code}", cost_name: '药品', return_url: "#{Set::Alibaba.domain_name}/customer/home/confirm_order?id=#{order.id}&pay_type=#{params[:pay_type]}"}#/customer/portal/pay?id=#{order.id}
+			# p '~~~~~~~~~',args
+			case params[:pay_type]
+			when "Alipay"
+				res = Pay::Alipay.payment(args)
+			when "Wechat"
+				res = Pay::Wechat.payment(args)
+			end
+		rescue Exception => e
+			p e
+		ensure 
+			order.update_attributes(:_locked=>0)
 		end
 		# p '~~~~~~~ 2',res
 		if res[:state].to_sym==:succ
@@ -67,7 +142,7 @@ class InterfacesController < ApplicationController
 		return (render json:{flag:false,info:"当前订单状态不允许退费。"})unless order
 		order.update_attributes(_locked:1)
 		# order.net_amt ##订单号用机构id+订单号
-		args = {out_trade_no: "#{order.id}_#{order.settle_times}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
+		args = {out_trade_no: "#{order.id}_#{order.settle_times}_#{order.created_at.to_i}", refund_fee: order.net_amt.to_f.round(2), reason:params[:reason],out_refund_no:Time.now.to_i}#/customer/portal/pay?id=#{order.id}
 		res = Pay::Refund.carry_out(args)
 		order.update_attributes(_locked:0)
 		# p '~~~~~~~',res
@@ -104,10 +179,10 @@ class InterfacesController < ApplicationController
 		end
 		re = Orders::Order.create_order_by_presc_ids(order)
 		flash[:notice] = re[:info]
-		session[:cart_prescription_ids] = nil
 		if re[:ret_code]!='0'
 			return redirect_to "/customer/portal/settlement"
 		end
+		session[:cart_prescription_ids] = nil
 		# p re
 		# flash[:notice] = re[:info]
 		if re[:order].payment_type.to_s == '2'
@@ -166,6 +241,11 @@ class InterfacesController < ApplicationController
 	# 获取用户选择的药房，默认最近的药房（用户传参：当前位置）
 	def get_current_pharmacy
 		# p '~~~~~~~',params, session[:current_pharmacy_id]
+		# 每次从微信浏览器进来的时候重置成最近的药房
+		if session[:openname]
+			session[:openname] = nil
+			session[:current_pharmacy_id] = nil
+		end
 		if session[:current_pharmacy_id]
 			# 自选
 			o = ::Admin::Organization.where(:type_code=>'2',id:session[:current_pharmacy_id]).first
@@ -292,13 +372,92 @@ class InterfacesController < ApplicationController
 
   
 
-def get_medicine_by_name
+	def get_medicine_by_name
 		params[:name]
 		ret = ::User.find_by_sql("select *  from dictmedicine where dictmedicine.name  like '%#{params[:name]}%'")
 		render json:{rows:ret,total:ret.count}
 	end
 
-    ############ xixu ############
+  ############ xixu ############
+	#############################
+
+
+	#############################
+	############ dujuan ############
+	# 生成pdf方法
+	# POST
+  # /interfaces/generate_pdf
+  # pdf打印的公共方法
+  # style_files: [额外样式1，额外样式2]
+  # style_string： 样式字符串
+  # html： 打印html
+  # orientation：横向或纵向Portrait/Landscape
+  # margin：边距
+  # page_size: 默认A4
+  # page_height: 打印纸张的高度
+  # page_width: 打印纸张的宽度
+  # header: 页头
+  # footer：页码等
+  def generate_pdf
+    # p params
+    style = ""
+    # 自定义打印样式
+    if params[:style_files].present?
+      (params[:style_files]||[]).each do |file|
+        # file  app/assets/stylesheets/crs/print.css，需.css文件，不需编译
+        style += (('<style type="text/css">'+File.open(Rails.root.join(file),'r:utf8'){|f| f.read}+'</style>') rescue '')
+      end
+    end
+    # 自定义样式
+    style += ('<style type="text/css">'+params[:style_string]+'</style>') if params[:style_string].present?
+    style = style.force_encoding("utf-8") # 强调编码，避免编码不一致
+    
+    @ctn_print_no = params[:ctn_print_no].to_i||0  # 续打页码，从0开始便是全部打印
+    # pdf文件内容
+    html = params[:html]||""
+
+    pdf = WickedPdf.new.pdf_from_string(
+      (style+html),
+      encoding: "UTF-8",
+      orientation: (params[:orientation]||"Portrait"), # 纵向或横向Portrait/Landscape
+      # header: {
+      #   line: params[:header]&&params[:header][:line]||false,
+      #   content: render_to_string(params[:header]&&params[:header][:url]||'/crs/setups/commons/_header.html', layout: 'wicked_pdf.html.erb'),
+      #   spacing: params[:header]&&params[:header][:spacing]||3
+      # },
+      footer: {
+        center: "第 [page] 页",
+        # content: render_to_string(params[:footer]&&params[:footer][:url]||'/crs/setups/commons/_footer.html', layout: 'wicked_pdf.html.erb'),
+        spacing: params[:footer]&&params[:footer][:spacing]||2
+      },
+      margin:{  top:      (params[:margin][:top].to_i rescue 10),                     # default 10 (mm)
+                bottom:   (params[:margin][:bottom].to_i rescue 10),
+                left:     (params[:margin][:left].to_i rescue 10),
+                right:    (params[:margin][:right].to_i rescue 10) },
+      page_size: params[:page_size]||"A4",         # A4, Letter, ...
+      page_height: params[:page_height],
+      page_width: params[:page_width]
+    )
+
+    foldername = 'pdfs' # pdf存储文件夹名称
+    dir = Rails.root.join('public',foldername) # 存储pdf路径Rails.root/public/pdfs
+    Dir.mkdir(dir) unless File::directory?(dir) # 如果不存在pdf存储目录，则创建
+
+    # 定时删除pdf文件语句    system "rm -rf #{Rails.root.join('public','pdfs','*.pdf')}"
+
+    filename = "#{(Time.now.to_f*1000).to_i}.pdf" # pdf文件名
+    save_path = Rails.root.join('public',foldername,filename)
+    # 写文件
+    File.open(save_path, 'wb') do |file|
+      file << pdf
+    end
+
+    respond_to do |format|
+      # 返回文件路径，页面接收到url，渲染并打印
+      format.json { render json: {flag: true, info: "", url: "/#{foldername}/#{filename}"} }
+    end
+  end
+  ############ dujuan ############
 	#############################
 
 end

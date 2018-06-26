@@ -70,10 +70,6 @@
 	}
 	.mui-checkbox input[type=checkbox]:before, .mui-radio input[type=radio]:before{
 		font-size: 20px;
-		/*color: #F55742;*/
-	}
-	.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
-		color: #F55742;
 	}
 	.mui-table-view-cell:after{
 		left: 0;
@@ -106,7 +102,7 @@
 			</template>
 			<template v-else>
 				<div style="padding-left: 16px;">
-					<p style="padding: 16px 0 0 8px;margin: 0;" class="common_red" v-if="pharmacys">未找到匹配项，可以试试：</p>
+					<p style="padding: 16px 0 0 8px;margin: 0;" class="common_green" v-if="pharmacys">未找到匹配项，可以试试：</p>
 					<p style="padding: 16px 0 0 8px;">离我最近</p>
 					<div style="min-height: 20px;">
 						<ul class="mui-table-view">
@@ -184,7 +180,7 @@
 				</label>
 			</div>
 			<a :href="current_pharmacy.lat ? '/customer/portal/map?lat='+current_pharmacy.lat+'&lng='+current_pharmacy.lng+'&name='+current_pharmacy.name : 'javascript:;'" style="position: absolute;right: 14px;top: 10px;color: #E62677;text-align: center;">
-				<i class="fal fa-map-marker-alt" style="font-size: 20px;color: #F55742;"></i>
+				<i class="fal fa-map-marker-alt common_green" style="font-size: 20px;"></i>
 				<p style="font-size: 12px;">{{current_pharmacy.distance||(current_pharmacy.lat ? "查看位置" : "")}}</p>
 			</a>
 			<ul class="mui-table-view" style="margin: 15px 0;">
@@ -196,7 +192,7 @@
 								<span>处方号: {{prescription.prescription_no}}</span>
 								<span class="common_grey" style="float: right;">{{prescription.created_at.slice(0,10)}}</span>
 							</label>
-							<a :href="'/customer/home/prescription?return=root&id='+prescription.id" class="common_red" style="position: absolute;right: 0;top: 0;">查看</a>
+							<a :href="'/customer/home/prescription?return=root&id='+prescription.id" class="common_green" style="position: absolute;right: 0;top: 0;">查看</a>
 						</div>
 					</li>
 					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
@@ -207,7 +203,7 @@
 								{{drug.title}}
 								<p class="mui-ellipsis">
 									<p style="padding-top: 6px;">{{drug.specification}}</p>
-									<p style="padding-top: 6px;"><span style="color: #F55742;">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
+									<p style="padding-top: 6px;"><span class="common_red">¥ <span style="font-size: 1.5em;">{{format_float(drug.price)}}</span></span> x {{drug.total_quantity}} {{drug.unit}}</p>
 								</p>
 							</div>
 						</div>
@@ -215,10 +211,10 @@
 				</template>
 			</ul>
 			<div style="line-height: 33px;">
-				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;background: #F55742;color: #fff;">去结算</a>
+				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;color: #fff;" class="common_bg_green">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
 					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
-					<span style="color: #F55742;float: right;">
+					<span class="common_red" style="float: right;">
 						<span>¥</span>
 						<span style="font-size: 1.5em;">{{total_price(organ)}}</span>
 					</span>
@@ -424,7 +420,7 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/hospital/prescriptions/get_prescriptions_by_phone?phone=<%= current_user.login %>',
+					url:'/interfaces/get_prescriptions_by_phone?phone=<%= current_user.login %>',
 					success:function(json) {
 						if (json.flag) {
 							_this.organs = json.data;

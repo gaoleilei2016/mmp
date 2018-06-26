@@ -57,7 +57,7 @@
     <div class="el-row" style="padding-top:4px;margin-top:6px;margin-bottom:6px;">
       <div class="el-col-24">
         <div style="text-align:right;">合计：{{format_price(info.amt)}}</div>
-        <div class="btns" style="text-align:right;">
+        <div class="btns" style="text-align:right; min-height:30px;">
           <span v-if="info.is_order&&info.status === '5'">
             <!-- <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_order(info.order_id)">退药</button> -->
             <button type="button" class="el-button el-button--danger el-button--mini" v-on:click="return_reason_visible = true">退药</button>
@@ -65,7 +65,7 @@
         </div>
       </div>
 
-      <div class="el-col-24" style=" min-height:60px; border:1px solid #ddd;" >
+      <div class="el-col-24" style=" min-height:60px; border:1px solid #ddd; margin-top:12px;" >
         <div style="color:#ADABAB;padding:0px 8px;">发票</div>
         <div class="el-row" style="padding:8px;">
           <div class="el-col-12">
@@ -74,7 +74,7 @@
           </div>
           <div class="el-col-12">
             <span v-if="info.invoice">税号：{{info.invoice.shuihao||'无'}}</span>
-            <span>税号：无</span>
+            <span v-else>税号：无</span>
           </div>
         </div>
       </div>
@@ -90,11 +90,25 @@
     </div>
   </div>
 
-  <el-dialog :visible.sync="return_reason_visible">
+  <el-dialog :visible.sync="return_reason_visible" style="padding:10px; padding-left:38px;">
     <el-form :model="return_reason_form">
-      <el-form-item label="退药原因">
-        <el-input v-model="return_reason_form.name" auto-complete="off"></el-input>
+      <el-form-item label="退药原因" style="margin-bottom:0;">
+        <!-- <el-input v-model="return_reason_form.name" auto-complete="off"></el-input> -->
       </el-form-item>
+
+            <el-select
+              v-model="return_reason_form.name"
+              filterable
+              allow-create
+              default-first-option
+              placeholder="请选择退药原因" style="width:80%;">
+              <el-option
+                v-for="item in return_reason"
+                :key="item.value"
+                :label="item.value"
+                :value="item.value">
+              </el-option>
+            </el-select>
     </el-form>
     <div slot="footer" class="dialog-footer">
       <el-button size="small" @click="return_reason_visible = false">取 消</el-button>
