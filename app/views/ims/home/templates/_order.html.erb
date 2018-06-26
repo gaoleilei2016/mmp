@@ -229,6 +229,7 @@ window.current_template_obj = {
               specification:data1.specification,
               qty:data1.total_quantity,
               unit:data1.unit,
+              price:data1.price,
             }]
           })
           if (ori_data.length>1) {
@@ -244,6 +245,7 @@ window.current_template_obj = {
                     specification:for_data.specification,
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
+                    price:for_data.price,                    
                   })
                   break inter;
                 }else{
@@ -268,6 +270,7 @@ window.current_template_obj = {
                         specification:for_data.specification,
                         qty:for_data.single_qty_value,
                         unit:for_data.single_qty_unit,
+                        price:for_data.price,
                       }]
                     })
                   };
@@ -283,7 +286,7 @@ window.current_template_obj = {
               amount = 0.0;
               if(item.lines){
                 item.lines.map(function(line){
-                  amount += Number(line.amt)
+                  amount += Number(line.price)
                 })
               }
               if (temp2.length<=0) {
@@ -401,6 +404,7 @@ window.current_template_obj = {
               specification:data1.specification,
               qty:data1.single_qty_value,
               unit:data1.single_qty_unit,
+              price:data1.price,
             }]
           })
           if (ori_data.length>1) {
@@ -416,6 +420,7 @@ window.current_template_obj = {
                     specification:for_data.specification,
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
+                    price:for_data.price,                    
                   })
                   break inter;
                 }else{
@@ -440,6 +445,7 @@ window.current_template_obj = {
                         specification:for_data.specification,
                         qty:for_data.single_qty_value,
                         unit:for_data.single_qty_unit,
+                        price:for_data.price,
                       }]
                     })
                   };
@@ -455,7 +461,7 @@ window.current_template_obj = {
               amount = 0.0;
               if(item.lines){
                 item.lines.map(function(line){
-                  amount += Number(line.amt)
+                  amount += Number(line.price)
                 })
               }            
               if (temp2.length<=0) {
