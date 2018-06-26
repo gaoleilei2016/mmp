@@ -1035,6 +1035,7 @@ window.current_template_obj = {
     			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
     			measure_val: drug.measure_val,  // 最小单位的值
     			encounter_id: _this.encounter.id, // 就诊模型id
+    			mul: drug.mul||1, // 倍率
     		}
     		_this.focusNext('ordtitle', 'ordsingleqty');
     	},
@@ -1050,6 +1051,20 @@ window.current_template_obj = {
 	  			if (field=="single_qty") {
 	  				_this.order.dose.value = parseFloat((parseFloat(_this.order[field].value) * parseFloat(minUnit)).toFixed(2));
 	  			}
+	  			var rate = ratesHash[_this.order.frequency&&_this.order.frequency.code||"QD"];
+	  			var singleQty = parseFloat(_this.order.single_qty&&_this.order.single_qty.value||1),
+	  					frequency = parseFloat(rate.frequency||1),
+	  					period = parseFloat(rate.period||1),
+	  					days = parseFloat(_this.order.course_of_treatment&&_this.order.course_of_treatment.value||1),
+	  					mul = parseFloat(_this.order.mul||1);
+	  			
+	  		  // single_qty: 单次数量的值
+					// frequency: 一个频次周期内的次数
+					// period: 一个频次周期有几天
+					// course_of_treatment_value: 天数
+					// mul: 销售单位和单次数量单位(基本单位)的倍率
+	  			// sinqle_qty_value.ceil * frequency / period * course_of_treatment_value / mul
+	  			_this.order.total_quantity = Math.ceil(Math.ceil(singleQty)*frequency/period*days/mul);
 	  		}
 	  	},
 	  	// 保存药品
@@ -1161,6 +1176,18 @@ window.current_template_obj = {
 	    	this.editIndex = index;
 	    	this.order = row;
 	    	this.order.name = row.title;
+	    	var _this = this;
+	    	Vue.resource('/dict/medications/'+row.serialno+'.json').get().then(function(response) {
+			    var res = response.data;
+			    if (res.flag) {
+			    	_this.order.mul = res.data.mul; // 用于运算总量
+			    	_this.order.measure_val = res.data.measure_val; // 用于运算总量
+					} else {
+    				_this.$message.error(res.info);
+    			}
+			  },function() {
+			  	_this.$message.error("获取药品详情失败，请联系管理员。");
+			  })
 	    },
 	    // 删除医嘱
 	    deleteOrder: function (index, row) {
