@@ -46,6 +46,7 @@
 			<%# end %>
 			<form class="mui-input-group" action="/customer/home/<%= current_user.id %>" method="post">
 				<%= render '/customer/form_token',method:'put' %>
+				<input type="hidden" name="from" value="<%= params[:from] %>">
 				<div class="mui-input-row">
 					<label>姓名</label>
 					<input id='name_input' type="text" class="mui-input-clear mui-input" placeholder="" name="users[name]" value="<%= current_user["name"] rescue nil %>">
@@ -81,8 +82,8 @@
 					<input id='address_input' type="text" class="mui-input-clear mui-input" placeholder="" name="users[address]" value="<%#= current_user["address"] rescue nil %>">
 				</div> -->
 			</form>
-			<div class="mui-content-padded">
-				<button onclick="valide_form();" class="mui-btn mui-btn-primary" style="width: 100%;">保存</button>
+			<div class="mui-content-padded" style="margin: 30px 80px;">
+				<button onclick="valide_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">保存</button>
 			</div>
 			<div class="mui-content-padded">
 				<p>请确保注册信息真实可靠，预约就诊时需要用到您的身份证号码或者手机号码。</p>

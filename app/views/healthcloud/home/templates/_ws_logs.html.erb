@@ -1,0 +1,84 @@
+<template>
+	<div v-loading.fullscreen.lock="fullscreenLoading">
+		<div style="margin: 8px 0;">
+			<el-breadcrumb separator="/" style="" class="pull-left">
+				<el-breadcrumb-item><a href="/">首页</a></el-breadcrumb-item>
+				<el-breadcrumb-item to="/">健康云</el-breadcrumb-item>
+				<el-breadcrumb-item>日志管理</el-breadcrumb-item>
+			</el-breadcrumb>
+			<div style="" class="pull-right">
+				<el-button size="mini" :disabled="true" type="danger" @click="">删除</el-button>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div class="el-input el-input--small el-input--prefix el-input--suffix" style="width: 300px;">
+			<input v-model="searchStr" @keyup="get_timeout_applications" autocomplete="off" placeholder="单号、姓名、简码" type="text" validateevent="true" class="el-input__inner">
+			<span class="el-input__prefix" @click="get_applications"><i class="el-icon-search el-input__icon"></i></span>
+			<span class="el-input__suffix" @click="searchStr='';get_applications();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+		</div>
+		<el-table size="mini" border ref="singleTable" :data="ws_logs" highlight-current-row @current-change="handleTableCurrentChange" style="margin: 8px 0;">
+			<el-table-column :show-overflow-tooltip="true" type="index" width="40"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" property="info" label="所有传输数据"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" property="error" label="error" width="120"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" property="method" label="method" width="160"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" property="time" label="time" width="160"></el-table-column>
+		</el-table>
+		<el-pagination ref="pagination" :page-size="10" @size-change="get_applications" @current-change="get_applications" layout="total, sizes, prev, pager, next, jumper" :total="datas_total"></el-pagination>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data: function(){
+		return {
+			searchStr:'',
+			fullscreenLoading:false,
+			ws_logs:[],
+			currentRow: null,
+			datas_total: 0,
+		}
+	},
+	methods:{
+		get_timeout_applications:function(e){
+			var _this = this;
+			clearTimeout(_this.timer);
+			if (e.keyCode==13) {
+				_this.get_applications();
+			}else{
+				_this.timer = setTimeout(function(){
+					_this.get_applications();
+				},_this.$parent.auto_search_timeout_value);
+			}
+		},
+		get_applications:function(){
+			var _this = this;
+			var pagination = _this.$refs.pagination;
+			var page = pagination.internalCurrentPage;
+			var per = pagination.internalPageSize;
+			_this.fullscreenLoading = true;
+			$.ajax({
+				url:'/healthcloud/partner_accounts/find_test.json',
+				data:{table_name:"ws_log",page:page,per:per,search:_this.searchStr},
+				success:function(json){
+					_this.datas_total = json.count;
+					_this.ws_logs = json.data;
+				},
+				error:error_fun,
+				complete:function(){
+					_this.fullscreenLoading = false;
+				}
+			})
+		},
+		handleTableCurrentChange:function(currentRow, oldCurrentRow){
+			this.currentRow = currentRow;
+		},
+	},
+	mounted:function(){
+		var _this = this;
+	},
+	activated:function() {
+		var _this = this;
+		_this.get_applications();
+	}
+}
+
+</script>

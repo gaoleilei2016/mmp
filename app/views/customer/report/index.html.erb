@@ -55,11 +55,23 @@
 </style>
 <template id="member_show_div">
 	<div>
+		<div id="common_mask" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: block;top: 44px;">
+			<div style="text-align: right;padding: 10px 20px 0 0;">
+				<img src="/assets/customer/guide_arrow.png">
+			</div>
+			<div style="color: #fff;font-size: 2em;text-align: right;padding: 20px;">
+				<div>体检时请出示二维码</div>
+			</div>
+			<div style="text-align: right;padding: 20px;">
+				<button onclick="$('#common_mask').hide(200);">我知道了</button>
+			</div>
+		</div>
 		<header class="my_top_nav mui-bar mui-bar-nav">
 			<!-- <router-link tag="button" to="/member_lists" class="mui-btn mui-btn-blue mui-btn-link mui-btn-nav mui-pull-left"><span class="mui-icon mui-icon-left-nav"></span>返回列表</router-link> -->
 			<!-- <h1 class="mui-title">{{member.name}}</h1> -->
 			<!-- <h1 class="mui-title">健康得分：</h1> -->
 			<h1 class="mui-title">AIDA智能体检</h1>
+			<a href="/customer/report/qrcode"><i class="fal fa-qrcode" style="float: right; line-height: 40px; font-size: 24px;"></i></a>
 		</header>
 		<div class="mui-content">
 
