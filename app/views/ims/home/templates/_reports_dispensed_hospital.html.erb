@@ -25,8 +25,8 @@
 	<!-- 接诊管理、统计页面 -->
 	<div id="reports_dispensed_hospital_div">
 		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
-		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-		  <el-breadcrumb-item>报表</el-breadcrumb-item>
+		  <!-- <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item> -->
+		  <!-- <el-breadcrumb-item>报表</el-breadcrumb-item> -->
 		</el-breadcrumb>
 		<div class="float-right-btns" style="position: relative;">
 	  	<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
@@ -84,6 +84,7 @@
 			      	<el-table
 						    :data="(props.row.drugs||[])"
 						    show-summary
+						    sum-text = '小计'
 						    class="inner-table"
 						    style="width: 100%">
 						    <el-table-column
@@ -130,7 +131,7 @@
 							    align="right"
 							    label="单价">
 							    <template slot-scope="scope">
-							    	{{ scope.row.price }}
+							    	{{ scope.row.price | formatMoney(4) }}
 							    </template>
 							  </el-table-column>
 							  <el-table-column
@@ -298,11 +299,20 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_hospitalsResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
+			try{
+				var start_time = _this.filter.range[0].pattern('yyyy-MM-dd HH:mm:ss');
+				var end_time = _this.filter.range[1].pattern('yyyy-MM-dd HH:mm:ss');
+			}
+			catch(err){
+				var start_time = "";
+				var end_time = "";
+				console.log("-=--=-=-=-=- 时间格式异常。。。。。。 ")
+			}
+			console.log("=========== start_time ="+start_time +"==== --- ="+end_time)
+			_this.dispensed_hospitalsResource.get({start_time:start_time,end_time:end_time,type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.dispensed_hospitals = res.data;
-  				console.log('dispensed_hospitals----------',_this.dispensed_hospitals)
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);

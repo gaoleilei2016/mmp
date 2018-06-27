@@ -54,7 +54,7 @@ class Ims::PreHeader < ApplicationRecord
 						:factory_name=> detail[:factory_name],
 						:base_unit=> detail[:base_unit],
 						:mul=> detail[:mul],
-						:purch_mul=> (Dict::Medication.find detail[:serialno]).try(:purch_mul),
+						:purch_mul=> (Dict::Medication.find detail[:serialno] rescue nil).try(:purch_mul),
 						:measure_val=> detail[:measure_val],
 						:measure_unit=> detail[:measure_unit],
 						:type_type=> detail[:type_type],
@@ -111,6 +111,7 @@ class Ims::PreHeader < ApplicationRecord
 				return header
 			rescue Exception => e
 				print e.message
+				print prescription rescue "prescription==== nil"
       	print "======= prescription_data 出错: " + e.backtrace.join("\n")
 				{}
 			end
