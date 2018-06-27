@@ -69,7 +69,11 @@ Rails.application.routes.draw do
         get :pay
       end
     end
-    resources :report
+    resources :report do
+      collection do
+        get :qrcode
+      end
+    end
     resources :invoice_headers
     resources :feedbacks do
       collection do
