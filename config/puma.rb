@@ -3,7 +3,6 @@
 environment 'development'
 threads 2, 16 # minimum 2 threads, maximum 32 threads
 workers 8
-port 3000
 app_name = 'mmp'
 
 application_path = "/home/tenmind/app/#{app_name}"
