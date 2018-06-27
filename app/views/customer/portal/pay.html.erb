@@ -129,9 +129,9 @@
 						location.href = '/customer/home/confirm_order?id=<%= params[:id] %>';
 					}else{
 						if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
-							alert("已取消支付。");
+							mui.alert('您已取消支付。');
 						}else{
-							alert("支付失败。");
+							mui.alert("支付失败。");
 						}
 						$("#reload_btn").removeClass("hide");
 					}
