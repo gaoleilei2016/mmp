@@ -1,0 +1,36 @@
+#encoding: utf-8
+
+defaults: &defaults
+  name: 高登服务器地址
+  code: wowgo
+  addr: https://cloud1.wowgohealth.com.tw/RestfulWebService
+  username: GSHTM2017
+  password: abcdefgh
+  qrcode_code: health
+  serialno: 91d3a1b0
+  actions:
+    new_user:
+      name: 创建用户
+      path: /restful/users
+      method: post
+      headers:
+        host: cloud1.wowgohealth.com.tw
+        content_type: application/json; charset=UTF-8
+
+    update_user:
+      name: 更新用户
+      path: /restful/users
+      method: put
+      serialno: 91d3a1b0
+      headers:
+        host: cloud1.wowgohealth.com.tw
+        content_type: application/json; charset=UTF-8
+
+development:
+  <<: *defaults
+
+test:
+  <<: *defaults
+
+production:
+  <<: *defaults
