@@ -5,6 +5,12 @@ class WechatController < ApplicationController
 
   layout false
 
+  # 将用户数据推送到高登服务器
+  def wowgo
+    res = current_user.push_wowgo
+    render json: res
+  end
+
   # 微信菜单登录设定
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login
