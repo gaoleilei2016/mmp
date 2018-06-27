@@ -1156,7 +1156,11 @@ window.current_template_obj = {
 	    },
 	    // 医嘱保存成功之后的处理
 	    handleOrderReturn: function (json) {
-	    	this.order = {};
+	    	this.order = {
+	    		single_qty: {value: "", unit: ""},
+					dose: {value: "", unit: ""},
+					course_of_treatment: {value: "", unit: ""},
+	    	};
 	    	json.btn.removeAttr("disabled").find(".fa").hide();
 	    	var res = json.res.data;
 	    	if(res.flag) {
