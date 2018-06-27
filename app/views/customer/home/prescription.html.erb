@@ -85,7 +85,7 @@
 					<div style="color: #666; font-size: 80%; line-height: 90%;">{{drug.route.display}}&#12288;{{drug.dose.value}}{{drug.dose.unit}}&#12288;{{drug.frequency.display}}</div>
 				</div>
 			</div>
-			<div class="drug_item" style="text-align: right;">总计：¥ {{prescription.price}}</div>
+			<div class="drug_item" style="text-align: right;">总计：¥ {{format_float(prescription.price)}}</div>
 		</div>
 		<div style="padding-top: 6px;">
 			<div style="width: 49.9%;float: left;">审核、配方：{{prescription.auditor&&prescription.auditor.display}}</div>
