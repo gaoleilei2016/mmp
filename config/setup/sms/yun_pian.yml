@@ -6,7 +6,7 @@ defaults: &defaults
   apikey: a3fa59da493d67ed21969c98953d285a
   tpl:
     take_medic: 2336456 #取药
-    verify_code: 2335480 #注册验证码
+    verify_code: 2359434 #2335480 #注册验证码
     medic_end: 2336458  #取药完成
     login_code: 2335484 #登录验证码
     new_code: 2340158 #
