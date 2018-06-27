@@ -1,6 +1,9 @@
 class Customer::HomeController < ApplicationController
 	layout "customer"
 	def index
+		# unless current_user.wowgo
+		# 	return redirect_to ""
+		# end
 	end
 	def edit
 	end
