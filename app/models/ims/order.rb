@@ -327,18 +327,24 @@ class Ims::Order < ApplicationRecord
         order_id = args[:id]
         current_user = args[:current_user]
         order = Orders::Order.find order_id rescue nil
-        return {flag:false,:info=>"未找到订单信息。"} if order.blank?
-        # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
-        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
-        return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
-        return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==7)
-        headers = Ims::PreHeader.where("order_id=#{order_id} and delivery_org_id=#{args[:org_id]} and status=4 and is_returned is null")
-        headers.map{|header| create_new_prescription header,current_user,args}
-        # is_returned:true,
-        headers.update_all({is_returned:true,reason:args[:reason],return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
-        attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退药')}
-        order.cancel_medical(attrs)
-        {flag:true,info:'退药成功！'}
+        order.with_lock do
+          return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+          # return {flag:false,:info=>"线上支付订单不能退药。"} if order.payment_type!="2"
+          return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id.to_s!=args[:org_id].to_s
+          return {flag:false,:info=>"该订单不是发药状态，不能退药。"} if order.status.to_i!=5
+          return {flag:false,:info=>"该订单已退药，不能再次退药。"} if (order.status.to_i==7)
+          headers = Ims::PreHeader.where("order_id=#{order_id} and delivery_org_id=#{args[:org_id]} and status=4 and is_returned is null")
+          headers.map{|header| create_new_prescription header,current_user,args}
+          # is_returned:true,
+          headers.update_all({is_returned:true,reason:args[:reason],return_name:current_user.name,return_id:current_user.id,return_org_id:current_user.organization_id,return_org_name:current_user.organization.try(:id),return_at:Time.new})
+          attrs = {prescription_ids:headers.distinct(:id),current_user:current_user,reason:(args[:reason]||'退药')}
+          order.cancel_medical(attrs)
+          {flag:true,info:'退药成功！'}
+        end
+      rescue ActiveRecord::StaleObjectError => e
+        print e.message rescue "  e.messag----"
+        print "=== dispensing_order ============ 退药乐观锁 出错: " + e.backtrace.join("\n")
+        {flag:false,info:'该单退药中，不用重复退药。'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 退药 出错: " + e.backtrace.join("\n")
@@ -376,28 +382,34 @@ class Ims::Order < ApplicationRecord
         order_id = args[:id]
         current_user = args[:current_user]
         order = Orders::Order.find order_id rescue nil
-        return {flag:false,:info=>"未找到订单信息。"} if order.blank?
-        return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
-        return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
-        # return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
-        return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
-        # ::ActiveRecord::Base.transaction  do
-          # ============ 判断表是否存，不存在则创建 ====================
-          # org_id = current_user.organization_id
-          # t_name = 'IPH_' + org_id.to_s
-          # td_name = 'IPD_' + org_id.to_s
-          # t_exist = table_name_exist t_name
-          # create_copy_table t_name,td_name unless t_exist
-          # ================================
-          prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
-          send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
-          result = Ims::PreHeader.save_prescription send_data
-          return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
-          temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
-          data = Orders::Order.order_completion(temp)
-          data = {ret_code:0}
-        # end
-        return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
+        order.with_lock do
+          return {flag:false,:info=>"未找到订单信息。"} if order.blank?
+          return {flag:false,:info=>"未查到发药用户信息。"} if current_user.blank?
+          return {flag:false,:info=>"该订单为#{order.target_org_name}的订单。"} if order.target_org_id!=current_user.organization_id
+          # return {flag:false,:info=>"该订单已退药，不能再次发药。"} if order.is_returned==1
+          return {flag:false,:info=>"该订单已发药，不能再次发药。"} if order.status=="5"
+          # ::ActiveRecord::Base.transaction  do
+            # ============ 判断表是否存，不存在则创建 ====================
+            # org_id = current_user.organization_id
+            # t_name = 'IPH_' + org_id.to_s
+            # td_name = 'IPD_' + org_id.to_s
+            # t_exist = table_name_exist t_name
+            # create_copy_table t_name,td_name unless t_exist
+            # ================================
+            prescriptions = ::Hospital::Interface.get_prescriptions_by_ids(order.prescription_ids)
+            send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
+            result = Ims::PreHeader.save_prescription send_data
+            return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
+            temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
+            data = Orders::Order.order_completion(temp)
+            data = {ret_code:0}
+          # end
+          return_data = data[:ret_code]==0 ? {flag:true,info:'发药成功！'} : {flag:false,info:"发药失败。"}
+        end
+      rescue ActiveRecord::StaleObjectError => e
+        print e.message rescue "  e.messag----"
+        print "=== dispensing_order ============ 发药乐观锁 出错: " + e.backtrace.join("\n")
+        {flag:false,info:'该单发药中，不用重复发药。'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "=== dispensing_order ============ 发药 出错: " + e.backtrace.join("\n")
