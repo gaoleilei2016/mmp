@@ -43,6 +43,13 @@ class User < ApplicationRecord
 		{state: :error, msg: '推送伺服器成功但更新失败', desc: self.errors.full_messages.join(',')}
 	end
 
+	def get_qr_code
+		return {state: :error, msg: '错误', desc: '请先把数据推送到高登'} unless wowgo
+		qrcode = Health::QrCode.find_by(code: login)
+		return {state: :error, msg: '未找到', desc: '相应的二维码未找到'} unless qrcode
+		{state: :succ, msg: '成功', base64: "data:image/png;base64,#{qrcode.img_data}"}
+	end
+
 	def handle_gender
 		case sex
 		when '女' then 'F'
