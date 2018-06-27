@@ -868,7 +868,7 @@ window.current_template_obj = {
 		    deleteDiagnoses: function (index, row) {
 		    	var _this = this, $target = $(event.target);
 		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: encounter_id}).then( function(response) {
+		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id}).then( function(response) {
 	      		var res = response.data;
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		if(res.flag) {
