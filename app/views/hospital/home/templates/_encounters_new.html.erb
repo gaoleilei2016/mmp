@@ -174,11 +174,33 @@ window.current_template_obj = {
 					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
 					orders: [], // 本次就诊药品列表
 					encorders: [], // 其他用到药品列表的地方
-					order: {},
+					order: {
+						single_qty: {value: "", unit: ""},
+						dose: {value: "", unit: ""},
+						course_of_treatment: {value: "", unit: ""},
+					},
 					drugs: [],
 					editIndex: -1, // 正在编辑的医嘱序号
 					multipleOrdersSelection: [], // 已经勾选的医嘱
 					ordersStatus: presStatusOptions,
+					orderRules: {
+						name: [
+				      // { required: true, message: '名称不能为空'},
+				      { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
+				    ],
+				    "single_qty.value": [
+				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次数量在 0.01 到 1000 之间 ' }
+				    ],
+				    "dose.value": [
+				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次剂量在 0.01 到 1000 之间 ' }
+				    ],
+				    "course_of_treatment.value": [
+				      { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
+				    ],
+				    total_quantity: [
+				    	{ pattern: /^[1-9]\d{0,2}$|^1000$/, message: '总量在 1 到 1000 之间' }
+				    ],
+				  },
 				/* 药品 --- end */ 
 
 				/* 药品模板 --- start */ 
@@ -846,7 +868,7 @@ window.current_template_obj = {
 		    deleteDiagnoses: function (index, row) {
 		    	var _this = this, $target = $(event.target);
 		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: encounter_id}).then( function(response) {
+		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id}).then( function(response) {
 	      		var res = response.data;
 	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
 	      		if(res.flag) {
@@ -1134,7 +1156,11 @@ window.current_template_obj = {
 	    },
 	    // 医嘱保存成功之后的处理
 	    handleOrderReturn: function (json) {
-	    	this.order = {};
+	    	this.order = {
+	    		single_qty: {value: "", unit: ""},
+					dose: {value: "", unit: ""},
+					course_of_treatment: {value: "", unit: ""},
+	    	};
 	    	json.btn.removeAttr("disabled").find(".fa").hide();
 	    	var res = json.res.data;
 	    	if(res.flag) {
