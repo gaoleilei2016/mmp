@@ -47,7 +47,7 @@ class User < ApplicationRecord
 		return {state: :error, msg: '错误', desc: '请先把数据推送到高登'} unless wowgo
 		qrcode = Health::QrCode.find_by(code: login)
 		return {state: :error, msg: '未找到', desc: '相应的二维码未找到'} unless qrcode
-		{state: :succ, msg: '成功', base64: "data:image/png;base64,#{qrcode.img_data}"}
+		{state: :succ, msg: '成功', base64: "data:image/png;base64,#{Base64.encode64(qrcode.img_data)}"}
 	end
 
 	def handle_gender

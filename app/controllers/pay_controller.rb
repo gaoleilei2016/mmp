@@ -126,6 +126,8 @@ class PayController < ApplicationController
 
   def index
     p 'tttttttttttttttt', request.remote_ip, request.remote_addr
-    @image = Set::QrCode.base64_data('Mynameis|hujun')
+    # @image = Set::QrCode.base64_data('Mynameis|hujun')
+    data = Health::QrCode.find_by(code: '18798009841').img_data
+    @image = "data:image/png;base64,#{Base64.encode64(data)}"
   end
 end
