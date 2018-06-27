@@ -19,10 +19,10 @@ stdout_redirect "#{application_path}/shared/log/puma.stdout.log", "#{application
 # stdout_redirect "#{application_path}/log/puma.stdout.log", "#{application_path}/log/puma.stderr.log"
 
 
-bind "unix://#{application_path}/shared/sockets/puma.sock"  #绑定sock
-activate_control_app "unix://#{application_path}/shared/sockets/pumactl.sock"
+# bind "unix://#{application_path}/shared/sockets/puma.sock"  #绑定sock
+# activate_control_app "unix://#{application_path}/shared/sockets/pumactl.sock"
 
-# bind 'tcp://192.168.2.207:3000'    #绑定端口4301
+bind 'tcp://192.168.2.207:3000'    #绑定端口4301
 worker_timeout 30
 
 daemonize true
