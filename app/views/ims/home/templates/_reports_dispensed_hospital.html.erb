@@ -71,6 +71,7 @@
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      default-expand-all
+		      :summary-method="getSummaries"
 		      show-summary
 		      row-class-name="primary-row"
 		      :show-header="false"
@@ -83,6 +84,7 @@
 			      <template slot-scope="props">
 			      	<el-table
 						    :data="(props.row.drugs||[])"
+						    :summary-method="getSummaries"
 						    show-summary
 						    sum-text = '小计'
 						    class="inner-table"
@@ -320,6 +322,42 @@ window.current_template_obj = {
       },function(response) {
         _this.$message.error("数据汇总出错。");
       })
+		},
+		getSummaries: function (param) {
+			var columns = param.columns;
+			var data = param.data;
+      var sums = [];
+      columns.forEach(function (column, index) {
+        if (index === 0) {
+        	if(!data[0].drug_count) {
+        		// 内层表格
+        		sums[index] = '小计';
+        	} else {
+        		// 外层表格
+          	sums[index] = '总计';
+        	}
+          return;
+        }
+        // 最后一列才总计
+        if(index==columns.length-1){
+	        var values = data.map(function(item){return Number(item[column.property])} );
+	        if (!values.every(function(value){return isNaN(value)})) {
+	          sums[index] = values.reduce(function (prev, curr) {
+	            var value = Number(curr);
+	            if (!isNaN(value)) {
+	              return prev + curr;
+	            } else {
+	              return prev;
+	            }
+	          }, 0);
+	          sums[index] = (sums[index]).toFixed(2);
+	        } else {
+	          sums[index] = '';
+	        }
+        }
+      });
+
+      return sums;
 		},
 		print: function (json) {
 			if(!this.printEles || this.printEles.length==0) {
