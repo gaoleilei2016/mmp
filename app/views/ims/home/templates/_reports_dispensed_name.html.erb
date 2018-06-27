@@ -299,11 +299,19 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_namesResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
+			try{
+				var start_time = _this.filter.range[0].pattern('yyyy-MM-dd HH:mm:ss');
+				var end_time = _this.filter.range[1].pattern('yyyy-MM-dd HH:mm:ss');
+			}
+			catch(err){
+				var start_time = "";
+				var end_time = "";
+				console.log("-=--=-=-=-=- 时间格式异常。。。。。。 ")
+			}
+			_this.dispensed_namesResource.get({start_time:start_time,end_time:end_time,type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.dispensed_names = res.data;
-  				console.log('dispensed_names----------',_this.dispensed_names)
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);
