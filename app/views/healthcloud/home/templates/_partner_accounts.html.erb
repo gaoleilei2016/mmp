@@ -1,0 +1,186 @@
+<template>
+	<div v-loading.fullscreen.lock="fullscreenLoading">
+		<div style="margin: 8px 0;">
+			<el-breadcrumb separator="/" style="" class="pull-left">
+				<el-breadcrumb-item><a href="/">首页</a></el-breadcrumb-item>
+				<el-breadcrumb-item to="/">健康云</el-breadcrumb-item>
+				<el-breadcrumb-item>第三方账号管理</el-breadcrumb-item>
+			</el-breadcrumb>
+			<div style="" class="pull-right">
+				<el-button size="mini" type="primary" @click="addOrEditAccount()">增加</el-button>
+				<el-button size="mini" type="primary" @click="addOrEditAccount(true)">编辑</el-button>
+				<el-button size="mini" type="danger" @click="deleteAccount">删除</el-button>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<el-table ref="singleTable" :data="partner_accounts" highlight-current-row @current-change="handleTableCurrentChange" style="margin-bottom: 8px;">
+			<el-table-column type="index" width="60"></el-table-column>
+			<el-table-column property="company" label="公司名称"></el-table-column>
+			<el-table-column property="strPrgID" label="账号" width="120"></el-table-column>
+			<el-table-column property="strPrgPws" label="密码" width="120"></el-table-column>
+		</el-table>
+		<el-pagination ref="pagination" :page-size="10" @size-change="getAccounts" @current-change="getAccounts" layout="total, sizes, prev, pager, next, jumper" :total="accounts_total"></el-pagination>
+
+		<!-- 创建 / 编辑 -->
+		<el-dialog title="第三方账号管理" :visible="dialogFormVisible">
+			<el-form :model="form">
+				<el-form-item label="公司名称" :label-width="formLabelWidth">
+					<el-input v-model="form.company" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="账号" :label-width="formLabelWidth">
+					<el-input v-model="form.strPrgID" auto-complete="off"></el-input>
+				</el-form-item>
+				<el-form-item label="密码" :label-width="formLabelWidth">
+					<el-input v-model="form.strPrgPws" auto-complete="off"></el-input>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button size="mini" @click="dialogFormVisible = false">取 消</el-button>
+				<el-button size="mini" type="primary" @click="saveAccount();">保 存</el-button>
+			</div>
+		</el-dialog>
+
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data: function(){
+		return {
+			fullscreenLoading:false,
+			dialogFormVisible: false,
+			partner_accounts:[],
+			form: {},
+			currentRow: null,
+			formLabelWidth:"120px",
+			accounts_total: 0,
+		}
+	},
+	methods:{
+		getAccounts:function(){
+			var _this = this;
+			var pagination = _this.$refs.pagination;
+			var page = pagination.internalCurrentPage;
+			var per = pagination.internalPageSize;
+			_this.fullscreenLoading = true;
+			$.ajax({
+				url:'/healthcloud/partner_accounts/find_test.json',
+				data:{table_name:"ws_sys",page:page,per:per},
+				success:function(json){
+					_this.accounts_total = json.count;
+					_this.partner_accounts = json.data;
+				},
+				error:error_fun,
+				complete:function(){
+					_this.fullscreenLoading = false;
+				}
+			})
+		},
+		handleTableCurrentChange:function(currentRow, oldCurrentRow){
+			this.currentRow = currentRow;
+		},
+		addOrEditAccount:function(edit_flag){
+			if(edit_flag){
+				if(this.currentRow){
+					this.form = _.clone(this.currentRow);
+				}else{
+					this.$message({
+						showClose: true,
+						message: '未选择行',
+						type: 'warning',
+						// duration: 0
+					});
+					return false;
+				}
+			}else{
+				this.form = {};
+			}
+			this.dialogFormVisible = true;
+		},
+		saveAccount:function(){
+			var _this = this,url=null,type=null;
+			current_app.loading = true;
+			if(_this.form.id){
+				// 更新
+				url = '/healthcloud/partner_accounts/update_ws_sys.json'
+				type= 'put';
+			}else{
+				url = '/healthcloud/partner_accounts/set_ws_sys.json'
+				type= 'post';
+			}
+			$.ajax({
+				url:url,
+				type:type,
+				data:{account:_this.form},
+				success:function(data){
+					if(data.flag){
+						_this.$message({
+							type: 'success',
+							message: data.info,
+						});
+						_this.getAccounts();
+						_this.dialogFormVisible = false;
+					}else{
+						_this.$message({
+							type: 'error',
+							message: data.info,
+						});
+					}
+				},
+				error:error_fun,
+				complete:function(){
+					current_app.loading = false;
+				}
+			})
+		},
+		deleteAccount:function(){
+			var _this = this;
+			if(_this.currentRow){
+				_this.$confirm('此操作将永久删除该账户, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(function(){
+
+					// 删除
+					current_app.loading = true;
+					$.ajax({
+						url: "/healthcloud/partner_accounts/def_ws_sys.json",
+						type: "delete",
+						data: { id:_this.currentRow.id },
+						success:function(data){
+							_this.$message({
+								type: data.flag ? 'success' : 'error',
+								message: data.info
+							});
+							_this.getAccounts();
+						},
+						error:error_fun,
+						complete:function(){
+							current_app.loading = false;
+						}
+					})
+
+				}).catch(function(){
+					_this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});          
+				});
+			}else{
+				_this.$message({
+					showClose: true,
+					message: '未选择行',
+					type: 'warning',
+					// duration: 0
+				});
+				return false;
+			}
+		},
+	},
+	mounted:function(){
+		var _this = this;
+		_this.getAccounts();
+	}
+}
+
+</script>

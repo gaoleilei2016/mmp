@@ -1,0 +1,286 @@
+<template>
+	<div v-loading.fullscreen.lock="fullscreenLoading">
+		<div style="margin: 8px 0;">
+			<el-breadcrumb separator="/" style="">
+				<el-breadcrumb-item><a href="/">首页</a></el-breadcrumb-item>
+				<el-breadcrumb-item to="/">健康云</el-breadcrumb-item>
+				<el-breadcrumb-item>数据资料管理</el-breadcrumb-item>
+			</el-breadcrumb>
+		</div>
+		<el-tabs type="border-card">
+			<el-tab-pane label="血压">
+				<el-table :data="ws_blood_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intSystolic" label="收缩压(mmHg)"></el-table-column>
+					<el-table-column property="intDiastolic" label="舒张压(mmHg)"></el-table-column>
+					<el-table-column property="intPulse" label="脉搏(BPM)"></el-table-column>
+					<el-table-column property="strMeno" label="备注"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_blood" :page-size="10" @size-change="getdatas('ws_blood')" @current-change="getdatas('ws_blood')" layout="total, sizes, prev, pager, next, jumper" :total="ws_blood_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="体重体脂肪">
+				<el-table :data="ws_weight_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="floWeight" label="体重(kg)"></el-table-column>
+					<el-table-column property="floBodyFat" label="体脂率(%)"></el-table-column>
+					<el-table-column property="floWaistline" label="腰围(cm)"></el-table-column>
+					<el-table-column property="floButtocks" label="臀围(cm)"></el-table-column>
+					<el-table-column property="floRateOfBone" label="骨骼量(kg)"></el-table-column>
+					<el-table-column property="floSoftLeanMass" label="肌肉量(kg)"></el-table-column>
+					<el-table-column property="floTotalBodyWater" label="总含水量(kg)"></el-table-column>
+					<el-table-column property="floBMR" label="基础代谢率(大卡)"></el-table-column>
+					<el-table-column property="floVisceralFat" label="内脏脂肪等级"></el-table-column>
+					<el-table-column property="floPhysicalAge" label="体内年龄"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_weight" :page-size="10" @size-change="getdatas('ws_weight')" @current-change="getdatas('ws_weight')" layout="total, sizes, prev, pager, next, jumper" :total="ws_weight_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="运动">
+				<el-table :data="ws_sport_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intSportType" label="運動型態"></el-table-column>
+					<el-table-column property="intSportMinutes" label="運動時間(分钟)"></el-table-column>
+					<el-table-column property="dubDistance" label="距離(公尺)"></el-table-column>
+					<el-table-column property="intFootSteps" label="步數"></el-table-column>
+					<el-table-column property="intCalorie" label="熱量(大卡)"></el-table-column>
+					<el-table-column property="strAutoMeasure" label="自動"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_sport" :page-size="10" @size-change="getdatas('ws_sport')" @current-change="getdatas('ws_sport')" layout="total, sizes, prev, pager, next, jumper" :total="ws_sport_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="血糖">
+				<el-table :data="ws_blood_sugar_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intConsistency" label="血糖值(mg/dl)"></el-table-column>
+					<el-table-column property="intTypeID" label="時段型態"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_blood_sugar" :page-size="10" @size-change="getdatas('ws_blood_sugar')" @current-change="getdatas('ws_blood_sugar')" layout="total, sizes, prev, pager, next, jumper" :total="ws_blood_sugar_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="手环运动">
+				<el-table :data="ws_ring_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<!-- <el-table-column property="datRecordTime" label="测量时间"></el-table-column> -->
+					<el-table-column property="intSportType" label="運動型態"></el-table-column>
+					<el-table-column property="recordTime" label="运动开始时间"></el-table-column>
+					<el-table-column property="sportMinutes" label="运动持续时间"></el-table-column>
+					<el-table-column property="footSteps" label="运动步数"></el-table-column>
+					<el-table-column property="distance" label="距离(公尺)"></el-table-column>
+					<el-table-column property="calorie" label="卡路里(大卡)"></el-table-column>
+					<el-table-column property="strAutoMeasure" label="自動"></el-table-column>
+					<el-table-column property="strStoredRecords" label="成功存入"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_ring" :page-size="10" @size-change="getdatas('ws_ring')" @current-change="getdatas('ws_ring')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ring_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="睡眠">
+				<el-table :data="ws_sleep_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<!-- <el-table-column property="datRecordTime" label="测量时间"></el-table-column> -->
+					<el-table-column property="datStartTime" label="睡眠開始時間"></el-table-column>
+					<el-table-column property="datEndTime" label="睡眠結束時間"></el-table-column>
+					<el-table-column property="intDeepMinutes" label="深睡分鐘數"></el-table-column>
+					<el-table-column property="intLightMinutes" label="淺睡分鐘數"></el-table-column>
+					<el-table-column property="strSleepRawData" label="詳細睡眠資料"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_sleep" :page-size="10" @size-change="getdatas('ws_sleep')" @current-change="getdatas('ws_sleep')" layout="total, sizes, prev, pager, next, jumper" :total="ws_sleep_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="饮食">
+				<el-table :data="ws_diet_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="用餐時間"></el-table-column>
+					<el-table-column property="intDietType" label="用餐種類"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_diet" :page-size="10" @size-change="getdatas('ws_diet')" @current-change="getdatas('ws_diet')" layout="total, sizes, prev, pager, next, jumper" :total="ws_diet_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="减重计划">
+				<el-table :data="ws_member_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="bolisMale" label="性別"></el-table-column>
+					<el-table-column property="floHeight" label="身高(cm)"></el-table-column>
+					<el-table-column property="datStartdate" label="計劃開始"></el-table-column>
+					<el-table-column property="datEnddate" label="計劃結束"></el-table-column>
+					<el-table-column property="floFtweight" label="期初體重(kg)"></el-table-column>
+					<el-table-column property="floTgweight" label="目標體重(kg)"></el-table-column>
+					<el-table-column property="floFtBodyFat" label="期初體脂(%)"></el-table-column>
+					<el-table-column property="floTgBodyFat" label="目標體脂(%)"></el-table-column>
+					<el-table-column property="floFtWaistline" label="期初腰圍(cm)"></el-table-column>
+					<el-table-column property="floTgWaistline" label="目標腰圍(cm)"></el-table-column>
+					<el-table-column property="floFtButtocks" label="期初臀圍(cm)"></el-table-column>
+					<el-table-column property="floTgButtocks" label="目標臀圍(cm)"></el-table-column>
+					<el-table-column property="intSportCount" label="運動次數"></el-table-column>
+					<el-table-column property="intSportOneMin" label="運動分鐘/次"></el-table-column>
+					<el-table-column property="datBreakfristST" label="早餐開始"></el-table-column>
+					<el-table-column property="datBreakfristET" label="早餐結束"></el-table-column>
+					<el-table-column property="datLunchST" label="午餐開始"></el-table-column>
+					<el-table-column property="datLunchET" label="午餐結束"></el-table-column>
+					<el-table-column property="datDinnerST" label="晚餐開始"></el-table-column>
+					<el-table-column property="datDinnerET" label="晚餐結束"></el-table-column>
+					<el-table-column property="datForbiddenST1" label="禁食時段開始1"></el-table-column>
+					<el-table-column property="datForbiddenET1" label="禁食時段結束1"></el-table-column>
+					<el-table-column property="datForbiddenST2" label="禁食時段開始2"></el-table-column>
+					<el-table-column property="datForbiddenET2" label="禁食時段結束2"></el-table-column>
+					<el-table-column property="intActivity" label="每日活動量"></el-table-column>
+					<el-table-column property="intRreducingCalorie" label="使用者自行設定減少摄取每日熱量(大卡)"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_member" :page-size="10" @size-change="getdatas('ws_member')" @current-change="getdatas('ws_member')" layout="total, sizes, prev, pager, next, jumper" :total="ws_member_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="心跳">
+				<el-table :data="ws_heart_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="strHR" label="心率數值"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_heart" :page-size="10" @size-change="getdatas('ws_heart')" @current-change="getdatas('ws_heart')" layout="total, sizes, prev, pager, next, jumper" :total="ws_heart_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="我要提问">
+				<el-table :data="ws_question_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="intQuestionID" label="問題的識別碼"></el-table-column>
+					<el-table-column property="strContent" label="提問內容"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_question" :page-size="10" @size-change="getdatas('ws_question')" @current-change="getdatas('ws_question')" layout="total, sizes, prev, pager, next, jumper" :total="ws_question_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="手环睡眠v2">
+				<el-table :data="ws_sleep_v2_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datStartTime" label="睡眠開始時間"></el-table-column>
+					<el-table-column property="datEndTime" label="睡眠結束時間第"></el-table-column>
+					<el-table-column property="intDeepMinutes" label="深睡分鐘數"></el-table-column>
+					<el-table-column property="intLightMinutes" label="淺睡分鐘數"></el-table-column>
+					<el-table-column property="intAwakeMinutes" label="清醒時間(分钟)"></el-table-column>
+					<el-table-column property="strSleepRawData" label="詳細睡眠資料"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_sleep_v2" :page-size="10" @size-change="getdatas('ws_sleep_v2')" @current-change="getdatas('ws_sleep_v2')" layout="total, sizes, prev, pager, next, jumper" :total="ws_sleep_v2_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="手环心跳v2">
+				<el-table :data="ws_heart_v2_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号" width="180"></el-table-column>
+					<el-table-column property="strJSONHR" label="JSON"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_heart_v2" :page-size="10" @size-change="getdatas('ws_heart_v2')" @current-change="getdatas('ws_heart_v2')" layout="total, sizes, prev, pager, next, jumper" :total="ws_heart_v2_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="ECG呼吸">
+				<el-table :data="ws_ecg_breath_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intRecordLevel" label="等級"></el-table-column>
+					<el-table-column property="intTrainingTime" label="訓練時間(分钟)"></el-table-column>
+					<el-table-column property="intAvgHR" label="心跳平均"></el-table-column>
+					<el-table-column property="intMaxHR" label="心跳最高"></el-table-column>
+					<el-table-column property="intMinHR" label="心跳最低"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_ecg_breath" :page-size="10" @size-change="getdatas('ws_ecg_breath')" @current-change="getdatas('ws_ecg_breath')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ecg_breath_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="ECG心率">
+				<el-table :data="ws_ecg_heart_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intHeartbeat" label="心跳數值(次/分)"></el-table-column>
+					<el-table-column property="intPressure" label="壓力指數"></el-table-column>
+					<el-table-column property="intVitalityAge" label="活力年齡"></el-table-column>
+					<el-table-column property="intEmoIndex" label="情緒指數"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_ecg_heart" :page-size="10" @size-change="getdatas('ws_ecg_heart')" @current-change="getdatas('ws_ecg_heart')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ecg_heart_total"></el-pagination>
+			</el-tab-pane>
+		</el-tabs>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data: function(){
+		return {
+			fullscreenLoading:false,
+			ws_blood_lists:[],
+			ws_blood_total: 0,
+			ws_weight_lists:[],
+			ws_weight_total:0,
+			ws_sport_lists:[],
+			ws_sport_total:0,
+			ws_blood_sugar_lists:[],
+			ws_blood_sugar_total:0,
+			ws_ring_lists:[],
+			ws_ring_total:0,
+			ws_sleep_lists:[],
+			ws_sleep_total:0,
+			ws_diet_lists:[],
+			ws_diet_total:0,
+			ws_member_lists:[],
+			ws_member_total:0,
+			ws_heart_lists:[],
+			ws_heart_total:0,
+			ws_question_lists:[],
+			ws_question_total:0,
+			ws_sleep_v2_lists:[],
+			ws_sleep_v2_total:0,
+			ws_heart_v2_lists:[],
+			ws_heart_v2_total:0,
+			ws_ecg_breath_lists:[],
+			ws_ecg_breath_total:0,
+			ws_ecg_heart_lists:[],
+			ws_ecg_heart_total:0,
+		}
+	},
+	methods:{
+		getdatas:function(list_name){
+			var _this = this;
+			var pagination = _this.$refs[list_name];
+			var page = pagination.internalCurrentPage;
+			var per = pagination.internalPageSize;
+			_this.fullscreenLoading = true;
+			$.ajax({
+				url:'/healthcloud/partner_accounts/find_test.json',
+				data:{table_name:list_name,page:page,per:per},
+				success:function(json){
+					_this[list_name+'_total'] = json.count;
+					_this[list_name+'_lists'] = json.data;
+				},
+				error:error_fun,
+				complete:function(){
+					_this.fullscreenLoading = false;
+				}
+			})
+		},
+	},
+	mounted:function(){
+		var _this = this;
+		_this.getdatas('ws_blood');
+		setTimeout(function() {
+			_this.getdatas('ws_weight');
+			_this.getdatas('ws_sport');
+			_this.getdatas('ws_blood_sugar');
+			_this.getdatas('ws_ring');
+			_this.getdatas('ws_sleep');
+			_this.getdatas('ws_diet');
+			_this.getdatas('ws_member');
+			_this.getdatas('ws_heart');
+			_this.getdatas('ws_question');
+			_this.getdatas('ws_sleep_v2');
+			_this.getdatas('ws_heart_v2');
+			_this.getdatas('ws_ecg_breath');
+			_this.getdatas('ws_ecg_heart');
+		},3000)
+	}
+}
+</script>

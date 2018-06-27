@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>健康小站管理端</title>
+	<link rel="icon" href="/assets/admin/TM.ico" />
+	<script type="text/javascript" src="/assets/jquery/jquery-1.9.1.js"></script>
+	<script type="text/javascript" src="/assets/plugins/vue/vue-253.js"></script>
+	<script type="text/javascript" src="/assets/plugins/vue/vue-router.js"></script>
+	<script type="text/javascript" src="/assets/plugins/lodash.js"></script>
+	<script type="text/javascript" src="/assets/plugins/vue/element-ui-240.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="/assets/plugins/vue/element-ui-240.css">
+	<link rel="stylesheet" type="text/css" href="/assets/plugins/fontawesome/font-awesome.min.css">
+	<%= csrf_meta_tag %>
+</head>
+<body>
+<style type="text/css">
+	.fade-enter-active, .fade-leave-active{
+		transition: opacity .2s;
+	}
+	.fade-enter, .fade-leave-active{
+		opacity: 0;
+	}
+	template{
+		display: none;
+	}
+	.clear{
+		clear: both;
+	}
+	a {
+		color: #428bca;
+		text-decoration: none;
+	}
+	.text-muted {
+		color: #999999;
+	}
+	.text-info {
+		color: #409EFF;
+	}
+	.bg-purple {
+		background: #d3dce6;
+	}
+	.bg-success {
+		background: #67c23a !important;
+		color: #fff !important;
+	}
+	.selected-success {
+		background: #67c23a !important;
+		color: #000 !important;
+		font-weight: bold;
+	}
+	.selected-success .el-tag{
+		color: #000;
+	}
+	.hide{
+		display: none !important;
+	}
+	.padding_box{
+		border: 1px solid #bbb;
+		/*border-radius: 4px;*/
+		transition: .2s;
+		padding: 6px;
+	}
+	.text-center{
+		text-align: center;
+	}
+	.table_header_dark thead tr th {
+		background: #5a7fab !important;
+		color: #fff !important;
+	}
+	.header_dark {
+		background: #5a7fab;
+		color: #fff;
+		padding: 8px 16px;
+		font-size: 14px;
+		font-weight: bold;
+	}
+	h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+		font-family: inherit;
+		font-weight: 500;
+		line-height: 1.1;
+		color: inherit;
+	}
+	h1, .h1, h2, .h2, h3, .h3 {
+		margin-top: 15px;
+		margin-bottom: 7.5px;
+	}
+	/*.el-table td, .el-table th{
+		padding: 6px 0;
+	}*/
+	.container,#current_app_div,.router-view-content{
+		height: 100%;
+	}
+	.router-view-content{
+		padding: 0 24px;
+		overflow: auto;
+	}
+	.el-breadcrumb{
+		height: 28px;
+		line-height: 28px;
+	}
+	.el-form-item--mini.el-form-item, .el-form-item--small.el-form-item {
+		margin-bottom: 14px;
+	}
+	.el-form-item--mini.el-form-item:last-child, .el-form-item--small.el-form-item:last-child {
+		margin-bottom: 0px;
+	}
+	.thin_scrollbar *::-webkit-scrollbar {
+		width: 8px;
+		background: #f1f1f1;
+		height: 8px;
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+	}
+	.thin_scrollbar *::-webkit-scrollbar-thumb {
+		background: #bbb;
+		-webkit-border-radius: 4px;
+		-moz-border-radius: 4px;
+		border-radius: 4px;
+	}
+	.thin_scrollbar *::-webkit-scrollbar-thumb:hover {
+		background: #999;
+	}
+	.thin_scrollbar *::-webkit-scrollbar-thumb:active {
+		background: #777;
+	}
+	.vertical_bottom > div{
+		vertical-align: bottom;
+	}
+	/*.el-pagination[background] .el-pager li.active {
+		background-color: #409eff;
+		color: #fff;
+	}*/
+	.text-danger{
+		color: #f56c6c;
+	}
+	/* table index word break bug */
+	.no_word_break > * {
+		padding: 0 4px 0 0 !important;
+		word-break: initial !important;
+	}
+	/* element-2 2 2 form-item input-group bug */
+	.el-form-item .el-input-group{
+		display: table;
+	}
+	/* el-table-column class-name="td_no_padding" */
+	.td_no_padding, .td_no_padding > * {
+		padding: 0 !important;
+	}
+	/* datepicker clearable bug */
+	.no_clearable_css > input{
+		padding-right: 10px !important;
+	}
+	/* tab_content_full_height_bug   tabs 组件不能全屏的css */
+	.tab_content_full_height_bug .el-tabs__content{
+		height: calc( 100% - 40px );
+	}
+	.tab_content_full_height_bug .el-tabs__content .el-tab-pane{
+		height: 100%;
+	}
+	.el-pagination .el-input__inner{
+		line-height: initial;
+	}
+</style>
+	<%= render 'header_and_footer' %>
+	<div class="container">
+		<div id="current_app_div" v-loading.fullscreen.lock="loading">
+			<transition name="fade" mode="out-in">
+				<router-view v-if="$route.meta.notKeepAlive" class="router-view-content"></router-view>
+				<keep-alive v-else>
+					<router-view class="router-view-content"></router-view>
+				</keep-alive>
+			</transition>
+		</div>
+		<%= render "/healthcloud/home/templates/home" %>
+	</div>
+	<div>
+	</div>
+	<script type="text/javascript">
+		window.apps||(window.apps = {});
+
+		$.ajaxPrefilter(function(options,originalOptions,xhr){
+			var token = $('meta[name="csrf-token"]').attr('content');
+			xhr.setRequestHeader('X-CSRF-Token',token);
+		})
+
+		const error_fun = function(e){
+			current_app.loading = false;
+			current_app.$message({
+				type: 'error',
+				message: '错误: '+e.status+' '+e.statusText,
+				showClose: true,
+				duration: 0
+			});
+		}
+		const refresh = Vue.extend({
+			template: '<div></div>',
+			beforeRouteEnter:function(to, from, next){
+				current_app.$message('目前由于架构所限，将刷新所有组件分页！')
+				next(function(){
+					router.push(from.path);
+				})
+			}
+		})
+		const router = new VueRouter({
+			routes:[
+			{path:'/',redirect:'/home'},
+			{path:'/home',component:home},
+			{path:'/refresh',component:refresh,meta:{notKeepAlive:true}},
+			]
+		})
+
+		const current_app = new Vue({
+			el:"#current_app_div",
+			data:{
+				loading:false,
+				auto_search_timeout_value:500, // 各子组件共用手动输入框搜索延时
+			},
+			router:router,
+			methods:{
+			},
+			mounted:function(){
+			}
+		})
+	</script>
+</body>
+</html>

@@ -162,15 +162,14 @@
 	}
 </style>
 <header class="my_top_nav mui-bar mui-bar-nav">
-	<!-- <a href="/users/home" class="mui-icon mui-icon-left-nav mui-pull-left"></a> -->
+	<a onclick="location='/customer/report'" class="mui-icon mui-icon-left-nav mui-pull-left"></a>
 	<h1 class="mui-title">体检二维码</h1>
 </header>
 <div class="mui-content" style="background: #fff;">
 	<div class="mui-content-padded" style="padding-top: 30px;">
 		<div style="text-align: center;font-size: 16px;color: #333;">请向健康小站出示此二维码</div>
 		<div style="text-align: center;font-size: 16px;color: #333;">横屏或者显示不完整时请单击二维码</div>
-		<img src="" style="width: 100%;" data-preview-src="" data-preview-group="1"/>
-		<%= current_user.get_qr_code[:base64] %>
+		<img src="<%= current_user.get_qr_code[:base64] %>" style="width: 100%;" data-preview-src="" data-preview-group="1"/>
 	</div>
 </div>
 <script type="text/javascript">
