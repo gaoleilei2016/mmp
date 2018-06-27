@@ -1,8 +1,8 @@
 <!-- 接诊页面 和 医嘱模板页面 共用 -->
-<el-form size="mini" label-position="top" label-width="80px" :model="order" ref="orderForm">
+<el-form size="mini" label-position="top" label-width="80px" :model="order" ref="orderForm" :rules="orderRules">
 	<el-row :gutter="5">
 		<el-col :span="5">
-		  <el-form-item label="名称">
+		  <el-form-item label="名称" prop="name">
 			  <el-autocomplete
 				  v-model="order.name"
 				  :fetch-suggestions="searchDrugs"
@@ -29,14 +29,14 @@
 		  </el-form-item>
 		</el-col>
 		<el-col :span="2">
-		  <el-form-item label="单次数量">
+		  <el-form-item label="单次数量" prop="single_qty.value">
 		    <el-input v-model.number="order.single_qty&&order.single_qty.value" @change="calculateQuantity('single_qty')" ref="ordsingleqty" @keydown.enter.stop.native="focusNext('ordsingleqty', 'orddose')">
 		    	<template slot="append">{{ order.single_qty&&order.single_qty.unit }}</template>
 		    </el-input>
 		  </el-form-item>
 		</el-col>
 		<el-col :span="2">
-		  <el-form-item label="单次剂量">
+		  <el-form-item label="单次剂量" prop="dose.value">
 		    <el-input v-model.number="order.dose&&order.dose.value" @change="calculateQuantity('dose')" ref="orddose" @keydown.enter.stop.native="focusNext('orddose', 'ordroute')">
 		    	<template slot="append">{{ order.dose&&order.dose.unit }}</template>
 		    </el-input>
@@ -68,14 +68,14 @@
 		</el-col>
 		<!-- <el-col :span="5"> -->
 		<el-col :span="2">
-		  <el-form-item label="疗程">
+		  <el-form-item label="疗程" prop="course_of_treatment.value">
 		    <el-input v-model.number="order.course_of_treatment&&order.course_of_treatment.value" ref="ordcourseoftreatment" @keydown.enter.stop.native="focusNext('ordcourseoftreatment', 'ordtotalquantity')" @change="calculateQuantity()">
 		    	<template slot="append">{{ order.course_of_treatment&&order.course_of_treatment.unit }}</template>
 		    </el-input>
 		  </el-form-item>
 		</el-col>
 		<el-col :span="2">
-		  <el-form-item label="总量">
+		  <el-form-item label="总量" prop="total_quantity">
 		    <el-input v-model="order.total_quantity" ref="ordtotalquantity" @keydown.enter.stop.native="focusNext('ordtotalquantity', 'ordnote')">
 		    	<template slot="append">{{ order.unit }}</template>
 		    </el-input>
