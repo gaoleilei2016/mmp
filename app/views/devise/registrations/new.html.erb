@@ -23,7 +23,7 @@
       
       .mui-checkbox input[type=checkbox],
       .mui-radio input[type=radio] {
-        top: 6px;
+        top: 7px;
       }
       
       .mui-content-padded {
@@ -79,7 +79,6 @@
         position: absolute;
         top: 7px;
         right: 13px;
-        color: rgb(1, 190, 1);
         padding: 2px 6px;
         font-size: 12px;
         border-radius: 12px;
@@ -110,7 +109,6 @@
       }
       .mui-checkbox input[type=checkbox]:before,.mui-checkbox input[type=checkbox]:checked:before, .mui-radio input[type=radio]:checked:before{
         font-size: 16px;
-        color: rgb(1, 190, 1);
       }
       .mui-checkbox.mui-left label{
         padding-left: 42px;
@@ -121,7 +119,7 @@
     <h1></h1>
 
     <header class=" mui-bar mui-bar-nav">
-      <a href="javascript:;" onclick="location.href='/users/sign_in?weixin_sign_in=true&login='+$('#login_input').val()" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left" style="color: #F55742;">
+      <a href="javascript:;" onclick="location.href='/users/sign_in?weixin_sign_in=true&login='+$('#login_input').val()" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
         <span class="mui-icon mui-icon-left-nav"></span>
       </a>
       <h1 class="mui-title">
@@ -152,7 +150,7 @@
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-email" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
             <input id="dxyz_input" type="number" name="dxyz" class="mui-input-clear mui-input" placeholder="短信码" value="<%= flash[:dxyz] %>" style="padding-left: 40px;font-size: 16px;" maxlength="4" oninput="if(value.length>4)value=value.slice(0,4)" autocomplete="off">
-            <div id="get_duanxinma" style="color: #F55742;">获取短信码<span class="time_line">(<span class="time"></span>秒)</span></div>
+            <div id="get_duanxinma" class="common_green">获取短信码<span class="time_line">(<span class="time"></span>秒)</span></div>
           </div>
           <div class="mui-input-row">
             <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
@@ -169,7 +167,7 @@
         </form>
       </div>
       <div class="mui-content-padded" style="margin: 10px 80px;">
-        <button onclick="submit_form();" class="mui-btn mui-btn-block mui-btn-primary" style="background: #F55742;border: 0;border-radius: 16px;padding: 4px;">提交</button>
+        <button onclick="submit_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">提交</button>
         <div class="link-area">
           <!-- <a href="/users/sign_in?type=use_psw" style="float: right;">使用密码登录</a> -->
           <div class="clear"></div>

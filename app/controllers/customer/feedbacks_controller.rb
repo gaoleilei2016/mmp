@@ -1,7 +1,7 @@
 class Customer::FeedbacksController < ApplicationController
 	layout "customer"
 	def index
-		feedbacks = ::Customer::Feedback.all.order("created_at desc").page(params[:page]).per(params[:per])
+		feedbacks = ::Customer::Feedback.where("id like '%#{params[:search]}%' OR user_id like '%#{params[:search]}%' OR content like '%#{params[:search]}%' OR contact like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
 		render json:{flag:true,rows:feedbacks,total:feedbacks.total_count}
 	end
 	def get_cur_feedbacks
