@@ -105,6 +105,32 @@ class Pay::Wechat
     def order_query()
     end
 
+    def send_custom_text(login, openid, data)
+      begin
+        res = JSON.parse(RestClient.get(access_token_url).body)
+        return { error: true, state: :fail, msg: 'token获取失败', desc: res['errmsg'] } if res['errmsg']
+        ret = push_wechat(custom_url(res['access_token']), custom_text(openid, data))
+        return {error: false, state: :succ, msg: "成功将消息推送到#{login}用户的微信上"} if ret['errmsg'].eql?('ok')
+        {error: true, state: :fail, msg: "发送消息失败: #{ret['errmsg']}"}
+      rescue RestClient::Exceptions::OpenTimeout => e
+        {error: true, state: :timeout, msg: '连接微信服务超时'}  
+      rescue Exception => e
+        {error: true, state: :error, msg: e.message}
+      end
+    end
+
+    def push_wechat(url, data)
+      JSON.parse(RestClient.post(url, data.to_json, {content_type: :json, accept: :json}).body)
+    end
+
+    def custom_url(token)
+      "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=#{token}"
+    end
+
+    def custom_text(openid, content)
+      {touser: openid, msgtype: 'text', text: {content: content}}
+    end
+
     #处理支付金额
     def handle_order_total_fee(total_fee)
       num = (total_fee.to_f*100 + 0.001).round(2) #将元转为分
