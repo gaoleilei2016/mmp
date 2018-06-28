@@ -152,7 +152,8 @@ class Hospital::PrescriptionsController < ApplicationController
     def format_prescription_create_args
       args = prescription_params
       begin
-        cur_orders = ::Hospital::Order.find(args[:ids])
+        args_orders = ::Hospital::Order.find(args[:ids]).group_by {|e| e.id.to_s}  # 按照id顺序重新排序
+        cur_orders = args[:ids].map { |_order_id| args_orders[_order_id.to_s][0] } # 处方医嘱的排列顺序按前端传的顺序生成
         diagnoses_args = args[:diagnoses]
         prescription = {
           organization_id: @cur_org.id,
@@ -168,6 +169,7 @@ class Hospital::PrescriptionsController < ApplicationController
           encounter_id: @cur_encounter.id,
           effective_start: Time.now,
           effective_end: Time.now + 1.day,
+          specialmark: args[:specialmark]
         }
         ret = {
           prescription: prescription,

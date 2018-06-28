@@ -266,8 +266,9 @@ class ::Hospital::Prescription < ApplicationRecord
 
 	def link_orders!(cur_orders, cur_user)
 		self.reload
-		cur_orders.each do |_order|
+		cur_orders.each_with_index do |_order, i|
 			_order.status = 0
+			_order.rank_in_prescription = i
 			_order.prescription_id = self.id
 			_order.save!
 		end
@@ -366,7 +367,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			# 该处方对应的诊断
 			diagnoses: self.diagnoses,
 			# 该处方对应的医嘱
-			orders: self.orders.map { |e| e.to_web_front  },
+			orders: self.orders.order(:rank_in_prescription).map { |e| e.to_web_front  },
 			price: self.orders.map{|e| e.price*e.total_quantity }.reduce(:+),
 			specialmark: self.specialmark,
 			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
