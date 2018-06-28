@@ -11,7 +11,7 @@ class WechatController < ApplicationController
     render json: res
   end
 
-  #发送微信客服消息
+  #发送微信客服消息 /wechat/send_data
   def send_data
     user = User.find_by(login: params[:login])
     res = if user
