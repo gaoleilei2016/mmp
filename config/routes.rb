@@ -232,5 +232,6 @@ Rails.application.routes.draw do
   match '/wechat/websocket', to: 'wechat#websocket', via: [:get]
   match '/wechat/info',  to: 'wechat#info', via: [:post]
   match '/wechat/push_wowgo', to: 'wechat#wowgo', via: [:post]
+  match '/wechat/send_data', to: 'wechat#send_data', via: [:post]
   ########### hujun_end   ##########
 end
