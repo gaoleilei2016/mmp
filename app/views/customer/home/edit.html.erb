@@ -83,10 +83,10 @@
 				</div> -->
 			</form>
 			<div class="mui-content-padded" style="margin: 30px 80px;">
-				<button onclick="valide_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">保存</button>
+				<button id="submit_button" onclick="valide_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">保存</button>
 			</div>
 			<div class="mui-content-padded">
-				<p>请确保注册信息真实可靠，预约就诊时需要用到您的身份证号码或者手机号码。</p>
+				<p>以上信息用于个人健康分析</p>
 			</div>
 		</div>
 		<script src="/assets/plugins/mui/mui.picker.min.js"></script>
@@ -168,6 +168,7 @@
 				// 	mui.toast('身份证输入有误');
 				// 	return false;
 				// }
+				$("#submit_button").attr("disabled",true);
 				$('form').submit();
 			}
 		</script>

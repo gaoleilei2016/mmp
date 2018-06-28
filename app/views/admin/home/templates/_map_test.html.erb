@@ -5,13 +5,28 @@
 			经度：{{point.lng}}
 			纬度：{{point.lat}}
 		</div>
-		<div style="height: calc( 100% - 38px );padding: 0 6px 6px 0;">
+		<div style="height: calc( 100% - 60px );padding: 0 6px 6px 0;">
 			<div id="map_use_div" style="height: 100%;padding:10px;border:1px solid #000;-moz-box-shadow:3px 3px 4px #000;-webkit-box-shadow:3px 3px 4px #000;box-shadow:3px 3px 4px #000;background:#fff;filter:progid:DXImageTransform.Microsoft.Shadow(Strength=4,Direction=135,Color='#000000');"></div>
 		</div>
 	</div>
 </template>
+<template id="child1">
+	<div>
+		bbbbb
+	</div>
+</template>
 <script type="text/javascript">
+	var child1 = Vue.extend({
+		template:'#child1',
+	})
+</script>
+<script type="text/javascript">
+console.log( 'xxxxxxxx' );
 window.current_template_obj = {
+	children:[{
+		path:'xxx',
+		component:child1
+	}],
 	data:function() {
 		return {
 			point:{},
