@@ -603,7 +603,8 @@ class Orders::Order < ApplicationRecord
 			t = Time.now.beginning_of_day
 			y = t.year.to_s[2,2]
 			d = ("00" + t.yday.to_s)[-3,3]
-			ser = ("000" + Orders::Order.where("target_org_id = ? AND created_at > ?",target_org_id,t).count.to_s)[-4,4]
+			# target_org_id = ? AND   target_org_id,
+			ser = ("0000" + (Orders::Order.where("created_at > ?",t).count+1).to_s)[-5,5]
 			"#{y}#{d}#{ser}"
 			# while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 			# 	code = get_order_code
