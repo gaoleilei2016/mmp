@@ -74,8 +74,6 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 
 	#删除一个系统权限用户
 	def def_ws_sys
-		# p '22222222222222222222'
-		# p params[:_id].to_s
 		health = HealthCloud::WsSys.find(params[:id])
 		health.destroy
 		render json:{flag:true,info:'删除成功'}
@@ -99,14 +97,14 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 				@table_tables=eval(table_name).where("name like '%#{params[:search]}%' or login like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
 				ret = @table_tables
 			elsif table_name=="HealthCloud::WsLog"
-				@table_tables=eval(table_name).where("info like '%#{params[:search]}%' or method like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
+				@table_tables=eval(table_name).where("info like '%#{params[:search]}%' or method like '%#{params[:search]}%'").order("time desc").page(params[:page]).per(params[:per])
 				ret = @table_tables
 			else
-				@table_tables=eval(table_name).all.order("created_at desc").page(params[:page]).per(params[:per])
+				@table_tables=eval(table_name).all.order("id desc").page(params[:page]).per(params[:per])
 				ret = @table_tables
 			end
 		end
-		render json:{flag:true, count:@table_tables.count, data:ret}
+		render json:{flag:true, count:@table_tables.total_count, data:ret}
 	end
 	#获取某个成员的数据
 	def get_date_by_id
@@ -129,9 +127,9 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 				# when "HealthCloud::WsRing"
 				# 	@table_tables=eval(table_name).where("userid"=>current_user.id,:recordTime.gte=>"#{s_time}",:recordTime.lte=>"#{e_time}").order("recordTime")
 				else
-					@table_tables=eval(table_name).where("userid"=>current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
+					@table_tables=eval(table_name).where("userid"=>current_user.id).page(params[:page]).per(params[:per])
 				end
-				render json:{flag:true, count:@table_tables.count, data:@table_tables}
+				render json:{flag:true, count:(@table_tables.total_count rescue nil), data:@table_tables}
 			end
 		else
 			raise 'table_name error'
@@ -160,7 +158,7 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 
 	private
 	def ws_sys
-		id = params[:account].delete(:_id)['$oid']
+		id = params[:account].delete(:id)
 		params[:account].delete(:created_at)
 		params[:account].delete(:updated_at)
 		@health = HealthCloud::WsSys.find(id)

@@ -666,6 +666,14 @@
 						},
 						xAxis: {
 							type: 'datetime',
+							min: new Date(start_date).getTime(),
+							max: new Date(end_date).getTime(),
+							tickInterval:24*3600*1000,
+							labels:{
+								formatter:function(){
+									return new Date(this.value).pattern("MM/dd");
+								}
+							}
 						},
 						yAxis: {
 							title: false,
@@ -1390,11 +1398,11 @@
 					</div>
 					<div class="mui-card-content">
 						<div class="mui-card-content-inner">
-							<div>基础代谢：{{sele_point.floBMR}} Kcal</div>
-							<div>脂肪比例：{{sele_point.floBodyFat&&$parent.number_with_one_point(sele_point.floBodyFat)}} %</div>
-							<div>水份比例：{{sele_point.floTotalBodyWater&&$parent.number_with_one_point(sele_point.floTotalBodyWater)}} %</div>
-							<div>肌肉重量：{{sele_point.floSoftLeanMass&&$parent.number_with_one_point(sele_point.floSoftLeanMass)}} Kg</div>
-							<div>骨矿物量：{{sele_point.floRateOfBone&&$parent.number_with_one_point(sele_point.floRateOfBone)}} Kg</div>
+							<div>基础代谢：{{sele_point&&sele_point.floBMR}} Kcal</div>
+							<div>脂肪比例：{{sele_point&&sele_point.floBodyFat&&$parent.number_with_one_point(sele_point.floBodyFat)}} %</div>
+							<div>水份比例：{{sele_point&&sele_point.floTotalBodyWater&&$parent.number_with_one_point(sele_point.floTotalBodyWater)}} %</div>
+							<div>肌肉重量：{{sele_point&&sele_point.floSoftLeanMass&&$parent.number_with_one_point(sele_point.floSoftLeanMass)}} Kg</div>
+							<div>骨矿物量：{{sele_point&&sele_point.floRateOfBone&&$parent.number_with_one_point(sele_point.floRateOfBone)}} Kg</div>
 							<a href="#/member_show/weight_desc" style="color: #56b9ff;position: absolute;right: 14px;top: 14px;">说明</a>
 						</div>
 					</div>
