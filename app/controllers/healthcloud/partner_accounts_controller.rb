@@ -55,17 +55,17 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 		hash_table.each do |key,val|
 			case key
 			when "ws_ring"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:recordTime).last 
+				valname=val.where("userid"=>current_user.id).order("recordTime").last 
 			when "ws_heart_v2"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:strRecordDate).last
+				valname=val.where("userid"=>current_user.id).order("strRecordDate").last
 			when "ws_weight"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:datRecordTime).last
+				valname=val.where("userid"=>current_user.id).order("datRecordTime").last
 			when "ws_blood"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:datRecordTime).last
+				valname=val.where("userid"=>current_user.id).order("datRecordTime").last
 			when "ws_blood_sugar"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:datRecordTime).last
+				valname=val.where("userid"=>current_user.id).order("datRecordTime").last
 			when "ws_ecg_heart"
-				valname=val.where("userid"=>session[:user]['_id']['$oid']).asc(:datRecordTime).last
+				valname=val.where("userid"=>current_user.id).order("datRecordTime").last
 			end
 			hash_return["#{key}"]=valname
 		end
@@ -118,21 +118,18 @@ class Healthcloud::PartnerAccountsController < ApplicationController
 		e_time=params[:end_date].present? && params[:end_date] || Time.now.end_of_day
 		if table_name
 			if table_name=="User"
-				render json:{flag:true, ws_user:eval(table_name).find(session[:user]['_id']['$oid'])}
+				render json:{flag:true, ws_user:eval(table_name).find(current_user.id)}
 			else
 				case table_name
-				when "HealthCloud::WsHeartVt"
-					#@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid']).asc(:strRecordDate)#.page(params[:page]).per(params[:per])
-					@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid'],:HRValue.ne=>"0",:strRecordDate.gte=>"#{s_time}",:strRecordDate.lte=>"#{e_time}").asc(:strRecordDate)
+				# when "HealthCloud::WsHeartVt"
+				# 	@table_tables=eval(table_name).where("userid"=>current_user.id,:HRValue.ne=>"0",:strRecordDate.gte=>"#{s_time}",:strRecordDate.lte=>"#{e_time}").order("strRecordDate")
 				when "HealthCloud::WsBlood","HealthCloud::WsWeight","HealthCloud::WsBloodSugar","HealthCloud::WsEcgHeart"
-					@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid'],:datRecordTime.gte=>"#{s_time}",:datRecordTime.lte=>"#{e_time}").asc(:datRecordTime)
-				# when "HealthCloud::WsEcgHeart"
-				# 	@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid']).asc(:datRecordTime)
-				when "HealthCloud::WsRing"
-					#params[:etime].present? && params[:etime] ||Time.now.to_s.split(" ")[0]
-					@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid'],:recordTime.gte=>"#{s_time}",:recordTime.lte=>"#{e_time}").asc(:recordTime)
+					# p '~~~~~~~~~~~~~~',table_name,s_time,e_time
+					@table_tables=eval(table_name).where("userid"=>current_user.id).where("datRecordTime >= '#{s_time}' or datRecordTime <= '#{e_time}'").order("datRecordTime")
+				# when "HealthCloud::WsRing"
+				# 	@table_tables=eval(table_name).where("userid"=>current_user.id,:recordTime.gte=>"#{s_time}",:recordTime.lte=>"#{e_time}").order("recordTime")
 				else
-					@table_tables=eval(table_name).where("userid"=>session[:user]['_id']['$oid']).order("created_at desc").page(params[:page]).per(params[:per])
+					@table_tables=eval(table_name).where("userid"=>current_user.id).order("created_at desc").page(params[:page]).per(params[:per])
 				end
 				render json:{flag:true, count:@table_tables.count, data:@table_tables}
 			end

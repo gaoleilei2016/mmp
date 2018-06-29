@@ -12,7 +12,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 2
 		create_table :health_cloud_ws_blood_sugars do |t|
@@ -24,7 +24,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 3 ############################# 部分属性错误, 下次迁移修复
 		create_table :health_cloud_ws_diets do |t|
@@ -44,7 +44,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 4
 		create_table :health_cloud_ws_ecg_breaths do |t|
@@ -59,7 +59,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 5
 		create_table :health_cloud_ws_ecg_hearts do |t|
@@ -73,7 +73,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 6 ############################# 部分属性错误, 下次迁移修复
 		create_table :health_cloud_ws_hearts do |t|
@@ -84,7 +84,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.integer :userid
 			t.integer :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 7
 		create_table :health_cloud_ws_heart_vts do |t|
@@ -96,7 +96,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :strPrgID
 			t.string :strRecordDate
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 8
 		create_table :health_cloud_ws_logs do |t|
@@ -104,7 +104,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :info
 			t.string :time
 			t.string :error
-			t.timestamps
+			# t.timestamps
 		end
 		# 9
 		create_table :health_cloud_ws_members do |t|
@@ -138,7 +138,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 10
 		create_table :health_cloud_ws_questions do |t|
@@ -147,7 +147,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 11
 		create_table :health_cloud_ws_rings do |t|
@@ -163,7 +163,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :sportMinutes
 			t.string :distance
 			t.string :calorie
-			t.timestamps
+			# t.timestamps
 		end
 		# 12
 		create_table :health_cloud_ws_sleeps do |t|
@@ -176,7 +176,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 13
 		create_table :health_cloud_ws_sleep_vts do |t|
@@ -191,7 +191,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 14
 		create_table :health_cloud_ws_sports do |t|
@@ -216,14 +216,14 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 		# 15
 		create_table :health_cloud_ws_sys do |t|
 			t.string :strPrgID
 			t.string :strPrgPws
 			t.string :company
-			t.timestamps
+			# t.timestamps
 		end
 		# 16
 		create_table :health_cloud_ws_users do |t|
@@ -239,7 +239,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :strAddSecCode
 			t.string :strCommunityCode
 			t.integer :intUserID
-			t.timestamps
+			# t.timestamps
 		end
 		# 17
 		create_table :health_cloud_ws_weights do |t|
@@ -258,7 +258,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :userid
 			t.string :strPrgID
 			t.string :strUserAccount
-			t.timestamps
+			# t.timestamps
 		end
 	end
 end

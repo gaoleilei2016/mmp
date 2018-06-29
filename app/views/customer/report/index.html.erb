@@ -52,10 +52,24 @@
 	.mui-table-view:after{
 		height: 0;
 	}
+	.mui-backdrop-action.mui-backdrop {
+		background-color: rgba(0,0,0,.7);
+	}
+	#report_index .mui-card{
+		margin: 10px 0;
+	}
 </style>
 <template id="member_show_div">
 	<div>
-		<div id="common_mask" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998;display: block;top: 44px;">
+		<div id="common_mask" class="mui-backdrop mui-backdrop-action mui-active" style="
+		z-index: 998;
+		<%# p '~~~~~~~~ customer_report_is_read ',session[:customer_report_is_read],current_user.get_config(:customer_report_is_read) %>
+		<% if session[:customer_report_is_read]||current_user.get_config(:customer_report_is_read).flag %>
+		display: none;
+		<% else %>
+		display: block;
+		<% end -%>
+		top: 44px;bottom: 50px;">
 			<div style="text-align: right;padding: 10px 20px 0 0;">
 				<img src="/assets/customer/guide_arrow.png">
 			</div>
@@ -63,7 +77,8 @@
 				<div>体检时请出示二维码</div>
 			</div>
 			<div style="text-align: right;padding: 20px;">
-				<button onclick="$('#common_mask').hide(200);">我知道了</button>
+				<button onclick="$('#common_mask').hide(200);hide_guide('once');">下次提醒</button>
+				<button onclick="$('#common_mask').hide(200);hide_guide('forever');">不再提示</button>
 			</div>
 		</div>
 		<header class="my_top_nav mui-bar mui-bar-nav">
@@ -73,13 +88,13 @@
 			<h1 class="mui-title">AIDA智能体检</h1>
 			<a href="/customer/report/qrcode"><i class="fal fa-qrcode" style="float: right; line-height: 40px; font-size: 24px;"></i></a>
 		</header>
-		<div class="mui-content">
+		<div class="mui-content" id="report_index">
 
-			<div>
+			<div style="">
 				<!-- <div class="white_bg_bar"><span>健康得分：</span><span style="color: #00c2ff;">90</span></div> -->
 				<!-- <div id="chart_div_leida" style="height: 240px;"></div> -->
 
-				<ul class="mui-table-view mui-grid-view mui-grid-9" style="background: #fff;">
+				<ul class="mui-table-view mui-grid-view mui-grid-9" style="background: #fff; margin-top: 10px;box-shadow: 0 1px 2px rgba(0,0,0,.3);">
 					<router-link :to="{name:'ws_weight'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
 						<a href="javascript:;">
 							<span class="mui-icon fal fa-weight" style="color: #cddc39;"></span>
@@ -122,7 +137,7 @@
 							<div class="mui-media-body">耳温</div>
 						</a>
 					</router-link> -->
-					<!-- <router-link :to="{name:'ws_blood_sugar'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
+					<router-link :to="{name:'ws_blood_sugar'}" class="mui-table-view-cell mui-media mui-col-xs-6 mui-col-sm-4">
 						<a href="javascript:;">
 							<span class="mui-icon fal fa-tint" style="color: #cddc39;"></span>
 							<div class="mui-media-body values">
@@ -131,7 +146,7 @@
 							</div>
 							<div class="mui-media-body">血糖</div>
 						</a>
-					</router-link> -->
+					</router-link>
 				</ul>
 				<!-- <div>
 					<div class="advise_text">健康建议：一天吃2份以上的奶制品并不补钙，反而对健康不利。因为人类并不适合消化牛奶，全球75%的人胃中缺乏一种消化牛奶中乳糖的酶。大量饮用牛奶就容易患上关节炎、过敏、哮喘和各种胃病。如果真的喜欢喝牛奶，每天喝1杯就够了，想补钙，不妨隔三差五地吃沙丁鱼、杏仁和虾。</div>
@@ -156,7 +171,7 @@
 							{{weight_advise.disease}}
 						</div>
 					</div>
-					<div class="mui-card-footer">预测来源腾迈智医AIDA人工智能</div>
+					<a href="http://www.tenmind.com/" class="mui-card-footer">预测来源腾迈智医AIDA人工智能</a>
 				</div> -->
 				<div class="mui-card">
 					<div class="mui-card-header">
@@ -171,7 +186,7 @@
 							<div>{{weight_advise.bad_diet}}</div>
 						</div>
 					</div>
-					<div class="mui-card-footer">建议来源腾迈智医AIDA人工智能</div>
+					<a href="http://www.tenmind.com/" class="mui-card-footer">建议来源腾迈智医AIDA人工智能</a>
 				</div>
 				<div class="mui-card">
 					<div class="mui-card-header">
@@ -188,7 +203,7 @@
 							<div>{{weight_advise.sport_events}}</div>
 						</div>
 					</div>
-					<div class="mui-card-footer">建议来源腾迈智医AIDA人工智能</div>
+					<a href="http://www.tenmind.com/" class="mui-card-footer">建议来源腾迈智医AIDA人工智能</a>
 				</div>
 			</div>
 
@@ -196,6 +211,16 @@
 	</div>
 </template>
 <script type="text/javascript">
+	function hide_guide(type) {
+		// type == 'once'
+		// type == 'forever'
+		$.ajax({
+			url:'/customer/report/hide_guide.json',
+			data:{type:type},
+			success:function (json) {
+			}
+		})
+	}
 	(function(factory) {
 		if(typeof module === 'object' && module.exports) {
 			module.exports = factory;
@@ -240,7 +265,7 @@
 					fontSize: '13px'
 				}
 			},
-			credits:false,
+			// credits:false,
 			xAxis: {
 				gridLineWidth: 1,
 				gridLineColor: "#bbb",
@@ -396,7 +421,7 @@
 					<b>{{blood_date1}} - {{blood_date2}}</b>
 				</div>
 				<div id="chart_div_ws_blood" style="height:300px"></div>
-				<div class="advise_text">健康建议：熬夜是时下生活中，很多人经常甚至每天都在经历的生活阶段。实际上这是非常不好的习惯。缺觉不说，而且长期熬夜还会增加心脑血管负担，最终使血管变脆，而容易发生意外。所以在新的一年里，咱还是别熬了吧。</div>
+				<!-- <div class="advise_text">健康建议：熬夜是时下生活中，很多人经常甚至每天都在经历的生活阶段。实际上这是非常不好的习惯。缺觉不说，而且长期熬夜还会增加心脑血管负担，最终使血管变脆，而容易发生意外。所以在新的一年里，咱还是别熬了吧。</div> -->
 			</div>
 		</div>
 	</div>
@@ -502,7 +527,10 @@
 							}]
 						},
 						// legend: false,
-						credits: false,
+						credits: {
+							text: '量测数据来源于高登智慧',
+							href: 'http://www.goldensmarthome.com.tw/',
+						},
 						series: [{
 							name: '收缩压',
 							tooltip: {
@@ -564,7 +592,7 @@
 					<b>{{blood_sugar_date1}} - {{blood_sugar_date2}}</b>
 				</div>
 				<div id="chart_div_ws_blood_sugar" style="height:300px"></div>
-				<div class="advise_text">健康建议：熬夜是时下生活中，很多人经常甚至每天都在经历的生活阶段。实际上这是非常不好的习惯。缺觉不说，而且长期熬夜还会增加心脑血管负担，最终使血管变脆，而容易发生意外。所以在新的一年里，咱还是别熬了吧。</div>
+				<!-- <div class="advise_text">健康建议：熬夜是时下生活中，很多人经常甚至每天都在经历的生活阶段。实际上这是非常不好的习惯。缺觉不说，而且长期熬夜还会增加心脑血管负担，最终使血管变脆，而容易发生意外。所以在新的一年里，咱还是别熬了吧。</div> -->
 			</div>
 		</div>
 	</div>
@@ -661,8 +689,11 @@
 								zIndex: 1
 							}]
 						},
-						// legend: false,
-						credits: false,
+						legend: false,
+						credits: {
+							text: '量测数据来源于高登智慧',
+							href: 'http://www.goldensmarthome.com.tw/',
+						},
 						series: [{
 							name: '血糖',
 							tooltip: {
@@ -741,7 +772,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="advise_text text-danger">恭喜您，您的身体非常健康，希望您继续保持充足的睡眠、均衡的饮食和适当的运动。</div>
+				<!-- <div class="advise_text text-danger">恭喜您，您的身体非常健康，希望您继续保持充足的睡眠、均衡的饮食和适当的运动。</div> -->
 			</div>
 		</div>
 	</div>
@@ -890,7 +921,10 @@
 								// }]
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '心跳数值',
 								cursor: 'pointer',
@@ -935,7 +969,10 @@
 								title: false,
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '压力指数',
 								cursor: 'pointer',
@@ -980,7 +1017,10 @@
 								title: false,
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '活力年龄',
 								cursor: 'pointer',
@@ -1025,7 +1065,10 @@
 								title: false,
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '情绪指数',
 								cursor: 'pointer',
@@ -1076,7 +1119,7 @@
 					<b>{{ring_date}}</b>
 				</div>
 				<div id="chart_div_ws_heart_v2" style="height:300px"></div>
-				<div class="advise_text">健康建议：水是万物之源，它主要的作用是辅助消化、参与新陈代谢、运送营养物质和调节抑制功能等。但是，现在的有些朋友会在工作学习中，忘了喝水。这是一个非常不好的习惯，长此下去，会使毒素在体内积累，造成各种各样的疾病。而且你要注意的是，喝水的时候不能光喝饮料。因为饮料中会加入很多后添加的物质，影响其他物质的吸收。</div>
+				<!-- <div class="advise_text">健康建议：水是万物之源，它主要的作用是辅助消化、参与新陈代谢、运送营养物质和调节抑制功能等。但是，现在的有些朋友会在工作学习中，忘了喝水。这是一个非常不好的习惯，长此下去，会使毒素在体内积累，造成各种各样的疾病。而且你要注意的是，喝水的时候不能光喝饮料。因为饮料中会加入很多后添加的物质，影响其他物质的吸收。</div> -->
 			</div>
 		</div>
 	</div>
@@ -1155,7 +1198,10 @@
 							}]
 						},
 						legend: false,
-						credits: false,
+						credits: {
+							text: '量测数据来源于高登智慧',
+							href: 'http://www.goldensmarthome.com.tw/',
+						},
 						series: [{
 							name: '心率',
 							tooltip: {
@@ -1198,7 +1244,7 @@
 					<b>{{ring_date}}</b>
 				</div>
 				<div id="chart_div_ws_ring" style="height:300px"></div>
-				<div class="advise_text">健康建议：随着社会节奏的加快，竞争的加剧，很多朋友整天就坐在电脑之前，书本之前，已经忘了自己的身体会动。这是一个非常不好的习惯。长期不运动，会造成生理性肌肉无力，而且还会使自己易患上其他疾病。所以，朋友们，再忙，也给自己动动的时间吧。 </div>
+				<!-- <div class="advise_text">健康建议：随着社会节奏的加快，竞争的加剧，很多朋友整天就坐在电脑之前，书本之前，已经忘了自己的身体会动。这是一个非常不好的习惯。长期不运动，会造成生理性肌肉无力，而且还会使自己易患上其他疾病。所以，朋友们，再忙，也给自己动动的时间吧。 </div> -->
 			</div>
 		</div>
 	</div>
@@ -1290,7 +1336,10 @@
 								title: false,
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '步数',
 								tooltip: {
@@ -1352,7 +1401,7 @@
 				</div>
 				<div>
 				</div>
-				<div class="advise_text">健康建议：油炸食品从来都是人们喜欢吃的，甚至有的人已经“离不开他了”。虽然它很香，但我要告诉你的是，长期吃油炸食品，容易造成肥胖，而且，还能增加患有其他可怕的疾病的风险。所以，吃货们，放弃油炸食品吧。</div>
+				<!-- <div class="advise_text">健康建议：油炸食品从来都是人们喜欢吃的，甚至有的人已经“离不开他了”。虽然它很香，但我要告诉你的是，长期吃油炸食品，容易造成肥胖，而且，还能增加患有其他可怕的疾病的风险。所以，吃货们，放弃油炸食品吧。</div> -->
 			</div>
 		</div>
 	</div>
@@ -1467,7 +1516,10 @@
 								// }]
 							},
 							legend: false,
-							credits: false,
+							credits: {
+								text: '量测数据来源于高登智慧',
+								href: 'http://www.goldensmarthome.com.tw/',
+							},
 							series: [{
 								name: '体重',
 								cursor: 'pointer',

@@ -14,6 +14,8 @@ class WechatController < ApplicationController
   # 微信菜单登录设定
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login
+    p '~~~~~~~~~~~~~~ login customer_report_is_read to false current: ',session[:customer_report_is_read]
+    session[:customer_report_is_read] = false
     if wx_user_sign_in? #已经登录并且已登记过的
       session[:openid] = current_user.openid
       session[:openname] = Set::Wechat.name

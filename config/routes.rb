@@ -73,6 +73,11 @@ Rails.application.routes.draw do
         get :order
         get :confirm_order
         get :feedbacks
+        get :edit_password
+        put :save_password
+        get :forget_password
+        get :coupons
+        get :get_coupons
       end
     end
     resources :portal do
@@ -90,6 +95,7 @@ Rails.application.routes.draw do
     resources :report do
       collection do
         get :qrcode
+        get :hide_guide
       end
     end
     resources :invoice_headers

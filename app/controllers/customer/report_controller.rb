@@ -9,4 +9,13 @@ class Customer::ReportController < ApplicationController
 	end
 	def qrcode
 	end
+	def hide_guide
+		# p '~~~~~~~~~~~~',params[:type]
+		if params[:type]=="once"
+			session[:customer_report_is_read] = true
+		elsif params[:type]=="forever"
+			current_user.set_config(:customer_report_is_read,true)
+		end
+		render json:{flag:true,info:"操作成功"}
+	end
 end
