@@ -141,7 +141,6 @@
         注册
         <% end -%>
       </h1>
-      <!-- <a href="javascript:;" onclick="submit_form();" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: .8em;color: rgb(1, 190, 1);margin-right: 10px;">提交</a> -->
     </header>
     <div class="mui-content" id="vue_form">
       <div style="padding: 30px;">
@@ -177,7 +176,7 @@
         </form>
       </div>
       <div class="mui-content-padded" style="margin: 10px 80px;">
-        <button onclick="submit_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">提交</button>
+        <button id="submit_button" onclick="submit_form();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">提交</button>
         <div class="link-area">
           <!-- <a href="/users/sign_in?type=use_psw" style="float: right;">使用密码登录</a> -->
           <div class="clear"></div>
@@ -348,6 +347,7 @@
     }else if( !$("#i_agree").prop("checked") ){
       mui.toast("请阅读协议并同意");
     }else{
+      $("#submit_button").attr("disabled",true);
       $('form').submit();
     }
   }
