@@ -225,10 +225,10 @@
 				})
 			}
 			$(".mui-tab-item").on('tap',function(e) {
-				// if ($(this).attr("data-url")=="/customer/report") {
-				// 	mui.toast("敬请期待");
-				// 	return false;
-				// }
+				if ($(this).attr("data-url")=="/customer/report") {
+					mui.toast("敬请期待");
+					return false;
+				}
 				if ($(this).attr("data-url")) {
 					location = $(this).attr("data-url");
 				}
