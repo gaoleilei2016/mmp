@@ -49,7 +49,11 @@
 					<a href="javascript:;">
 						<span>№{{item.out_trade_no}}</span>
 						<span style="float: right;" class="common_red">
-							<span>{{item.status_desc}}</span>
+							<span v-if="item.status=='fail'">错误</span>
+							<span v-if="item.status=='success'">已支付</span>
+							<span v-if="item.status=='succ'">支付中</span>
+							<span v-if="item.status=='refund'">已退款</span>
+							<span v-if="item.status=='abnormal'">异常</span>
 						</span>
 					</a>
 				</li>
@@ -60,7 +64,7 @@
 						</div>
 						<p class="mui-ellipsis" style="font-size: 12px;">
 							{{show_diagnoses(item.diagnoses)}}
-							<span style="float: right;">{{item.total_fee}}</span>
+							<span style="float: right;">{{format_float(item.total_fee)}}</span>
 						</p>
 				</li>
 			</ul>

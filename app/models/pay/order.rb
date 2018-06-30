@@ -21,6 +21,7 @@ class Pay::Order < ApplicationRecord
   # return_url(支付后返回路径)
   # status(订单状态 为success时是已支付)
   # status_desc(订单状态描述)
+  scope :recent, ->{order(created_at: :desc)}
 
   class << self
     # args={out_trade_no:'订单号'}
