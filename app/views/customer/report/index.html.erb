@@ -157,8 +157,8 @@
 					</div>
 					<div class="mui-card-content">
 						<div class="mui-card-content-inner">
-							<div style="margin: 6px 0;font-weight: bold;">体质指数（bmi）：</div>
-							<div>{{weight_advise.bmi}}</div>
+							<div style="margin: 6px 0;">体质指数（bmi）：<span style="font-weight: bold;">{{weight_advise.bmi}}</span></div>
+							<div style="margin: 6px 0;">血压评测：<span style="font-weight: bold;">{{blood_pressure.result}}</span></div>
 						</div>
 					</div>
 				</div>
@@ -302,6 +302,7 @@
 		template: '#member_show_div',
 		data: function() {
 			return {
+				blood_pressure: {},
 				weight_advise: {},
 				member: {},
 				member_data: {
@@ -315,7 +316,7 @@
 		},
 		methods: {
 			advise_to_html: function(text) {
-				return text.replace(/\\n/g,'<br/>')
+				return (text||'').replace(/\\n/g,'<br/>')
 			},
 			get_member: function(id) {
 				var _this = this;
@@ -391,11 +392,22 @@
 			// 	}]
 			// });
 			$.ajax({
-				// url:'/customer/report/advise.json?type=blood_pressure',
 				url:'/customer/report/advise.json?type=weight',
 				success:function(json) {
 					if (json.error==false) {
 						_this.weight_advise = json.result;
+					}else{
+						mui.toast(json.msg,{
+							duration:8000,
+						});
+					}
+				}
+			})
+			$.ajax({
+				url:'/customer/report/advise.json?type=blood_pressure',
+				success:function(json) {
+					if (json.error==false) {
+						_this.blood_pressure = json.result;
 					}else{
 						mui.toast(json.msg,{
 							duration:8000,
