@@ -1,9 +1,9 @@
 class HealthWeights < ActiveRecord::Migration[5.1]
   def change
     create_table :health_weights do |t|
-      t.column :user_id
-      t.column :sex,               :string, default: ''
+      t.column :user_id,           :integer
       t.column :age,               :integer
+      t.column :sex,               :string, default: ''
       t.column :bmi,               :string, default: ''
       t.column :height,            :string, default: ''
       t.column :code,              :string, default: ''

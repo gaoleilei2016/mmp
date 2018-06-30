@@ -89,8 +89,7 @@ class User < ApplicationRecord
   def create_weight_bmi(res)
     w = Health::Weight.create_record(res)
     return w if w[:error]
-    self.update_attributes({weight_bmi: w[:rec]})
-    return { error: false, msg: '成功获得数据', result: w[:rec].result, user: self } if w.save
+    return { error: false, msg: '成功获得数据', result: w[:rec].result, user: self } if self.update_attributes({weight_bmi: w[:rec]})
     { error: true, msg: "获取数据失败：#{w.errors.full_messages.join(',')}" }
   end
 

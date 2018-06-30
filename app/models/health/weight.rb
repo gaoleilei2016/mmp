@@ -44,9 +44,9 @@ class Health::Weight < ApplicationRecord
 
     def handle_data(args)
       bmi = bmi_value(args[:data], args[:height])
-      max_heart_rate = max_heart(args[:sex])
+      max_heart_rate = max_heart(args[:sex], args[:age])
       normal_heart_rate = normal_heart(args[:age])
-      code = get_wt_record(bmi)
+      code = get_wt_record(bmi.to_f)
       args.merge({bmi: bmi, max_heart_rate: max_heart_rate, normal_heart_rate: normal_heart_rate, code: code})
     end
 
@@ -64,7 +64,7 @@ class Health::Weight < ApplicationRecord
     end
 
     #最高心率
-    def max_heart(sex)
+    def max_heart(sex, age)
       case sex
       when '男'
         "#{205 - age}"
