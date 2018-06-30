@@ -1,6 +1,19 @@
 class Customer::PortalController < ApplicationController
 	layout "customer"
 	def index
+		if current_user.login=="admin"
+			return redirect_to "/admin/home"
+		else
+			case current_user.type_code
+			when "1"
+				return redirect_to "/hospital/home"
+			when "2"
+				return redirect_to "/ims/home"
+			else
+				# path = "/"
+				# /portal/index
+			end
+		end
 	end
 	def pullrefresh_main
 	end

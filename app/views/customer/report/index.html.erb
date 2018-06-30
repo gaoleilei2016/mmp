@@ -200,7 +200,8 @@
 							<div style="margin: 6px 0;font-weight: bold;">运动强度：</div>
 							<div>{{weight_advise.motion_intensity}}</div>
 							<div style="margin: 6px 0;font-weight: bold;">注意事项：</div>
-							<div>{{weight_advise.sport_events}}</div>
+							<div v-html="advise_to_html(weight_advise.sport_events)"></div>
+							<!-- <div>{{advise_to_html(weight_advise.sport_events)}}</div> -->
 						</div>
 					</div>
 					<a href="http://www.tenmind.com/" class="mui-card-footer">建议来源腾迈智医AIDA人工智能</a>
@@ -313,6 +314,9 @@
 			}
 		},
 		methods: {
+			advise_to_html: function(text) {
+				return text.replace(/\\n/g,'<br/>')
+			},
 			get_member: function(id) {
 				var _this = this;
 				$("#loading").show();
@@ -387,7 +391,8 @@
 			// 	}]
 			// });
 			$.ajax({
-				url:'/users/weight_advise.json',
+				// url:'/customer/report/advise.json?type=blood_pressure',
+				url:'/customer/report/advise.json?type=weight',
 				success:function(json) {
 					if (json.error==false) {
 						_this.weight_advise = json.result;

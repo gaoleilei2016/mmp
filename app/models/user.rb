@@ -19,6 +19,9 @@ class User < ApplicationRecord
 	# 	end
 	# 	super attrs
 	# end
+	has_one :weight_bmi,     class_name: 'Health::Weight'        #体重分析
+  has_one :blood_pressure, class_name: 'Health::BloodPressure' #血压分析
+
 	def is_admin?
 		admin_level=='1'
 	end
@@ -34,6 +37,66 @@ class User < ApplicationRecord
 		con = get_config ii
 		con.update_attributes(flag:flag)
 	end
+
+	#健康小站=========================
+	def health_paid?
+		ex = Time.parse(expired_in)
+		ex > Time.now
+	end
+
+	def age
+    t1 = Time.parse(birth)
+    t2 = Time.now
+    (t2-t1).to_i/(60*60*24*30*12)-1
+  end
+
+	# 获取体重数据分析
+  def get_weight_bmi
+    ws_weight = HealthCloud::WsWeight.where(userid: self.id.to_s).last rescue nil
+    return { error: true, msg: '无法找到用户的测量体重' } unless ws_weight
+    res = {sex: self.sex, age: age, height: handle_height, data: ws_weight.floWeight, user: self}
+    return update_weight_bmi(res) if self.weight_bmi.present?
+    create_weight_bmi(res)
+  end
+
+  # 获取血压数据分析
+  def get_blood_data
+    begin
+      ws_blood = HealthCloud::WsBlood.where(userid: self.id.to_s).last rescue nil
+      return { error: true, msg: '没有血压测量数据' } unless ws_blood
+      res = { systolic_value: ws_blood.intSystolic, diastolic_value: ws_blood.intDiastolic }
+      return update_blood_data(res) if self.blood_pressure.present?
+      bp = Health::BloodPressure.create_record(res.merge({user: self}))
+      return { error: false, msg: '成功获得数据', result: bp[:rec].result, user: self } unless bp[:error]
+      bp      
+    rescue Exception => e
+      { error: true, msg: e.message }
+    end
+  end
+
+  def update_blood_data(res)
+    return { error: false, msg: '成功获得数据', result: self.blood_pressure.result} if res[:diastolic_value].eql?(self.blood_pressure.diastolic_value)
+    return { error: false, msg: '成功获得数据', result: self.blood_pressure.result} if self.blood_pressure.update_attributes(Health::BloodPressure.handle_data(res))
+    { error: true, msg: "获取数据失败: #{self.blood_pressure.errors.full_messages.join(',')}" }
+  end
+
+  def update_weight_bmi(res)
+    return { error: false, msg: '成功获得数据', result: self.weight_bmi.result} if res[:sex].eql?(self.weight_bmi.sex) && res[:age].eql?(self.weight_bmi.age) && res[:height].eql?(self.weight_bmi.height) && res[:data].eql?(self.weight_bmi.data)
+    return { error: false, msg: '成功获得数据', result: self.weight_bmi.result} if self.weight_bmi.update_attributes(Health::Weight.handle_data(res))
+    { error: true, msg: "获取数据失败: #{self.weight_bmi.errors.full_messages.join(',')}" }
+  end
+
+  def create_weight_bmi(res)
+    w = Health::Weight.create_record(res)
+    return w if w[:error]
+    return { error: false, msg: '成功获得数据', result: w[:rec].result, user: self } if self.update_attributes({weight_bmi: w[:rec]})
+    { error: true, msg: "获取数据失败：#{w.errors.full_messages.join(',')}" }
+  end
+
+  def handle_height
+    self.height.to_i/100.0
+  end
+	#================================= 
 
 	# 调用： user.push_wowgo
 	# 返回结果：
