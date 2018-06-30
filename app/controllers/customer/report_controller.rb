@@ -20,7 +20,7 @@ class Customer::ReportController < ApplicationController
 		respond_to do |f|
 			f.html
 			f.json{
-				@orders = Pay::Order.where(openid: current_user.openid, pay_type: 'wechat', cost_name: '健康小站').recent.page(params[:page]).per(params[:per])
+				@orders = Pay::Order.where(openid: current_user.openid, pay_type: 'wechat', cost_name: '健康小站', status: 'success').recent.page(params[:page]).per(params[:per])
 				render json: {orders: @orders, total: @orders.total_count}
 			}
 		end
