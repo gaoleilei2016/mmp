@@ -95,6 +95,8 @@ Rails.application.routes.draw do
     resources :report do
       collection do
         get :pay
+        post :pay_order
+        post :valid_pay_status
         get :qrcode
         get :hide_guide
       end

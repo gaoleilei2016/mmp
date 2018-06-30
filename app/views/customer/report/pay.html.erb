@@ -10,153 +10,111 @@
 </style>
 <div id="vue_content">
 	<header class="my_top_nav mui-bar mui-bar-nav">
-		<a href="javascript:;" onclick="back_to_orders();" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<a href="/customer/report" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
 			<span class="mui-icon mui-icon-left-nav"></span>
 		</a>
 		<h1 class="mui-title">支付订单</h1>
+		<a href="/customer/report/orders" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right"><span>支付查询</span></a>
 	</header>
-	<div class="mui-content">
-		<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
-			<!-- <div style="color: #999;">订单支付超时，请重新下单</div> -->
-			<div style="color: #999;"><span id="set_time"></span></div>
-			<div style="font-size: 2em;padding: 6px 0;">¥ <%= sprintf("%.2f",@order.net_amt) %></div>
-			<div style="color: #999;font-size: .8em;"><%= "华希订单-#{@order.order_code}" %></div>
+	<% if current_user.openid.present? %>
+		<div class="mui-content">
+			<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
+				<div style="color: #999;"><span id="set_time">请在支付后体验本小站</span></div>
+				<div style="font-size: 2em;padding: 6px 0;">¥ 19.90</div>
+				<div style="color: #999;font-size: .8em;"><%= "贵州康云大成有限公司订单" %></div>
+			</div>
+			<ul class="mui-table-view mui-table-view-radio" style="margin-top: 15px;">
+				<li class="mui-table-view-cell mui-selected" data-type="Wechat">
+					<a class="mui-navigate-right">
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/weixin_logo.jpg" style="height: 16px;width: 16px;margin-top: 2px;">
+						微信支付
+					</a>
+				</li>
+				<% unless session[:openid] %>
+				<!-- <li class="mui-table-view-cell" data-type="Alipay">
+					<a class="mui-navigate-right">
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/alipay_logo.png" style="height: 16px;width: 16px;margin-top: 2px;">
+						支付宝支付
+					</a>
+				</li> -->
+				<% end %>
+			</ul>
+			<!-- <form id="submit_form" action="/customer/report/pay_order" method="post">
+				<input type="hidden" id="pay_type" name="pay_type">
+				<input type="hidden" name="order_id" value="">
+			</form> -->
 		</div>
-		<ul class="mui-table-view mui-table-view-radio" style="margin-top: 15px;">
-			<li class="mui-table-view-cell mui-selected" data-type="Wechat">
-				<a class="mui-navigate-right">
-					<img class="mui-media-object mui-pull-left" src="/assets/customer/weixin_logo.jpg" style="height: 16px;width: 16px;margin-top: 2px;">
-					微信支付
-				</a>
-			</li>
-			<% unless session[:openid] %>
-			<li class="mui-table-view-cell" data-type="Alipay">
-				<a class="mui-navigate-right">
-					<img class="mui-media-object mui-pull-left" src="/assets/customer/alipay_logo.png" style="height: 16px;width: 16px;margin-top: 2px;">
-					支付宝支付
-				</a>
-			</li>
-			<% end %>
+		<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
+			确认支付 ¥ 19.90
+		</button>
+	<% else %>
+	<div class="mui-content" style="background: #fff;">
+		<ul class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
+			<li class="common_red">请使用微信公众号体验本小站</li>
 		</ul>
-		<form action="/interfaces/pay_order" method="post">
-			<input type="hidden" id="pay_type" name="pay_type">
-			<input type="hidden" name="order_id" value="<%= @order.id %>">
-		</form>
+		<div style="text-align: center;">
+			<!-- <img src="/assets/admin/gzh.jpg" style="max-width: 100%;"> -->
+		</div>
 	</div>
-	<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
-		确认支付 ¥ <%= sprintf("%.2f",@order.net_amt) %>
-	</button>
+	<% end -%>
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
-	var time_str = '';
-	function back_to_orders() {
-		var btnArray = ['继续支付', '确定离开'];
-		mui.confirm('您的订单在 '+time_str+' 内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
-			if (e.index == 1) {
-				location = '/customer/home/orders';
-			} else {
+	function submit_form() {
+		// $("#submit_form").submit();
+		$.ajax({
+			url:'/customer/report/pay_order',
+			type:'post',
+			success:function(json) {
+				function onBridgeReady(){
+					WeixinJSBridge.invoke('getBrandWCPayRequest', {
+						"appId":json.appId,     //公众号名称，由商户传入     
+						"timeStamp":json.timeStamp,         //时间戳，自1970年以来的秒数     
+						"nonceStr":json.nonceStr, //随机串     
+						"package":json.package,     
+						"signType":json.signType,         //微信签名方式：     
+						"paySign":json.sign //微信签名 
+					},function(res){
+						// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+						if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+							mui.toast('正在验证支付信息...');
+							$("#loading").show();
+							$.ajax({
+								url:"/customer/report/valid_pay_status?order_id="+json.order_id,
+								type:'post',
+								success:function(json) {
+									if (json.state=='succ') {
+										location.href = '/customer/report/qrcode';
+									}else{
+										mui.toast(json.desc);
+									}
+								},
+								complete:function() {
+									$("#loading").hide();
+								},
+								error:error_fun
+							})
+						}else{
+							if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
+								mui.alert('您已取消支付。');
+							}else{
+								mui.alert("支付失败。");
+							}
+							// $("#reload_btn").removeClass("hide");
+						}
+					});
+				}
+				if (typeof WeixinJSBridge == "undefined"){
+					if( document.addEventListener ){
+						document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+					}else if (document.attachEvent){
+						document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+						document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+					}
+				}else{
+					onBridgeReady();
+				}
 			}
 		})
-	}
-	function set_time(msecond){
-		if (msecond>0) {
-			var minutes = parseInt(msecond/(1000 * 60));
-			minutes<10 ? minutes='0'+minutes : '';
-			var seconds = parseInt(msecond%(1000 * 60)/1000);
-			seconds<10 ? seconds='0'+seconds : '';
-			time_str = minutes+':'+seconds
-			$("#set_time").text('订单有效期 '+minutes+':'+seconds);
-		}else{
-			$("#set_time").addClass("common_red");
-			$("#set_time").text("订单支付超时，请重新下单");
-		}
-	};
-	// alert("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>")
-	var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>");
-	set_time( deadline - new Date() );
-	setInterval(function() {
-		set_time( deadline - new Date() );
-	},1000);
-	// var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>") - new Date("<%= Time.now.to_s.gsub('-','/') %>");
-	// set_time( deadline );
-	// setInterval(function() {
-	// 	deadline = deadline - 1000;
-	// 	set_time( deadline );
-	// },1000);
-	// document.querySelector('.mui-table-view.mui-table-view-radio').addEventListener('selected',function(e){
-	// 	console.log( e.detail );
-	// });
-	function submit_form() {
-		// alert('xxx')
-		<% if session[:openid] %>
-			function onBridgeReady(){
-				// alert("<%#= @res %>")
-				WeixinJSBridge.invoke('getBrandWCPayRequest', {
-					"appId":"<%= @res[:appId] %>",     //公众号名称，由商户传入     
-					"timeStamp":"<%= @res[:timeStamp] %>",         //时间戳，自1970年以来的秒数     
-					"nonceStr":"<%= @res[:nonceStr] %>", //随机串     
-					"package":"<%= @res[:package] %>",     
-					"signType":"<%= @res[:signType] %>",         //微信签名方式：     
-					"paySign":"<%= @res[:sign] %>" //微信签名 
-				},function(res){
-					// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
-					// alert(JSON.stringify(res.err_desc))
-					if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-						// $("#loading").show();
-						// $.ajax({
-						// 	url:'/users/replay',
-						// 	type:'post',
-						// 	success:function(json) {
-						// 		// alert("支付成功。");
-						// 		location.reload();
-						// 	},
-						// 	complete:function() {
-						// 	},
-						// 	error:function(e) {
-						// 		$("#loading").hide();
-						// 		var info = '';
-						// 		if(e.status==0){
-						// 			info = '错误: ' + e.status + ' 访问服务器失败，请检查网络或刷新重试';
-						// 		}else{
-						// 			info = '错误: ' + e.status + ' ' + e.statusText;
-						// 		}
-						// 		mui.toast(info, {
-						// 			duration: 8000
-						// 		});
-						// 	}
-						// })
-						location.href = '/customer/home/confirm_order?id=<%= params[:id] %>';
-					}else{
-						if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
-							mui.alert('您已取消支付。');
-						}else{
-							mui.alert("支付失败。");
-						}
-						$("#reload_btn").removeClass("hide");
-					}
-				});
-			}
-			if (typeof WeixinJSBridge == "undefined"){
-				if( document.addEventListener ){
-					document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-				}else if (document.attachEvent){
-					document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
-					document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-				}
-			}else{
-				onBridgeReady();
-			}
-		<% else %>
-
-			var pay_type = $(".mui-table-view-cell.mui-selected").attr('data-type');
-			if (pay_type) {
-				$("#pay_type").val(pay_type);
-				$("form").submit();
-			}else{
-				mui.toast("请选择付款方式",{duration:8000});
-				return false;
-			}
-		<% end %>
 	}
 </script>
