@@ -25,7 +25,10 @@ class Customer::ReportController < ApplicationController
 								{state: :succ, msg: '用户已支付', desc: '用户已支付'}
 							else
 								res = Pay::Wechat.order_query(order)
-								
+								if res[:state].eql?(:succ)
+									flash[:notice] = '支付成功'
+								end
+								res
 							end
 						else
 							{state: :error, msg: '无效订单号', desc: '订单号不存在'}
@@ -39,6 +42,20 @@ class Customer::ReportController < ApplicationController
 	def pay_order
 		res = Pay::Wechat.get_pay_result(current_user.openid)
 		render json: res
+	end
+
+	def advise
+		res = if params[:type].eql?('weight')
+						current_user.get_weight_bmi
+					elsif params[:type].eql?('blood_pressure')
+						current_user.get_blood_data
+					else
+						{error: true, msg: '未知的建议类型'}
+					end
+    respond_to do |f|
+      f.html
+      f.json {render json: res }
+    end
 	end
 
 	def pay
