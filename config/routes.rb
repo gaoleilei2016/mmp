@@ -100,6 +100,7 @@ Rails.application.routes.draw do
         get :qrcode
         get :hide_guide
         get :advise
+        get :orders
       end
     end
     resources :invoice_headers
