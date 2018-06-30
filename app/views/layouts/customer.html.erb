@@ -278,9 +278,9 @@
 	<script type="text/javascript">
 		<%# p '~~~~~~~~~~~~~~~~~', notice, alert, flash[:notice] %>
 		<% if flash[:notice].present? %>
-		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>",{duration:5000});
+		mui.toast("<%= (flash[:notice].to_s).gsub(/\s/,'') %>",{duration:8000});
 		<% elsif notice.present?||alert.present? %>
-		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>",{duration:5000});
+		mui.toast("<%= (notice.to_s + alert.to_s + flash[:notice].to_s).gsub(/\s/,'') %>",{duration:8000});
 		<% end -%>
 	</script>
 	<% if [["customer/portal", "index"],["customer/portal", "map"]].index([controller_path,action_name]) %>
