@@ -40,7 +40,8 @@ class User < ApplicationRecord
 
 	#健康小站=========================
 	def health_paid?
-		ex = Time.parse(expired_in)
+		ex = Time.parse(expired_in) rescue nil
+		return false unless ex
 		ex > Time.now
 	end
 
