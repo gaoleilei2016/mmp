@@ -41,16 +41,17 @@ class WechatController < ApplicationController
   end
 
   def info
-    res = begin
-          return {state: :error, msg: '无法获取微信信息', desc: '没有openid'} unless current_user&.openid
-          info = Pay::Wechat.get_wechat_info_by(current_user.openid)
-          return info unless info[:state].eql?(:succ)
-          return {state: :fail, msg: '失败', desc: '获取信息成功,但更新失败'} unless current_user.update_attributes({name: info[:res]['nickname'], headimgurl: info[:res]['headimgurl']})
-          flash[:notice] = '成功获取用户微信信息'
-          {state: :succ, msg: '成功'}
-        rescue Exception => e
-          {state: :error, msg: '错误', desc: e.message}
-        end
+    res = nil
+    begin
+      raise '没有openid' unless current_user&.openid
+      info = Pay::Wechat.get_wechat_info_by(current_user.openid)
+      raise info.to_s unless info[:state].eql?(:succ)
+      raise '获取信息成功,但更新失败' unless current_user.update_attributes({name: info[:res]['nickname'], headimgurl: info[:res]['headimgurl']})
+      flash[:notice] = '成功获取用户微信信息'
+      res = {state: :succ, msg: '成功'}
+    rescue Exception => e
+      res = {state: :error, msg: '错误', desc: e.message}
+    end
     render json: res
   end
 
