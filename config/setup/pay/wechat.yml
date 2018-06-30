@@ -17,6 +17,9 @@ defaults: &defaults
   pay_key: GuiZhouTenmindHuaXiYiliaoHuJun18 #FeiShanJie88HaoTenmindGS20170222
   notify_url: http://huaxi.tenmind.com/pay/wechat
   refund_notify_url: http://huaxi.tenmind.com/refund/wechat
+  health_total_fee: 1990
+  health_title: 康云订单
+  health_cost_name: 健康小站
   awesome_setting: <%= "#{Rails.root}/config/setup/pay/wechat/apiclient_cert.p12" %>
 
 development:
