@@ -11,6 +11,24 @@ class WechatController < ApplicationController
   #   render json: res
   # end
 
+  #发送微信客服消息 /wechat/send_data
+  def send_data
+    user = User.find_by(login: params[:login])
+    res = if user
+            return write_senddata_log({error: true, msg: '该用户不是微信公众号用户'}) if user.openid.empty?
+            ret = Pay::Wechat.send_custom_text(user.login, user.openid, params[:text])
+            write_senddata_log(ret)
+          else
+            write_senddata_log({error: false, msg: '用户不存在'})
+          end
+    render json: res
+  end
+
+  def write_senddata_log(msg)
+    PayAndSmsLog.info("----#{msg[:error]}----#{msg[:msg]}--#{msg}", {file_name: 'send_data'})
+    msg
+  end
+
   # 微信菜单登录设定
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login

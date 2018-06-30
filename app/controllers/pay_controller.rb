@@ -30,7 +30,8 @@ class PayController < ApplicationController
       return write_log("----订单未找到-#{res['out_trade_no']}----#{xml}") unless wx
       return write_log("----订单支付异常--#{res}---") unless res['return_code'].eql?('SUCCESS') && res['result_code'].eql?('SUCCESS')
       if (wx.total_fee.to_f*100).round == res['total_fee'].to_i
-        Orders::Order.find(wx.out_trade_no.split('_')[0]).order_settle("Wechat")
+        Orders::Order.find(wx.out_trade_no.split('_')[0]).order_settle("Wechat") unless wx.cost_name.eql?('健康小站')
+        write_log(wx.user_health_expired[:desc]) if wx.cost_name.eql?('健康小站')
         return write_log("-----订单已支付----#{res['out_trade_no']}") if wx.update_attributes({status: 'success', status_desc: '订单已支付'})
         write_log("------订单已支付但数据更新失败----原因:#{wx.errors.full_messages.join(',')}")
       else

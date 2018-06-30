@@ -1,4 +1,5 @@
 class Customer::ReportController < ApplicationController
+	skip_before_action :verify_authenticity_token, :only => [:pay_order, :valid_pay_status]
 	layout "customer"
 	def index
 		# p '~~~~~~~~',current_user.wowgo
@@ -8,11 +9,55 @@ class Customer::ReportController < ApplicationController
 		end
 	end
 	def qrcode
-		if true
+		if current_user.health_paid?
+		else
 			# 未收费的用户 / 收费过期的用户
 			return redirect_to '/customer/report/pay'
 		end
 	end
+
+	def valid_pay_status
+		res = if params[:order_id]
+						order = Pay::Order.find_by(out_trade_no: params[:order_id], pay_type: 'wechat')
+						if order
+							if order.status.eql?('success')
+								flash[:notice] = '支付成功'
+								{state: :succ, msg: '用户已支付', desc: '用户已支付'}
+							else
+								res = Pay::Wechat.order_query(order)
+								if res[:state].eql?(:succ)
+									flash[:notice] = '支付成功'
+								end
+								res
+							end
+						else
+							{state: :error, msg: '无效订单号', desc: '订单号不存在'}
+						end
+					else
+						{state: :error, msg: '无效订单号', desc: '订单不能为空'}
+					end
+		render json: res
+	end
+
+	def pay_order
+		res = Pay::Wechat.get_pay_result(current_user.openid)
+		render json: res
+	end
+
+	def advise
+		res = if params[:type].eql?('weight')
+						current_user.get_weight_bmi
+					elsif params[:type].eql?('blood_pressure')
+						current_user.get_blood_data
+					else
+						{error: true, msg: '未知的建议类型'}
+					end
+    respond_to do |f|
+      f.html
+      f.json {render json: res }
+    end
+	end
+
 	def pay
 		# # p '~~~~~~~ pay',params
 		# @order = ::Orders::Order.find(params[:id])

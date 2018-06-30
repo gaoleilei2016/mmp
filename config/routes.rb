@@ -259,10 +259,11 @@ Rails.application.routes.draw do
   match '/refund/wechat', to: 'refund#wechat', via: [:post]
   match '/refund/alipay', to: 'refund#alipay', via: [:post]
 
-  match '/wechat/login',  to: 'wechat#login', via: [:get]
-  match '/wechat/public_pay', to: 'wechat#pay', via: [:post]
-  match '/wechat/websocket', to: 'wechat#websocket', via: [:get]
-  match '/wechat/info',  to: 'wechat#info', via: [:post]
-  match '/wechat/push_wowgo', to: 'wechat#wowgo', via: [:post]
+  match '/wechat/login',      to: 'wechat#login',     via: [:get]
+  match '/wechat/public_pay', to: 'wechat#pay',       via: [:post]
+  match '/wechat/websocket',  to: 'wechat#websocket', via: [:get]
+  match '/wechat/info',       to: 'wechat#info',      via: [:post]
+  match '/wechat/push_wowgo', to: 'wechat#wowgo',     via: [:post]
+  match '/wechat/send_data',  to: 'wechat#send_data', via: [:post]
   ########### hujun_end   ##########
 end
