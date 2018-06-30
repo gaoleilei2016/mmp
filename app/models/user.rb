@@ -53,7 +53,7 @@ class User < ApplicationRecord
 	# 获取体重数据分析
   def get_weight_bmi
     ws_weight = HealthCloud::WsWeight.where(userid: self.id.to_s).last rescue nil
-    return { error: true, msg: '无法找到用户的测量体重' } unless ws_weight
+    return { error: true, msg: '没有体重测量数据' } unless ws_weight
     res = {sex: self.sex, age: age, height: handle_height, data: ws_weight.floWeight, user: self}
     return update_weight_bmi(res) if self.weight_bmi.present?
     create_weight_bmi(res)
