@@ -94,6 +94,7 @@ Rails.application.routes.draw do
     end
     resources :report do
       collection do
+        get :pay
         get :qrcode
         get :hide_guide
       end
