@@ -9,7 +9,7 @@ class Customer::ReportController < ApplicationController
 	end
 	def qrcode
 		if true
-			# 
+			# 未收费的用户 / 收费过期的用户
 			
 		end
 	end
