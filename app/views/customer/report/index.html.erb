@@ -61,15 +61,7 @@
 </style>
 <template id="member_show_div">
 	<div>
-		<div id="common_mask" class="mui-backdrop mui-backdrop-action mui-active" style="
-		z-index: 998;
-		<%# p '~~~~~~~~ customer_report_is_read ',session[:customer_report_is_read],current_user.get_config(:customer_report_is_read) %>
-		<% if session[:customer_report_is_read]||current_user.get_config(:customer_report_is_read).flag %>
-		display: none;
-		<% else %>
-		display: block;
-		<% end -%>
-		top: 44px;bottom: 50px;">
+		<div id="common_mask" class="mui-backdrop mui-backdrop-action mui-active" style="z-index: 998; display: none; top: 44px;bottom: 50px;">
 			<div style="text-align: right;padding: 10px 20px 0 0;">
 				<img src="/assets/customer/guide_arrow.png">
 			</div>
@@ -412,6 +404,16 @@
 						mui.toast(json.msg,{
 							duration:8000,
 						});
+					}
+				}
+			})
+			$.ajax({
+				url:'/customer/report/show_guide_flag.json?',
+				success:function(json) {
+					if (json.flag==true) {
+						$("#common_mask").show();
+					}else{
+						$("#common_mask").hide();
 					}
 				}
 			})
