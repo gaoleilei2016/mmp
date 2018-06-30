@@ -47,68 +47,21 @@
 			<ul class="mui-table-view prescription_item" style="" v-for="item in orders">
 				<li class="mui-table-view-cell">
 					<a href="javascript:;">
-						<span>№{{item.prescription_no}}</span>
+						<span>№{{item.out_trade_no}}</span>
 						<span style="float: right;" class="common_red">
-							<span v-if="item.status=='0'">未审核</span>
-							<span v-if="item.status=='1'">已审核</span>
-							<span v-if="item.status=='2'">待收费</span>
-							<span v-if="item.status=='3'">已收费</span>
-							<span v-if="item.status=='4'">已发药</span>
-							<span v-if="item.status=='6'">失效</span>
-							<span v-if="item.status=='7'">废弃</span>
-							<span v-if="item.status=='8'">已退药</span>
-							<!-- <span v-if="item.status=='9'">已退费</span> -->
-							<span v-if="item.status=='10'">
-								<!-- 完成 -->
-								<span v-if="item.bill_status=='1'">待付款</span>
-								<span v-if="item.bill_status=='2'">已收费</span>
-								<span v-if="item.bill_status=='3'">未发货</span>
-								<span v-if="item.bill_status=='4'">已发货</span>
-								<span v-if="item.bill_status=='5'">交易完成</span>
-								<span v-if="item.bill_status=='6'">已退药</span>
-								<span v-if="item.bill_status=='7'">交易关闭</span>
-							</span>
+							<span>{{item.status_desc}}</span>
 						</span>
-						<span v-if="!item.is_read" class="mui-badge" style="background: red;color: #fff;position: absolute;right: 6px;top: 10px; padding: 4px;"></span>
 					</a>
 				</li>
 				<li class="mui-table-view-cell" style="padding: 9px 15px;overflow: visible;">
-					<a :href="'/customer/home/prescription?id='+item.id">
 						<div>
-							<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
-							<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 22px;font-size:21px;line-height: 30px;color: #8A8782;text-align: center;"></i>
-							<div class="mui-media-body">
-								<div>
-									<span>{{item.org.display}}</span>
-									<span style="float: right;">{{item.created_at.slice(0,10)}}</span>
-								</div>
-								<p class="mui-ellipsis" style="font-size: 12px;">
-									{{show_diagnoses(item.diagnoses)}}
-									<span style="float: right;">{{item.author.display}}</span>
-								</p>
-							</div>
+							<span v-if="item.pay_type=='wechat'">微信支付</span>
+							<span style="float: right;">{{item.created_at.slice(0,10)}}</span>
 						</div>
-						<ul class="mui-table-view" style="margin: 6px 0 0;">
-							<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding: 9px 0;">
-								<div href="javascript:;" class="">
-									<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
-									<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
-									<div class="mui-media-body">
-										{{drug.title}}
-										<p class="mui-ellipsis" style="float: right;">
-											<span>{{drug.specification}}</span>
-										</p>
-										<p class="mui-ellipsis">
-											<span style="margin-right: 10px;" class="common_green">{{drug.route.display}}</span>
-											<span style="margin-right: 10px;" class="common_green">{{drug.dose.value}}{{drug.dose.unit}}</span>
-											<span style="" class="common_green">{{drug.frequency.display}}</span>
-											<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
-										</p>
-									</div>
-								</div>
-							</li>
-						</ul>
-					</a>
+						<p class="mui-ellipsis" style="font-size: 12px;">
+							{{show_diagnoses(item.diagnoses)}}
+							<span style="float: right;">{{item.total_fee}}</span>
+						</p>
 				</li>
 			</ul>
 		</div>
