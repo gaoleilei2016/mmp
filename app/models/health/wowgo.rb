@@ -78,6 +78,7 @@ class Health::Wowgo < ApplicationRecord
     qrcode_text = qr_code.text
     data = {'UserName' => user_name, 'Gender' => gender, 'Height' => height, 
       'BirthDate' => birth, 'ProfilePhoto' => get_headimg_data}
+    data.delete("ProfilePhoto") unless data["ProfilePhoto"].present?
     return data.merge({'QRCode_Wechat' => qrcode_text}) if api_code.eql?('new_user')
     data.merge({'Account' => user_name, 'SerialNo' => set.serialno})
   end

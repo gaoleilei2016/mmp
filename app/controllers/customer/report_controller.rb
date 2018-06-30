@@ -8,6 +8,10 @@ class Customer::ReportController < ApplicationController
 		end
 	end
 	def qrcode
+		if true
+			# 
+			
+		end
 	end
 	def hide_guide
 		# p '~~~~~~~~~~~~',params[:type]
