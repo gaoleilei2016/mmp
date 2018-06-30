@@ -99,6 +99,7 @@ Rails.application.routes.draw do
         post :valid_pay_status
         get :qrcode
         get :hide_guide
+        get :advise
       end
     end
     resources :invoice_headers
