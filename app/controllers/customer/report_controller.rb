@@ -16,6 +16,16 @@ class Customer::ReportController < ApplicationController
 		end
 	end
 
+	def orders
+		respond_to do |f|
+			f.html
+			f.json{
+				@orders = Pay::Order.where(openid: current_user.openid, pay_type: 'wechat', cost_name: '健康小站').page(params[:page]).per(params[:per])
+				render json: {orders: @orders, total: @orders.total_count}
+			}
+		end
+	end
+
 	def valid_pay_status
 		res = if params[:order_id]
 						order = Pay::Order.find_by(out_trade_no: params[:order_id], pay_type: 'wechat')
