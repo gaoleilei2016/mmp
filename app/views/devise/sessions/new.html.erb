@@ -123,10 +123,10 @@
             </h3>
             <div style="width: 250px; margin: 0 auto;">
               <el-input autofocus placeholder="用  户  名" name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
-                <i slot="prefix" class="el-input__icon fa fa-user-o fa-lg fa-fw" style="color:rgba(255, 255, 255, 0.7);"></i>
+                <i slot="prefix" class="el-input__icon fal fa-user-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i>
               </el-input>
               <el-input type="password" placeholder="密  　  码" name="user[password]" style="margin-top: 10px;" autocomplete="off">
-                <i slot="prefix" class="el-input__icon fa fa-lock fa-lg fa-fw" style="color:rgba(255, 255, 255, 0.7);"></i>
+                <i slot="prefix" class="el-input__icon fal fa-lock-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i>
               </el-input>
               <div style="margin-top: 10px;">
                 <el-checkbox :label="1" name="user[remember_me]" style="line-height: 40px; color: rgba(255, 255, 255, 0.7);">记住我</el-checkbox>
@@ -137,7 +137,7 @@
               </div>
               <div style="margin-top: 1em;text-align: center; color: rgba(255, 255, 255, 0.5);">
                 <!-- <a style="float: left;" href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;">商户入驻</a> -->
-                <a href="/users/sign_up"><span style="color: rgba(255, 255, 255, 0.5);">&nbsp;注&#12288;册&nbsp;</span></a> |
+                <a href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;"><span style="color: rgba(255, 255, 255, 0.5);">&nbsp;注&#12288;册&nbsp;</span></a> |
                 <a href="/users/password/new" onclick="current_app.$message('暂未提供密码找回方式，请联系管理员找回');return false;"><span style="color: rgba(255, 255, 255, 0.5);">忘记密码</span></a>
               </div>
             </div>

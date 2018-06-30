@@ -41,6 +41,24 @@ Rails.application.routes.draw do
     resources :organizations
     resources :users
   end
+  namespace :healthcloud do
+    resources :home do
+      collection do
+        get :templates
+      end
+    end
+    resources :partner_accounts do 
+      collection do
+        get :pictures
+        post :set_ws_sys
+        delete :def_ws_sys
+        put :update_ws_sys
+        get :find_test
+        get :get_date_by_id
+        get :get_last_data
+      end
+    end
+  end
   ########### admin ##########
   ############################
 
@@ -55,6 +73,11 @@ Rails.application.routes.draw do
         get :order
         get :confirm_order
         get :feedbacks
+        get :edit_password
+        put :save_password
+        get :forget_password
+        get :coupons
+        get :get_coupons
       end
     end
     resources :portal do
@@ -69,7 +92,12 @@ Rails.application.routes.draw do
         get :pay
       end
     end
-    resources :report
+    resources :report do
+      collection do
+        get :qrcode
+        get :hide_guide
+      end
+    end
     resources :invoice_headers
     resources :feedbacks do
       collection do

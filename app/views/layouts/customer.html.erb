@@ -57,7 +57,11 @@
 			}*/
 			.mui-bar-nav{
 				/*box-shadow: none;*/
-				background: #fff;
+				background: #14ae8f;
+				color: #fff;
+			}
+			.mui-bar-nav *{
+				color: #fff !important;
 			}
 			.mui-bar-tab .mui-tab-item.mui-active{
 				color: #14ae8f;
@@ -221,10 +225,10 @@
 				})
 			}
 			$(".mui-tab-item").on('tap',function(e) {
-				if ($(this).attr("data-url")=="/customer/report") {
-					mui.toast("敬请期待");
-					return false;
-				}
+				// if ($(this).attr("data-url")=="/customer/report") {
+				// 	mui.toast("敬请期待");
+				// 	return false;
+				// }
 				if ($(this).attr("data-url")) {
 					location = $(this).attr("data-url");
 				}

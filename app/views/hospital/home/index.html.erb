@@ -44,6 +44,97 @@
 			{value: "10", label: "完成", type: "success"},
 			// {value: "9", label: "已退费", type: "info"},
 		];
+  var ratesHash = {"QD": {
+      frequency: 1.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每日一次"
+    },
+    "BID": {
+      frequency: 2.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每日两次"
+    },
+    "TID": {
+      frequency: 3.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每日三次"
+    },
+    "QID": {
+      frequency: 4.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每日四次"
+    },
+    "QUINGID": {
+      frequency: 5.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每日五次"
+    },
+    "QN": {
+      frequency: 1.0,
+      period: 1,
+      period_unit: 'd',
+      display: "每晚一次"
+    },
+    "Q4H": {
+      frequency: 6.0,
+      period: 1,
+      period_unit: 'd',
+      display: "四小时一次"
+    },
+    "Q6H": {
+      frequency: 4.0,
+      period: 1,
+      period_unit: 'd',
+      display: "六小时一次"
+    },
+    "Q8H": {
+      frequency: 3.0,
+      period: 1,
+      period_unit: 'd',
+      display: "八小时一次"
+    },
+    "Q12H": {
+      frequency: 2.0,
+      period: 1,
+      period_unit: 'd',
+      display: "12小时一次"
+    },
+    "QH": {
+      frequency: 24.0,
+      period: 1,
+      period_unit: 'd',
+      display: "一小时一次"
+    },
+    "Q2H": {
+      frequency: 12.0,
+      period: 1,
+      period_unit: 'd',
+      display: "二小时一次"
+    },
+    "Q3H": {
+      frequency: 8.0,
+      period: 1,
+      period_unit: 'd',
+      display: "三小时一次"
+    },
+    "QOD": {
+      frequency: 1.0,
+      period: 2,
+      period_unit: 'd',
+      display: "隔日一次"
+    },
+    "QW": {
+      frequency: 1.0,
+      period: 7,
+      period_unit: 'd',
+      display: "每周一次"
+    }};
+
 
 
 	var docCommMet = new Vue({

@@ -283,6 +283,7 @@
                 window.current_template_obj = null;
                 var tmp = $('<div><div>');
                 tmp.html(html);
+                // 此处载入 current_template_obj
                 $(tmp).find("script").appendTo("body");
                 $(tmp).find("style").appendTo("body");
                 if ($(tmp).find("template").length) {

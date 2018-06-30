@@ -88,7 +88,7 @@
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
 						<div>
-							<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+							<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
 							<div class="mui-media-body">
 								<div>
 									{{item.name}}
@@ -108,7 +108,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in near_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -126,7 +126,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in history_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -144,7 +144,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in hot_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -170,7 +170,7 @@
 			<div class="mui-checkbox mui-left">
 				<input @click="check_all($event,organ)" type="checkbox" :checked="equals_array(organ.prescription_ids,organ.prescription_ids2)" style="top: 12px;left: 0px;">
 				<label style="padding-left: 26px;padding-right: 0;">
-					<img class="mui-media-object mui-pull-left head-img" src="/assets/customer/pharmacy.png">
+					<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
 					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 					<div class="mui-media-body">
 						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
@@ -213,7 +213,7 @@
 			<div style="line-height: 33px;">
 				<a href="javascript:;" @click="send_prescription_ids_session(organ)" style="float: right;width: 80px;height: 100%;text-align: center;color: #fff;" class="common_bg_green">去结算</a>
 				<div style="overflow: hidden;padding-right: 10px;">
-					<span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span>
+					<!-- <span style=""><i class="fal fa-clock" style="margin-right: 6px;"></i>{{new Date(organ.first_created_at).pattern("MM月dd日")}}</span> -->
 					<span class="common_red" style="float: right;">
 						<span>¥</span>
 						<span style="font-size: 1.5em;">{{total_price(organ)}}</span>
@@ -420,7 +420,7 @@
 				var _this = this;
 				$("#loading").show();
 				$.ajax({
-					url:'/interfaces/get_prescriptions_by_phone?phone=<%= current_user.login %>',
+					url:'/interfaces/get_prescriptions_by_phone',
 					success:function(json) {
 						if (json.flag) {
 							_this.organs = json.data;

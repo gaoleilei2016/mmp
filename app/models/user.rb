@@ -22,6 +22,18 @@ class User < ApplicationRecord
 	def is_admin?
 		admin_level=='1'
 	end
+	def get_config ii
+		con = ::Customer::Config.where(user_id:self.id,ii:ii.to_s).first
+		if con
+			con
+		else
+			con = ::Customer::Config.create(user_id:self.id,ii:ii.to_s)
+		end
+	end
+	def set_config ii,flag
+		con = get_config ii
+		con.update_attributes(flag:flag)
+	end
 
 	# 调用： user.push_wowgo
 	# 返回结果：
@@ -38,6 +50,10 @@ class User < ApplicationRecord
 		res = Health::Wowgo.new(datas)
 		return {state: :error, msg: '推送错误', desc: res.errors.full_messages.join(',')} unless res.save
 		ret = res.push_info
+		if ret[:desc] == "帳號重複"
+			self.update_attributes({wowgo: true})
+			return {state: :fail, msg: ret[:msg], desc: "#{ret[:desc]}（已修复，请尝试重新保存）"}
+		end
   	return {state: :fail, msg: ret[:msg], desc: ret[:desc]} unless ret[:state].eql?('succ')
 	  return {state: :succ, msg: '成功', desc: '推送伺服器成功'} if self.update_attributes({wowgo: true})
 		{state: :error, msg: '推送伺服器成功但更新失败', desc: self.errors.full_messages.join(',')}

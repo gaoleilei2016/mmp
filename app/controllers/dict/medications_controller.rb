@@ -1,7 +1,7 @@
 class ::Dict::MedicationsController < ApplicationController
 
   # GET
-  # /dict/diseases
+  # /dict/medications
   def index
     p "::Dict::MedicationsController index", params
     # params[:search] = "nl"
@@ -23,5 +23,12 @@ class ::Dict::MedicationsController < ApplicationController
         format.html # index.html.erb
         format.json { render json: {flag: true, info:"", data: ret} }
       end
+  end
+
+  # GET
+  # /dict/medications/:id
+  def show
+    @medication = ::Dict::Medication.find(params[:id])
+    render json:{flag: true, info: "success", data: @medication}
   end
 end
