@@ -35,6 +35,13 @@ class User < ApplicationRecord
 		con.update_attributes(flag:flag)
 	end
 
+	#健康小站=========================
+	def health_paid?
+		ex = Time.parse(expired_in)
+		ex > Time.now
+	end
+	#================================= 
+
 	# 调用： user.push_wowgo
 	# 返回结果：
 	#   错误：{state: :error, msg: '推送错误', desc: '错误描述'}
