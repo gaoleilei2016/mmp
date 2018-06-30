@@ -1,0 +1,191 @@
+<style type="text/css">
+	html,body,.mui-content{
+		/*height: 100%;*/
+		/*overflow: hidden;*/
+	}
+	.mui-content{
+		/*overflow: auto;*/
+		/*padding-bottom: 60px;*/
+	}
+	.mui-table-view-cell.no_background:after{
+		background: none;
+	}
+	.mui-table-view.no_background:after{
+		background: none;
+	}
+	.mui-table-view:before{
+		height: 1px;
+	}
+	.mui-table-view:after{
+		height: 0;
+	}
+	.mui-table-view-cell{
+		padding: 10px 15px;
+	}
+	.mui-table-view-cell:last-child{
+		padding-bottom: 13px;
+	}
+	.mui-content .mui-active{
+		background: none !important;
+	}
+	.prescription_item:not(:last-child){
+		margin-bottom: 22px;
+	}
+	.mui-table-view-cell:after{
+		left: 0;
+	}
+</style>
+<header class="my_top_nav mui-bar mui-bar-nav">
+	<a href="/customer/report" class="mui-left mui-btn mui-btn-link mui-btn-nav mui-pull-left">
+		<span class="mui-icon mui-icon-left-nav"></span>
+	</a>
+	<h1 class="mui-title">小站支付记录</h1>
+</header>
+<div id="vue_content" class="mui-content mui-scroll-wrapper" v-cloak>
+	<div class="mui-scroll">
+		<div style="min-height: 40px;">
+			<ul class="mui-table-view prescription_item" style="" v-for="item in orders">
+				<li class="mui-table-view-cell">
+					<a href="javascript:;">
+						<span>№{{item.prescription_no}}</span>
+						<span style="float: right;" class="common_red">
+							<span v-if="item.status=='0'">未审核</span>
+							<span v-if="item.status=='1'">已审核</span>
+							<span v-if="item.status=='2'">待收费</span>
+							<span v-if="item.status=='3'">已收费</span>
+							<span v-if="item.status=='4'">已发药</span>
+							<span v-if="item.status=='6'">失效</span>
+							<span v-if="item.status=='7'">废弃</span>
+							<span v-if="item.status=='8'">已退药</span>
+							<!-- <span v-if="item.status=='9'">已退费</span> -->
+							<span v-if="item.status=='10'">
+								<!-- 完成 -->
+								<span v-if="item.bill_status=='1'">待付款</span>
+								<span v-if="item.bill_status=='2'">已收费</span>
+								<span v-if="item.bill_status=='3'">未发货</span>
+								<span v-if="item.bill_status=='4'">已发货</span>
+								<span v-if="item.bill_status=='5'">交易完成</span>
+								<span v-if="item.bill_status=='6'">已退药</span>
+								<span v-if="item.bill_status=='7'">交易关闭</span>
+							</span>
+						</span>
+						<span v-if="!item.is_read" class="mui-badge" style="background: red;color: #fff;position: absolute;right: 6px;top: 10px; padding: 4px;"></span>
+					</a>
+				</li>
+				<li class="mui-table-view-cell" style="padding: 9px 15px;overflow: visible;">
+					<a :href="'/customer/home/prescription?id='+item.id">
+						<div>
+							<!-- <img class="mui-media-object mui-pull-left head-img" id="head-img" src="/assets/admin/TM.png"> -->
+							<i class="fal fa-hospital mui-media-object mui-pull-left" style="width: 22px;font-size:21px;line-height: 30px;color: #8A8782;text-align: center;"></i>
+							<div class="mui-media-body">
+								<div>
+									<span>{{item.org.display}}</span>
+									<span style="float: right;">{{item.created_at.slice(0,10)}}</span>
+								</div>
+								<p class="mui-ellipsis" style="font-size: 12px;">
+									{{show_diagnoses(item.diagnoses)}}
+									<span style="float: right;">{{item.author.display}}</span>
+								</p>
+							</div>
+						</div>
+						<ul class="mui-table-view" style="margin: 6px 0 0;">
+							<li class="mui-table-view-cell no_background" v-for="drug in item.orders" style="padding: 9px 0;">
+								<div href="javascript:;" class="">
+									<!-- <img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="border: 1px solid #ddd;border-radius: 50%;"> -->
+									<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
+									<div class="mui-media-body">
+										{{drug.title}}
+										<p class="mui-ellipsis" style="float: right;">
+											<span>{{drug.specification}}</span>
+										</p>
+										<p class="mui-ellipsis">
+											<span style="margin-right: 10px;" class="common_green">{{drug.route.display}}</span>
+											<span style="margin-right: 10px;" class="common_green">{{drug.dose.value}}{{drug.dose.unit}}</span>
+											<span style="" class="common_green">{{drug.frequency.display}}</span>
+											<span style="float: right;">¥ {{format_float(drug.price)}} x {{drug.total_quantity}} {{drug.unit}}</span>
+										</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	var current_app = new Vue({
+		el:"#vue_content",
+		data:{
+			orders:[],
+		},
+		methods:{
+			show_diagnoses:function(diagnoses) {
+				return (diagnoses||[]).map(function(v) {
+					return v.display;
+				}).join("。")
+			},
+			format_float:function(value) {
+				return (parseFloat(value)||0).toFixed(2);
+			},
+			get_orders:function(pulltype) {
+				// console.log( '~~~~~~',pulltype );
+				var _this = this;
+				$("#loading").show();
+				var per = 5;
+				if (pulltype=='pulldown') {
+					var page = 1;
+				}else{
+					var page = Math.ceil(_this.orders.length/per)+1;
+				}
+				$.ajax({
+					url:'/customer/report/orders.json?page='+page+'&per='+per,
+					success:function(json) {
+						if (pulltype=='pulldown') {
+							_this.orders = json.orders;
+							mui('#vue_content').pullRefresh().endPulldownToRefresh();
+							mui('#vue_content').pullRefresh().enablePullupToRefresh();
+							// mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
+						}else if(pulltype=='pullup'){
+							json.orders.map(function(item) {
+								_this.orders.push(item);
+							})
+						}
+						mui('#vue_content').pullRefresh().endPullupToRefresh(_this.orders.length>=json.total); //参数为true代表没有更多数据了。
+					},
+					complete:function() {
+						$("#loading").hide();
+					},
+					error:function(e) {
+						mui.toast("获取失败");
+					}
+				})
+			},
+			pulldown:function() {
+				this.get_orders('pulldown');
+			},
+			pullup:function() {
+				this.get_orders('pullup');
+			},
+		},
+		mounted:function() {
+			var _this = this;
+			mui.init({
+				pullRefresh: {
+					container: '#vue_content',
+					down: {
+						style:'circle',
+						callback: _this.pulldown
+					},
+					up: {
+						auto:true,
+						contentrefresh: '正在加载...',
+						callback: _this.pullup
+					}
+				}
+			});
+		}
+	})
+
+</script>
