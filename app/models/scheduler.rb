@@ -4,11 +4,18 @@ class Scheduler
 	require 'rufus-scheduler'
 
 	def initialize()
-		@scheduler = Rufus::Scheduler.new
 	end
 
-	def timer_at(time = "",execute = "")
-		@scheduler.at time do
+	def self.timer_at(time = "",execute = "")
+		scheduler = Rufus::Scheduler.new
+		scheduler.at time do
+		  eval(execute)
+		end
+	end
+
+	def self.cron_at(cron = "",execute = "")
+		scheduler = Rufus::Scheduler.new
+		scheduler.cron cron do
 		  eval(execute)
 		end
 	end
