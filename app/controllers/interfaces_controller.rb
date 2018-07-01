@@ -102,7 +102,7 @@ class InterfacesController < ApplicationController
 	end
 	#支付
 	def pay_order
-		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0 and order_failure_time > '#{Time.now.to_s(:db)}",params[:order_id]).last
+		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0 and order_failure_time > '#{Time.now.to_s(:db)}'",params[:order_id]).last
 		unless order
 			flash[:notice] = "订单状态不允许支付。"
 			redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
