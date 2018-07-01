@@ -66,6 +66,11 @@ class Orders::Order < ApplicationRecord
 			::Orders::Order.transaction do
 				case status.to_s
 				when '1'
+					if !cur_user && payment_type.to_s == '1' && (created_at+30.minutes) > Time.now
+						sch = ::Scheduler.new()
+						sch.timer_at(created_at + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
+						return {ret_code:'-1',info:'订单未超时'}
+					end
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
@@ -370,8 +375,8 @@ class Orders::Order < ApplicationRecord
 						result[:order] = order
 						if attrs[:payment_type].to_s == 'online'#线上收费
 							sch = ::Scheduler.new()
-							sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
-							result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
+							sch.timer_at((order.created_at + 30.minutes),"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
+							result[:info].concat("请在#{(order.created_at + 30.minutes).to_s(:db)}之前完成订单支付")
 						else
 							# if attrs[:invoice_id].blank?
 								# ::NoticeBroadcastJob.perform_later(data:data)
