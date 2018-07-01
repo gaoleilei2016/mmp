@@ -26,8 +26,8 @@ class PayController < ApplicationController
       write_log("----收到微信支付通知-----#{xml}")
       res = Hash.from_xml(xml)['xml']
       wx = Pay::Order.find_by(out_trade_no: res['out_trade_no'])
-      return write_log("----------订单已支付：不在修改支付状态---#{xml}") if wx.status.eql?('success')
       return write_log("----订单未找到-#{res['out_trade_no']}----#{xml}") unless wx
+      return write_log("----------订单已支付：不在修改支付状态---#{xml}") if wx.status.eql?('success')
       return write_log("----订单支付异常--#{res}---") unless res['return_code'].eql?('SUCCESS') && res['result_code'].eql?('SUCCESS')
       if (wx.total_fee.to_f*100).round == res['total_fee'].to_i
         Orders::Order.find(wx.out_trade_no.split('_')[0]).order_settle("Wechat") unless wx.cost_name.eql?('健康小站')
