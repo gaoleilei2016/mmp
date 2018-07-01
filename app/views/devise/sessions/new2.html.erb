@@ -1,142 +1,142 @@
-    <style>
-      .area {
-        margin: 20px auto 0px auto;
-      }
-      
-      .mui-input-group {
-        margin-top: 10px;
-      }
-      
-      .mui-input-group:first-child {
-        margin-top: 20px;
-      }
-      
-      .mui-input-group label {
-        width: 30%;
-      }
-      
-      .mui-input-row label~input,
-      .mui-input-row label~select,
-      .mui-input-row label~textarea {
-        width: 70%;
-      }
-      
-      .mui-checkbox input[type=checkbox],
-      .mui-radio input[type=radio] {
-        top: 6px;
-      }
-      
-      .mui-content-padded {
-        margin-top: 25px;
-      }
-      
-      .mui-btn {
-        padding: 10px;
-      }
-      
-      .link-area {
-        display: block;
-        margin-top: 25px;
-        text-align: center;
-      }
-      .link-area a{
-        /*color: #666;*/
-        color: #aaa;
-      }
-      
-      .spliter {
-        color: #bbb;
-        padding: 0px 12px;
-      }
-      
-      .oauth-area {
-        position: absolute;
-        bottom: 20px;
-        left: 0px;
-        text-align: center;
-        width: 100%;
-        padding: 0px;
-        margin: 0px;
-      }
-      
-      .oauth-area .oauth-btn {
-        display: inline-block;
-        width: 50px;
-        height: 50px;
-        background-size: 30px 30px;
-        background-position: center center;
-        background-repeat: no-repeat;
-        margin: 0px 20px;
-        /*-webkit-filter: grayscale(100%); */
-        border: solid 1px #ddd;
-        border-radius: 25px;
-      }
-      
-      .oauth-area .oauth-btn:active {
-        border: solid 1px #aaa;
-      }
-      
-      .oauth-area .oauth-btn.disabled {
-        background-color: #ddd;
-      }
-      body,.mui-content{
-        background: #fff;
-      }
-      .mui-input-group:before{
-        height: 0;
-      }
-      .mui-input-group:after{
-        height: 0;
-      }
-      .mui-input-group .mui-input-row:after{
-        height: 0;
-      }
-      .mui-input-row{
-        border-bottom: 1px solid #ddd;
-      }
-    </style>
+<style>
+  .area {
+    margin: 20px auto 0px auto;
+  }
+  
+  .mui-input-group {
+    margin-top: 10px;
+  }
+  
+  .mui-input-group:first-child {
+    margin-top: 20px;
+  }
+  
+  .mui-input-group label {
+    width: 30%;
+  }
+  
+  .mui-input-row label~input,
+  .mui-input-row label~select,
+  .mui-input-row label~textarea {
+    width: 70%;
+  }
+  
+  .mui-checkbox input[type=checkbox],
+  .mui-radio input[type=radio] {
+    top: 6px;
+  }
+  
+  .mui-content-padded {
+    margin-top: 25px;
+  }
+  
+  .mui-btn {
+    padding: 10px;
+  }
+  
+  .link-area {
+    display: block;
+    margin-top: 25px;
+    text-align: center;
+  }
+  .link-area a{
+    /*color: #666;*/
+    color: #aaa;
+  }
+  
+  .spliter {
+    color: #bbb;
+    padding: 0px 12px;
+  }
+  
+  .oauth-area {
+    position: absolute;
+    bottom: 20px;
+    left: 0px;
+    text-align: center;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+  }
+  
+  .oauth-area .oauth-btn {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    background-size: 30px 30px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    margin: 0px 20px;
+    /*-webkit-filter: grayscale(100%); */
+    border: solid 1px #ddd;
+    border-radius: 25px;
+  }
+  
+  .oauth-area .oauth-btn:active {
+    border: solid 1px #aaa;
+  }
+  
+  .oauth-area .oauth-btn.disabled {
+    background-color: #ddd;
+  }
+  body,.mui-content{
+    background: #fff;
+  }
+  .mui-input-group:before{
+    height: 0;
+  }
+  .mui-input-group:after{
+    height: 0;
+  }
+  .mui-input-group .mui-input-row:after{
+    height: 0;
+  }
+  .mui-input-row{
+    border-bottom: 1px solid #ddd;
+  }
+</style>
 
-    <h1></h1>
+<h1></h1>
 
-    <!-- <header class=" mui-bar mui-bar-nav">
-      <h1 class="mui-title">登录</h1>
-      <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: 16px;color: rgb(1, 190, 1);margin-right: 10px;">注册</a>
-    </header> -->
-    <div class="mui-content">
-      <div style="text-align: center;margin: 70px 0 0px;">
-        <img src="/assets/admin/TM.png" style="width: 100px;"/>
+<!-- <header class=" mui-bar mui-bar-nav">
+  <h1 class="mui-title">登录</h1>
+  <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right" style="float: right;font-size: 16px;color: rgb(1, 190, 1);margin-right: 10px;">注册</a>
+</header> -->
+<div class="mui-content">
+  <div style="text-align: center;margin: 70px 0 0px;">
+    <img src="/assets/admin/TM.png" style="width: 100px;"/>
+  </div>
+  <div style="padding: 30px;">
+    <form id='login-form' class="mui-input-group" action="/users/sign_in" method="post">
+      <input type="hidden" name="user[remember_me]" value="1">
+      <div class="mui-input-row">
+        <span class="mui-icon mui-icon-phone" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
+        <input autofocus type="number" oninput="if(value.length>11)value=value.slice(0,11)" id="login_input" name="user[login]" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" style="padding-left: 40px;font-size: 16px;" autocomplete="off">
       </div>
-      <div style="padding: 30px;">
-        <form id='login-form' class="mui-input-group" action="/users/sign_in" method="post">
-          <input type="hidden" name="user[remember_me]" value="1">
-          <div class="mui-input-row">
-            <span class="mui-icon mui-icon-phone" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input autofocus type="number" oninput="if(value.length>11)value=value.slice(0,11)" id="login_input" name="user[login]" class="mui-input-clear mui-input" placeholder="手机号" value="<%= flash[:login] %>" style="padding-left: 40px;font-size: 16px;" autocomplete="off">
-          </div>
-          <div class="mui-input-row">
-            <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
-            <input type="password" maxlength="16" name="user[password]" class="mui-input-clear mui-input" placeholder="密码" style="padding-left: 40px;font-size: 16px;">
-          </div>
-        </form>
+      <div class="mui-input-row">
+        <span class="mui-icon mui-icon-locked" style="font-size: 20px; position: absolute; z-index: 1; top: 10px; left: 0; width: 38px; height: 38px; text-align: center; color: #999; "></span>
+        <input type="password" maxlength="16" name="user[password]" class="mui-input-clear mui-input" placeholder="密码" style="padding-left: 40px;font-size: 16px;">
       </div>
-      <!-- <form class="mui-input-group">
-        <ul class="mui-table-view mui-table-view-chevron">
-          <li class="mui-table-view-cell">
-            自动登录
-            <div id="autoLogin" class="mui-switch mui-active">
-              <div class="mui-switch-handle"></div>
-            </div>
-          </li>
-        </ul>
-      </form> -->
-      <div class="mui-content-padded" style="margin: 10px 80px;">
-        <button onclick="$('form').submit();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">登录</button>
-        <div class="link-area">
-          <a href="javascript:;" onclick="location.href='/users/sign_up?forget_password=true&login='+$('#login_input').val()" style="font-size: 12px;">忘记密码?</a>
-          <span class="spliter">|</span>
-          <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" class="" style="font-size: 12px;">注册</a>
-          <!-- <a href="/users/sign_up" style="float: right;">注冊</a> -->
-          <!-- <div class="clear"></div> -->
+    </form>
+  </div>
+  <!-- <form class="mui-input-group">
+    <ul class="mui-table-view mui-table-view-chevron">
+      <li class="mui-table-view-cell">
+        自动登录
+        <div id="autoLogin" class="mui-switch mui-active">
+          <div class="mui-switch-handle"></div>
         </div>
-      </div>
+      </li>
+    </ul>
+  </form> -->
+  <div class="mui-content-padded" style="margin: 10px 80px;">
+    <button onclick="$('form').submit();" class="mui-btn mui-btn-block mui-btn-primary common_bg_green" style="border: 0;border-radius: 16px;padding: 4px;">登录</button>
+    <div class="link-area">
+      <a href="javascript:;" onclick="location.href='/users/sign_up?forget_password=true&login='+$('#login_input').val()" style="font-size: 12px;">忘记密码?</a>
+      <span class="spliter">|</span>
+      <a href="javascript:;" onclick="location.href='/users/sign_up?login='+$('#login_input').val()" class="" style="font-size: 12px;">注册</a>
+      <!-- <a href="/users/sign_up" style="float: right;">注冊</a> -->
+      <!-- <div class="clear"></div> -->
     </div>
+  </div>
+</div>

@@ -164,11 +164,13 @@
 <header class="my_top_nav mui-bar mui-bar-nav">
 	<a onclick="location='/customer/report'" class="mui-icon mui-icon-left-nav mui-pull-left"></a>
 	<h1 class="mui-title">体检二维码</h1>
+	<a onclick="location='/customer/report/orders'" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right"><span>支付查询</span></a>
 </header>
 <div class="mui-content" style="background: #fff;">
 	<div class="mui-content-padded" style="padding-top: 30px;">
 		<div style="text-align: center;font-size: 16px;color: #333;">请向健康小站出示此二维码</div>
 		<div style="text-align: center;font-size: 16px;color: #333;">横屏或者显示不完整时请单击二维码</div>
+		<div style="text-align: center;font-size: 16px;color: #333;">此二维码24小时内有效</div>
 		<img src="<%= current_user.get_qr_code[:base64] %>" style="width: 100%;" data-preview-src="" data-preview-group="1"/>
 	</div>
 </div>

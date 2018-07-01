@@ -26,7 +26,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :strUserAccount
 			t.timestamps
 		end
-		# 3
+		# 3 ############################# 部分属性错误, 下次迁移修复
 		create_table :health_cloud_ws_diets do |t|
 			t.integer :intServerID
 			t.string :datRecordTime
@@ -75,7 +75,7 @@ class CreateHealthcloudTables < ActiveRecord::Migration[5.1]
 			t.string :strUserAccount
 			t.timestamps
 		end
-		# 6
+		# 6 ############################# 部分属性错误, 下次迁移修复
 		create_table :health_cloud_ws_hearts do |t|
 			t.integer :intServerID
 			t.string :datRecordTime

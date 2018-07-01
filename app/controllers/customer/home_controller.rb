@@ -15,7 +15,7 @@ class Customer::HomeController < ApplicationController
 		if current_user.valid?
 			if params[:from]=='healthcloud'
 				res = current_user.push_wowgo
-				# p '~~~~~~~~~~~~',res
+				p '~~~~~~~~~~~~ from healthcloud',res
 				flash[:notice] = res[:desc]
 				if res[:state]==:succ
 					redirect_to '/customer/report?first_use=true'
@@ -25,7 +25,7 @@ class Customer::HomeController < ApplicationController
 			else
 				Thread.new{
 					res = current_user.push_wowgo
-					# p '~~~~~~~~~~~~',res
+					p '~~~~~~~~~~~~ from edit',res
 				}
 				flash[:notice] = '保存成功'
 				redirect_to '/customer/home'
@@ -55,5 +55,27 @@ class Customer::HomeController < ApplicationController
 				render json:{flag:true,prescription:pre.to_web_front}
 			}
 		end
+	end
+	def save_password
+		# p '~~~~~~~~~~',params
+		# p current_user.valid_password?(params[:users][:old_password])
+		if current_user.valid_password?(params[:users][:old_password])
+			current_user.password = params[:users][:new_password]
+			current_user.save
+			flash[:notice] = "保存成功"
+			redirect_to "/customer/home"
+		else
+			flash[:notice] = "密码错误"
+			render "/customer/home/edit_password"
+		end
+	end
+	def forget_password
+		login = current_user.login
+		sign_out(current_user)
+		redirect_to "/users/sign_up?forget_password=true&login=#{login}"
+	end
+	# 卡券
+	def get_coupons
+		render json:{flag:true,rows:[],total:0}
 	end
 end

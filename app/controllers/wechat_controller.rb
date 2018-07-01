@@ -11,9 +11,29 @@ class WechatController < ApplicationController
   #   render json: res
   # end
 
+  #发送微信客服消息 /wechat/send_data
+  def send_data
+    user = User.find_by(login: params[:login])
+    res = if user
+            return write_senddata_log({error: true, msg: '该用户不是微信公众号用户'}) if user.openid.empty?
+            ret = Pay::Wechat.send_custom_text(user.login, user.openid, params[:text])
+            write_senddata_log(ret)
+          else
+            write_senddata_log({error: false, msg: '用户不存在'})
+          end
+    render json: res
+  end
+
+  def write_senddata_log(msg)
+    PayAndSmsLog.info("----#{msg[:error]}----#{msg[:msg]}--#{msg}", {file_name: 'send_data'})
+    msg
+  end
+
   # 微信菜单登录设定
   # 登录调转到'/'; 未登录调转到'/users/sign_up'
   def login
+    p '~~~~~~~~~~~~~~ login customer_report_is_read to false current: ',session[:customer_report_is_read]
+    session[:customer_report_is_read] = false
     if wx_user_sign_in? #已经登录并且已登记过的
       session[:openid] = current_user.openid
       session[:openname] = Set::Wechat.name
@@ -39,16 +59,17 @@ class WechatController < ApplicationController
   end
 
   def info
-    res = begin
-          return {state: :error, msg: '无法获取微信信息', desc: '没有openid'} unless current_user&.openid
-          info = Pay::Wechat.get_wechat_info_by(current_user.openid)
-          return info unless info[:state].eql?(:succ)
-          return {state: :fail, msg: '失败', desc: '获取信息成功,但更新失败'} unless current_user.update_attributes({name: info[:res]['nickname'], headimgurl: info[:res]['headimgurl']})
-          flash[:notice] = '成功获取用户微信信息'
-          {state: :succ, msg: '成功'}
-        rescue Exception => e
-          {state: :error, msg: '错误', desc: e.message}
-        end
+    res = nil
+    begin
+      raise '没有openid' unless current_user&.openid
+      info = Pay::Wechat.get_wechat_info_by(current_user.openid)
+      raise info.to_s unless info[:state].eql?(:succ)
+      raise '获取信息成功,但更新失败' unless current_user.update_attributes({name: info[:res]['nickname'], headimgurl: info[:res]['headimgurl']})
+      flash[:notice] = '成功获取用户微信信息'
+      res = {state: :succ, msg: '成功'}
+    rescue Exception => e
+      res = {state: :error, msg: '错误', desc: e.message}
+    end
     render json: res
   end
 

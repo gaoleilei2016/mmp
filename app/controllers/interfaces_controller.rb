@@ -12,7 +12,9 @@ class InterfacesController < ApplicationController
 	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	# 获取未取药的有效的处方，并按医院合并后下订单
 	def get_prescriptions_by_phone
-		cur_phone = params[:phone]
+		# cur_phone = params[:phone]
+		raise "未登录的用户" unless current_user
+		cur_phone = current_user.login
 		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
 		ret = []
 		::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| 
@@ -35,7 +37,9 @@ class InterfacesController < ApplicationController
 	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	# 获取所有处方以及过期等状态
 	def get_all_prescriptions_by_phone
-		cur_phone = params[:phone].to_s
+		# cur_phone = params[:phone].to_s
+		raise "未登录的用户" unless current_user
+		cur_phone = current_user.login
 		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
 		ret = []
 		page = params[:page]||1
@@ -45,7 +49,7 @@ class InterfacesController < ApplicationController
 			ret << _prescription.to_web_front
 		end
 		count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
-		render json: {flag: true, info: "success", data: ret, count: count}
+		render json: {flag: true, info: "success", rows: ret, total: count}
 	end
 
 	# PUT

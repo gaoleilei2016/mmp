@@ -102,7 +102,50 @@ class Pay::Wechat
     def refund_query()
     end
 
-    def order_query()
+    # 支付订单查询
+    def order_query_url
+      'https://api.mch.weixin.qq.com/pay/orderquery'
+    end
+
+    def order_query(order)
+      begin
+        write_log_return({state: :start, msg: '订单查询', desc: '开始'})
+        data = {out_trade_no: order.out_trade_no, appid: wx.appid, mch_id: wx.mchid, nonce_str: new_pass(32), sign_type: 'MD5'}
+        encrypt_data = handle_send_datas(data)
+        res = send_data(order_query_url, encrypt_data)
+        return write_log_return({state: :fail, msg: '请求失败', desc: res['return_msg']}) if res['return_code'].eql?('FAIL')
+        return write_log_return({state: :fail, msg: '请求失败', desc: "#{res['err_code']}: #{res['err_code_des']}"}) if res['result_code'].eql?('FAIL')
+        return write_log_return({state: :error, msg: '订单状态更新失败', desc: order.errors.full_messages.join(',')}) unless order.update_attributes({status: 'success', status_desc: '订单已支付'})
+        order.user_health_expired
+      rescue Exception => e
+        write_log_return({state: :error, msg: '系统错误', desc: e.message})
+      end
+    end
+
+    def send_custom_text(login, openid, data)
+      begin
+        res = JSON.parse(RestClient.get(access_token_url).body)
+        return { error: true, state: :fail, msg: 'token获取失败', desc: res['errmsg'] } if res['errmsg']
+        ret = push_wechat(custom_url(res['access_token']), custom_text(openid, data))
+        return {error: false, state: :succ, msg: "成功将消息推送到#{login}用户的微信上"} if ret['errmsg'].eql?('ok')
+        {error: true, state: :fail, msg: "发送消息失败: #{ret['errmsg']}"}
+      rescue RestClient::Exceptions::OpenTimeout => e
+        {error: true, state: :timeout, msg: '连接微信服务超时'}  
+      rescue Exception => e
+        {error: true, state: :error, msg: e.message}
+      end
+    end
+
+    def push_wechat(url, data)
+      JSON.parse(RestClient.post(url, data.to_json, {content_type: :json, accept: :json}).body)
+    end
+
+    def custom_url(token)
+      "https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=#{token}"
+    end
+
+    def custom_text(openid, content)
+      {touser: openid, msgtype: 'text', text: {content: content}}
     end
 
     #处理支付金额
@@ -191,6 +234,20 @@ class Pay::Wechat
       end
     end
 
+    def get_pay_result(openid)
+      args = {out_trade_no: get_trade_no, total_fee: wx.health_total_fee, title: '华希订单',
+        cost_name: '健康小站', openid: openid}
+      public_pay(args)
+    end
+
+    # 前三位091是康云的编码
+    def get_trade_no(num = 0)
+      trade_no = "091#{Time.now.strftime('%Y%m%d%H%M%S')}#{num}"
+      order = Pay::Order.find_by(out_trade_no: trade_no, pay_type: 'wechat')
+      return get_trade_no(num + 1) if order
+      trade_no
+    end
+
     #公众号支付
     # args = {out_trade_no: '', total_fee: 0.0, title: '', cost_name: '', openid: ''}
     def public_pay(args)
@@ -219,10 +276,10 @@ class Pay::Wechat
       p '2222222222222222222222222222', res
       data = {}
       if res['err_code_des'].eql?('该订单已支付')
-        data = { state: :success, msg: '支付成功', desc: '支付已完成'}
+        data = { state: :success, msg: '支付成功', desc: '支付已完成', order_id: order.out_trade_no}
       elsif res['return_code'].eql?('SUCCESS')
         if res['result_code'].eql?('SUCCESS')
-          data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'] }
+          data = { state: :succ, msg: '成功提交', desc: '成功提交支付, 等待用户支付中', prepay_id: res['prepay_id'], order_id: order.out_trade_no}
         else
           data = {state: :fail, msg: '请求失败', desc: res['err_code_des']}
         end
