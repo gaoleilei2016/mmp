@@ -272,7 +272,6 @@ class Pay::Wechat
       openid: order.openid, trade_type: 'JSAPI'}
 
       ret = handle_send_datas(datas)
-      p '7777777777777777777777777777', ret
       res = Hash.from_xml(RestClient.post(wx.pay_url, ret).body)['xml']
       p '2222222222222222222222222222', res
       data = {}
