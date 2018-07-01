@@ -91,13 +91,13 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i<=0#取消订单回调处方
+					# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i<=0#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
 				when '6'
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
+					# ::Orders::Order.cancel_bill(self.prescriptions,cur_user)#取消订单回调处方
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					result = {ret_code:'0',info:'订单已取消。'}
 					# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
@@ -125,13 +125,14 @@ class Orders::Order < ApplicationRecord
 			case status.to_s
 			when '1'
 
-			when '2'
+			when '2'#已收费
 				::Orders::Order.transaction do
-					if is_send_medical.to_i>0
+					if is_send_medical.to_i>0#是否发过药
 						update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:'药房退款')
-						# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
+						# ::Orders::Order.cancel_prescriptions(self.prescriptions,attrs[:current_user])#线下的处方废弃
 					else
 						update_attributes(status:'1')
+						# ::Orders::Order.cancel_bill(self.prescriptions,cur_user) #if is_send_medical.to_i>0#处方回到已审核
 					end
 				end
 				result = {ret_code:'0',info:'退费成功'}
@@ -139,14 +140,16 @@ class Orders::Order < ApplicationRecord
 
 			when '4'
 
-			when '5'
+			when '5'#完成
 				::Orders::Order.transaction do
 					update_attributes(status:'2',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					# cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
 					if self.payment_type.to_s == '2' #如果是线下支付的
-						::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
-						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
+						# ::Orders::Order.cancel_bill(self.prescriptions,attrs[:current_user])#处方回到已审核
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
+						# ::Orders::Order.cancel_prescriptions(self.prescriptions,attrs[:current_user])#线下的处方废弃
 					end
+					
 				end
 				result[:ret_code] = '0'
 				result[:info] = '退药成功！'
@@ -174,8 +177,8 @@ class Orders::Order < ApplicationRecord
 		arg = {
 		# 退费人
 			return_charge_opt: {
-				id: cur_user.id.to_s,
-				display: cur_user.name.to_s
+				id: cur_user&.id.to_s,
+				display: cur_user&.name.to_s
 			},
 			# 退费时间
 			return_charge_at: Time.now.to_s(:db)
@@ -240,8 +243,22 @@ class Orders::Order < ApplicationRecord
 
 	class << self
 		#取消订单时回调处方
-		def cancel_bill(pres,arg={},current_user)
-			pres.each{|x|x.cancel_bill(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
+		def cancel_bill(pres,current_user)
+			arg = {}
+			pres.each{|x|x.cancel_bill(arg, current_user)}
+		end
+		#废弃处方 退款时
+		def cancel_prescriptions(pres,current_user)
+			arg = {
+					# 废弃人
+					abandonor: {
+						id: current_user&.id,
+						display: current_user&.name
+					},
+					# 废弃时间
+					abandon_at: Time.now
+				}
+			pres.each{|x|x.abandon(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
 		end
 		#检查订单定时器
 		def check_order_timer
@@ -342,7 +359,7 @@ class Orders::Order < ApplicationRecord
 							order.prescriptions << prescription
 							prescription.bill = order
 							prescription.save
-							prescription.commit_bill(args, attrs[:current_user])#改变处方状态
+							prescription.commit_bill(args, attrs[:current_user])#改变处方为完成
 							details.each do |detail|
 								net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 								order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt,prescription_id:k}))

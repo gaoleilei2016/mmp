@@ -91,6 +91,9 @@ class Customer::ReportController < ApplicationController
 		# 	return redirect_to "/customer/home/order?id=#{@order.id}"
 		# end
 	end
+	def show_guide_flag
+		render json:{flag: !(session[:customer_report_is_read]||current_user.get_config(:customer_report_is_read).flag) }
+	end
 	def hide_guide
 		# p '~~~~~~~~~~~~',params[:type]
 		if params[:type]=="once"

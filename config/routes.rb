@@ -98,6 +98,7 @@ Rails.application.routes.draw do
         post :pay_order
         post :valid_pay_status
         get :qrcode
+        get :show_guide_flag
         get :hide_guide
         get :advise
         get :orders
