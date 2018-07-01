@@ -18,7 +18,7 @@
 	<div class="mui-content">
 		<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
 			<!-- <div style="color: #999;">订单支付超时，请重新下单</div> -->
-			<div style="color: #999;"><span id="set_time">请在 <%= @order.order_failure_time.getlocal.to_s.slice(0,16) rescue nil %> 前完成支付</span></div>
+			<div style="color: #999;">请在 <span id="set_time"><%= @order.order_failure_time.getlocal.to_s.slice(0,16) rescue nil %></span> 前完成支付</div>
 			<div style="font-size: 2em;padding: 6px 0;">¥ <%= sprintf("%.2f",@order.net_amt) %></div>
 			<div style="color: #999;font-size: .8em;"><%= "华希订单-#{@order.order_code}" %></div>
 		</div>
@@ -49,10 +49,10 @@
 </div>
 <script type="text/javascript">
 	$("#bottom_tabs").remove();
-	var time_str = '';
+	// var time_str = '';
 	function back_to_orders() {
 		var btnArray = ['继续支付', '确定离开'];
-		mui.confirm('您的订单在 '+time_str+' 内未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
+		mui.confirm('您的订单在 '+$("#set_time").text()+' 前未支付将被取消，请尽快完成支付。','', btnArray, function(e) {
 			if (e.index == 1) {
 				location = '/customer/home/orders';
 			} else {
