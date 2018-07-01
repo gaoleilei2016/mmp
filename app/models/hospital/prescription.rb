@@ -405,6 +405,11 @@ class ::Hospital::Prescription < ApplicationRecord
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
 		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: self.tookcode, url: url, phone: cur_encounter.phone}
 		Sms::Data.send_phone(args)
+		Thread.new{
+			# 发微信
+			url2 = "http://#{ ::User.server_ips(:mmp) }/wechat/send_data"
+			RestClient.post(url2,{login:cur_encounter.phone,text:"您有新的处方，请注意查收"})
+		}
 	end
 
 	class<<self
