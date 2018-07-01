@@ -235,7 +235,7 @@ class Pay::Wechat
     end
 
     def get_pay_result(openid)
-      args = {out_trade_no: get_trade_no, total_fee: wx.health_total_fee, title: '康云订单',
+      args = {out_trade_no: get_trade_no, total_fee: wx.health_total_fee, title: '华希订单',
         cost_name: '健康小站', openid: openid}
       public_pay(args)
     end
