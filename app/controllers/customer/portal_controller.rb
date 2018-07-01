@@ -30,10 +30,10 @@ class Customer::PortalController < ApplicationController
 			args[:openid] = session[:openid]
 			# 微信内部支付
 			@res = Pay::Wechat.public_pay(args)
-			# p args,@res
+			# p "~~~~~~~~~~~~~~~~~",args,@res
 			if @res[:state]==:succ
 			else
-				flash[:notice] = @res[:desc]
+				flash[:notice] = @res[:desc].present? ? @res[:desc] : @res[:msg]
 				return redirect_to "/"
 			end
 			# p '~~~~~~~~~~',res

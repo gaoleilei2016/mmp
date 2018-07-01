@@ -18,7 +18,7 @@
 	<div class="mui-content">
 		<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
 			<!-- <div style="color: #999;">订单支付超时，请重新下单</div> -->
-			<div style="color: #999;"><span id="set_time"></span></div>
+			<div style="color: #999;"><span id="set_time">请在 <%= @order.order_failure_time.getlocal.to_s.slice(0,16) rescue nil %> 前完成支付</span></div>
 			<div style="font-size: 2em;padding: 6px 0;">¥ <%= sprintf("%.2f",@order.net_amt) %></div>
 			<div style="color: #999;font-size: .8em;"><%= "华希订单-#{@order.order_code}" %></div>
 		</div>
@@ -59,34 +59,24 @@
 			}
 		})
 	}
-	function set_time(msecond){
-		if (msecond>0) {
-			var minutes = parseInt(msecond/(1000 * 60));
-			minutes<10 ? minutes='0'+minutes : '';
-			var seconds = parseInt(msecond%(1000 * 60)/1000);
-			seconds<10 ? seconds='0'+seconds : '';
-			time_str = minutes+':'+seconds
-			$("#set_time").text('订单有效期 '+minutes+':'+seconds);
-		}else{
-			$("#set_time").addClass("common_red");
-			$("#set_time").text("订单支付超时，请重新下单");
-		}
-	};
-	// alert("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>")
-	var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>");
-	set_time( deadline - new Date() );
-	setInterval(function() {
-		set_time( deadline - new Date() );
-	},1000);
-	// var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>") - new Date("<%= Time.now.to_s.gsub('-','/') %>");
-	// set_time( deadline );
+	// function set_time(msecond){
+	// 	if (msecond>0) {
+	// 		var minutes = parseInt(msecond/(1000 * 60));
+	// 		minutes<10 ? minutes='0'+minutes : '';
+	// 		var seconds = parseInt(msecond%(1000 * 60)/1000);
+	// 		seconds<10 ? seconds='0'+seconds : '';
+	// 		time_str = minutes+':'+seconds
+	// 		$("#set_time").text('订单有效期 '+minutes+':'+seconds);
+	// 	}else{
+	// 		$("#set_time").addClass("common_red");
+	// 		$("#set_time").text("订单支付超时，请重新下单");
+	// 	}
+	// };
+	// var deadline = new Date("<%= (@order.created_at+30.minutes).to_s.gsub('-','/') %>");
+	// set_time( deadline - new Date() );
 	// setInterval(function() {
-	// 	deadline = deadline - 1000;
-	// 	set_time( deadline );
+	// 	set_time( deadline - new Date() );
 	// },1000);
-	// document.querySelector('.mui-table-view.mui-table-view-radio').addEventListener('selected',function(e){
-	// 	console.log( e.detail );
-	// });
 	function submit_form() {
 		// alert('xxx')
 		<% if session[:openid] %>
