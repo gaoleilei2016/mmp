@@ -15,4 +15,3 @@ log/*.*
 config/puma.rb
 config/database.yml
 config/rabbitmq.yml
-config/setup/ip.yml
