@@ -12,10 +12,10 @@ defaults: &defaults
   sign_type: RSA2
   product_code: 2018060810537243
   version: 1.0
-  domain_name: http://huaxi.tenmind.com
-  notify_url: http://huaxi.tenmind.com/pay/alipay
-  refund_notify_url: http://huaxi.tenmind.com/refund/alipay
-  return_url: http://huaxi.tenmind.com
+  domain_name: http://mdp.tenmind.com
+  notify_url: http://mdp.tenmind.com/pay/alipay
+  refund_notify_url: http://mdp.tenmind.com/refund/alipay
+  return_url: http://mdp.tenmind.com
   public_key_root: <%= "#{Rails.root}/app/models/pay/alipay/alipay.pem" %>
   private_key_root: <%= "#{Rails.root}/app/models/pay/alipay/rsa_private_key.pem" %>
 
