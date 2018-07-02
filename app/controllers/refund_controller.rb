@@ -18,8 +18,9 @@ class RefundController < ApplicationController
       return if value[:error]
       ref = Pay::Refund.find_by(out_refund_no: value[:res]['out_refund_no'])
       return write_log_return({state: :notfund, msg: '退款单号错误', desc: '未找到退款单'}) unless ref
+      return write_log_return({state: :fail, msg: '订单已退款', desc: '不再修改状态'}) if ref.status.eql?('success')
       return write_log_return({state: :error_status, msg: '失败', desc: '退款失败'}) unless value[:res]['refund_status'].eql?('SUCCESS')
-      return write_log_return({state: :error_fee, msg: '错误', desc: '退款金额错误'}) unless (ref.refund_fee.to_f*100).round.eql?(value[:res]['refund_fee'])
+      return write_log_return({state: :error_fee, msg: '错误', desc: '退款金额错误'}) unless (ref.refund_fee.to_f*100).round.eql?(value[:res]['refund_fee'].to_i)
       return write_log_return({state: :success, msg:'成功', desc: '退款成功'}) if ref.update_attributes({status: :success, status_desc: value[:res]['refund_recv_accout']})
       write_log_return({state: :fail, msg: '退款成功但更新数据库记录出错', desc: ref.errors.full_messages.join(',')})
       render json: {return_code: 'SUCCESS', return_msg: 'OK'}.to_json

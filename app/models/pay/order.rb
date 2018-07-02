@@ -21,11 +21,20 @@ class Pay::Order < ApplicationRecord
   # return_url(支付后返回路径)
   # status(订单状态 为success时是已支付)
   # status_desc(订单状态描述)
+  scope :recent, ->{order(created_at: :desc)}
 
   class << self
     # args={out_trade_no:'订单号'}
     def query_res(args)
     end
+  end
+
+  def user_health_expired
+    user = User.find_by(openid: openid)
+    return {state: :notfund, msg: '用户未找到', desc: "--------未找到[#{openid}]对应的用户"} unless user
+    ex = Time.now.next_day.to_s
+    return {state: :succ, msg: '用户已支付', desc: "-----#{user.login}用户的健康二维码有效期为#{ex}"} if user.update_attributes({expired_in: ex})
+    {state: :error, msg: '更新有效期失败', desc: "-----#{user.login}用户的健康二维码有效期更新失败: #{user.errors.full_messages.join(',')}"}
   end
 
   def public_openid

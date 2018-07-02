@@ -8,18 +8,6 @@
 			</el-breadcrumb>
 		</div>
 		<el-tabs type="border-card">
-			<el-tab-pane label="血压">
-				<el-table :data="ws_blood_lists" highlight-current-row style="margin-bottom: 8px;">
-					<el-table-column type="index" width="60"></el-table-column>
-					<el-table-column property="strUserAccount" label="账号"></el-table-column>
-					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
-					<el-table-column property="intSystolic" label="收缩压(mmHg)"></el-table-column>
-					<el-table-column property="intDiastolic" label="舒张压(mmHg)"></el-table-column>
-					<el-table-column property="intPulse" label="脉搏(BPM)"></el-table-column>
-					<el-table-column property="strMeno" label="备注"></el-table-column>
-				</el-table>
-				<el-pagination ref="ws_blood" :page-size="10" @size-change="getdatas('ws_blood')" @current-change="getdatas('ws_blood')" layout="total, sizes, prev, pager, next, jumper" :total="ws_blood_total"></el-pagination>
-			</el-tab-pane>
 			<el-tab-pane label="体重体脂肪">
 				<el-table :data="ws_weight_lists" highlight-current-row style="margin-bottom: 8px;">
 					<el-table-column type="index" width="60"></el-table-column>
@@ -37,6 +25,31 @@
 					<el-table-column property="floPhysicalAge" label="体内年龄"></el-table-column>
 				</el-table>
 				<el-pagination ref="ws_weight" :page-size="10" @size-change="getdatas('ws_weight')" @current-change="getdatas('ws_weight')" layout="total, sizes, prev, pager, next, jumper" :total="ws_weight_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="血压">
+				<el-table :data="ws_blood_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intSystolic" label="收缩压(mmHg)"></el-table-column>
+					<el-table-column property="intDiastolic" label="舒张压(mmHg)"></el-table-column>
+					<el-table-column property="intPulse" label="脉搏(BPM)"></el-table-column>
+					<el-table-column property="strMeno" label="备注"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_blood" :page-size="10" @size-change="getdatas('ws_blood')" @current-change="getdatas('ws_blood')" layout="total, sizes, prev, pager, next, jumper" :total="ws_blood_total"></el-pagination>
+			</el-tab-pane>
+			<el-tab-pane label="ECG心率">
+				<el-table :data="ws_ecg_heart_lists" highlight-current-row style="margin-bottom: 8px;">
+					<el-table-column type="index" width="60"></el-table-column>
+					<el-table-column property="strUserAccount" label="账号"></el-table-column>
+					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
+					<el-table-column property="intHeartbeat" label="心跳數值(次/分)"></el-table-column>
+					<el-table-column property="intPressure" label="壓力指數"></el-table-column>
+					<el-table-column property="intVitalityAge" label="活力年齡"></el-table-column>
+					<el-table-column property="intEmoIndex" label="情緒指數"></el-table-column>
+					<el-table-column property="strMemo" label="備註"></el-table-column>
+				</el-table>
+				<el-pagination ref="ws_ecg_heart" :page-size="10" @size-change="getdatas('ws_ecg_heart')" @current-change="getdatas('ws_ecg_heart')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ecg_heart_total"></el-pagination>
 			</el-tab-pane>
 			<el-tab-pane label="运动">
 				<el-table :data="ws_sport_lists" highlight-current-row style="margin-bottom: 8px;">
@@ -190,19 +203,6 @@
 					<el-table-column property="strMemo" label="備註"></el-table-column>
 				</el-table>
 				<el-pagination ref="ws_ecg_breath" :page-size="10" @size-change="getdatas('ws_ecg_breath')" @current-change="getdatas('ws_ecg_breath')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ecg_breath_total"></el-pagination>
-			</el-tab-pane>
-			<el-tab-pane label="ECG心率">
-				<el-table :data="ws_ecg_heart_lists" highlight-current-row style="margin-bottom: 8px;">
-					<el-table-column type="index" width="60"></el-table-column>
-					<el-table-column property="strUserAccount" label="账号"></el-table-column>
-					<el-table-column property="datRecordTime" label="测量时间"></el-table-column>
-					<el-table-column property="intHeartbeat" label="心跳數值(次/分)"></el-table-column>
-					<el-table-column property="intPressure" label="壓力指數"></el-table-column>
-					<el-table-column property="intVitalityAge" label="活力年齡"></el-table-column>
-					<el-table-column property="intEmoIndex" label="情緒指數"></el-table-column>
-					<el-table-column property="strMemo" label="備註"></el-table-column>
-				</el-table>
-				<el-pagination ref="ws_ecg_heart" :page-size="10" @size-change="getdatas('ws_ecg_heart')" @current-change="getdatas('ws_ecg_heart')" layout="total, sizes, prev, pager, next, jumper" :total="ws_ecg_heart_total"></el-pagination>
 			</el-tab-pane>
 		</el-tabs>
 	</div>

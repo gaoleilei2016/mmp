@@ -33,25 +33,29 @@ class Users::SessionsController < Devise::SessionsController
 
   # POST /resource/sign_in
   def create
-    if current_user
-      if current_user.login=="admin"
-        path = "/admin/home"
-      else
-        case current_user.type_code
-        when "1"
-          path = "/hospital/home"
-        when "2"
-          path = "/ims/home"
-        else
-          path = "/"
-        end
-      end
-      return redirect_to path
-    else
-      flash[:login] = params[:user][:login] rescue nil
-      super
-    end
+    flash[:login] = params[:user][:login] rescue nil
+    super
   end
+  # def create
+  #   if current_user
+  #     if current_user.login=="admin"
+  #       path = "/admin/home"
+  #     else
+  #       case current_user.type_code
+  #       when "1"
+  #         path = "/hospital/home"
+  #       when "2"
+  #         path = "/ims/home"
+  #       else
+  #         path = "/"
+  #       end
+  #     end
+  #     return redirect_to path
+  #   else
+  #     flash[:login] = params[:user][:login] rescue nil
+  #     super
+  #   end
+  # end
 
   # DELETE /resource/sign_out
   # def destroy
