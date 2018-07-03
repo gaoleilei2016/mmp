@@ -16,7 +16,7 @@ class Hospital::Order < ApplicationRecord
 
 
   def dict_medication
-    ::Dict::Medication.find(self.serialno)
+    ::Dict::Medication.find(self.serialno) rescue nil
   end
 
   def to_web_front_with_photo
