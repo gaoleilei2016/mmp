@@ -216,7 +216,7 @@ class InterfacesController < ApplicationController
 		re.each do |cur_org, _prescriptions|
 			prescription_ids = []
 			total_price = 0.0
-			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front_with_photo;  }
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:total_price] = total_price
 			cur_org[:orders] = orders
