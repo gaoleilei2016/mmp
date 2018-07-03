@@ -3,6 +3,12 @@ class InterfacesController < ApplicationController
 	layout false
 	#############################
 	############ zyz ############
+	# 上传 file 图片 转换成 base64
+	def stringify_base64_img
+		# p '~~~~~~~~~~~',params[:file].class
+		img_base64_data = ::Base64.encode64(params[:file].read)
+		render json:{flag:true,base64_img:"data:image/png;base64,#{img_base64_data}"}
+	end
 	def gzh
 	end
 	# GET

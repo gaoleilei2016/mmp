@@ -13,6 +13,29 @@
 		width: 100%;
 		padding: 4px;
 	}
+	.avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>
 <template>
 	<div id="organizations_index_right_div" class="">
@@ -36,15 +59,20 @@
 		</div>
 		<el-table height="'100%'" style="height: calc( 100% - 32px - 6px - 32px );" class="table_header_dark" size="mini" ref="data_table" border :data="tableData" @row-dblclick="edit_organization" @cell-click="cell_click_user" v-loading="table_loading">
 			<el-table-column type="selection"></el-table-column>
-			<el-table-column :show-overflow-tooltip="true" label="id" prop="id" width="100"></el-table-column>
-			<el-table-column :show-overflow-tooltip="true" label="类型" prop="type_code" width="100">
+			<el-table-column :show-overflow-tooltip="true" label="id" prop="id" width="50"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="类型" prop="type_code" width="60">
 				<template slot-scope="scope">
 					<div v-if="scope.row.type_code=='1'">医院</div>
 					<div v-if="scope.row.type_code=='2'">药房</div>
 				</template>
 			</el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="logo" width="60">
+				<template slot-scope="scope">
+					<img :src="scope.row.picture" style="width: 100%;">
+				</template>
+			</el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="名称" prop="name"></el-table-column>
-			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin"></el-table-column>
+			<el-table-column :show-overflow-tooltip="true" label="简拼" prop="jianpin" width="120"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="位置" prop="addr"></el-table-column>
 			<el-table-column :show-overflow-tooltip="true" label="创建时间" prop="created_at" width="140"></el-table-column>
 		</el-table>
@@ -67,6 +95,10 @@
 						</el-form-item>
 						<el-form-item label="简拼" prop="jianpin">
 							<el-input ref="jianpin_input" v-model="ruleForm.jianpin"></el-input>
+						</el-form-item>
+						<div class="clear"></div>
+						<el-form-item label="logo" prop="picture">
+							<el-upload class="avatar-uploader" action="/interfaces/stringify_base64_img" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload"><img v-if="ruleForm.picture" :src="ruleForm.picture" class="avatar"><i v-else class="el-icon-plus avatar-uploader-icon"></i></el-upload>
 						</el-form-item>
 					</el-tab-pane>
 					<el-tab-pane label="管理员">
@@ -171,6 +203,7 @@
 <script type="text/javascript">
 window.current_template_obj = {
 	data:function(){
+		var _this = this;
 		return {
 			map_search_str:'',
 			point:{},
@@ -200,12 +233,21 @@ window.current_template_obj = {
 			searchInputValue:'',
 			ruleForm: {
 				yaofang_type:false,
+				picture:'',
 			},
 			defaultForm:null,
 			rules: {
 				"type_code": [{ required: true, message: '类型不能为空', trigger: 'change' }],
 				'name': [{ required: true, message: '请输入名称', trigger: 'change' }],
 				'jianpin': [{ required: true, message: '请输入简码', trigger: 'change' }],
+				'picture': [{ validator:function(rule,value,callback) {
+					if (_this.ruleForm.type_code=='2') {
+						if (!_this.ruleForm.picture) {
+							return callback(new Error('没图的药房不能进入候选。建议使用宽高比例为1的图片。'));
+						}
+					}
+					callback();
+				},trigger: 'change' }],
 			},
 		}
 	},
@@ -224,7 +266,7 @@ window.current_template_obj = {
 							map.addOverlay(new BMap.Marker(point));
 							myGeo.getLocation(point, function(rs){
 								_this.point = rs.point;
-								console.log( '~~~~~~~~~ search',rs );
+								// console.log( '~~~~~~~~~ search',rs );
 							});
 					}else{
 						// alert("您选择地址没有解析到结果!");
@@ -234,6 +276,20 @@ window.current_template_obj = {
 		},
 	},
 	methods:{
+		handleAvatarSuccess(res, file) {
+			this.ruleForm.picture = res.base64_img;
+		},
+		beforeAvatarUpload(file) {
+			const isJPG = ['image/jpeg','image/png'].indexOf(file.type)>-1;
+			const isLt2M = file.size / 1024 < 50;
+			if (!isJPG) {
+				this.$message.error('上传格式只能是 [JPG,PNG] 格式!');
+			}
+			if (!isLt2M) {
+				this.$message.error('上传大小不能超过 50KB!');
+			}
+			return isJPG && isLt2M;
+		},
 		init_map:function() {
 			var _this = this;
 			if (!_this.map) {
@@ -250,7 +306,7 @@ window.current_template_obj = {
 							_this.map_search_str = rs.address;
 							_this.click_to_fill = true;
 							_this.point = rs.point;
-							console.log( '~~~~~~~~~ click',rs );
+							// console.log( '~~~~~~~~~ click',rs );
 						});
 						map.centerAndZoom(pt);
 						map.clearOverlays();
