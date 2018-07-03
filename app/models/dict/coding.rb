@@ -3,6 +3,7 @@ class ::Dict::Coding < ApplicationRecord
   SYSTEM = {
     "gender" => "2.16.156.1.19449.1.2261.1", # 性别编码表
     "country" => "2.16.156.1.19449.1.2659", # 国家编码表
+    "nation" => "2.16.156.1.19449.1.3304"
   }
 	
 
