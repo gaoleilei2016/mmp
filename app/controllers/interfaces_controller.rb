@@ -86,7 +86,7 @@ class InterfacesController < ApplicationController
 			base64_img = Set::QrCode.base64_data(o.order_code)
 			re = JSON.parse(o.to_json)
 			re["base64_img"] = base64_img
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			# p '~~~~~~~~~~',::Customer::InvoiceHeader.find(o.invoice_id)
@@ -97,7 +97,7 @@ class InterfacesController < ApplicationController
 		ret = []
 		orders.each{|o|
 			re = JSON.parse(o.to_json)
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			ret<<re
@@ -105,6 +105,13 @@ class InterfacesController < ApplicationController
 		render json:{flag:true,rows:ret,total:orders.total_count}
 		# render json:{flag:true,rows:[{},{},{}],total:4}
 		# render json:{flag:true,rows:[],total:0}
+	end
+	def get_details_with_picture details
+		details.map{|d|
+			_d = JSON.parse(d.to_json)
+			_d['picture'] = ::Dict::Medication.find(d.item_id).picture rescue nil
+			_d
+		}
 	end
 	#支付
 	def pay_order
