@@ -23,7 +23,7 @@ class InterfacesController < ApplicationController
 			prescription_ids = []
 			cur_org[:prescriptions] = _prescriptions.map{|x| 
 				prescription_ids<<x.id
-				x.to_web_front
+				x.to_web_front_with_photo
 			}
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:prescription_ids2] = prescription_ids
