@@ -121,7 +121,8 @@ module ::Hospital::Interface
           price: _order.price,
           specifications: _order.specification,
           firm: _order.factory_name,
-          dosage:'剂型'
+          dosage:'剂型',
+          # img_path: _order.dict_medication&.picture
         }
       end
       ret[:details][prescription_id] = prescription_details

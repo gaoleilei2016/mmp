@@ -88,7 +88,7 @@
 				<ul class="mui-table-view">
 					<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in pharmacys">
 						<div>
-							<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
+							<img class="mui-media-object mui-pull-left" :src="item.picture||'/assets/admin/gzh.jpg'" alt="photo">
 							<div class="mui-media-body">
 								<div>
 									{{item.name}}
@@ -108,7 +108,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in near_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" :src="item.picture||'/assets/admin/gzh.jpg'" alt="photo">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -126,7 +126,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in history_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" :src="item.picture||'/assets/admin/gzh.jpg'" alt="photo">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -144,7 +144,7 @@
 						<ul class="mui-table-view">
 							<li @click="click_to_save_user_pharmacy(item)" class="mui-table-view-cell tap_to_save_user_pharmacy" v-for="item in hot_pharmacys">
 								<div>
-									<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
+									<img class="mui-media-object mui-pull-left" :src="item.picture||'/assets/admin/gzh.jpg'" alt="photo">
 									<div class="mui-media-body">
 										<div>
 											{{item.name}}
@@ -170,7 +170,7 @@
 			<div class="mui-checkbox mui-left">
 				<input @click="check_all($event,organ)" type="checkbox" :checked="equals_array(organ.prescription_ids,organ.prescription_ids2)" style="top: 12px;left: 0px;">
 				<label style="padding-left: 26px;padding-right: 0;">
-					<img class="mui-media-object mui-pull-left" src="/assets/customer/pharmacy.png">
+					<img class="mui-media-object mui-pull-left" :src="current_pharmacy.picture||'/assets/admin/gzh.jpg'" alt="photo" style="color:#aaa; font-size: 8px;">
 					<!-- <i class="fal fa-store-alt mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 					<div class="mui-media-body">
 						<span v-if="current_pharmacy.name">{{current_pharmacy.name}}</span>
@@ -197,7 +197,7 @@
 					</li>
 					<li class="mui-table-view-cell no_background" v-for="drug in prescription.orders" style="padding-left: 0;">
 						<div href="javascript:;" class="">
-							<img class="mui-media-object mui-pull-left" src="/assets/customer/drug.jpg" style="height: 80px; width: 80px; max-width: none;">
+							<img class="mui-media-object mui-pull-left" :src="drug.picture||'/assets/admin/gzh.jpg'" alt="暂无图片" style="height: 80px; width: 80px; max-width: none;"><!-- /assets/customer/drug.jpg -->
 							<!-- <i class="fal fa-capsules mui-media-object mui-pull-left" style="width: 42px;font-size:32px;color: #8A8782;text-align: center;"></i> -->
 							<div class="mui-media-body">
 								{{drug.title}}

@@ -3,6 +3,12 @@ class InterfacesController < ApplicationController
 	layout false
 	#############################
 	############ zyz ############
+	# 上传 file 图片 转换成 base64
+	def stringify_base64_img
+		# p '~~~~~~~~~~~',params[:file].class
+		img_base64_data = ::Base64.encode64(params[:file].read)
+		render json:{flag:true,base64_img:"data:image/png;base64,#{img_base64_data}"}
+	end
 	def gzh
 	end
 	# GET
@@ -23,7 +29,7 @@ class InterfacesController < ApplicationController
 			prescription_ids = []
 			cur_org[:prescriptions] = _prescriptions.map{|x| 
 				prescription_ids<<x.id
-				x.to_web_front
+				x.to_web_front_with_photo
 			}
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:prescription_ids2] = prescription_ids
@@ -80,7 +86,7 @@ class InterfacesController < ApplicationController
 			base64_img = Set::QrCode.base64_data(o.order_code)
 			re = JSON.parse(o.to_json)
 			re["base64_img"] = base64_img
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			# p '~~~~~~~~~~',::Customer::InvoiceHeader.find(o.invoice_id)
@@ -91,7 +97,7 @@ class InterfacesController < ApplicationController
 		ret = []
 		orders.each{|o|
 			re = JSON.parse(o.to_json)
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			ret<<re
@@ -99,6 +105,13 @@ class InterfacesController < ApplicationController
 		render json:{flag:true,rows:ret,total:orders.total_count}
 		# render json:{flag:true,rows:[{},{},{}],total:4}
 		# render json:{flag:true,rows:[],total:0}
+	end
+	def get_details_with_picture details
+		details.map{|d|
+			_d = JSON.parse(d.to_json)
+			_d['picture'] = ::Dict::Medication.find(d.item_id).picture rescue nil
+			_d
+		}
 	end
 	#支付
 	def pay_order
@@ -210,7 +223,7 @@ class InterfacesController < ApplicationController
 		re.each do |cur_org, _prescriptions|
 			prescription_ids = []
 			total_price = 0.0
-			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front_with_photo;  }
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:total_price] = total_price
 			cur_org[:orders] = orders
