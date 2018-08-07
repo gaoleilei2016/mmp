@@ -1,4 +1,4 @@
-# #!/usr/bin/env puma
+#!/usr/bin/env puma
 
 environment 'development'
 # environment 'production'
@@ -26,11 +26,11 @@ worker_timeout 30
 
 daemonize false
 
-# 胡俊专用
+# # 胡俊专用
 # threads_count = ENV.fetch("RAILS_MAX_THREADS") { 2 }
-# threads 2, 16
-# workers 8
-# port 3000
+# threads 2, 2
+# workers 3
+# port 6789
 # environment 'development'
 # application_path = "/home/hujun/work/mmp"
 # #这里一定要配置为项目路径下地current
