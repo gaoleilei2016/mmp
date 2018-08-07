@@ -16,7 +16,7 @@
 		<h1 class="mui-title">支付订单</h1>
 		<a href="/customer/report/orders" class="mui-btn mui-btn-link mui-btn-nav mui-pull-right"><span>支付查询</span></a>
 	</header>
-	<% if session[:openid].present? %>
+	<template v-if="weixin_flag">
 		<div class="mui-content">
 			<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
 				<div style="color: #999;"><span id="set_time" class="common_red">请在支付后体验本小站</span></div>
@@ -30,89 +30,163 @@
 						微信支付
 					</a>
 				</li>
-				<!-- <li class="mui-table-view-cell" data-type="Alipay">
+			</ul>
+		</div>
+		<button type="button" @click="submit_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
+			确认支付 ¥ 19.90
+		</button>
+	</template>
+	<template v-else-if="app_flag">
+		<!-- app 支付 -->
+		<div class="mui-content">
+			<div class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
+				<div style="color: #999;"><span id="set_time" class="common_red">请在支付后体验本小站</span></div>
+				<div style="font-size: 2em;padding: 6px 0;">¥ 19.90</div>
+				<div style="color: #999;font-size: .8em;"><%= "华希订单" %></div>
+			</div>
+			<ul class="mui-table-view mui-table-view-radio" style="margin-top: 15px;">
+				<li class="mui-table-view-cell mui-selected" data-type="WX">
+					<a class="mui-navigate-right">
+						<img class="mui-media-object mui-pull-left" src="/assets/customer/weixin_logo.jpg" style="height: 16px;width: 16px;margin-top: 2px;">
+						微信支付
+					</a>
+				</li>
+				<li class="mui-table-view-cell" data-type="ALi">
 					<a class="mui-navigate-right">
 						<img class="mui-media-object mui-pull-left" src="/assets/customer/alipay_logo.png" style="height: 16px;width: 16px;margin-top: 2px;">
 						支付宝支付
 					</a>
-				</li> -->
+				</li>
 			</ul>
 			<!-- <form id="submit_form" action="/customer/report/pay_order" method="post">
 				<input type="hidden" id="pay_type" name="pay_type">
 				<input type="hidden" name="order_id" value="">
 			</form> -->
 		</div>
-		<button type="button" onclick="submit_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
+		<button type="button" @click="submit_app_form();" style="background: red;color: #fff;position: fixed;bottom: 0px;z-index: 999;height: 60px;width: 100%;font-size: 20px;text-align: center;">
 			确认支付 ¥ 19.90
 		</button>
-	<% else %>
-	<div class="mui-content" style="background: #fff;">
+	</template>
+	<div v-else class="mui-content" style="background: #fff;">
 		<ul class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
-			<li class="common_red">请使用微信公众号体验本小站</li>
+			<li class="common_red">请使用微信公众号或下载app体验本小站</li>
 		</ul>
 		<div style="text-align: center;">
 			<!-- <img src="/assets/admin/gzh.jpg" style="max-width: 100%;"> -->
 		</div>
 	</div>
-	<% end -%>
 </div>
 <script type="text/javascript">
-	$("#bottom_tabs").remove();
-	function submit_form() {
-		// $("#submit_form").submit();
-		$.ajax({
-			url:'/customer/report/pay_order',
-			type:'post',
-			success:function(json) {
-				function onBridgeReady(){
-					WeixinJSBridge.invoke('getBrandWCPayRequest', {
-						"appId":json.appId,     //公众号名称，由商户传入     
-						"timeStamp":json.timeStamp+'',         //时间戳，自1970年以来的秒数     
-						"nonceStr":json.nonceStr, //随机串     
-						"package":json.package,     
-						"signType":json.signType,         //微信签名方式：     
-						"paySign":json.sign //微信签名 
-					},function(res){
-						// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
-						if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-							mui.toast('正在验证支付信息...');
-							$("#loading").show();
-							$.ajax({
-								url:"/customer/report/valid_pay_status?order_id="+json.order_id,
-								type:'post',
-								success:function(json) {
-									if (json.state=='succ') {
-										location.href = '/customer/report/qrcode';
-									}else{
-										mui.toast(json.desc);
-									}
-								},
-								complete:function() {
-									$("#loading").hide();
-								},
-								error:error_fun
-							})
-						}else{
-							if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
-								mui.alert('您已取消支付。');
-							}else{
-								mui.alert("支付失败。");
-							}
-							// $("#reload_btn").removeClass("hide");
-						}
-					});
-				}
-				if (typeof WeixinJSBridge == "undefined"){
-					if( document.addEventListener ){
-						document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-					}else if (document.attachEvent){
-						document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
-						document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-					}
-				}else{
-					onBridgeReady();
-				}
-			}
-		})
+	function complete_callback(paytype,recode,desc) {
+		mui.toast(paytype+' '+recode+' '+desc);
+		setTimeout(function() {
+			complete_callback(paytype,recode,desc);
+		},1000)
 	}
+
+	$("#bottom_tabs").remove();
+	var current_app = new Vue({
+		el:"#vue_content",
+		data:{
+			weixin_flag: <%= session[:openid].present? %>,
+			// app_flag: true,
+			app_flag: function() {
+				var u = navigator.userAgent;
+				// console.log( u );
+				// var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
+				// var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;
+				var isiOS = !!window.webkit;
+				var isAndroid = !!window.APPConnectionJs;
+				if (isiOS) {
+					return 'ios';
+				}else if(isAndroid){
+					return 'android';
+				}else{
+					return false;
+				}
+			}(),
+		},
+		methods:{
+			submit_app_form: function() {
+				var pay_type = $(".mui-table-view-cell.mui-selected").attr('data-type');
+				// if (!window.webkit && !window.APPConnectionJs) {
+				// 	mui.toast('支付接口 window.webkit或window.APPConnectionJs 为空导致的支付失败',{duration:8000});
+				// 	return false;
+				// }
+				var obj = {
+					payMethod: pay_type,// WX | ALi | UN
+					parameter: {
+						orderId: "订单ID" , 
+						usrMp: "用户手机号码" , 
+						appId: "AppID" , 
+						payMethod: "支付方式" , 
+						totalAmount: "支付金额" 
+					}
+				};
+				if (this.app_flag == 'ios') {
+					window.webkit.messageHandlers.APPConnectionJs.postMessage(obj);
+				}else if (this.app_flag == 'android') {
+					window.APPConnectionJs.postMessage(JSON.stringify(obj));
+				}
+			},
+			submit_form: function() {
+				$.ajax({
+					url:'/customer/report/pay_order',
+					type:'post',
+					success:function(json) {
+						function onBridgeReady(){
+							WeixinJSBridge.invoke('getBrandWCPayRequest', {
+								"appId":json.appId,     //公众号名称，由商户传入     
+								"timeStamp":json.timeStamp+'',         //时间戳，自1970年以来的秒数     
+								"nonceStr":json.nonceStr, //随机串     
+								"package":json.package,     
+								"signType":json.signType,         //微信签名方式：     
+								"paySign":json.sign //微信签名 
+							},function(res){
+								// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 
+								if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+									mui.toast('正在验证支付信息...');
+									$("#loading").show();
+									$.ajax({
+										url:"/customer/report/valid_pay_status?order_id="+json.order_id,
+										type:'post',
+										success:function(json) {
+											if (json.state=='succ') {
+												location.href = '/customer/report/qrcode';
+											}else{
+												mui.toast(json.desc);
+											}
+										},
+										complete:function() {
+											$("#loading").hide();
+										},
+										error:error_fun
+									})
+								}else{
+									if(res.err_msg == "get_brand_wcpay_request:cancel" ) {
+										mui.alert('您已取消支付。');
+									}else{
+										mui.alert("支付失败。");
+									}
+									// $("#reload_btn").removeClass("hide");
+								}
+							});
+						}
+						if (typeof WeixinJSBridge == "undefined"){
+							if( document.addEventListener ){
+								document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+							}else if (document.attachEvent){
+								document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+								document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+							}
+						}else{
+							onBridgeReady();
+						}
+					}
+				})
+			}
+		},
+		mounted:function() {
+		}
+	})
 </script>

@@ -1,6 +1,8 @@
 class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
+	before_action :ajax_access
 	layout false
+
 	#############################
 	############ zyz ############
 	# 上传 file 图片 转换成 base64
@@ -476,5 +478,11 @@ class InterfacesController < ApplicationController
   end
   ############ dujuan ############
 	#############################
+
+
+  private
+  def ajax_access
+    response.headers['Access-Control-Allow-Origin'] = '*'
+  end
 
 end
