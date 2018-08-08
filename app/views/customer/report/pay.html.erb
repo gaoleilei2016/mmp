@@ -67,14 +67,16 @@
 			确认支付 ¥ 19.90
 		</button>
 	</template>
-	<div v-else class="mui-content" style="background: #fff;">
-		<ul class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
-			<li class="common_red">请使用微信公众号或下载app体验本小站</li>
-		</ul>
-		<div style="text-align: center;">
-			<!-- <img src="/assets/admin/gzh.jpg" style="max-width: 100%;"> -->
+	<template v-else>
+		<div class="mui-content" style="background: #fff;">
+			<ul class="mui-table-view" style="text-align: center;color: #333;padding: 14px 0;">
+				<li class="common_red">请使用微信公众号或下载app体验本小站</li>
+			</ul>
+			<div style="text-align: center;">
+				<!-- <img src="/assets/admin/gzh.jpg" style="max-width: 100%;"> -->
+			</div>
 		</div>
-	</div>
+	</template>
 </div>
 <script type="text/javascript">
 	function complete_callback(paytype,recode,desc) {
@@ -92,9 +94,6 @@
 			// app_flag: true,
 			app_flag: function() {
 				var u = navigator.userAgent;
-				// console.log( u );
-				// var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
-				// var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;
 				var isiOS = !!window.webkit;
 				var isAndroid = !!window.APPConnectionJs;
 				if (isiOS) {

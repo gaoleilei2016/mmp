@@ -50,8 +50,14 @@ class Customer::ReportController < ApplicationController
 	end
 
 	def pay_order
-		res = Pay::Wechat.get_pay_result(current_user.openid)
-		render json: res
+		if session[:openid]
+			res = Pay::Wechat.get_pay_result(current_user.openid)
+			render json: res
+		else
+			# App支付
+			# pay_type,// WX | ALi | UN
+			# app_flag // ios | android
+		end
 	end
 
 	def advise
