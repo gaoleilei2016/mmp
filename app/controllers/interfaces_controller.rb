@@ -1,8 +1,16 @@
 class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
+	before_action :ajax_access
 	layout false
+
 	#############################
 	############ zyz ############
+	# 上传 file 图片 转换成 base64
+	def stringify_base64_img
+		# p '~~~~~~~~~~~',params[:file].class
+		img_base64_data = ::Base64.encode64(params[:file].read)
+		render json:{flag:true,base64_img:"data:image/png;base64,#{img_base64_data}"}
+	end
 	def gzh
 	end
 	# GET
@@ -12,7 +20,9 @@ class InterfacesController < ApplicationController
 	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 获取未取药的有效的处方，并按医院合并，方便下订单 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	# 获取未取药的有效的处方，并按医院合并后下订单
 	def get_prescriptions_by_phone
-		cur_phone = params[:phone]
+		# cur_phone = params[:phone]
+		raise "未登录的用户" unless current_user
+		cur_phone = current_user.login
 		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.nil?
 		ret = []
 		::Hospital::Interface.get_prescriptions_by_phone(cur_phone,'1').group_by {|_prescription| 
@@ -21,7 +31,7 @@ class InterfacesController < ApplicationController
 			prescription_ids = []
 			cur_org[:prescriptions] = _prescriptions.map{|x| 
 				prescription_ids<<x.id
-				x.to_web_front
+				x.to_web_front_with_photo
 			}
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:prescription_ids2] = prescription_ids
@@ -35,7 +45,9 @@ class InterfacesController < ApplicationController
 	# $$$$$$$$$$$$$$$$$$$$$$$$$$$$$ 我的处方页面，获取所有处方以及是否过期等状态 $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 	# 获取所有处方以及过期等状态
 	def get_all_prescriptions_by_phone
-		cur_phone = params[:phone].to_s
+		# cur_phone = params[:phone].to_s
+		raise "未登录的用户" unless current_user
+		cur_phone = current_user.login
 		return render json: {flag: false, info: "电话号不能为空"} if cur_phone.blank?
 		ret = []
 		page = params[:page]||1
@@ -45,7 +57,7 @@ class InterfacesController < ApplicationController
 			ret << _prescription.to_web_front
 		end
 		count = ::Hospital::Interface.get_prescriptions_count_by_phone(cur_phone)
-		render json: {flag: true, info: "success", data: ret, count: count}
+		render json: {flag: true, info: "success", rows: ret, total: count}
 	end
 
 	# PUT
@@ -76,7 +88,7 @@ class InterfacesController < ApplicationController
 			base64_img = Set::QrCode.base64_data(o.order_code)
 			re = JSON.parse(o.to_json)
 			re["base64_img"] = base64_img
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			# p '~~~~~~~~~~',::Customer::InvoiceHeader.find(o.invoice_id)
@@ -87,7 +99,7 @@ class InterfacesController < ApplicationController
 		ret = []
 		orders.each{|o|
 			re = JSON.parse(o.to_json)
-			re["drugs"] = o.details
+			re["drugs"] = get_details_with_picture o.details
 			re["organ"] = ::Admin::Organization.find(o.target_org_id)
 			re["total_price"] = o.net_amt
 			ret<<re
@@ -96,12 +108,19 @@ class InterfacesController < ApplicationController
 		# render json:{flag:true,rows:[{},{},{}],total:4}
 		# render json:{flag:true,rows:[],total:0}
 	end
+	def get_details_with_picture details
+		details.map{|d|
+			_d = JSON.parse(d.to_json)
+			_d['picture'] = ::Dict::Medication.find(d.item_id).picture rescue nil
+			_d
+		}
+	end
 	#支付
 	def pay_order
-		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0",params[:order_id]).last
+		order = ::Orders::Order.where("id=? and status = 1 and _locked = 0 and order_failure_time > '#{Time.now.to_s(:db)}'",params[:order_id]).last
 		unless order
 			flash[:notice] = "订单状态不允许支付。"
-			redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
+			return redirect_to "/customer/portal/pay?id="+ params[:order_id].to_s
 		end
 		res = {}
 		begin
@@ -206,7 +225,7 @@ class InterfacesController < ApplicationController
 		re.each do |cur_org, _prescriptions|
 			prescription_ids = []
 			total_price = 0.0
-			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front;  }
+			orders = _prescriptions.map { |e| prescription_ids<<e.id;e.orders}.flatten.map { |k| total_price+=k.price*k.total_quantity;k.to_web_front_with_photo;  }
 			cur_org[:prescription_ids] = prescription_ids
 			cur_org[:total_price] = total_price
 			cur_org[:orders] = orders
@@ -459,5 +478,11 @@ class InterfacesController < ApplicationController
   end
   ############ dujuan ############
 	#############################
+
+
+  private
+  def ajax_access
+    response.headers['Access-Control-Allow-Origin'] = '*'
+  end
 
 end

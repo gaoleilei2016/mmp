@@ -11,12 +11,15 @@ defaults: &defaults
   mchid: 1507477411 #1432526502
   pay_url: https://api.mch.weixin.qq.com/pay/unifiedorder
   refund_url: https://api.mch.weixin.qq.com/secapi/pay/refund
-  cert_root: "/app/models/pay/wechat/apiclient_cert.p12" #"/../../zhengshu/apiclient_cert.p12"
+  cert_root: "/../../zhengshu/apiclient_cert.p12" #"/app/models/pay/wechat/apiclient_cert.p12" #"/../../zhengshu/apiclient_cert.p12"
   wap_name: 腾迈华希医药
   wap_url: http://huaxi.tenmind.com
   pay_key: GuiZhouTenmindHuaXiYiliaoHuJun18 #FeiShanJie88HaoTenmindGS20170222
   notify_url: http://huaxi.tenmind.com/pay/wechat
   refund_notify_url: http://huaxi.tenmind.com/refund/wechat
+  health_total_fee: 19.9
+  health_title: 华希订单
+  health_cost_name: 健康小站
   awesome_setting: <%= "#{Rails.root}/config/setup/pay/wechat/apiclient_cert.p12" %>
 
 development:

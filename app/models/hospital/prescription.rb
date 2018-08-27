@@ -266,8 +266,9 @@ class ::Hospital::Prescription < ApplicationRecord
 
 	def link_orders!(cur_orders, cur_user)
 		self.reload
-		cur_orders.each do |_order|
+		cur_orders.each_with_index do |_order, i|
 			_order.status = 0
+			_order.rank_in_prescription = i
 			_order.prescription_id = self.id
 			_order.save!
 		end
@@ -366,7 +367,7 @@ class ::Hospital::Prescription < ApplicationRecord
 			# 该处方对应的诊断
 			diagnoses: self.diagnoses,
 			# 该处方对应的医嘱
-			orders: self.orders.map { |e| e.to_web_front  },
+			orders: self.orders.order(:rank_in_prescription).map { |e| e.to_web_front  },
 			price: self.orders.map{|e| e.price*e.total_quantity }.reduce(:+),
 			specialmark: self.specialmark,
 			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
@@ -385,6 +386,119 @@ class ::Hospital::Prescription < ApplicationRecord
 		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
 		return ret
 	end
+
+	# 这个方法是公共的接口方法  不能随意更改   字段可以增加  但是不能修改和删除
+	def to_web_front_with_photo
+		self.reload
+		# 患者信息
+		cur_encounter = self.encounter
+		patient_info = {
+			# 姓名
+			name: cur_encounter.name,
+			# 性别
+			gender: {
+			  code: cur_encounter.gender_code, 
+			  display: cur_encounter.gender_display
+			},
+			# 年龄
+			age: cur_encounter.age,
+			# 出生日期
+			birth_date: cur_encounter.birth_date,
+			# 身份证号
+			iden: cur_encounter.iden,
+			# 职业
+			occupation:{
+			  code: cur_encounter.occupation_code,
+			  display: cur_encounter.occupation_display
+			},
+			# 电话
+			phone: cur_encounter.phone,
+			# 地址
+			address: cur_encounter.address,
+		}
+		# 机构信息
+		cur_org = self.organization
+		organization_info = {
+			# 处方开单机构
+			org:{
+				id: cur_org.id,
+				display: cur_org.name
+			}
+		}
+		# 就诊信息
+		cur_doctor = self.doctor # User
+		encounter_info = {
+			# 就诊号
+			patient_no: cur_encounter.patient_no,
+			# 就诊医生
+			author: {
+				id: cur_doctor.id,
+				display: cur_doctor.name
+			},
+			# 就诊科室
+			encounter_loc: {
+				id: cur_encounter.encounter_loc_id,
+				display: cur_encounter.encounter_loc_display
+			}
+		}
+		# 药房信息
+		drug_store_info = {
+			drug_store: {
+				id: self.drug_store&.id,
+				display: self.drug_store&.name
+			}
+		}
+
+		# 处方信息
+		prescription_info = {
+			# 处方id 
+			id: self.id,
+			# 处方号
+			prescription_no: format("%010d",self.id),
+			# 处方状态
+			status: self.status,
+			# 处方备注
+			note: self.note,
+			# 处方类型 精一等
+			type: {
+				code: self.type_code,
+				display: self.type_display
+			},
+			# 账单id
+			bill_id: self.bill_id,
+			bill_status: self.bill&.status.to_s,
+			# 处方权限
+			confidentiality: {
+				code: self.confidentiality_code,
+				display: self.confidentiality_display
+			},
+			# 有效期开始
+			effective_start: self.effective_start,
+			# 有效期截止
+			effective_end: self.effective_end,
+			# 该处方对应的诊断
+			diagnoses: self.diagnoses,
+			# 该处方对应的医嘱
+			orders: self.orders.order(:rank_in_prescription).map { |e| e.to_web_front_with_photo  },
+			price: self.orders.map{|e| e.price*e.total_quantity }.reduce(:+),
+			specialmark: self.specialmark,
+			created_at: self.created_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			updated_at: self.updated_at.getlocal.strftime("%Y-%m-%d %H:%M:%S"),
+			is_read: self.is_read,
+			auditor:{
+				id: self.auditor_id,
+				display: self.auditor_display
+			},
+			delivery:{
+				id: self.delivery_id,
+				display: self.delivery_display
+			}
+
+		}
+		ret = {}.merge(patient_info).merge(organization_info).merge(encounter_info).merge(drug_store_info).merge(prescription_info)
+		return ret
+	end
+
 
 	def set_tookcode!
 		self.tookcode = format("%06d", self.id)
@@ -405,6 +519,11 @@ class ::Hospital::Prescription < ApplicationRecord
 		# args = {type: :take_medic, name: '患者姓名', number:'处方单号', total_fee: '处方单总金额+单位',number1: '取药码', url: 'http连接', phone: '手机号码'}
 		args = {type: :take_medic, name: cur_encounter.name, number: format("%010d",self.id), total_fee: total_fee,number1: self.tookcode, url: url, phone: cur_encounter.phone}
 		Sms::Data.send_phone(args)
+		Thread.new{
+			# 发微信
+			url2 = "http://#{ ::User.server_ips(:mmp) }/wechat/send_data"
+			RestClient.post(url2,{login:cur_encounter.phone,text:"您有新的处方，请注意查收"})
+		}
 	end
 
 	class<<self

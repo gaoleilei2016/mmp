@@ -1,8 +1,9 @@
 module ::Hospital::Interface
   # => 根据电话号获取处方单
   def self.get_prescriptions_by_phone(phone,status='')
-    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone}"
-    status.present? && sql.concat(" and a.status = #{status}")
+    cur_time = Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    sql = "SELECT a.* FROM hospital_prescriptions a INNER JOIN  hospital_encounters b on a.encounter_id=b.id WHERE b.phone=#{phone} AND a.effective_end>='#{cur_time}'"
+    status.present? && sql.concat(" AND a.status = #{status}")
     ::Hospital::Prescription.find_by_sql(sql)
   end
 
@@ -120,7 +121,8 @@ module ::Hospital::Interface
           price: _order.price,
           specifications: _order.specification,
           firm: _order.factory_name,
-          dosage:'剂型'
+          dosage:'剂型',
+          # img_path: _order.dict_medication&.picture
         }
       end
       ret[:details][prescription_id] = prescription_details

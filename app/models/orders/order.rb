@@ -69,7 +69,7 @@ class Orders::Order < ApplicationRecord
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}#待收费转为已审核
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					# prescriptions.each{|x|x.cancel_bill({}, current_user)}
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
+					::Orders::Order.cancel_bill(prescriptions,cur_user)#取消订单回调处方
 					result = {ret_code:'0',info:'订单已取消。'}
 				when payment_type.to_s == '1' && cur_user && '2'#线上已结算的可以取消
 					# ::Orders::Order.cancel_bill(prescriptions,{},cur_user)#取消订单回调处方
@@ -91,13 +91,13 @@ class Orders::Order < ApplicationRecord
 					# {ch:’’,type:’’,event:’’,content:’’}
 					::NoticeChannel.publish(data) rescue nil
 					# ::NoticeBroadcastJob.perform_later(data:data)
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i<=0#取消订单回调处方
+					# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i<=0#取消订单回调处方
 					result = {ret_code:'0',info:'取消成功。'}
 				when '5'
 					result = {ret_code:'-1',info:'订单已完成，不允许取消。'}
 				when '6'
 					# prescriptions.each{|x|x.back_wait_charge({}, current_user)}
-					::Orders::Order.cancel_bill(self.prescriptions,{},cur_user)#取消订单回调处方
+					# ::Orders::Order.cancel_bill(self.prescriptions,cur_user)#取消订单回调处方
 					update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:reason)
 					result = {ret_code:'0',info:'订单已取消。'}
 					# return {ret_code:'-1',info:'订单已关闭，不允许取消。'}
@@ -125,13 +125,14 @@ class Orders::Order < ApplicationRecord
 			case status.to_s
 			when '1'
 
-			when '2'
+			when '2'#已收费
 				::Orders::Order.transaction do
-					if is_send_medical.to_i>0
+					if is_send_medical.to_i>0#是否发过药
 						update_attributes(status:'7',end_time:Time.now.to_s(:db),reason:'药房退款')
-						# ::Orders::Order.cancel_bill(self.prescriptions,{},cur_user) if is_send_medical.to_i>0#取消订单回调处方
+						# ::Orders::Order.cancel_prescriptions(self.prescriptions,attrs[:current_user])#线下的处方废弃
 					else
 						update_attributes(status:'1')
+						# ::Orders::Order.cancel_bill(self.prescriptions,cur_user) #if is_send_medical.to_i>0#处方回到已审核
 					end
 				end
 				result = {ret_code:'0',info:'退费成功'}
@@ -139,14 +140,16 @@ class Orders::Order < ApplicationRecord
 
 			when '4'
 
-			when '5'
+			when '5'#完成
 				::Orders::Order.transaction do
 					update_attributes(status:'2',refund_medical_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
 					# cancel_order_by_private(prescriptions,attrs[:current_user],attrs[:reason])
 					if self.payment_type.to_s == '2' #如果是线下支付的
-						::Orders::Order.cancel_bill(prescriptions,{},attrs[:current_user])#取消订单回调处方
-						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退款成功",refund_medical_reason:attrs[:reason])
+						# ::Orders::Order.cancel_bill(self.prescriptions,attrs[:current_user])#处方回到已审核
+						update_attributes(status:'7',close_time:Time.now.to_s(:db),reason:"退药成功",refund_medical_reason:attrs[:reason])
+						# ::Orders::Order.cancel_prescriptions(self.prescriptions,attrs[:current_user])#线下的处方废弃
 					end
+					
 				end
 				result[:ret_code] = '0'
 				result[:info] = '退药成功！'
@@ -174,8 +177,8 @@ class Orders::Order < ApplicationRecord
 		arg = {
 		# 退费人
 			return_charge_opt: {
-				id: cur_user.id.to_s,
-				display: cur_user.name.to_s
+				id: cur_user&.id.to_s,
+				display: cur_user&.name.to_s
 			},
 			# 退费时间
 			return_charge_at: Time.now.to_s(:db)
@@ -240,15 +243,30 @@ class Orders::Order < ApplicationRecord
 
 	class << self
 		#取消订单时回调处方
-		def cancel_bill(pres,arg={},current_user)
-			pres.each{|x|x.cancel_bill(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
+		def cancel_bill(pres,current_user)
+			arg = {}
+			pres.each{|x|x.cancel_bill(arg, current_user)}
+		end
+		#废弃处方 退款时
+		def cancel_prescriptions(pres,current_user)
+			arg = {
+					# 废弃人
+					abandonor: {
+						id: current_user&.id,
+						display: current_user&.name
+					},
+					# 废弃时间
+					abandon_at: Time.now
+				}
+			pres.each{|x|x.abandon(arg, current_user);x.bill_id = '';x.bill = nil;x.save}
 		end
 		#检查订单定时器
 		def check_order_timer
-			Orders::Order.where('payment_type = 1 and status = 1 and created_at > ?' ,Time.now - 28.minutes ).update_all(status:'7',reason:'超时关闭')
-			Orders::Order.where('payment_type = 1 and status = 1 and created_at < ?' ,Time.now - 30.minutes ).each{|x| 
-				sch = ::Scheduler.new();
-				sch.timer_at(Time.now + (30.minutes - (Time.now - x.created_at)),"::Orders::Order.find(#{x.id.to_s}).cancel_order({},'超时关闭')")}
+			::Scheduler.cron_at('0 0 1 * * ? *',"::Orders::Order.cancel_failure_bill()")
+		end
+		#作废过期订单
+		def cancel_failure_bill 
+			Orders::Order.where("payment_type = 1 and status = 1 and order_failure_time <= #{Time.now.to_s(:db)}").update_all(status:'7',reason:'超时关闭')
 		end
 			
 
@@ -301,10 +319,12 @@ class Orders::Order < ApplicationRecord
 				result[:info].concat("处方未审核!待医院审核完成后即可生成领药订单。")
 			end
 			if result[:ret_code].to_s == '0'
+				presc_times = []
 				begin
 					::Orders::Order.transaction do 
 					##通过处方拿到订单生成数据
 						presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
+						return {ret_code:'-1',info:'空的处方明细。'}if presc[:details].blank?
 						# Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
 						order = self.create(
 						 target_org_id: attrs[:pharmacy_id].to_s,
@@ -339,27 +359,29 @@ class Orders::Order < ApplicationRecord
 						}
 						presc[:details].each do |k,details|
 							prescription = ::Hospital::Prescription.find(k)
+							presc_times << prescription.created_at
 							order.prescriptions << prescription
 							prescription.bill = order
 							prescription.save
-							prescription.commit_bill(args, attrs[:current_user])#改变处方状态
+							prescription.commit_bill(args, attrs[:current_user])#改变处方为完成
 							details.each do |detail|
 								net_amt = (detail[:quantity].to_f * detail[:price].to_f).round(2)
 								order.details << Orders::OrderDetail.create(detail.merge({net_amt:net_amt,prescription_id:k}))
 							end
 						end
+						order.order_failure_time = presc_times.sort.first + 22.hour
 						order.save
 						result[:info].concat("订单生成成功！")
 						result[:order] = order
-						if attrs[:payment_type].to_s == 'online'#线上收费
-							sch = ::Scheduler.new()
-							sch.timer_at(Time.now + 30.minutes,"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
-							result[:info].concat("请在#{(Time.now + 30.minutes).to_s(:db)}之前完成订单支付")
-						else
-							# if attrs[:invoice_id].blank?
-								# ::NoticeBroadcastJob.perform_later(data:data)
-							# end
-						end
+						# if attrs[:payment_type].to_s == 'online'#线上收费
+						# 	sch = ::Scheduler.new()
+						# 	sch.timer_at((order.created_at + 30.minutes),"::Orders::Order.find(#{order.id.to_s}).cancel_order({},'超时关闭')")
+						# 	result[:info].concat("请在#{(order.created_at + 30.minutes).to_s(:db)}之前完成订单支付")
+						# else
+						# 	# if attrs[:invoice_id].blank?
+						# 		# ::NoticeBroadcastJob.perform_later(data:data)
+						# 	# end
+						# end
 						data = {
 							ch:order.target_org_id,#药房id
 							org_id:order.target_org_id,#药房id
@@ -434,7 +456,7 @@ class Orders::Order < ApplicationRecord
 		def get_order_details(attrs={})
 			attrs = attrs.deep_symbolize_keys
 			result = {ret_code:'0',info:'',prescriptions:[]}
-			::Orders::Order.where("user_id = ? and status = ?",attrs[:person_id],attrs[:status]||'1').each do |order|
+			::Orders::Order.where("user_id = ? and status = ? ",attrs[:person_id],attrs[:status]||'1').each do |order|
 				result[:prescriptions] << {
 					order_code: order.order_code,
 					amt: order.net_amt,
@@ -552,7 +574,7 @@ class Orders::Order < ApplicationRecord
 
 			attrs = attrs.deep_symbolize_keys
 			return [] if attrs[:org_id].blank?
-			condtion = "target_org_id = #{attrs[:org_id]} "
+			condtion = "target_org_id = #{attrs[:org_id]} "# and order_failure_time > '#{Time.now.to_s(:db)}'"
 			if attrs[:order_code].present?
 				condtion.concat("order_code = #{attrs[:order_code]}")
 			else
@@ -603,7 +625,8 @@ class Orders::Order < ApplicationRecord
 			t = Time.now.beginning_of_day
 			y = t.year.to_s[2,2]
 			d = ("00" + t.yday.to_s)[-3,3]
-			ser = ("000" + Orders::Order.where("target_org_id = ? AND created_at > ?",target_org_id,t).count.to_s)[-4,4]
+			# target_org_id = ? AND   target_org_id,
+			ser = ("0000" + (Orders::Order.where("created_at > ?",t).count+1).to_s)[-5,5]
 			"#{y}#{d}#{ser}"
 			# while Orders::Order.where("order_code = ? AND created_at < ?",code,t.beginning_of_day).last
 			# 	code = get_order_code

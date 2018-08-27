@@ -1,6 +1,19 @@
 class Customer::PortalController < ApplicationController
 	layout "customer"
 	def index
+		if current_user.login=="admin"
+			return redirect_to "/admin/home"
+		else
+			case current_user.type_code
+			when "1"
+				return redirect_to "/hospital/home"
+			when "2"
+				return redirect_to "/ims/home"
+			else
+				# path = "/"
+				# /portal/index
+			end
+		end
 	end
 	def pullrefresh_main
 	end
@@ -17,10 +30,10 @@ class Customer::PortalController < ApplicationController
 			args[:openid] = session[:openid]
 			# 微信内部支付
 			@res = Pay::Wechat.public_pay(args)
-			# p args,@res
+			# p "~~~~~~~~~~~~~~~~~",args,@res
 			if @res[:state]==:succ
 			else
-				flash[:notice] = @res[:desc]
+				flash[:notice] = @res[:desc].present? ? @res[:desc] : @res[:msg]
 				return redirect_to "/"
 			end
 			# p '~~~~~~~~~~',res

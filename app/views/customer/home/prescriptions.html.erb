@@ -133,31 +133,31 @@
 				// console.log( '~~~~~~',pulltype );
 				var _this = this;
 				$("#loading").show();
-				var per = 3;
+				var per = 5;
 				if (pulltype=='pulldown') {
 					var page = 1;
 				}else{
 					var page = Math.ceil(_this.prescriptions.length/per)+1;
 				}
 				$.ajax({
-					url:'/interfaces/get_all_prescriptions_by_phone?phone=<%= current_user.login %>&page='+page+'&per='+per,
+					url:'/interfaces/get_all_prescriptions_by_phone?page='+page+'&per='+per,
 					success:function(json) {
 						if (pulltype=='pulldown') {
 							if (json.flag) {
-								_this.prescriptions = json.data;
+								_this.prescriptions = json.rows;
 							}
 							mui('#vue_content').pullRefresh().endPulldownToRefresh();
 							mui('#vue_content').pullRefresh().enablePullupToRefresh();
-							// mui('#vue_content').pullRefresh().endPullupToRefresh(_this.prescriptions.length>=json.count); //参数为true代表没有更多数据了。
+							// mui('#vue_content').pullRefresh().endPullupToRefresh(_this.prescriptions.length>=json.total); //参数为true代表没有更多数据了。
 						}else if(pulltype=='pullup'){
 							if (json.flag) {
-								json.data.map(function(item) {
+								json.rows.map(function(item) {
 									_this.prescriptions.push(item);
 								})
 							}
-							// console.log( _this.prescriptions.length,json.count );
+							// console.log( _this.prescriptions.length,json.total );
 						}
-						mui('#vue_content').pullRefresh().endPullupToRefresh(_this.prescriptions.length>=json.count); //参数为true代表没有更多数据了。
+						mui('#vue_content').pullRefresh().endPullupToRefresh(_this.prescriptions.length>=json.total); //参数为true代表没有更多数据了。
 						if (json.flag) {
 						}else{
 							mui.toast(json.info);

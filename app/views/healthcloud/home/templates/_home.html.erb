@@ -1,0 +1,25 @@
+<template id="home_div">
+	<div id="home_template" style="margin-top: 20px;">
+		<h2>健康云管理</h2>
+		<hr>
+		<h4>第三方账号管理</h4>
+		<p>管理第三方数据提供商(例如天来公司)的接入账号和密码</p>
+		<hr>
+		<h4>会员管理</h4>
+		<p>管理第三方提供的客户个人信息</p>
+		<hr>
+		<h4>数据资料管理</h4>
+		<p>管理第三方提供的客户健康信息(例如身高体重血糖及各项指标)</p>
+		<hr>
+		<a href="/healthcloud/app#/member_lists">
+		<h4>成员健康视图(移动端)</h4>
+			<p>客户健康信息(例如身高体重血糖及各项指标)</p>
+		</a>
+		<hr>
+	</div>
+</template>
+<script type="text/javascript">
+const home = Vue.extend({
+	template: '#home_div',
+})
+</script>

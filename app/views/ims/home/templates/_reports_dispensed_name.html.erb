@@ -25,8 +25,8 @@
 	<!-- 接诊管理、统计页面 -->
 	<div id="reports_dispensed_name_div">
 		<el-breadcrumb separator="/" style="margin-bottom: 10px; margin-top: 10px;">
-		  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-		  <el-breadcrumb-item>报表</el-breadcrumb-item>
+		  <!-- <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item> -->
+		  <!-- <el-breadcrumb-item>报表</el-breadcrumb-item> -->
 		</el-breadcrumb>
 		<div class="float-right-btns" style="position: relative;">
 	  	<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
@@ -71,6 +71,7 @@
 		      @selection-change="handleSelectionChange"
 		      class="thiner-row"
 		      default-expand-all
+					:summary-method="getSummaries"
 		      show-summary
 		      row-class-name="primary-row"
 		      :show-header="false"
@@ -83,7 +84,9 @@
 			      <template slot-scope="props">
 			      	<el-table
 						    :data="(props.row.drugs||[])"
+						    :summary-method="getSummaries"
 						    show-summary
+						    sum-text = '小计'
 						    class="inner-table"
 						    style="width: 100%">
 						    <el-table-column
@@ -130,7 +133,7 @@
 							    align="right"
 							    label="单价">
 							    <template slot-scope="scope">
-							    	{{ scope.row.price }}
+							    	{{ scope.row.price | formatMoney(4)}}
 							    </template>
 							  </el-table-column>
 							  <el-table-column
@@ -298,11 +301,19 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.dispensed_namesResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter,start_time:_this.filter.range[0],end_time:_this.filter.range[1]}).then( function(response) {
+			try{
+				var start_time = _this.filter.range[0].pattern('yyyy-MM-dd HH:mm:ss');
+				var end_time = _this.filter.range[1].pattern('yyyy-MM-dd HH:mm:ss');
+			}
+			catch(err){
+				var start_time = "";
+				var end_time = "";
+				console.log("-=--=-=-=-=- 时间格式异常。。。。。。 ")
+			}
+			_this.dispensed_namesResource.get({start_time:start_time,end_time:end_time,type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.dispensed_names = res.data;
-  				console.log('dispensed_names----------',_this.dispensed_names)
           _this.dataCount = res.count;
   			}else{
   				_this.$message.error(res.info);
@@ -310,6 +321,42 @@ window.current_template_obj = {
       },function(response) {
         _this.$message.error("数据汇总出错。");
       })
+		},
+		getSummaries: function (param) {
+			var columns = param.columns;
+			var data = param.data;
+      var sums = [];
+      columns.forEach(function (column, index) {
+        if (index === 0) {
+        	if(!data[0].drug_count) {
+        		// 内层表格
+        		sums[index] = '小计';
+        	} else {
+        		// 外层表格
+          	sums[index] = '总计';
+        	}
+          return;
+        }
+        // 最后一列才总计
+        if(index==columns.length-1){
+	        var values = data.map(function(item){return Number(item[column.property])} );
+	        if (!values.every(function(value){return isNaN(value)})) {
+	          sums[index] = values.reduce(function (prev, curr) {
+	            var value = Number(curr);
+	            if (!isNaN(value)) {
+	              return prev + curr;
+	            } else {
+	              return prev;
+	            }
+	          }, 0);
+	          sums[index] = (sums[index]).toFixed(2);
+	        } else {
+	          sums[index] = '';
+	        }
+        }
+      });
+
+      return sums;
 		},
 		print: function (json) {
 			if(!this.printEles || this.printEles.length==0) {

@@ -1,0 +1,98 @@
+<template>
+	<div v-loading.fullscreen.lock="fullscreenLoading">
+		<div style="margin: 8px 0;">
+			<el-breadcrumb separator="/" style="" class="pull-left">
+				<el-breadcrumb-item><a href="/">首页</a></el-breadcrumb-item>
+				<el-breadcrumb-item to="/">健康云</el-breadcrumb-item>
+				<el-breadcrumb-item>会员账号管理</el-breadcrumb-item>
+			</el-breadcrumb>
+			<div style="" class="pull-right">
+				<el-button size="mini" :disabled="true" type="primary" @click="">增加</el-button>
+				<el-button size="mini" :disabled="true" type="primary" @click="">编辑</el-button>
+				<el-button size="mini" :disabled="true" type="danger" @click="">删除</el-button>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<div class="el-input el-input--small el-input--prefix el-input--suffix" style="width: 300px;">
+			<input v-model="searchStr" @keyup="get_timeout_applications" autocomplete="off" placeholder="单号、姓名、简码" type="text" validateevent="true" class="el-input__inner">
+			<span class="el-input__prefix" @click="get_applications"><i class="el-icon-search el-input__icon"></i></span>
+			<span class="el-input__suffix" @click="searchStr='';get_applications();"><span class="el-input__suffix-inner"><i class="el-icon-circle-close-outline el-input__icon"></i></span></span>
+		</div>
+		<el-table size="mini" border ref="singleTable" :data="ws_users" highlight-current-row @current-change="handleTableCurrentChange" style="margin: 8px 0;">
+			<el-table-column type="index" width="44"></el-table-column>
+			<el-table-column width="60" label="头像">
+				<template slot-scope="scope">
+					<img :src="scope.row.headimgurl" style="width: 100%; float: left;">
+				</template>
+			</el-table-column>
+			<el-table-column property="login" label="账号"></el-table-column>
+			<el-table-column property="name" label="昵称"></el-table-column>
+			<el-table-column width="60" property="sex" label="性别"></el-table-column>
+			<el-table-column width="60" property="height" label="身高"></el-table-column>
+			<el-table-column property="birth" label="出生日期"></el-table-column>
+			<el-table-column property="pay_status" label="支付状态"></el-table-column>
+			<el-table-column property="price" label="支付金额"></el-table-column>
+			<el-table-column property="created_at" label="注册时间"></el-table-column>
+			<!-- <el-table-column property="phone" label="电话"></el-table-column> -->
+			<el-table-column property="address" label="性别测试"></el-table-column>
+		</el-table>
+		<el-pagination ref="pagination" :page-size="10" @size-change="get_applications" @current-change="get_applications" layout="total, sizes, prev, pager, next, jumper" :total="datas_total"></el-pagination>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data: function(){
+		return {
+			searchStr:'',
+			fullscreenLoading:false,
+			ws_users:[],
+			currentRow: null,
+			datas_total: 0,
+		}
+	},
+	methods:{
+		get_timeout_applications:function(e){
+			var _this = this;
+			clearTimeout(_this.timer);
+			if (e.keyCode==13) {
+				_this.get_applications();
+			}else{
+				_this.timer = setTimeout(function(){
+					_this.get_applications();
+				},_this.$parent.auto_search_timeout_value);
+			}
+		},
+		get_applications:function(){
+			var _this = this;
+			var pagination = _this.$refs.pagination;
+			var page = pagination.internalCurrentPage;
+			var per = pagination.internalPageSize;
+			_this.fullscreenLoading = true;
+			$.ajax({
+				url:'/healthcloud/partner_accounts/find_test.json',
+				data:{table_name:"ws_user",page:page,per:per,search:_this.searchStr},
+				success:function(json){
+					_this.datas_total = json.count;
+					_this.ws_users = json.data;
+				},
+				error:error_fun,
+				complete:function(){
+					_this.fullscreenLoading = false;
+				}
+			})
+		},
+		handleTableCurrentChange:function(currentRow, oldCurrentRow){
+			this.currentRow = currentRow;
+		},
+	},
+	mounted:function(){
+		var _this = this;
+	},
+	activated:function() {
+		var _this = this;
+		_this.get_applications();
+	}
+
+}
+
+</script>
