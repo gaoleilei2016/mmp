@@ -4,7 +4,7 @@ class ::Dict::MedicationsController < ApplicationController
   # /dict/medications
   def index
     p "::Dict::MedicationsController index", params
-    # params[:search] = "nl"
+    p current_user
     serialno = params[:search]
     ecode = params[:search]
     name = params[:search]
