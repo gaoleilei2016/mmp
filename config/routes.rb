@@ -241,6 +241,15 @@ Rails.application.routes.draw do
       end
     end
 
+    # 库存
+    namespace :inv do
+      resources :stocks do
+        collection do
+          get :exports                           # 库存导入
+        end
+      end
+    end
+
     resources :interfaces do
       collection do
       end
