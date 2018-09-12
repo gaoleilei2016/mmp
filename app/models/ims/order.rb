@@ -483,6 +483,19 @@ class Ims::Order < ApplicationRecord
       end
     end
 
+
+    # 过账方法(发药减少库存、退药增加库存)
+    # （药品ID、药库ID、数量、批号、单价）
+    def pre_posting args = {}
+      medicine_id = args[:medicine_id]
+      location_id = args[:location_id]
+      qty = args[:qty]
+      batch = args[:batch]
+      price = args[:price]
+      
+    end
+
+
     # 下载错误处方返回
     def prescription_back args = {}
       begin
