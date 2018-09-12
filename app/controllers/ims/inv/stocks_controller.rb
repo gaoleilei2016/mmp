@@ -9,6 +9,10 @@ class Ims::Inv::StocksController < ApplicationController
 		
 	end
 
+  def save_file
+    result = {flag:true,info:"保存成功。"}
+  end
+
 	private
     # Use callbacks to share common setup or constraints between actions.
     def set_ims_inv_stock
