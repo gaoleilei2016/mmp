@@ -246,6 +246,7 @@ Rails.application.routes.draw do
       resources :stocks do
         collection do
           get :exports                           # 库存导入
+          post :get_file                           # 库存导入
         end
       end
     end

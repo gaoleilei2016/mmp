@@ -9,7 +9,7 @@ class Ims::Inv::StocksController < ApplicationController
 		
 	end
 
-  def save_file
+  def get_file
     result = {flag:true,info:"保存成功。"}
   end
 
