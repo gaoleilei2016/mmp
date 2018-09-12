@@ -1,12 +1,27 @@
 class Hospital::Order < ApplicationRecord
 
   belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id', optional: true
-  # has_one :dict_medication, class_name: '::Dict::Medication', foreign_key: 'serialno' 
+  # has_one :dict_medication, class_name: '::Dict::NewMedication', foreign_key: 'serialno' 
 
   belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
   belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
   belongs_to :mtemplate, class_name: '::Hospital::Sets::Mtemplate', foreign_key: 'mtemplate_id', optional: true
   # order_type 医嘱类型 1 药品医嘱
+
+  validate :enough_storage?
+
+  # 保存前验证库存量
+  def enough_storage?
+    # 根据药品id 获取药品库存的方法
+    # cur_drug_storage = 5.times.map { |e| rand(8)  }.sort {|x,y| y <=> x}
+
+    cur_drug_storage = [::Dict::NewMedication.find(self.serialno).quantity]
+    p cur_drug_storage
+    p (cur_drug_storage[0] || 0) < self.total_quantity.to_f
+    if (cur_drug_storage[0] || 0) < self.total_quantity.to_f
+      errors.add(:total_quantity, "保存失败： 医嘱药品总量超过最大库存量 ")
+    end
+  end
 
   def initialize args = {}
     super args
@@ -16,7 +31,7 @@ class Hospital::Order < ApplicationRecord
 
 
   def dict_medication
-    ::Dict::Medication.find(self.serialno) rescue nil
+    ::Dict::NewMedication.find(self.serialno) rescue nil
   end
 
   def to_web_front_with_photo
@@ -141,7 +156,7 @@ class Hospital::Order < ApplicationRecord
         cur_orders.each do |_order|
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
           # 查询当前药品使用信息
-          cur_medication = ::Dict::Medication.find(_order.serialno)
+          cur_medication = ::Dict::NewMedication.find(_order.serialno)
           next unless cur_medication.can_create?
           medication_info = cur_medication.to_order_info
           new_order_args = {
@@ -181,7 +196,7 @@ class Hospital::Order < ApplicationRecord
           end
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
           # 查询当前药品使用信息
-          cur_medication = ::Dict::Medication.find(_order.serialno)
+          cur_medication = ::Dict::NewMedication.find(_order.serialno)
           raise "创建失败  有药品不能使用" unless cur_medication.can_create?
           medication_info = cur_medication.to_order_info
           new_order_args = {

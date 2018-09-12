@@ -1058,6 +1058,7 @@ window.current_template_obj = {
     			measure_val: drug.measure_val,  // 最小单位的值
     			encounter_id: _this.encounter.id, // 就诊模型id
     			mul: drug.mul||1, // 倍率
+    			storage: drug.storage, //库存数组 从大大小排列
     		}
     		_this.focusNext('ordtitle', 'ordsingleqty');
     	},
@@ -1121,6 +1122,19 @@ window.current_template_obj = {
 	        	if(!_this.order.total_quantity) {
 	        		_this.$message({
 			          message: '请填写药品的总量。',
+			          type: 'warning'
+			        });
+			        _this.$refs["ordtotalquantity"].focus();
+			        return false;
+	        	}
+	        	//判断总量和库存的关系
+	        	//storage 是每个合作药店的最大库存量数组 按从大到小排列的
+	        	console.log(_this.order.storage);
+	        	console.log(_this.order.total_quantity)
+	        	console.log((_this.order.storage[0]||0) >= _this.order.total_quantity)
+	        	if( (_this.order.storage[0]||0) < _this.order.total_quantity ) {
+	        		_this.$message({
+			          message: '该药品最大库存为: ' + (_this.order.storage[0]||0) +_this.order.unit+'。请重新填写总量或者采用替代药品',
 			          type: 'warning'
 			        });
 			        _this.$refs["ordtotalquantity"].focus();
@@ -1208,6 +1222,7 @@ window.current_template_obj = {
 			    if (res.flag) {
 			    	_this.order.mul = res.data.mul; // 用于运算总量
 			    	_this.order.measure_val = res.data.measure_val; // 用于运算总量
+			    	_this.order.storage = res.data.storage; //用于判断库存量是否满足
 					} else {
     				_this.$message.error(res.info);
     			}

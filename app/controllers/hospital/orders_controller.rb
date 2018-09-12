@@ -52,7 +52,7 @@ class Hospital::OrdersController < ApplicationController
         format.json { render json: {flag: true, info:"success", data: @order.to_web_front} }
       else
         format.html { render action: "new" }
-        format.json { render json: {flag: false , info: "#{@order.errors.messages}"} }
+        format.json { render json: {flag: false , info: "#{@order.errors.messages.values.flatten.join(" ")}"} }
       end
     end
 	end
@@ -67,7 +67,7 @@ class Hospital::OrdersController < ApplicationController
         format.json { render json: {flag: true, info:"", data: @order.to_web_front} }
       else
         format.html { render action: "edit" }
-        format.json { render json: {flag: false , info: "#{@order.errors.messages}"} }
+        format.json { render json: {flag: false , info: "#{@order.errors.messages.values.flatten.join(" ")}"} }
       end
     end
   end
@@ -102,7 +102,7 @@ class Hospital::OrdersController < ApplicationController
 
     def format_order_create_args
       args = order_params
-      dict_mediaction_info = ::Dict::Medication.find(args[:serialno]).to_order_info()
+      dict_mediaction_info = ::Dict::NewMedication.find(args[:serialno]).to_order_info()
       begin
         ret = {
           serialno: args[:serialno],
@@ -139,7 +139,7 @@ class Hospital::OrdersController < ApplicationController
 
     def format_order_update_args
       args = order_params
-      dict_mediaction_info = ::Dict::Medication.find(args[:serialno]).to_order_info()
+      dict_mediaction_info = ::Dict::NewMedication.find(args[:serialno]).to_order_info()
       begin
         ret = {
           serialno: args[:serialno],

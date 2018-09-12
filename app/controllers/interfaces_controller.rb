@@ -111,7 +111,7 @@ class InterfacesController < ApplicationController
 	def get_details_with_picture details
 		details.map{|d|
 			_d = JSON.parse(d.to_json)
-			_d['picture'] = ::Dict::Medication.find(d.item_id).picture rescue nil
+			_d['picture'] = ::Dict::NewMedication.find(d.item_id).picture rescue nil
 			_d
 		}
 	end
