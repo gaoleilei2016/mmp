@@ -1,7 +1,7 @@
 class Orders::Order < ApplicationRecord
 	table_name = "Orders_order"
 	has_many :details, class_name: '::Orders::OrderDetail', foreign_key: 'order_id'
-	has_many :medicals, class_name: '::Dict::Medication', foreign_key: 'order_id'
+	has_many :medicals, class_name: '::Dict::NewMedication', foreign_key: 'order_id'
 	has_many :prescriptions, class_name: '::Hospital::Prescription', foreign_key: 'order_id'
 	belongs_to :settle,class_name: "::Settles::Settle",foreign_key: 'settle_id' , optional: true
 	

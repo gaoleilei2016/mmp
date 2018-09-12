@@ -8,7 +8,9 @@ class ::Dict::Medication < ApplicationRecord
   	end
 
   	def to_hash
-  		self.attributes
+  		ret = self.attributes
+      # 临时测试代码  随机库存
+      ret.merge!(storage: 5.times.map { |e| rand(10)  }.sort {|x,y| y <=> x})
   	end
 
   	# 能否开此药品

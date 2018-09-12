@@ -1,6 +1,8 @@
 class InterfacesController < ApplicationController
 	skip_before_action :verify_authenticity_token
+	before_action :ajax_access
 	layout false
+
 	#############################
 	############ zyz ############
 	# 上传 file 图片 转换成 base64
@@ -109,7 +111,7 @@ class InterfacesController < ApplicationController
 	def get_details_with_picture details
 		details.map{|d|
 			_d = JSON.parse(d.to_json)
-			_d['picture'] = ::Dict::Medication.find(d.item_id).picture rescue nil
+			_d['picture'] = ::Dict::NewMedication.find(d.item_id).picture rescue nil
 			_d
 		}
 	end
@@ -476,5 +478,11 @@ class InterfacesController < ApplicationController
   end
   ############ dujuan ############
 	#############################
+
+
+  private
+  def ajax_access
+    response.headers['Access-Control-Allow-Origin'] = '*'
+  end
 
 end
