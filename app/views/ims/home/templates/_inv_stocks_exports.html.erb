@@ -1,0 +1,97 @@
+<style type="text/css">
+#inv_stocks_exports label{font-size: 18px;display: inline-block;padding-bottom:10px;}
+</style>
+<template>
+	<div id="inv_stocks_exports">
+    <el-col :span="22" :offset="1">
+      <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+      <h3></h3>
+      </el-form>
+        <el-row>
+          <label>需要导入的Excel文件:</label>
+          <el-col :span="24">
+            <el-col :span="5" style="width:200px;">
+            </el-col>
+          </el-col>
+          <el-col :span="24">
+            <el-col :span="5" style="width:250px;">
+              <el-input id="file_input" size="small" readonly v-on:click.native="get_file"></el-input>
+              <el-input id="file_source" v-model="file" type="file" v-on:change.native="changeValue" style="display: none;" accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></el-input>
+            </el-col>
+            <el-col :span="5" style="margin-left:8px;">
+              <el-button type="primary" size="small" @click="file_upload">上传</el-button>
+              <el-button type="success" size="small" @click="file_save">保存</el-button>
+            </el-col>
+          </el-col>
+        </el-row>
+      <br/>
+      <el-row style="display:none;">
+        <el-col>
+          <label>文件预览:</label>
+          <el-table
+            :data="tableData"
+            border
+            style="width: 100%;display:none;">
+            <el-table-column
+              prop="name"
+              label="姓名"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="age"
+              label="性别"
+              width="180">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="地址">
+            </el-table-column>
+          </el-table>
+        </el-col>
+        
+      </el-row>
+    </el-col>
+  </div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+	data:function(){
+		return {
+      labelPosition: 'top',
+      file:"",
+      formLabelAlign: {
+        name: '',
+        region: '',
+        type: ''
+      },
+      tableData: []
+		}
+	},
+	methods:{
+    init:function(){},
+    get_file:function(){
+      $("#file_source").click()
+    },
+    changeValue:function(){
+      console.log("change")
+      setTimeout('$("#file_input").val($("#file_source")[0].files[0].name)',200)
+    },
+    file_upload:function(){
+      _this = this
+      _this.$http.post('/ims/inv/stocks/get_file', {file:$("#file_source")[0].files[0].name, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          console.log(response)
+            _this.$message.success("上传成功。");
+          _this.tableData = response.data.data
+          }, function() {
+            _this.$message.error("后台出错，上传失败！");
+          });
+    },
+    file_save:function(){alert("保存成功。")},
+	},
+	mounted:function(){
+		this.$nextTick(function(){
+			this.init();
+		})	
+	},
+}
+</script>
