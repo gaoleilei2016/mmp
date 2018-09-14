@@ -487,12 +487,30 @@ class Ims::Order < ApplicationRecord
     # 过账方法(发药减少库存、退药增加库存)
     # （药品ID、药库ID、数量、批号、单价）
     def pre_posting args = {}
-      medicine_id = args[:medicine_id]
-      location_id = args[:location_id]
-      qty = args[:qty]
-      batch = args[:batch]
-      price = args[:price]
-      
+      begin
+        medicine_id = args[:medicine_id]
+        location_id = args[:location_id]
+        qty = args[:qty]
+        batch = args[:batch]
+        price = args[:price]
+        stock_id = args[:stock_id]
+        result = Ims::Inv::Stock.find(stock_id) rescue nil
+        if result.blank?
+          sql = "SELECT * FROM ims_inv_stocks s WHERE s.medicine_id=#{medicine_id} and s.location_id = #{location_id} and s.batch=#{batch} and s.price = #{price}"
+          # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
+          res = Ims::Inv::Stock.find_by_sql(sql)
+          stock_id = res[0].try(:id)
+          result = Ims::Inv::Stock.find(id) rescue nil
+        end
+        return {flag:false,info:"未找到可减的库存记录"} if result.blank?
+        amount = (qty.to_f*price.to_f.round(2))
+        sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{args[:id]}"
+        result = self.find_by_sql(sql)
+      rescue Exception => e
+        print e.message rescue "  e.messag----"
+        print "laaaaaaaaaaaaaaaaaaaa 过账方法 出错: " + e.backtrace.join("\n")
+        result = {flag:false,:info=>"药店系统出错。"}
+      end
     end
 
 

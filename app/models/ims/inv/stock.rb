@@ -2,9 +2,24 @@
 # => 药店-库存表
 class Ims::Inv::Stock < ApplicationRecord
 
-	def update_or_create_stock update_data={}
-		
+	class << self
+
+		# 创建
+		def create_stock args = {}
+		end
+
+		# 库存查询
+		def search_stocks args = {}
+			org_id = args[:org_id]
+			location_id = args[:location_id]
+			search = args[:search]
+			sql = "SELECT * FROM dictmedicine d inner join ims_inv_stocks s on s.medicine_id=d.serialno where s.location_id=#{location_id}  and s.org_id=#{org_id} and (d.py like '%#{search}%' or d.wb like '%#{search}%' or d.name like '%#{search}%' or d.common_name like '%#{search}%' or d.common_py like '%#{search}%' or d.common_wb like '%#{search}%' or d.spec like '%#{search}%')"
+			result = self.find_by_sql(sql)
+        	JSON.parse(result.to_json)
+		end
+
 	end
+
 	# rails generate scaffold Ims::Inv::Stock org_id:integer medicine_id:integer pt_code:string code:string unit:string price:string mul:string batch:string location_id:string location_name:string quantity:float freeze_qty:float amount:float created_at:datetime updated_at:datetime
 	# bundle exec rake db:migrate
 	# id             # 库存表ID

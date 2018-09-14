@@ -59,5 +59,15 @@ headers:
       #   style_css: 'reports_drug_report'
       #   icon: 'fa-bar-chart'
       #   sequence: '10'
-
+  - code: 'IMS.A25'
+    caption: '库存'
+    icon: 'fa-tasks'
+    sequence: '21'
+    childs:
+      - code: 'IMS.B10'
+        caption: '库存表导入'
+        path: '#/inv/stocks/exports'
+        style_css: 'inv_stocks_exports'
+        icon: 'fa-bar-chart'
+        sequence: '1'
       
