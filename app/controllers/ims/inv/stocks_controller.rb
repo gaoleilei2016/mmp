@@ -61,14 +61,26 @@ class Ims::Inv::StocksController < ApplicationController
     end
   end
 
-  # 库存导入
-  def exports
-    
+  # 文件上传
+  def upload_file
+    puts "---#{params}----",params
+    file=params[:myfile]
+    p "111111111",file
+    file_name=file.original_filename
+    data = File.read(file.tempfile)
+    file_path="up_xls//"+file_name.to_s
+    tmp_file = File.new(file_path, "w+")
+    tmp_file.syswrite(data) if tmp_file
+    tmp_file.close
+    render json:{flag:true,info:"文件上传成功。",file_name:file_name}   
   end
 
-  def get_file
-    result = {flag:true,info:"保存成功。"}
+  # post 库存导入保存
+  def exports
+    ret = Ims::Inv::Stock.exports params
+    render json:ret.to_json
   end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.

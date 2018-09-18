@@ -245,8 +245,8 @@ Rails.application.routes.draw do
     namespace :inv do
       resources :stocks do
         collection do
-          get :exports                           # 库存导入
-          post :get_file                           # 库存导入
+          get :exports                                # 库存导入保存
+          post :upload_file                           # 库存表上传
         end
       end
     end
