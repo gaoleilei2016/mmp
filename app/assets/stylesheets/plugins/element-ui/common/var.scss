@@ -15,7 +15,8 @@ $--color-white: #fff !default;
 $--color-black: #000 !default;
 
 // $--color-primary: #409EFF !default;   2018/06/16修改颜色 dujuan
-$--color-primary: #0CBDAA !default;
+// $--color-primary: #0CBDAA !default;
+$--color-primary: #9ec3e2 !default;      // =====2018/09/20 修改颜色 huziqiang
 $--color-primary-light-1: mix($--color-white, $--color-primary, 10%) !default; /* 53a8ff */
 $--color-primary-light-2: mix($--color-white, $--color-primary, 20%) !default; /* 66b1ff */
 $--color-primary-light-3: mix($--color-white, $--color-primary, 30%) !default; /* 79bbff */

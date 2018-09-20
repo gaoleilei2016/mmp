@@ -2,33 +2,35 @@
 <el-collapse class="patient-info" v-model="activeCollapse">
   <el-collapse-item name="patientinfo1">
     <template slot="title">
-    	<el-button size="mini" @click.stop.native="searchPeople({search: '', modal: 'isShowEncountersDialog'})" type="text" icon="fa fa-lg fa-fw fa-search text-mmp-lighter" title="搜索患者"></el-button>
-    	<el-button v-if="loadingidcard" size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-spinner fa-spin text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;" disabled> 正在读取身份证 </el-button>
-    	<el-button v-else size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-id-card-o text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;"> &nbsp;读身份证</el-button>
-    	<!-- <i class="fa fa-lg fa-fw fa-search text-mmp-lighter" @keyup.enter.stop.native="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>&#12288; -->
-      <!-- <el-input
-		    placeholder="姓名 / 手机号 / 身份证号码 / 诊断"
-		    size="mini"
-		    class="search-enc-input"
-		    @click.stop.native=""
-		    
-		    ref="searchencstr"
-		    @focus="focusEncSearchInp(true)"
-		    @blur="focusEncSearchInp(false)"
-		    v-model="searchencstr">
-		    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
-		  </el-input>&#12288; -->
-      <span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
-      <i v-if="encounter.gender&&encounter.gender.display" v-html="judgeGender(encounter.gender.display)"></i>&#12288;
-      <span v-if="encounter.age">{{ encounter.age }}岁</span>
-      <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
-      <span v-if="!activeCollapse || activeCollapse.length==0">
-      	<i v-if="encounter.phone" class="fa fa-fw fa-lg fa-phone text-mmp-lighter"></i>{{encounter.phone}}&#12288;
-      	<span v-for="(all,index) in (encounter.allergens || [])" :key="index">{{ all.display }} </span>&#12288;
-      	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>
-      </span>
-      <div style="float: right; margin-right: 1em;">
-      	<el-button size="mini" @click="resetEncounterForm('encounterForm')" class="refresh-btn" type="text" icon="fa fa-lg fa-fw el-icon-refresh"></el-button>
+    	<div style="background-color: #d3e9fb;">
+	    	<el-button size="mini" @click.stop.native="searchPeople({search: '', modal: 'isShowEncountersDialog'})" type="text" icon="fa fa-lg fa-fw fa-search text-mmp-lighter" title="搜索患者"></el-button>
+	    	<el-button v-if="loadingidcard" size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-spinner fa-spin text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;" disabled> 正在读取身份证 </el-button>
+	    	<el-button v-else size="mini" @click.stop.native="getIdCardInfo()" type="text" icon="fa fa-lg fa-fw fa-id-card-o text-mmp-lighter" title="读取身份证信息" style="margin-right: 10px; color: #3f6e6b;"> &nbsp;读身份证</el-button>
+	    	<!-- <i class="fa fa-lg fa-fw fa-search text-mmp-lighter" @keyup.enter.stop.native="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>&#12288; -->
+	      <!-- <el-input
+			    placeholder="姓名 / 手机号 / 身份证号码 / 诊断"
+			    size="mini"
+			    class="search-enc-input"
+			    @click.stop.native=""
+			    
+			    ref="searchencstr"
+			    @focus="focusEncSearchInp(true)"
+			    @blur="focusEncSearchInp(false)"
+			    v-model="searchencstr">
+			    <i slot="prefix" class="el-input__icon el-icon-search" @click="searchPeople({search: searchencstr, modal: 'isShowEncountersDialog'})"></i>
+			  </el-input>&#12288; -->
+	      <span v-if="encounter.name">{{ encounter.name }}</span>&#12288;
+	      <i v-if="encounter.gender&&encounter.gender.display" v-html="judgeGender(encounter.gender.display)"></i>&#12288;
+	      <span v-if="encounter.age">{{ encounter.age }}岁</span>
+	      <span v-if="encounter.birth_date"> ({{ encounter.birth_date | formatDate('yyyy-MM-dd') }}) </span>
+	      <span v-if="!activeCollapse || activeCollapse.length==0">
+	      	<i v-if="encounter.phone" class="fa fa-fw fa-lg fa-phone text-mmp-lighter"></i>{{encounter.phone}}&#12288;
+	      	<span v-for="(all,index) in (encounter.allergens || [])" :key="index">{{ all.display }} </span>&#12288;
+	      	<span v-for="(dia,index) in (encounter.diagnoses || [])" :key="index">{{ dia.display }} </span>
+	      </span>
+	      <div style="float: right; margin-right: 1em;">
+	      	<el-button size="mini" @click="resetEncounterForm('encounterForm')" class="refresh-btn" type="text" icon="fa fa-lg fa-fw el-icon-refresh"></el-button>
+	      </div>
       </div>
     </template>
     <el-form size="mini" :rules="rules" :model="encounter" ref="encounterForm" label-width="80px">
