@@ -67,11 +67,17 @@
     border-bottom-width: 1px;
     border-bottom-color: rgba(255, 255, 255, 0.7);
     background: transparent;
-    padding-left: 80px !important; 
+    padding-left: 60px !important; 
     color: rgba(255, 255, 255, 0.9);
+  }
+  .el-input__inner:focus {
+    border-color: rgb(158, 195, 226);
   }
   .el-input__inner::placeholder {
     color: rgba(255, 255, 255, 0.3);
+  }
+  .el-input__prefix {
+    top: 10px;
   }
   .el-form-item .el-input-group {
     display: inline-table;
@@ -110,42 +116,40 @@
     });
   }
 </script>
-<div class="thin_scrollbar" style="height:100%; background: url('/assets/admin/bg.jpg') fixed top right; background-size: cover;">
+<div class="thin_scrollbar" style="height:100%; background: url('/assets/admin/background.jpg') fixed top right; background-size: 100% 100%;">
   <div id="vue_container" v-cloak>
     <div id="main_content">
       <transition name="el-zoom-in-top">
-        <el-form v-show="showFlag" action="/users/sign_in" method="post" style="width: 50%;position: absolute;left: 25%;top: 25%;">
+        <el-form v-show="showFlag" action="/users/sign_in" method="post" style="width: 50%;position: absolute;left: 25%;top: 40%; background-size: 60% 60%;">
           <!-- <h1 style="text-align: center;padding: 0 0 40px 0;font-size: 40px; font-family: 微软雅黑;font-weight: 500;">处方流通平台</h1> -->
-          <div style="background: #fff; padding: 30px; background: rgba(255, 255, 255, 0.15);">
-            <h3 style="margin-bottom: 2em; margin-left: 1em;">
-              <img src="/assets/admin/TM.png" style="width: 100px; float: left;">
-              <span style="font-size: 140%; font-family: 微软雅黑; font-weight: 500; color:rgba(255, 255, 255, 0.7); display: inline-block; margin-left: 20px; margin-top: 10px;">爱萌医药云平台</span>
+          <!-- <div style="background: #fff; padding: 30px; background: rgba(255, 255, 255, 0.15);"> -->
+            <h3 style="margin-bottom: 2em; text-align: center;">
+              <img src="/assets/admin/TM-LOGO.png" style="width: 120px;">
+              <span style="font-size: 150%; font-family: 微软雅黑; font-weight: 500; color:#fff; display: inline-block; margin-left: 20px; margin-top: 10px;">电子处方共享云平台</span>
             </h3>
-            <div style="width: 250px; margin: 0 auto;">
-              <el-input autofocus placeholder="用  户  名" name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
-                <i slot="prefix" class="el-input__icon fal fa-user-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i>
+            <div style="width: 300px; margin: 0 auto;">
+              <el-input autofocus name="user[login]" value="<%= flash[:login] %>" autocomplete="off">
+                <!-- <i slot="prefix" class="el-input__icon fal fa-user-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i> -->
+                <i slot="prefix">
+                  <img src="/assets/admin/username-2.png" style="width: 20px; height: 20px;">
+                </i>
               </el-input>
-              <el-input type="password" placeholder="密  　  码" name="user[password]" style="margin-top: 10px;" autocomplete="off">
-                <i slot="prefix" class="el-input__icon fal fa-lock-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i>
+              <el-input type="password" name="user[password]" style="margin-top: 10px;" autocomplete="off">
+                <!-- <i slot="prefix" class="el-input__icon fal fa-lock-alt fa-lg" style="color:rgba(255, 255, 255, 0.7);"></i> -->
+                <i slot="prefix">
+                  <img src="/assets/admin/password-2.png" style="width: 20px; height: 20px;">
+                </i>
               </el-input>
-              <div style="margin-top: 10px;">
-                <el-checkbox :label="1" name="user[remember_me]" style="line-height: 40px; color: rgba(255, 255, 255, 0.7);">记住我</el-checkbox>
-              </div>
-              <div style="margin-top: 1em; text-align: center;">
-                <el-button type="primary" native-type="submit">登 录</el-button>
-                <!--  onclick="current_app.$message('暂未提供自主注册方式，请联系管理员');return false;" -->
-              </div>
-              <div style="margin-top: 1em;text-align: center; color: rgba(255, 255, 255, 0.5);">
-                <!-- <a style="float: left;" href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;">商户入驻</a> -->
-                <a href="/users/sign_up" onclick="current_app.$message('暂未提供商户注册方式，请联系管理员入驻');return false;"><span style="color: rgba(255, 255, 255, 0.5);">&nbsp;注&#12288;册&nbsp;</span></a> |
-                <a href="/users/password/new" onclick="current_app.$message('暂未提供密码找回方式，请联系管理员找回');return false;"><span style="color: rgba(255, 255, 255, 0.5);">忘记密码</span></a>
+              <div style="margin-top: 10px; float: right;">
+                <!-- <img src="/assets/admin/login.png" @click="submit()" style="width: 40px; height: 40px; cursor:pointer;"> -->
+                <input type="image" src="/assets/admin/login.png" onclick="submit()" style="width: 40px; height: 40px; cursor:pointer;">
               </div>
             </div>
-          </div>
+          <!-- </div> -->
         </el-form>
       </transition>
     </div>
-    <div style="width: 100%; position: fixed; bottom: 10px; left: 0; text-align: center; color: rgba(255, 255, 255, 0.8);"><small>贵州腾迈华希医疗科技发展有限公司</small></div>
+    <div style="width: 100%; font-size: 18px; font-family: 微软雅黑; position: fixed; bottom: 20px; left: 0; text-align: center; color: rgba(255, 255, 255, 0.8);">贵州腾迈华希医疗科技发展有限公司</div>
   </div>
 </div>
 <script type="text/javascript">
