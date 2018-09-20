@@ -70,4 +70,10 @@ headers:
         style_css: 'inv_stocks_exports'
         icon: 'fa-bar-chart'
         sequence: '1'
+      - code: 'IMS.B11'
+        caption: '库存查询'
+        path: '#/inv/stocks/search_exports'
+        style_css: 'inv_stocks_search_exports'
+        icon: 'fa-bar-chart'
+        sequence: '1'
       

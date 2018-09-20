@@ -1,38 +1,29 @@
 <style type="text/css">
-#inv_stocks_exports label{font-size: 18px;display: inline-block;padding-bottom:10px;}
+#inv_stocks_exports label{font-size: 14px; display: inline-block;padding-bottom:10px; color: rgb(173, 171, 171);padding-left: 5%;margin-top: 20px;}
 </style>
 <template>
 	<div id="inv_stocks_exports">
-    <el-col :span="22" :offset="1">
-      <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
-      <h3></h3>
-      </el-form>
-        <el-row>
+      <el-col style="padding: 8px;height:100%;">
+        <el-row style="height: 78px; padding-left:8px; border: 1px solid #ebeef5; border-bottom: none; background: #f2f8fb;">
           <label>需要导入的Excel文件:</label>
-          <el-col :span="24">
+          <el-col :span="24" style="padding-left: 5%;">
             <el-col :span="5" style="width:200px;">
-            </el-col>
-          </el-col>
-          <el-col :span="24">
-            <el-col :span="5" style="width:250px;">
-              <el-input id="file_input" size="small" readonly v-on:click.native="get_file"></el-input>
               <input type="hidden" id="file_name">
+              <el-input id="file_input" size="small" readonly v-on:click.native="get_file" placeholder="点击获取上传文件"></el-input>
               <el-input id="file_source" v-model="file" type="file" v-on:change.native="changeValue" style="display: none;" accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></el-input>
             </el-col>
-            <el-col :span="5" style="margin-left:8px;">
-              <el-button type="primary" size="small" @click="file_upload">上传</el-button>
-              <el-button type="success" size="small" @click="file_save">保存</el-button>
+            <el-col :span="6" style="width:calc(100% - 200px); padding-left: 16px;">
+              <el-button type="primary" size="mini" @click="file_upload">上传</el-button>
+              <el-button type="success" size="mini" @click="file_save">保存</el-button>
             </el-col>
           </el-col>
         </el-row>
-      <br/>
-      <el-row style="display:none;">
-        <el-col>
-          <label>文件预览:</label>
-          <el-table
+
+         <!--  <el-table
             :data="tableData"
             border
-            style="width: 100%;display:none;">
+            size="mini"
+            style="width: 100%; height:calc(100% - 78px);">
             <el-table-column
               prop="name"
               label="姓名"
@@ -47,10 +38,7 @@
               prop="address"
               label="地址">
             </el-table-column>
-          </el-table>
-        </el-col>
-        
-      </el-row>
+          </el-table> -->
     </el-col>
   </div>
 </template>
@@ -60,12 +48,14 @@ window.current_template_obj = {
 		return {
       labelPosition: 'top',
       file:"",
+      stock_search:"",
       formLabelAlign: {
         name: '',
         region: '',
         type: ''
       },
-      tableData: []
+      tableData: [],
+      drug_stock_data:[],
 		}
 	},
 	methods:{
@@ -79,29 +69,78 @@ window.current_template_obj = {
     },
     file_upload:function(){
       _this = this
-      // formdata.append("authenticity_token","<%= form_authenticity_token%>")
-      $("#file_name").val($("#file_source")[0].files[0].name);
-      _this.$http.post('/ims/inv/stocks/upload_file', {file:$("#file_source")[0].files[0].name,myfile:$("#file_source")[0].files[0], authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-          console.log(response)
-            _this.$message.success("上传成功。");
-            $("#file_name").val()
-          _this.tableData = response.data.data
-          }, function() {
+      // _this.$http.post('/ims/inv/stocks/upload_file', {myfile:$("#file_source")[0].files[0], authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+      //     console.log(response)
+      //     _this.tableData = response.data.data
+      //   }, function() {
+      //     _this.$message.error("后台出错，上传失败！");
+      //   });
+      var file_input = $("#file_input").val()
+      if (file_input.length<=0){
+        _this.$message.error("请先选择需要上传的库存表。");
+      }else
+      {
+        $("#file_name").val($("#file_source")[0].files[0].name);
+  		  var formdata = new FormData();
+        formdata.append("myfile",$("#file_source")[0].files[0])
+        formdata.append("authenticity_token","<%= form_authenticity_token%>")
+        $.ajax({
+          type:"post",
+          url:"/ims/inv/stocks/upload_file",
+          data:formdata,
+          contentType: false,
+          processData: false,
+          success:function(data){
+            // console.log(data)
+            if (data) {
+              _this.$message.success("上传成功！");
+            }
+          },
+          error:function(data){
             _this.$message.error("上传失败！");
-          });
+          }
+        });
+      };
+
     },
     file_save:function(){
+    	// alert(2)
     	_this = this
-      _this.$http.post('/ims/inv/stocks/exports', {file_name:$("#file_name").val(), authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-          console.log(response)
-            _this.$message.success("保存成功。");
-          _this.tableData = response.data.data
-          }, function() {
-            _this.$message.error("保存失败！");
-          });
-    	// alert("保存成功。")
+      var file_name = $("#file_name").val()
+      var file_input = $("#file_input").val()
+      if (file_input.length<=0){
+        _this.$message.error("请先选择需要上传的库存表。");
+      }
+      else if (file_name.length<=0){
+        _this.$message.error("请先上传库存表。");
+        // _this.$message.error("没有需要保存的库存表。");
+      }
+      else
+      {
+        _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name,'aa':"1241241"}}).then( function(response) {
+        console.log(response)
+        _this.$message.success("保存成功。");
+        $("#file_input").val("")
+        $("#file_name").val("")
+        _this.tableData = response.data.data
+        }, function() {
+          _this.$message.error("保存失败！");
+        });
+      };
     },
-
+    search_drug_stock:function(){
+      _this = this
+      var search = _this.stock_search
+      // alert(search)
+      _this.$http.get('/ims/inv/stocks/search_stocks', {params:{search:search}}).then( function(response) {
+          console.log(response)
+          // _this.tableData = response.data.data
+          _this.drug_stock_data = response.data.data
+        }, function() {
+          _this.$message.error("上传失败！");
+        });
+      // _this.drug_stock_data = [{name:"23",spec:"23mg*24s",qty:"3",unit:"盒"}]
+    }
 	},
 	mounted:function(){
 		this.$nextTick(function(){

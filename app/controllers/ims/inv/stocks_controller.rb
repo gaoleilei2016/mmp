@@ -61,23 +61,37 @@ class Ims::Inv::StocksController < ApplicationController
     end
   end
 
+  def search_stocks
+    p "=======-----------",params
+    location_id = current_user.cur_loc_id.blank? ? current_user.organization_id : current_user.cur_loc_id
+    ret = Ims::Inv::Stock.search_stocks params.merge({org_id:current_user.organization_id,location_id:location_id})
+    p ret
+    render json:ret.to_json
+  end
+
   # 文件上传
   def upload_file
-    puts "---#{params}----",params
     file=params[:myfile]
-    p "111111111",file
     file_name=file.original_filename
     data = File.read(file.tempfile)
     file_path="up_xls//"+file_name.to_s
     tmp_file = File.new(file_path, "w+")
     tmp_file.syswrite(data) if tmp_file
+    p tmp_file
     tmp_file.close
     render json:{flag:true,info:"文件上传成功。",file_name:file_name}   
   end
 
-  # post 库存导入保存
+  
   def exports
-    ret = Ims::Inv::Stock.exports params
+    
+  end
+
+  # post 库存导入保存
+  def save_exports
+    location_id = current_user.organization_id 
+    location_name = Admin::Organization.find(location_id).try(:name)
+    ret = Ims::Inv::Stock.exports params.merge({org_id:current_user.organization_id,location_id:location_id,location_name:location_name})
     render json:ret.to_json
   end
 

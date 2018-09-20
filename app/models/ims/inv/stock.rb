@@ -10,12 +10,18 @@ class Ims::Inv::Stock < ApplicationRecord
 
 		# 库存查询
 		def search_stocks args = {}
-			org_id = args[:org_id]
-			location_id = args[:location_id]
-			search = args[:search]
-			sql = "SELECT * FROM dictmedicine d inner join ims_inv_stocks s on s.medicine_id=d.serialno where s.location_id=#{location_id}  and s.org_id=#{org_id} and (d.py like '%#{search}%' or d.wb like '%#{search}%' or d.name like '%#{search}%' or d.common_name like '%#{search}%' or d.common_py like '%#{search}%' or d.common_wb like '%#{search}%' or d.spec like '%#{search}%')"
-			result = self.find_by_sql(sql)
-        	JSON.parse(result.to_json)
+        	begin
+				org_id = args[:org_id]
+				location_id = args[:location_id]
+				search = args[:search]
+				sql = "SELECT * FROM dictmedicine d inner join ims_inv_stocks s on s.medicine_id=d.serialno where s.location_id=#{location_id}  and s.org_id=#{org_id} and (d.py like '%#{search}%' or d.wb like '%#{search}%' or d.name like '%#{search}%' or d.common_name like '%#{search}%' or d.common_py like '%#{search}%' or d.common_wb like '%#{search}%' or d.spec like '%#{search}%')"
+				result = self.find_by_sql(sql)
+	        	JSON.parse(result.to_json)
+        	rescue Exception => e
+        		print e.message rescue "  e.messag----"
+		        print "laaaaaaaaaaaaaaaaaaaa 库存查询 出错: " + e.backtrace.join("\n")
+		        result = {flag:false,:info=>"药店系统出错。"}
+        	end
 		end
 
 		# 创建配置文件
@@ -31,6 +37,7 @@ class Ims::Inv::Stock < ApplicationRecord
 			    config_my=["pt_code","code","unit","price","quantity","amount"]
 			    # 获取excel
 			    save_ar=save_ar_hash(path,config_ta,config_my)
+				runsql=ActiveRecord::Base.connection()
 			    save_ar.each{ |aa|
 				    # ----------更新---------
 				    select_pt={pt_code:aa["pt_code"],org_id:org_id}
@@ -38,17 +45,17 @@ class Ims::Inv::Stock < ApplicationRecord
 				    selct_ims=self.find_by_sql selct_ims_sql
 				    puts "-查询#{selct_ims}-----"
 				    if(selct_ims.count!=0)
-				    	amount = (aa['quantity'].to_f*aa["price"]).round(2)
-				      	update_sql="update ims_inv_stocks set quantity=quantity+#{aa['quantity']},amount=#{aa['amount']} where id=#{selct_ims[0].id} and org_id=#{org_id}"
+				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
+				      	update_sql="update ims_inv_stocks set quantity=#{aa['quantity']},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
 				      	puts "------#{update_sql}--------"
-				      	self.find_by_sql update_sql
+				      	runsql.update update_sql
 				      	# return {flag:true,info:"更新成功。"} 
 				    else
 				    	sql = "select * from dictmedicine where effect_code=#{aa['pt_code']} "
-				    	ret = self.find_by_sql selct_ims_sql
+				    	ret = self.find_by_sql sql
 				    	drug = JSON.parse(ret[0].to_json) rescue nil
 				    	return {flag:false,info:""} if drug.blank?
-				    	amount = (aa['quantity'].to_f*aa["price"]).round(2)
+				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
 				    	create_data = {
 				    		:org_id=> org_id,
 							:medicine_id=> drug["serialno"],
@@ -60,7 +67,7 @@ class Ims::Inv::Stock < ApplicationRecord
 							:batch=> "",
 							:location_id=> location_id,
 							:location_name=> location_name,
-							:quantity=> args["quantity"].to_f.round(2),
+							:quantity=> aa["quantity"].to_f.round(2),
 							:freeze_qty=>0 ,
 							:amount=> amount,
 				    	}
@@ -71,7 +78,9 @@ class Ims::Inv::Stock < ApplicationRecord
 			    }
 			    return {flag:true,info:"库存导入保存成功!"}
 			rescue Exception => e
-				
+				print e.message rescue "  e.messag----"
+		        print "laaaaaaaaaaaaaaaaaaaa 库存导入保存文件 出错: " + e.backtrace.join("\n")
+		        result = {flag:false,:info=>"药店系统出错。"}
 			end
 		end
 
