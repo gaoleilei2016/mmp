@@ -47,11 +47,15 @@ body > .container{
 			}
 		}
 		.el-menu-item:focus{
-			background-color: #0A9788!important;
+			background-color: #9ec3e2!important;
+			color: #FFFFFF;
+		}
+		.el-menu-item:hover{
+			background-color: #9ec3e2!important;
 			color: #FFFFFF;
 		}
 		.el-menu-item.is-active{
-			background-color: #84B5B0;
+			background-color: #9ec3e2;
 			color: #FFFFFF;
 		}
 	}
@@ -105,10 +109,10 @@ body > .container{
 						padding:5px 2px;
 					}
 					.pre_list:hover{
-						background-color: rgb(226, 246, 244);
+						background-color: #9ec3e2;
 					}					
 					.pre_list.active{
-						background-color: rgb(226, 246, 244);
+						background-color: #D3E9FB;
 					}
 				}
 			}
