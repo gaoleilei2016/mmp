@@ -33,13 +33,18 @@ class Ims::Inv::Stock < ApplicationRecord
 			    location_id = args[:location_id]
 				location_name = args[:location_name]
 			    path="up_xls/"+file_name.to_s
-			    config_ta=["商品编码","商品编码","单位","售价","数量(A)","售价金额"]#1,3,8
-			    config_my=["pt_code","code","unit","price","quantity","amount"]
+ 				#用户所用的机构 #org_id
+ 				select_cid=Ims::Inv::SelectConfig.where(use_org_id: org_id.to_s).last
+			    ta_id=select_cid.c_id
+			    ta=Ims::Inv::UseConfig.find ta_id  #本地配置文件
+			    config_ta=ta.configstr.split(",") #1,3,8
+			    my=Ims::Inv::UseConfig.find 1  #本地配置文件
+			    config_my=my.configstr.split(",")
 			    # 获取excel
 			    save_ar=save_ar_hash(path,config_ta,config_my)
 				runsql=ActiveRecord::Base.connection()
 			    save_ar.each{ |aa|
-				    # ----------更新---------
+				# ----------更新---------
 				    select_pt={pt_code:aa["pt_code"],org_id:org_id}
 				    selct_ims_sql = "select id from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
 				    selct_ims=self.find_by_sql selct_ims_sql
@@ -71,21 +76,19 @@ class Ims::Inv::Stock < ApplicationRecord
 							:freeze_qty=>0 ,
 							:amount=> amount,
 				    	}
+				    	puts "---------进去"
 				    	self.create(create_data)
 				    	# return {flag:true,info:""} if self.create(create_data)
 				    end
 				    # return {flag:false,info:""}
 			    }
-			    return {flag:true,info:"库存导入保存成功!"}
+			    return {flag:true,info:"库存导入保存成1功!"}
 			rescue Exception => e
 				print e.message rescue "  e.messag----"
 		        print "laaaaaaaaaaaaaaaaaaaa 库存导入保存文件 出错: " + e.backtrace.join("\n")
 		        result = {flag:false,:info=>"药店系统出错。"}
 			end
 		end
-
-
-		
 		# 获取标号
 		def get_xls_column
 			["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
