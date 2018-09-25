@@ -117,7 +117,7 @@ window.current_template_obj = {
       }
       else
       {
-        _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name,'aa':"1241241"}}).then( function(response) {
+        _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name}}).then( function(response) {
         console.log(response)
         _this.$message.success("保存成功。");
         $("#file_input").val("")
