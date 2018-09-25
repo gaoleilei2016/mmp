@@ -118,12 +118,18 @@ window.current_template_obj = {
       else
       {
         _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name,'aa':"1241241"}}).then( function(response) {
-        console.log(response)
-        _this.$message.success("保存成功。");
-        $("#file_input").val("")
-        $("#file_name").val("")
-        _this.tableData = response.data.data
-        }, function() {
+        // console.log(response.body.info)
+        if(response.body.flag==false){
+           _this.$message.error(response.body.info);
+         }else{
+          _this.$message.success(response.body.info);
+          $("#file_input").val("")
+          $("#file_name").val("")
+          _this.tableData = response.data.data
+         }
+
+        }, function(data) {
+          // alert(data)
           _this.$message.error("保存失败！");
         });
       };

@@ -1,9 +1,4 @@
 Rails.application.routes.draw do
-  namespace :ims do
-    namespace :inv do
-      resources :select_configs
-    end
-  end
   devise_for :users, controllers: {
     :sessions => 'users/sessions',
     :registrations =>"users/registrations",

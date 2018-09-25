@@ -84,11 +84,19 @@ class Ims::Inv::StocksController < ApplicationController
 
   
   def exports
-    
+    location_id = current_user.organization_id 
+    location_name = Admin::Organization.find(location_id).try(:name)
+    ret = Ims::Inv::Stock.exports params.merge({org_id:current_user.organization_id,location_id:location_id,location_name:location_name})
+    if(ret==nil)
+      data={flag:true,info:'配置文件有问题，请联系管理员--'}
+       render json:data
+    end
+    render json:ret.to_json
   end
 
   # post 库存导入保存
   def save_exports
+    puts "-------进来"
     location_id = current_user.organization_id 
     location_name = Admin::Organization.find(location_id).try(:name)
     ret = Ims::Inv::Stock.exports params.merge({org_id:current_user.organization_id,location_id:location_id,location_name:location_name})
