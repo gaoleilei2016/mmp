@@ -1,0 +1,162 @@
+<%= form_with(model: ims_inv_entry, local: true) do |form| %>
+  <% if ims_inv_entry.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(ims_inv_entry.errors.count, "error") %> prohibited this ims_inv_entry from being saved:</h2>
+
+      <ul>
+      <% ims_inv_entry.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :org_id %>
+    <%= form.number_field :org_id, id: :ims_inv_entry_org_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :medicine_id %>
+    <%= form.number_field :medicine_id, id: :ims_inv_entry_medicine_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, id: :ims_inv_entry_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :spec %>
+    <%= form.text_field :spec, id: :ims_inv_entry_spec %>
+  </div>
+
+  <div class="field">
+    <%= form.label :formul_name %>
+    <%= form.text_field :formul_name, id: :ims_inv_entry_formul_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :entry_type %>
+    <%= form.text_field :entry_type, id: :ims_inv_entry_entry_type %>
+  </div>
+
+  <div class="field">
+    <%= form.label :pt_code %>
+    <%= form.text_field :pt_code, id: :ims_inv_entry_pt_code %>
+  </div>
+
+  <div class="field">
+    <%= form.label :code %>
+    <%= form.text_field :code, id: :ims_inv_entry_code %>
+  </div>
+
+  <div class="field">
+    <%= form.label :unit %>
+    <%= form.text_field :unit, id: :ims_inv_entry_unit %>
+  </div>
+
+  <div class="field">
+    <%= form.label :price %>
+    <%= form.text_field :price, id: :ims_inv_entry_price %>
+  </div>
+
+  <div class="field">
+    <%= form.label :mul %>
+    <%= form.text_field :mul, id: :ims_inv_entry_mul %>
+  </div>
+
+  <div class="field">
+    <%= form.label :batch %>
+    <%= form.text_field :batch, id: :ims_inv_entry_batch %>
+  </div>
+
+  <div class="field">
+    <%= form.label :location_id %>
+    <%= form.text_field :location_id, id: :ims_inv_entry_location_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :location_name %>
+    <%= form.text_field :location_name, id: :ims_inv_entry_location_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :quantity %>
+    <%= form.text_field :quantity, id: :ims_inv_entry_quantity %>
+  </div>
+
+  <div class="field">
+    <%= form.label :amount %>
+    <%= form.text_field :amount, id: :ims_inv_entry_amount %>
+  </div>
+
+  <div class="field">
+    <%= form.label :source_id %>
+    <%= form.text_field :source_id, id: :ims_inv_entry_source_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :source_name %>
+    <%= form.text_field :source_name, id: :ims_inv_entry_source_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :document_id %>
+    <%= form.text_field :document_id, id: :ims_inv_entry_document_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :document_code %>
+    <%= form.text_field :document_code, id: :ims_inv_entry_document_code %>
+  </div>
+
+  <div class="field">
+    <%= form.label :document_line_id %>
+    <%= form.text_field :document_line_id, id: :ims_inv_entry_document_line_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :note %>
+    <%= form.text_field :note, id: :ims_inv_entry_note %>
+  </div>
+
+  <div class="field">
+    <%= form.label :operater %>
+    <%= form.text_field :operater, id: :ims_inv_entry_operater %>
+  </div>
+
+  <div class="field">
+    <%= form.label :operater_id %>
+    <%= form.text_field :operater_id, id: :ims_inv_entry_operater_id %>
+  </div>
+
+  <div class="field">
+    <%= form.label :operat_at %>
+    <%= form.datetime_select :operat_at, id: :ims_inv_entry_operat_at %>
+  </div>
+
+  <div class="field">
+    <%= form.label :patient_name %>
+    <%= form.text_field :patient_name, id: :ims_inv_entry_patient_name %>
+  </div>
+
+  <div class="field">
+    <%= form.label :posting_on %>
+    <%= form.datetime_select :posting_on, id: :ims_inv_entry_posting_on %>
+  </div>
+
+  <div class="field">
+    <%= form.label :created_at %>
+    <%= form.datetime_select :created_at, id: :ims_inv_entry_created_at %>
+  </div>
+
+  <div class="field">
+    <%= form.label :updated_at %>
+    <%= form.datetime_select :updated_at, id: :ims_inv_entry_updated_at %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

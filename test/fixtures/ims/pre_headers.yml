@@ -1,0 +1,123 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  prescription_no: 1
+  note: MyString
+  type_code: MyString
+  type_name: MyString
+  confidentiality_code: MyString
+  confidentiality_name: MyString
+  name: MyString
+  gender_code: MyString
+  gender_name: MyString
+  age: MyString
+  birth_date: 2018-06-23 15:14:27
+  iden: MyString
+  occupation_code: MyString
+  occupation_name: MyString
+  phone: MyString
+  address: MyString
+  source_org_id: 1
+  source_org_name: MyString
+  patient_no: MyString
+  author_id: 1
+  author_name: MyString
+  auditor_id: 1
+  auditor_name: MyString
+  audit_at: 2018-06-23 15:14:27
+  charger_id: 1
+  charger_name: MyString
+  charge_at: 2018-06-23 15:14:27
+  encounter_loc_id: 1
+  encounter_loc_name: MyString
+  total_amount: 1.5
+  delivery_id: 1
+  delivery_name: MyString
+  delivery_org_id: 1
+  delivery_org_name: MyString
+  delivery_at: 2018-06-23 15:14:27
+  return_id: 1
+  return_name: MyString
+  return_org_id: 1
+  return_org_name: MyString
+  return_at: 2018-06-23 15:14:27
+  drug_store_id: 1
+  drug_store_name: MyString
+  effective_start: 2018-06-23 15:14:27
+  effective_end: 2018-06-23 15:14:27
+  diagnoses: MyString
+  specialmark: MyString
+  status: MyString
+  order_id: 1
+  order_code: MyString
+  order_at: 2018-06-23 15:14:27
+  create_bill_opt_id: 1
+  create_bill_opt_name: MyString
+  hospital_prescription_at: 2018-06-23 15:14:27
+  hospital_prescription_id: 1
+  is_return: false
+  ori_id: 1
+  ori_code: MyString
+  tookcode: MyString
+  reason: MyString
+
+two:
+  prescription_no: 1
+  note: MyString
+  type_code: MyString
+  type_name: MyString
+  confidentiality_code: MyString
+  confidentiality_name: MyString
+  name: MyString
+  gender_code: MyString
+  gender_name: MyString
+  age: MyString
+  birth_date: 2018-06-23 15:14:27
+  iden: MyString
+  occupation_code: MyString
+  occupation_name: MyString
+  phone: MyString
+  address: MyString
+  source_org_id: 1
+  source_org_name: MyString
+  patient_no: MyString
+  author_id: 1
+  author_name: MyString
+  auditor_id: 1
+  auditor_name: MyString
+  audit_at: 2018-06-23 15:14:27
+  charger_id: 1
+  charger_name: MyString
+  charge_at: 2018-06-23 15:14:27
+  encounter_loc_id: 1
+  encounter_loc_name: MyString
+  total_amount: 1.5
+  delivery_id: 1
+  delivery_name: MyString
+  delivery_org_id: 1
+  delivery_org_name: MyString
+  delivery_at: 2018-06-23 15:14:27
+  return_id: 1
+  return_name: MyString
+  return_org_id: 1
+  return_org_name: MyString
+  return_at: 2018-06-23 15:14:27
+  drug_store_id: 1
+  drug_store_name: MyString
+  effective_start: 2018-06-23 15:14:27
+  effective_end: 2018-06-23 15:14:27
+  diagnoses: MyString
+  specialmark: MyString
+  status: MyString
+  order_id: 1
+  order_code: MyString
+  order_at: 2018-06-23 15:14:27
+  create_bill_opt_id: 1
+  create_bill_opt_name: MyString
+  hospital_prescription_at: 2018-06-23 15:14:27
+  hospital_prescription_id: 1
+  is_return: false
+  ori_id: 1
+  ori_code: MyString
+  tookcode: MyString
+  reason: MyString

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>title</title>
+	<script type="text/javascript" src="/assets/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/bootstrap/bootstrap.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/assets/bootstrap-3.3.7/bootstrap.min.css">
+	<style type="text/css">
+		button#upload_btn,button#save_btn{
+			/*color:#fff; background-color:#5bc0de; border-color:#46b8da;*/
+		}
+		label.title2{font-size: 15px;}
+		h3.title{text-align: center;margin-bottom:20px;}
+		body{background: #fff url(/assets/background/body_bg.jpg) repeat-x;}
+	</style>
+</head>
+<body>
+	<div class="main-data" style="padding: 8px;">
+		<h3 class="title">药品文件上传</h3>
+		<div class="head row">
+			<!-- <form action="/" method="post" enctype="multipart/form-data"  id="uploadForm"> -->
+				<label class="col-sm-2 title2" style="width:190px; text-align: right; padding-top:8px; padding-right:0px;">需要导入的Excel文件：</label>
+				<div class="col-sm-5" style="width:280px;">
+					<input type="" class="form-control" id="file_name" readonly="true" onclick="$('#file_input').click()">
+				</div>
+				<input type="file" id="file_input" style="display:none;" name="" onchange="format_file()" accept=".csv, application/vnd.ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+				<button id="upload_btn" class="btn btn-info" style="" onclick="upload_file()">上传</button>
+				<button id="save_btn" class="btn btn-info" onclick="save_file()">保存</button>
+			<!-- </form> -->
+		</div>
+		<br/>
+
+		<label class="title2">文件预览：</label>
+		<div class="table panel panel-default" style="background-color: transparent;">
+			<table class="table table table-hover datatable click_table_focus_tr" cellspacing="0" cellpadding="0" style="background-color: transparent;">
+				<thead>
+					<tr>
+						<th>name</th>
+						<th>age</th>
+						<th>sex</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>sd</td>
+						<td>sd</td>
+						<td>sd</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function format_file(){
+        file = $("#file_input")[0].files[0]
+        console.log($("#file_input")[0].files)
+        if(file){
+	        // $("#file_name").val($("#file_input").val())
+	        $("#file_name").val(file.name)
+        }else{
+	        $("#file_name").val("")
+        }
+			if (window.FileReader) {    
+            var reader = new FileReader();    
+            reader.readAsDataURL(file);    
+            //监听文件读取结束后事件    
+          reader.onloadend = function (e) {
+          	console.log(e.target)
+            // $(".img").attr("src",e.target.result);    //e.target.result就是最后的路径地址
+            };    
+       } 
+		}
+
+		function upload_file(){
+      var formdata = new FormData();
+      formdata.append("myfile",$("#file_input")[0].files[0])
+      formdata.append("authenticity_token","<%= form_authenticity_token%>")
+			$.ajax({
+				type:"post",
+				url:"/study/save_file",
+				data:formdata,
+				contentType: false,
+				processData: false,
+				success:function(data){
+					if (data) {
+						alert("保存成功！")
+					}
+				},
+				error:function(data){
+					alert("上传错误")
+				}
+			})
+		}
+
+		function save_file(){
+			$.ajax({
+				type:"post",
+				url:"/study/test",
+				data:formdata,
+				contentType: false,
+				processData: false,
+				success:function(data){
+					var str= ""
+					$.each(data,function(k,v){
+						str += "<tr><td>"+v.name+"</td><td>"+v.age+"</td><td></td></tr>";
+					})					
+					$("table tbody").html(str);
+				},
+				error:function(data){
+					alert("上传错误")
+				}
+			})
+		}
+	</script>
+</body>
+</html>

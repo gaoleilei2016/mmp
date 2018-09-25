@@ -1,0 +1,83 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Ims Inv Entries</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Org</th>
+      <th>Medicine</th>
+      <th>Name</th>
+      <th>Spec</th>
+      <th>Formul name</th>
+      <th>Entry type</th>
+      <th>Pt code</th>
+      <th>Code</th>
+      <th>Unit</th>
+      <th>Price</th>
+      <th>Mul</th>
+      <th>Batch</th>
+      <th>Location</th>
+      <th>Location name</th>
+      <th>Quantity</th>
+      <th>Amount</th>
+      <th>Source</th>
+      <th>Source name</th>
+      <th>Document</th>
+      <th>Document code</th>
+      <th>Document line</th>
+      <th>Note</th>
+      <th>Operater</th>
+      <th>Operater</th>
+      <th>Operat at</th>
+      <th>Patient name</th>
+      <th>Posting on</th>
+      <th>Created at</th>
+      <th>Updated at</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @ims_inv_entries.each do |ims_inv_entry| %>
+      <tr>
+        <td><%= ims_inv_entry.org_id %></td>
+        <td><%= ims_inv_entry.medicine_id %></td>
+        <td><%= ims_inv_entry.name %></td>
+        <td><%= ims_inv_entry.spec %></td>
+        <td><%= ims_inv_entry.formul_name %></td>
+        <td><%= ims_inv_entry.entry_type %></td>
+        <td><%= ims_inv_entry.pt_code %></td>
+        <td><%= ims_inv_entry.code %></td>
+        <td><%= ims_inv_entry.unit %></td>
+        <td><%= ims_inv_entry.price %></td>
+        <td><%= ims_inv_entry.mul %></td>
+        <td><%= ims_inv_entry.batch %></td>
+        <td><%= ims_inv_entry.location_id %></td>
+        <td><%= ims_inv_entry.location_name %></td>
+        <td><%= ims_inv_entry.quantity %></td>
+        <td><%= ims_inv_entry.amount %></td>
+        <td><%= ims_inv_entry.source_id %></td>
+        <td><%= ims_inv_entry.source_name %></td>
+        <td><%= ims_inv_entry.document_id %></td>
+        <td><%= ims_inv_entry.document_code %></td>
+        <td><%= ims_inv_entry.document_line_id %></td>
+        <td><%= ims_inv_entry.note %></td>
+        <td><%= ims_inv_entry.operater %></td>
+        <td><%= ims_inv_entry.operater_id %></td>
+        <td><%= ims_inv_entry.operat_at %></td>
+        <td><%= ims_inv_entry.patient_name %></td>
+        <td><%= ims_inv_entry.posting_on %></td>
+        <td><%= ims_inv_entry.created_at %></td>
+        <td><%= ims_inv_entry.updated_at %></td>
+        <td><%= link_to 'Show', ims_inv_entry %></td>
+        <td><%= link_to 'Edit', edit_ims_inv_entry_path(ims_inv_entry) %></td>
+        <td><%= link_to 'Destroy', ims_inv_entry, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Ims Inv Entry', new_ims_inv_entry_path %>

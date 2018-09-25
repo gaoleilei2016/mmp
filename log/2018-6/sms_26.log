@@ -1,0 +1,5 @@
+# Logfile created on 2018-06-25 10:22:54 +0800 by logger.rb/56438
+$$:-=-2018-06-25 10:22:54-=-INFO--: start----发送短信开始-----{:type=>:take_medic, :name=>"王敏烈", :number=>"0000000045", :total_fee=>0.21, :number1=>"000045", :url=>"http://huaxi.tenmind.com/", :phone=>"18786020697"}---- 
+ 
+$$:-=-2018-06-25 10:22:55-=-INFO--: succ----短信发送成功---- 
+ 

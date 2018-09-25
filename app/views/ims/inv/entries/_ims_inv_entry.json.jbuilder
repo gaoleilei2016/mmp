@@ -1,0 +1,2 @@
+json.extract! ims_inv_entry, :id, :org_id, :medicine_id, :name, :spec, :formul_name, :entry_type, :pt_code, :code, :unit, :price, :mul, :batch, :location_id, :location_name, :quantity, :amount, :source_id, :source_name, :document_id, :document_code, :document_line_id, :note, :operater, :operater_id, :operat_at, :patient_name, :posting_on, :created_at, :updated_at, :created_at, :updated_at
+json.url ims_inv_entry_url(ims_inv_entry, format: :json)

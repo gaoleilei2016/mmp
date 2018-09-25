@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  org_id: 1
+  medicine_id: 1
+  pt_code: MyString
+  code: MyString
+  unit: MyString
+  price: MyString
+  mul: MyString
+  batch: MyString
+  location_id: MyString
+  location_name: MyString
+  quantity: 1.5
+  freeze_qty: 1.5
+  amount: 1.5
+  created_at: 2018-09-11 15:18:55
+  updated_at: 2018-09-11 15:18:55
+
+two:
+  org_id: 1
+  medicine_id: 1
+  pt_code: MyString
+  code: MyString
+  unit: MyString
+  price: MyString
+  mul: MyString
+  batch: MyString
+  location_id: MyString
+  location_name: MyString
+  quantity: 1.5
+  freeze_qty: 1.5
+  amount: 1.5
+  created_at: 2018-09-11 15:18:55
+  updated_at: 2018-09-11 15:18:55
