@@ -33,24 +33,39 @@ class Ims::Inv::Stock < ApplicationRecord
 			    location_id = args[:location_id]
 				location_name = args[:location_name]
 			    path="up_xls/"+file_name.to_s
-			    config_ta=["商品编码","商品编码","单位","售价","数量(A)","售价金额"]#1,3,8
-			    config_my=["pt_code","code","unit","price","quantity","amount"]
+ 				#用户所用的机构 #org_id
+ 				select_cid=Ims::Inv::SelectConfig.where(use_org_id: org_id.to_s).last
+			    ta_id=select_cid.c_id
+			    ta=Ims::Inv::UseConfig.find ta_id  #本地配置文件
+			    config_ta=ta.configstr.split(",") #1,3,8
+			    my=Ims::Inv::UseConfig.find 1  #本地配置文件
+			    config_my=my.configstr.split(",")
 			    # 获取excel
 			    save_ar=save_ar_hash(path,config_ta,config_my)
+			    if(save_ar==nil)
+			    	return  {flag:false,info:"配置文件有误，请联系系统管理员"}
+			    end
 				runsql=ActiveRecord::Base.connection()
 			    save_ar.each{ |aa|
-				    # ----------更新---------
+				# ----------更新---------
 				    select_pt={pt_code:aa["pt_code"],org_id:org_id}
-				    selct_ims_sql = "select id from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
+				    selct_ims_sql = "select id,quantity from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
 				    selct_ims=self.find_by_sql selct_ims_sql
 				    puts "-查询#{selct_ims}-----"
 				    if(selct_ims.count!=0)
+				    	puts "----更新----"
+				    	# 查询更新前数量
+				    	update_befor_num=selct_ims[0].quantity
 				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
 				      	update_sql="update ims_inv_stocks set quantity=#{aa['quantity']},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
 				      	puts "------#{update_sql}--------"
 				      	runsql.update update_sql
+				      	# 更新日志
+				      	data_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:selct_ims[0].id,refresh_after_num:aa['quantity'],refresh_befor_num:update_befor_num,status:0}
+				      	Ims::Inv::RefreshLog.create(data_log)
 				      	# return {flag:true,info:"更新成功。"} 
 				    else
+				    	puts "--------插入------"
 				    	sql = "select * from dictmedicine where effect_code=#{aa['pt_code']} "
 				    	ret = self.find_by_sql sql
 				    	drug = JSON.parse(ret[0].to_json) rescue nil
@@ -71,7 +86,11 @@ class Ims::Inv::Stock < ApplicationRecord
 							:freeze_qty=>0 ,
 							:amount=> amount,
 				    	}
+				    	puts "---------进去"
 				    	self.create(create_data)
+				    	data_in_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:drug["serialno"],
+				    		refresh_after_num:aa["quantity"],refresh_befor_num: nil,status:1}
+				      	Ims::Inv::RefreshLog.create(data_in_log)
 				    	# return {flag:true,info:""} if self.create(create_data)
 				    end
 				    # return {flag:false,info:""}
@@ -83,9 +102,6 @@ class Ims::Inv::Stock < ApplicationRecord
 		        result = {flag:false,:info=>"药店系统出错。"}
 			end
 		end
-
-
-		
 		# 获取标号
 		def get_xls_column
 			["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"]
@@ -130,6 +146,7 @@ class Ims::Inv::Stock < ApplicationRecord
 	   	end
 	   	# ---读取文件
 	   	def getXls path
+	   		puts "---#{path}"
 	   		begin
 		        xlsx = Roo::Spreadsheet.open(path, extension: :xls)
 		    rescue Exception => e
@@ -141,7 +158,12 @@ class Ims::Inv::Stock < ApplicationRecord
 	    def save_ar_hash path,config_ta,config_my
 	        arr=getXls path#--返回一个数组，第一个用于取值，第二个用于关闭文件
 	        first_value=get_xls_row(arr[0])#库存更新第一行
+	        puts "#{first_value.size}-----------第一行长度-----------"
 	        aa=file_touch(config_ta,first_value)#所需列
+	        # 配置文件 有误
+	        if(aa==nil)
+	        	return nil
+	        end
 	        column_str_my=[]
 	        for i in (0...aa.size)
 	          column_str=get_column_str aa[i]
@@ -175,6 +197,10 @@ class Ims::Inv::Stock < ApplicationRecord
 	 					break;
 	 				end
 	 			end
+	 		end
+	 		#配置文件不正确
+	 		if(config_ar.size != jilu.size)
+	 			return nil
 	 		end
 	 		return jilu
 		end
