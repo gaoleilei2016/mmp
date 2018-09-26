@@ -46,7 +46,7 @@ class Ims::Inv::Stock < ApplicationRecord
 				    puts "-查询#{selct_ims}-----"
 				    if(selct_ims.count!=0)
 				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
-				      	update_sql="update ims_inv_stocks set quantity=#{aa['quantity']},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
+				      	update_sql="update ims_inv_stocks set quantity=#{aa['quantity'].to_f},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
 				      	puts "------#{update_sql}--------"
 				      	runsql.update update_sql
 				      	# return {flag:true,info:"更新成功。"} 

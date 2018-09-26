@@ -65,7 +65,7 @@ class Ims::Inv::StocksController < ApplicationController
     p "=======-----------",params
     location_id = current_user.cur_loc_id.blank? ? current_user.organization_id : current_user.cur_loc_id
     ret = Ims::Inv::Stock.search_stocks params.merge({org_id:current_user.organization_id,location_id:location_id})
-    p ret
+    p ret[0]
     render json:ret.to_json
   end
 

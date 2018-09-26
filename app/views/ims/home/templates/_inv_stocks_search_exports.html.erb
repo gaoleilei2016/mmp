@@ -65,7 +65,7 @@
               align="right"
               min-width="80">
               <template slot-scope="scope">
-                {{ scope.row.price | formatMoney(4)}}
+                {{ parseFloat(scope.row.price) | formatMoney(2)}}
               </template>
             </el-table-column>
             <el-table-column
@@ -73,7 +73,7 @@
               align="right"
               min-width="80">
               <template slot-scope="scope">
-                {{ scope.row.quantity }}
+                {{ scope.row.quantity}}
               </template>
             </el-table-column>
              <el-table-column
@@ -91,7 +91,7 @@
               align="right"
               min-width="100">
               <template slot-scope="scope">
-                {{ scope.row.amount | formatMoney(2)}}
+                {{ parseFloat(scope.row.amount) | formatMoney(2)}}
               </template>
             </el-table-column>
 
@@ -138,16 +138,13 @@ window.current_template_obj = {
       var search = _this.stock_search
       _this.$http.get('/ims/inv/stocks/search_stocks', {params:{search:search}}).then( function(response) {
         console.log(response.data)
-        _this.drug_stock_data = response.data.data
-        // var res = response.data;
-        // if(res.flag) {
+        if(response.data.length>0) {
           _this.drug_stock_data = response.data;
-        //   _this.dataCount = res.count;
-        // }else{
-        //   _this.$message.error(res.info);
-        // }
+        }else{
+          _this.$message.error("没有数据。");
+        }
       }, function() {
-        _this.$message.error("上传失败！");
+        _this.$message.error("查询出错！");
       });
     }
   },
