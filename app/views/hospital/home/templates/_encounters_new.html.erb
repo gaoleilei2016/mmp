@@ -11,7 +11,9 @@
 	  		<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
 	  			<!-- 历史就诊tab -->
 	  			<!-- 药品tab显示模板和生成处方按钮 -->
-	  			<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">
+	  			<!--<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">-->
+	  			<div>
+		  			<el-button size="mini" @click="openDrugModal">药品字典</el-button>
 		  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
 		  			<el-button size="mini" @click="openCopyModal">引用</el-button>
 		  			<el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
@@ -46,7 +48,8 @@
   	<%= render "hospital/home/render/encounters_favorite_dialog" %>
   	<!-- 引用弹出框 -->
   	<%= render "hospital/home/render/encounters_copy_dialog" %>
-  	
+  	<!-- 药品字典弹出框 -->
+  	<%= render "hospital/home/templates/drugs_detail_dialog" %>
 	</div>
 </template>
 <!-- 处方打印模板 -->
@@ -202,7 +205,7 @@ window.current_template_obj = {
 				    ],
 				  },
 				/* 药品 --- end */ 
-
+					dialogVisible: false,  //是否显示药品字典
 				/* 药品模板 --- start */ 
 					isShowFavoriteDialog: false, // 显示模板模态框
 					favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
@@ -1268,6 +1271,22 @@ window.current_template_obj = {
       	}
       },
     /* 药品操作 --- end */
+
+    /* 药品字典 --- start */
+    //打开药品字典弹出框
+    openDrugModal: function() {
+    	this.dialogVisible = true;
+    	this.getDrugsList();
+    },
+    getDrugsList: function(search) {
+    	var _this = this;
+    	_this.$resource("/hospital/dict/medications/list").get({search: search}).then(function(response) {
+    		console.log(response);
+    	}, function(response) {
+    		_this.$message.error("获取药品列表失败，请刷新后重试");
+    	})
+    },
+    /* 药品字典 --- end*/
 
     /* 药品模板 --- start */
       // 打开模板弹出框，使用模板，创建模板
