@@ -45,7 +45,7 @@ class ::Hospital::Dict::NewMedication < ApplicationRecord
     class<<self
       #  只接收药品id
       def find(medicine_id)
-        ::Dict::NewMedication.where("medicine_id" => medicine_id).first
+        ::Hospital::Dict::NewMedication.where("medicine_id" => medicine_id).first
       end
     end
 end

@@ -1,7 +1,7 @@
 class Hospital::Order < ApplicationRecord
 
   belongs_to :encounter, class_name: '::Hospital::Encounter', foreign_key: 'encounter_id', optional: true
-  # has_one :dict_medication, class_name: '::Dict::NewMedication', foreign_key: 'serialno' 
+  # has_one :dict_medication, class_name: '::Hospital::Dict::NewMedication', foreign_key: 'serialno' 
 
   belongs_to :prescription, class_name: '::Hospital::Prescription', foreign_key: 'prescription_id', optional: true
   belongs_to :author, class_name: '::User', foreign_key: 'author_id', optional: true
@@ -15,7 +15,7 @@ class Hospital::Order < ApplicationRecord
     # 根据药品id 获取药品库存的方法
     # cur_drug_storage = 5.times.map { |e| rand(8)  }.sort {|x,y| y <=> x}
 
-    cur_drug_storage = [::Dict::NewMedication.find(self.serialno).quantity]
+    cur_drug_storage = [::Hospital::Dict::NewMedication.find(self.serialno).quantity]
     p cur_drug_storage
     p (cur_drug_storage[0] || 0) < self.total_quantity.to_f
     if (cur_drug_storage[0] || 0) < self.total_quantity.to_f
@@ -31,7 +31,7 @@ class Hospital::Order < ApplicationRecord
 
 
   def dict_medication
-    ::Dict::NewMedication.find(self.serialno) rescue nil
+    ::Dict::Medication.find(self.serialno) rescue nil
   end
 
   def to_web_front_with_photo
@@ -152,12 +152,16 @@ class Hospital::Order < ApplicationRecord
     def copy_orders(order_ids, encounter_id, cur_user)
       cur_encounter = ::Hospital::Encounter.find(encounter_id)
       cur_orders = ::Hospital::Order.find(order_ids)
+      errors = []
       ::ActiveRecord::Base.transaction do 
         cur_orders.each do |_order|
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
           # 查询当前药品使用信息
-          cur_medication = ::Dict::NewMedication.find(_order.serialno)
-          next unless cur_medication.can_create?
+          cur_medication = ::Dict::Medication.find(_order.serialno)
+          unless cur_medication.can_create?
+            errors << "药品: #{_order.title} 未启用" 
+            next
+          end
           medication_info = cur_medication.to_order_info
           new_order_args = {
               single_qty_value: _order.single_qty_value,
@@ -182,6 +186,11 @@ class Hospital::Order < ApplicationRecord
           new_order = ::Hospital::Order.create!(new_order_args)
         end
       end
+      if errors.blank?
+        {flag: true, info: "success"}
+      else
+        {flag: false, info: errors.join("、")}
+      end
     end
 
     def to_template_order(order_ids, mtemplate_id, cur_user)
@@ -196,7 +205,7 @@ class Hospital::Order < ApplicationRecord
           end
           # 三方面复制  复制药品使用信息  复制当前药品的价格  置空相关医嘱和人相关的信息
           # 查询当前药品使用信息
-          cur_medication = ::Dict::NewMedication.find(_order.serialno)
+          cur_medication = ::Dict::Medication.find(_order.serialno)
           raise "创建失败  有药品不能使用" unless cur_medication.can_create?
           medication_info = cur_medication.to_order_info
           new_order_args = {

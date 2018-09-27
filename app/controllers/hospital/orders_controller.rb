@@ -102,7 +102,7 @@ class Hospital::OrdersController < ApplicationController
 
     def format_order_create_args
       args = order_params
-      dict_mediaction_info = ::Dict::NewMedication.find(args[:serialno]).to_order_info()
+      dict_mediaction_info = ::Hospital::Dict::NewMedication.find(args[:serialno]).to_order_info()
       begin
         ret = {
           serialno: args[:serialno],
@@ -139,7 +139,7 @@ class Hospital::OrdersController < ApplicationController
 
     def format_order_update_args
       args = order_params
-      dict_mediaction_info = ::Dict::NewMedication.find(args[:serialno]).to_order_info()
+      dict_mediaction_info = ::Hospital::Dict::NewMedication.find(args[:serialno]).to_order_info()
       begin
         ret = {
           serialno: args[:serialno],

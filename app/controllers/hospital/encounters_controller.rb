@@ -66,9 +66,10 @@ class Hospital::EncountersController < ApplicationController
   # /hospital/encounters/quote_orders
   def quote_orders
     p " quote_orders",params
-    flag = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
-    info = flag ? "引用成功" : "复制出错 有药品以停用" 
-    render json: {flag: flag, info: info}
+    ret = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
+    p ret
+    info = ret[:flag] ? "引用成功" : ("引用失败: " + ret[:info]) 
+    render json: {flag: ret[:flag], info: info}
   end
 
 

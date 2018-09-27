@@ -28,7 +28,7 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     alias_py = params[:search]
     alias_wb = params[:search]
     search_str = "serialno LIKE ? OR ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR alias_name LIKE ? OR py LIKE ? OR wb LIKE ? OR common_py LIKE ? OR common_wb LIKE ? OR alias_py LIKE ? OR alias_wb LIKE ?"
-    @medications = ::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%").page(params[:page]||1).per(params[:per]||25)
+    @medications = ::Hospital::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%").page(params[:page]||1).per(params[:per]||25)
     ret = @medications.map { |e| e.to_hash }
       respond_to do |format|
         if ret.blank?
@@ -43,7 +43,7 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
   # GET
   # hospital/dict/medications/:id
   def show
-    @medication = ::Dict::NewMedication.find(params[:id])
+    @medication = ::Hospital::Dict::NewMedication.find(params[:id])
     # 获取该药品的实时库存量
     @medication = @medication.to_hash
     render json:{flag: true, info: "success", data: @medication}
