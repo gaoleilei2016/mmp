@@ -14,6 +14,10 @@ $--color-transition-base: color .2s cubic-bezier(.645,.045,.355,1) !default;
 $--color-white: #fff !default;
 $--color-black: #000 !default;
 
+/*自定义的主题颜色*/
+$--mmp-theme-bg: rgb(211, 233, 251);//深色
+$--mmp-second-bg: rgb(158, 195, 226);//浅色
+
 // $--color-primary: #409EFF !default;   2018/06/16修改颜色 dujuan
 $--color-primary: #0CBDAA !default;
 $--color-primary-light-1: mix($--color-white, $--color-primary, 10%) !default; /* 53a8ff */

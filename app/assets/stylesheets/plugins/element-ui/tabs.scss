@@ -228,13 +228,13 @@
       color: $--color-text-secondary;
 
       &.is-active {
-        color: #9ec3e2;
+        color: $--mmp-second-bg;
         background-color: $--color-white;
         border-right-color: $--border-color-base;
         border-left-color: $--border-color-base;
       }
       &:not(.is-disabled):hover {
-        color: #9ec3e2;
+        color: $--mmp-second-bg;
       }
       &.is-disabled {
         color: $--disabled-color-base;
