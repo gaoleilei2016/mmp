@@ -57,7 +57,7 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
       @medications = @medications.where(pharmacology_code: params[:pharmacology_code])
     end
     if params[:indications].present?
-      indications = params[:indications] # 适应症
+      indications = params[:indications].map { |e| "%#{e}%"  } # 适应症
       indications_search_str = indications.map {|e| "indications LIKE ?" }.join(" OR ")
       indications_search_arr = [indications_search_str] + indications
       @medications = @medications.where(indications_search_arr)
