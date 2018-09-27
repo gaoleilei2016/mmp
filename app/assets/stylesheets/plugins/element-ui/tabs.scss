@@ -194,7 +194,6 @@
       }
       &.is-active {
         border-bottom-color: $--color-white;
-
         &.is-closable {
           padding-left: 20px;
           padding-right: 20px;
@@ -229,13 +228,13 @@
       color: $--color-text-secondary;
 
       &.is-active {
-        color: $--color-primary;
+        color: #9ec3e2;
         background-color: $--color-white;
         border-right-color: $--border-color-base;
         border-left-color: $--border-color-base;
       }
       &:not(.is-disabled):hover {
-        color: $--color-primary;
+        color: #9ec3e2;
       }
       &.is-disabled {
         color: $--disabled-color-base;

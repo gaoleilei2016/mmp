@@ -54,10 +54,10 @@
       line-height: 60px;
       margin: 0;
       border-bottom: 2px solid transparent;
-      color: $--mmp-theme-text-lighter; // #CAE6E7
+      color: $--color-white;
 
-      a,
-      a:hover {
+      i,
+      i:hover {
         color: inherit;
       }
 
@@ -68,12 +68,14 @@
     }
     & > .el-submenu {
       float: left;
-
+      i {
+          color: inherit;
+        }
       &:focus,
       &:hover {
         outline: none;
         .el-submenu__title {
-          color: $--mmp-theme-text-lighter; // #CAE6E7
+          color: $--color-white;
         }
       }
 
@@ -88,7 +90,7 @@
         height: 60px;
         line-height: 60px;
         border-bottom: 2px solid transparent;
-        color: $--mmp-theme-text-lighter; // #CAE6E7
+        color: $--color-white;
 
         &:hover {
           background-color: #fff;
@@ -109,10 +111,9 @@
         height: 36px;
         line-height: 36px;
         padding: 0 10px;
-        color: $--mmp-theme-text-lighter; // #CAE6E7
-
-        &.is-active {
-          color: $--color-white;
+        color: $--color-white;
+        i {
+          color: inherit;
         }
       }
     }

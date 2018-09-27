@@ -189,10 +189,10 @@ window.current_template_obj = {
 				      { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
 				    ],
 				    "single_qty.value": [
-				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次数量在 0.01 到 1000 之间 ' }
+				      { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|1000.000/, message: '单次数量在 0.001 到 1000 之间 ' }
 				    ],
 				    "dose.value": [
-				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次剂量在 0.01 到 1000 之间 ' }
+				      { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|1000.000/, message: '单次剂量在 0.001 到 1000 之间 ' }
 				    ],
 				    "course_of_treatment.value": [
 				      { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
@@ -1007,7 +1007,7 @@ window.current_template_obj = {
     			cb([]);
     			return false;
     		}
-    		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
+    		Vue.resource('/hospital/dict/new_medications.json').get({search: queryString}).then(function(response) {
 			    var res = response.data;
 			    if (res.flag) {
 			    	var drugs = res.data;
@@ -1217,7 +1217,7 @@ window.current_template_obj = {
 	    	this.order = row;
 	    	this.order.name = row.title;
 	    	var _this = this;
-	    	Vue.resource('/dict/medications/'+row.serialno+'.json').get().then(function(response) {
+	    	Vue.resource('/hospital/dict/new_medications/'+row.serialno+'.json').get().then(function(response) {
 			    var res = response.data;
 			    if (res.flag) {
 			    	_this.order.mul = res.data.mul; // 用于运算总量
