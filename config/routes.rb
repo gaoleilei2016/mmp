@@ -134,6 +134,10 @@ Rails.application.routes.draw do
       resources :mtemplates # 医嘱模板管理
       resources :codes # 编码表
     end
+
+    namespace :dict do
+      resources :new_medications
+    end
     resources :home
     # 就诊管理、统计
     resources :encounters do 
