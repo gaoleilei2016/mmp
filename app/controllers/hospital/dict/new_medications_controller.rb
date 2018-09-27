@@ -52,10 +52,16 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     # 基础查询 根据
     @medications = ::Hospital::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%")
     # 药理学分类查询
-    pharmacology_code = params[:pharmacology_code] # 药理学分类
-    @medications = @medications.where(pharmacology_code: pharmacology_code)
-    indications = params[:indications] # 适应症
-    @medications = @medications
+    if params[:pharmacology_code].present?
+      pharmacology_code = params[:pharmacology_code] # 药理学分类
+      @medications = @medications.where(pharmacology_code: params[:pharmacology_code])
+    end
+    if params[:indications].present?
+      indications = params[:indications] # 适应症
+      indications_search_str = indications.map {|e| "indications LIKE ?" }.join(" OR ")
+      indications_search_arr = [indications_search_str] + indications
+      @medications = @medications.where(indications_search_arr)
+    end
     @medications = @medications.page(params[:page]||1).per(params[:per]||25)
     med_count = @medications.count
     ret = @medications.map { |e| e.to_hash }
