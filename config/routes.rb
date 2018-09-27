@@ -136,7 +136,11 @@ Rails.application.routes.draw do
     end
 
     namespace :dict do
-      resources :new_medications
+      resources :new_medications do
+        collection do 
+          get :list
+        end
+      end
     end
     resources :home
     # 就诊管理、统计

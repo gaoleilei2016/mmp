@@ -30,14 +30,14 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     search_str = "serialno LIKE ? OR ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR alias_name LIKE ? OR py LIKE ? OR wb LIKE ? OR common_py LIKE ? OR common_wb LIKE ? OR alias_py LIKE ? OR alias_wb LIKE ?"
     @medications = ::Hospital::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%").page(params[:page]||1).per(params[:per]||25)
     ret = @medications.map { |e| e.to_hash }
-      respond_to do |format|
-        if ret.blank?
-          format.json { render json: {flag: false, info: "没有相关药品", data: ret} }
-        else
-          format.html # index.html.erb
-          format.json { render json: {flag: true, info:"", data: ret} }
-        end
+    respond_to do |format|
+      if ret.blank?
+        format.json { render json: {flag: false, info: "没有相关药品", data: ret} }
+      else
+        format.html # index.html.erb
+        format.json { render json: {flag: true, info:"", data: ret} }
       end
+    end
   end
 
   # GET
@@ -47,6 +47,13 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     # 获取该药品的实时库存量
     @medication = @medication.to_hash
     render json:{flag: true, info: "success", data: @medication}
+  end
+
+  # 医生端 药品列表
+  # GET
+  # hospital/dict/medications/list
+  def list
+    
   end
 
   private

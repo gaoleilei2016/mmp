@@ -67,7 +67,6 @@ class Hospital::EncountersController < ApplicationController
   def quote_orders
     p " quote_orders",params
     ret = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
-    p ret
     info = ret[:flag] ? "引用成功" : ("引用失败: " + ret[:info]) 
     render json: {flag: ret[:flag], info: info}
   end

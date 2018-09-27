@@ -14,6 +14,9 @@ class ::Hospital::Dict::NewMedication < ApplicationRecord
       ret[:purch_price] = self.purch_price.to_f
       ret[:price] = self.price.to_f
       ret[:storage] = [self.quantity]
+      ret[:return_price_flag]  =  (rand(0..1) == 0 ? false : true) #返款标记
+      ret[:pharmacology_code]  =  0 #药理学分类编码 编码系统
+      ret[:indications]  =  "感冒|发烧|头疼" #适应症
       # 临时测试代码  随机库存
       # ret.merge!(storage: 5.times.map { |e| rand(10)  }.sort {|x,y| y <=> x})
       ret
