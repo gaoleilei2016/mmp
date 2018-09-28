@@ -213,11 +213,14 @@ window.current_template_obj = {
           pageSize: 10,          //当前显示条数
           totalDrugCount: 0,      //所有药品数量
           pharmacologies: [],      //药理学分类
-          allIndications: [],       //药品适应症
+          kindnames: [],           //药品分类
+          jxtypes: [],            //剂型
           filter: {
-            pharmacology: "",
-            indications: []
+            pharmacology: "", //药理学分类查询
+            kindname: "",     //药品分类查询
+            jxtype: "",       //剂型分类查询
           },
+          moreSearchFlag: false,   //高级搜索
         /* 药品模板 --- start */ 
           isShowFavoriteDialog: false, // 显示模板模态框
           favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
@@ -273,7 +276,10 @@ window.current_template_obj = {
     "filter.pharmacology": function() {
       this.getDrugsList();
     },
-    "filter.indications": function() {
+    "filter.kindname": function() {
+      this.getDrugsList();
+    },
+    "filter.jxtype": function() {
       this.getDrugsList();
     },
   },
@@ -306,7 +312,6 @@ window.current_template_obj = {
       init: function() {
         var _this = this;
         _this.orgname = $("#current_org_name").val();
-        //_this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 500);
         _this.$refs["encname"].focus();
         // Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
        //    var res = response.data;
@@ -343,9 +348,10 @@ window.current_template_obj = {
         }, function  (response) {
           _this.$message.error('获取编码表报错，请联系管理员。');
         })
-        _this.getDrugsList();
-        _this.getPharmacology();
-        _this.getallIndications();
+        _this.getDrugsList(); //获取药品列表
+        _this.getPharmacology();//获取所有药理学分类编码
+        _this.getallKindnames();//获取所有药品分类
+        _this.getAllJxtypes();//获取所有剂型分类
       },
       // 聚焦下一个
       focusNext: function (now, next) {
@@ -1321,17 +1327,30 @@ window.current_template_obj = {
       var blob =  new Blob([ab], { type: 'image/png' });
       return URL.createObjectURL(blob);
     },
-    //获取所有药品适应症
-    getallIndications: function() {
+    //获取所有剂型分类
+    getAllJxtypes: function() {
       var _this = this;
-      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.256"}).then(function(response) {
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.13610.1.364.8.50.2"}).then(function(response) {
           if (response.flag) {
-            _this.allIndications = response.body.data;
+            _this.jxtypes = response.body.data;
           } else {
             //_this.$message.warning(response.body.info);
           }
       }, function(response) {
-        _this.$message.error("药理学分类暂不可用！");
+        _this.$message.error("剂型分类暂不可用！");
+      })
+    },
+    //获取所有药品分类
+    getallKindnames: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.256"}).then(function(response) {
+          if (response.flag) {
+            _this.kindnames = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("药品分类暂不可用！");
       })
     },
     //获取所有药理学分类编码
@@ -1347,9 +1366,10 @@ window.current_template_obj = {
         _this.$message.error("药理学分类暂不可用！");
       })
     },
+    //获取药品列表
     getDrugsList: function() {
       var _this = this;
-      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, indications: _this.filter.indications}).then(function(response) {
+      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, kindname: _this.filter.kindname, jxtype: _this.filter.jxtype}).then(function(response) {
         if (response.body.flag) {
           _this.drugsData = response.body.data;
           _this.totalDrugCount = response.body.count;
