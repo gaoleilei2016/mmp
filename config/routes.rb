@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to:"customer/portal#index"
   mount ActionCable.server => "/cable"
-  
+  mount Ims::Inv::Interface => 'wqj'
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do

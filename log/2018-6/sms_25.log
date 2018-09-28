@@ -1,9 +1,0 @@
-# Logfile created on 2018-06-22 17:27:14 +0800 by logger.rb/56438
-$$:-=-2018-06-22 17:27:14-=-INFO--: start----发送短信开始-----{:type=>:take_medic, :name=>"王敏烈", :number=>"0000000047", :total_fee=>0.38, :number1=>"000047", :url=>"http://huaxi.tenmind.com/", :phone=>"18786020697"}---- 
- 
-$$:-=-2018-06-22 17:27:14-=-INFO--: succ----短信发送成功---- 
- 
-$$:-=-2018-06-23 20:57:14-=-INFO--: start----发送短信开始-----{:type=>:take_medic, :name=>"王敏烈", :number=>"0000000008", :total_fee=>0.01, :number1=>"000008", :url=>"http://huaxi.tenmind.com/", :phone=>"18786020697"}---- 
- 
-$$:-=-2018-06-23 20:57:14-=-INFO--: succ----短信发送成功---- 
- 

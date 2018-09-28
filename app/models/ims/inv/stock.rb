@@ -27,6 +27,10 @@ class Ims::Inv::Stock < ApplicationRecord
 		# 创建配置文件
   		#  库存导入接收文件
 		def exports args={}
+			no_exist_ar=[]#药品不存在的药品编码
+				update_num=0
+				insert_num=0
+				false_num=0
 			begin
 				file_name = args[:file_name]
 				org_id = args[:org_id]
@@ -36,6 +40,7 @@ class Ims::Inv::Stock < ApplicationRecord
  				#用户所用的机构 #org_id
  				select_cid=Ims::Inv::SelectConfig.where(use_org_id: org_id.to_s).last
 			    ta_id=select_cid.c_id
+			    puts "-------#{ta_id}-----"
 			    ta=Ims::Inv::UseConfig.find ta_id  #本地配置文件
 			    config_ta=ta.configstr.split(",") #1,3,8
 			    my=Ims::Inv::UseConfig.find 1  #本地配置文件
@@ -48,6 +53,7 @@ class Ims::Inv::Stock < ApplicationRecord
 				runsql=ActiveRecord::Base.connection()
 			    save_ar.each{ |aa|
 				# ----------更新---------
+				# 导入信息提示
 				    select_pt={pt_code:aa["pt_code"],org_id:org_id}
 				    selct_ims_sql = "select id,quantity from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
 				    selct_ims=self.find_by_sql selct_ims_sql
@@ -62,19 +68,22 @@ class Ims::Inv::Stock < ApplicationRecord
 				      	runsql.update update_sql
 				      	# 更新日志
 				      	data_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:selct_ims[0].id,refresh_after_num:aa['quantity'],refresh_befor_num:update_befor_num,status:0}
+				      	update_num+=1
 				      	Ims::Inv::RefreshLog.create(data_log)
-				      	# return {flag:true,info:"更新成功。"} 
 				    else
 				    	puts "--------插入------"
-				    	sql = "select * from dictmedicine where effect_code=#{aa['pt_code']} "
+				    	sql = "select * from dictmedicine where pt_code=#{aa['pt_code']} "
 				    	ret = self.find_by_sql sql
 				    	drug = JSON.parse(ret[0].to_json) rescue nil
-				    	return {flag:false,info:""} if drug.blank?
+				    	if drug.blank?
+				    		no_exist_ar<<aa['pt_code']
+				    			next
+				    	end
 				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
 				    	create_data = {
 				    		:org_id=> org_id,
 							:medicine_id=> drug["serialno"],
-							:pt_code=> drug["effect_code"],
+							:pt_code=> drug["pt_code"],
 							:code=> '',
 							:unit=> aa["unit"],
 							:price=> aa['price'].to_f.round(4),
@@ -90,12 +99,20 @@ class Ims::Inv::Stock < ApplicationRecord
 				    	self.create(create_data)
 				    	data_in_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:drug["serialno"],
 				    		refresh_after_num:aa["quantity"],refresh_befor_num: nil,status:1}
+				    		insert_num+=1;
 				      	Ims::Inv::RefreshLog.create(data_in_log)
 				    	# return {flag:true,info:""} if self.create(create_data)
 				    end
-				    # return {flag:false,info:""}
 			    }
-			    return {flag:true,info:"库存导入保存成1功!"}
+			    info="库存导入完成！新增药品:#{insert_num}条,修改药品：#{update_num}条、\n"
+			    if(no_exist_ar.size != 0)
+			    	info.concat("药品目录不存在的药品编码有")
+			    	no_exist_ar.each{ |noexit|
+			    		info.concat("#{noexit} .")
+			    	}
+			    	info=info[0,info.size-2]
+			    end
+			    return {flag:true,info:info}
 			rescue Exception => e
 				print e.message rescue "  e.messag----"
 		        print "laaaaaaaaaaaaaaaaaaaa 库存导入保存文件 出错: " + e.backtrace.join("\n")
