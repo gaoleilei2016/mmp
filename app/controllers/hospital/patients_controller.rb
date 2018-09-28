@@ -6,23 +6,22 @@ class Hospital::PatientsController < ApplicationController
 
   # 根据医生 医生所在机构 查询接诊过的就诊列表
 	# GET
-  # /hospital/encounters
+  # /hospital/patinets
   # {search: String}
 	def index
-    p "Hospital::EncountersController index", params
+    p "Hospital::PatientsController index", params
     search = params[:search].to_s
-    @encounters = ::Hospital::Encounter.where(auhtor_id: current_user.id)
-    @encounters = @encounters.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%")
-    cur_author_patients_count =  @encounters.count
-    @encounters = @encounters.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25).map { |e| e.to_web_front  }
+    @person = ::Person.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%")
+    person_count =  @person.count
+    @person = @person.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"", data: @encounters, count: cur_author_patients_count} }
+      format.json { render json: {flag: true, info:"", data: @person, count: person_count} }
     end
 	end
   
 	# GET
-  # /hospital/encounters/:id
+  # /hospital/patinets/:id
 	def show
 		respond_to do |format|
       format.html # show.html.erb
