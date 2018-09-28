@@ -62,8 +62,8 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
       indications_search_arr = [indications_search_str] + indications
       @medications = @medications.where(indications_search_arr)
     end
-    @medications = @medications.page(params[:page]||1).per(params[:per]||25)
     med_count = @medications.count
+    @medications = @medications.page(params[:page]||1).per(params[:per]||25)
     ret = @medications.map { |e| e.to_hash }
     respond_to do |format|
       if ret.blank?

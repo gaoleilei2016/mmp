@@ -4,18 +4,43 @@
   :visible.sync="dialogVisible"
   width="80%"
   >
-  <el-row :span="24" :gutter="20">
+  <el-row :span="24" :gutter="20" style="margin-bottom: 22px;"> 
     <el-col :span="8">
         <el-input
           v-model="searchDrugsList"
+          :class.native="'search__input'"
           placeholder="请输入药品名/简拼/五笔/编号/"
           style="border: 1px solid #dcdfe6; border-radius: 4px;outline:none"
+          @keydown.enter.native.stop.prevent="getDrugsList"
         >
+        <i slot="suffix" class="el-input__icon el-icon-search" @click="getDrugsList"></i>
         </el-input>
     </el-col>
   </el-row>
-  <div style="margin-top: 1em;">
-    <el-table :data="drugsData" size="mini">
+  <el-row :span="24" :gutter="20">
+    <el-form :model="filter" ref="filter_drug_form" label-width="80px">
+      <el-col :span="4">
+        <el-form-item prop="filter.pharmacologies" label="药理分类">
+          <el-select v-model="filter.pharmacology" placeholder="请选择药理分类" popper-class="select__input">
+            <el-option v-for="item in pharmacologies" :key="item.id" :value="item.code" :label="item.display"></el-option>
+            <el-option :value="''" label="全部"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="6">
+        <el-form-item prop="filter.indications" label="适应症">
+          <el-select v-model="filter.indications" placeholder="根据适应症搜索" popper-class="select__input" multiple>
+            <el-option v-for="item in allIndications" :key="item.id" :value="item.code" :label="item.display"></el-option>
+            <el-option :value="'2'" label="2"></el-option>
+            <el-option :value="'3'" label="3"></el-option>
+            <el-option :value="'4'" label="4"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-col>
+    </el-form>
+  </el-row>
+  <div>
+    <el-table :data="drugsData" size="mini" align="center" border>
       <el-table-column prop="kindname" label="药品分类"></el-table-column>
       <el-table-column prop="pharmacology_code" label="药理分类"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
@@ -29,9 +54,26 @@
       <el-table-column prop="licensenum" label="批准文号"></el-table-column>
       <el-table-column prop="instruction" label="药品说明书"></el-table-column>
       <el-table-column prop="picture" label="药品图片"></el-table-column>
-      <el-table-column prop="indications" label="适应症"></el-table-column>
-      <el-table-column prop="return_price_flag" label="标签"></el-table-column>
+      <el-table-column label="适应症">
+        <template slot-scope="scope">
+          <el-tag v-for="item in scope.row.indications.split('|')" :key="item">{{item}}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="标签">
+        <template slot-scope="scope">
+          <el-tag type="danger" v-if="scope.row.return_price_flag">返款</el-tag>
+        </template>
+      </el-table-column>
     </el-table>
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentDrugsListPage"
+      :page-sizes="pageSizes"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="totalDrugCount">
+    </el-pagination>
   </div>
   
   <span slot="footer" class="dialog-footer">
