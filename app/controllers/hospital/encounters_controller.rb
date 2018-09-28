@@ -17,8 +17,13 @@ class Hospital::EncountersController < ApplicationController
     if params[:filter].present?
       return render json: {flag: false, info: "查询过滤参数格式错误 不能查询"} unless params[:filter].respond_to?(:to_hash)
       start_time, end_time = params[:filter][:start_time].to_s, params[:filter][:end_time].to_s
-      if start_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/ && end_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/
-        @encounters = @encounters.where("hospital_encounters.created_at between ? and ?", "#{start_time}", "#{end_time}")
+      p start_time,end_time
+      if start_time.present? && end_time.present?
+        if start_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/ && end_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/
+          @encounters = @encounters.where("hospital_encounters.created_at between ? and ?", "#{start_time}", "#{end_time}")
+        else
+          return render json: {flag: false, info: "查询时间参数格式错误 不能查询 请使用 YYYY-mm-dd HH:MM:SS格式"}
+        end
       end
       # 如果病种参数存在 就关联查询诊断数据
       if params[:filter][:disease].present?
