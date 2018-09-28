@@ -8,7 +8,7 @@ class Hospital::EncountersController < ApplicationController
   # 根据登录人筛选 就诊数据
 	# GET
   # /hospital/encounters
-  # {type: String, search: String, filter:{start_time: Time, end_time: Time, disease: String}} Time格式 "YYYY-mm-dd"
+  # {type: String, search: String, filter:{start_time: Time, end_time: Time, disease: String}} Time格式 "YYYY-mm-dd HH:MM:SS"
 	def index
     p "Hospital::EncountersController index", params
     search = params[:search].to_s
@@ -17,12 +17,12 @@ class Hospital::EncountersController < ApplicationController
     if params[:filter].present?
       return render json: {flag: false, info: "查询过滤参数格式错误 不能查询"} unless params[:filter].respond_to?(:to_hash)
       start_time, end_time = params[:filter][:start_time].to_s, params[:filter][:end_time].to_s
-      if start_time =~ /^\d{4}-\d{1,2}-\d{1,2}/ && end_time =~ /^\d{4}-\d{1,2}-\d{1,2}/
-        @encounters = @encounters.where("created_at between ? and ?", "#{start_time}", "#{end_time}")
+      if start_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/ && end_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/
+        @encounters = @encounters.where("hospital_encounters.created_at between ? and ?", "#{start_time}", "#{end_time}")
       end
       # 如果病种参数存在 就关联查询诊断数据
       if params[:filter][:disease].present?
-        # @encounter.join("")
+        @encounters = @encounters.joins(:diagnoses).where("hospital_diagnoses.display LIKE ?", "%#{params[:filter][:disease]}%")
       end
     end
     cur_author_patients_count =  @encounters.count
