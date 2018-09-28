@@ -208,8 +208,19 @@ window.current_template_obj = {
           dialogVisible: false,  //是否显示药品字典
           drugsData: [],        //all drugs
           searchDrugsList: "",      //药品查询搜索
-          pharmacology: [],      //药理学分类
-          indications: [],       //药品适应症
+          currentDrugsListPage: 1,   //药品列表当前页
+          pageSizes: [5, 10, 15, 20],         //分页显示条数
+          pageSize: 10,          //当前显示条数
+          totalDrugCount: 0,      //所有药品数量
+          pharmacologies: [],      //药理学分类
+          kindnames: [],           //药品分类
+          jxtypes: [],            //剂型
+          filter: {
+            pharmacology: "", //药理学分类查询
+            kindname: "",     //药品分类查询
+            jxtype: "",       //剂型分类查询
+          },
+          moreSearchFlag: false,   //高级搜索
         /* 药品模板 --- start */ 
           isShowFavoriteDialog: false, // 显示模板模态框
           favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
@@ -261,7 +272,16 @@ window.current_template_obj = {
   watch: {
     searchDrugsList: function() {
       this.debounceGetDrugsList()
-    }
+    },
+    "filter.pharmacology": function() {
+      this.getDrugsList();
+    },
+    "filter.kindname": function() {
+      this.getDrugsList();
+    },
+    "filter.jxtype": function() {
+      this.getDrugsList();
+    },
   },
   computed: {
     bmi: function () {
@@ -285,14 +305,13 @@ window.current_template_obj = {
     // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
     // 请参考：https://lodash.com/docs#debounce
     var _this = this;
-    _this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 200)
+    _this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 500)
   },
   methods: {
     /* 公共方法  ---- start */ 
       init: function() {
         var _this = this;
         _this.orgname = $("#current_org_name").val();
-        //_this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 500);
         _this.$refs["encname"].focus();
         // Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
        //    var res = response.data;
@@ -329,7 +348,10 @@ window.current_template_obj = {
         }, function  (response) {
           _this.$message.error('获取编码表报错，请联系管理员。');
         })
-        _this.getDrugsList();
+        _this.getDrugsList(); //获取药品列表
+        _this.getPharmacology();//获取所有药理学分类编码
+        _this.getallKindnames();//获取所有药品分类
+        _this.getAllJxtypes();//获取所有剂型分类
       },
       // 聚焦下一个
       focusNext: function (now, next) {
@@ -1294,32 +1316,78 @@ window.current_template_obj = {
     //打开药品字典弹出框
     openDrugModal: function() {
       this.dialogVisible = true;
-      this.getPharmacology();
+    },
+    encodeBase64ToImgUrl: function(urlData) {
+      var bytes = window.atob(urlData.split(',')[1]);
+      var ab = new ArrayBuffer(bytes.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < bytes.length; i++) {
+        ia[i] = bytes.charCodeAt(i);
+      }
+      var blob =  new Blob([ab], { type: 'image/png' });
+      return URL.createObjectURL(blob);
+    },
+    //获取所有剂型分类
+    getAllJxtypes: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.13610.1.364.8.50.2"}).then(function(response) {
+          if (response.flag) {
+            _this.jxtypes = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("剂型分类暂不可用！");
+      })
+    },
+    //获取所有药品分类
+    getallKindnames: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.256"}).then(function(response) {
+          if (response.flag) {
+            _this.kindnames = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("药品分类暂不可用！");
+      })
     },
     //获取所有药理学分类编码
     getPharmacology: function() {
       var _this = this;
-      // _this.$resource("").get({oid: "2.16.156.1.675425699.1.255", target: "CodeSystem"}).then(function(response) {
-      //     console.log(response);
-      // }, function(response) {
-      //   _this.$message.error("药理学分类暂不可用！");
-      // })
-    },
-    getDrugsList: function(search) {
-      var _this = this;
-      setTimeout(function() {
-        _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList}).then(function(response) {
-          console.log(response);
-          if (response.body.flag) {
-            _this.drugsData = response.body.data;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.255"}).then(function(response) {
+          if (response.flag) {
+            _this.pharmacologies = response.body.data;
           } else {
-            _this.$message.warning(response.body.info || "获取药品列表失败，请刷新后重试");
+            //_this.$message.warning(response.body.info);
           }
-        }, function(response) {
-          _this.$message.error("获取药品列表失败，请刷新后重试");
-        })
-      }, 3000)
-      
+      }, function(response) {
+        _this.$message.error("药理学分类暂不可用！");
+      })
+    },
+    //获取药品列表
+    getDrugsList: function() {
+      var _this = this;
+      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, kindname: _this.filter.kindname, jxtype: _this.filter.jxtype}).then(function(response) {
+        if (response.body.flag) {
+          _this.drugsData = response.body.data;
+          _this.totalDrugCount = response.body.count;
+        } else {
+          _this.$message.warning(response.body.info || "获取药品列表失败，请刷新后重试");
+        }
+      }, function(response) {
+        _this.$message.error("获取药品列表失败，请刷新后重试");
+      })
+    },
+    //分页方法
+    handleSizeChange: function(val) {
+      this.pageSize = val;
+      this.getDrugsList();
+    },
+    handleCurrentChange: function(val) {
+      this.currentDrugsListPage = val;
+      this.getDrugsList();
     },
     /* 药品字典 --- end*/
 
