@@ -336,24 +336,29 @@ $card-border-radius: 2px;
 
 // 药品下拉框
 .order-autocomplete {
-	width: 35% !important;
+	width: 50% !important;
 	.drug-field {
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		display: inline-block;
 		&.name {
-			width: 40%;
+			width: 35%;
 		}
 		&.spec {
-			width: 0px;
+			width: 10%;
 		}
+		/*
 		&.formul {
-			width: 15%;
+			width: 20%;
+			text-align:center;
+		}*/
+		&.price {
+			width: 10%;
 			text-align:center;
 		}
-		&.price {
-			width: 15%;
+		&.storage {
+			width: 10%;
 			text-align:center;
 		}
 		&.produce {
