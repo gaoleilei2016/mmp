@@ -19,13 +19,14 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     p current_user,@cur_org
     search_str = "serialno LIKE ? OR ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR alias_name LIKE ? OR py LIKE ? OR wb LIKE ? OR common_py LIKE ? OR common_wb LIKE ? OR alias_py LIKE ? OR alias_wb LIKE ?"
     @medications = ::Hospital::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%").page(params[:page]||1).per(params[:per]||25)
+    med_count = @medications.count
     ret = @medications.map { |e| e.to_hash }
     respond_to do |format|
       if ret.blank?
-        format.json { render json: {flag: false, info: "没有相关药品", data: ret} }
+        format.json { render json: {flag: false, info: "没有相关药品", data: ret, count: med_count} }
       else
         format.html # index.html.erb
-        format.json { render json: {flag: true, info:"", data: ret} }
+        format.json { render json: {flag: true, info:"", data: ret, count: med_count} }
       end
     end
   end
@@ -51,18 +52,25 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     # 基础查询 根据
     @medications = ::Hospital::Dict::NewMedication.where(hos_id: @cur_org.id).where(search_str, "%#{serialno}%", "%#{ecode}%", "%#{name}%", "%#{common_name}%", "%#{alias_name}%", "%#{py}%", "%#{wb}%", "%#{common_py}%", "%#{common_wb}%", "%#{alias_py}%", "%#{alias_wb}%")
     # 药理学分类查询
-    pharmacology_code = params[:pharmacology_code] # 药理学分类
-    @medications = @medications.where(pharmacology_code: pharmacology_code)
-    indications = params[:indications] # 适应症
-    @medications = @medications
+    if params[:pharmacology_code].present?
+      pharmacology_code = params[:pharmacology_code] # 药理学分类
+      @medications = @medications.where(pharmacology_code: params[:pharmacology_code])
+    end
+    if params[:indications].present?
+      indications = params[:indications].map { |e| "%#{e}%"  } # 适应症
+      indications_search_str = indications.map {|e| "indications LIKE ?" }.join(" OR ")
+      indications_search_arr = [indications_search_str] + indications
+      @medications = @medications.where(indications_search_arr)
+    end
     @medications = @medications.page(params[:page]||1).per(params[:per]||25)
+    med_count = @medications.count
     ret = @medications.map { |e| e.to_hash }
     respond_to do |format|
       if ret.blank?
-        format.json { render json: {flag: false, info: "没有相关药品", data: ret} }
+        format.json { render json: {flag: false, info: "没有相关药品", data: ret, count: med_count} }
       else
         format.html # index.html.erb
-        format.json { render json: {flag: true, info:"", data: ret} }
+        format.json { render json: {flag: true, info:"", data: ret, count: med_count} }
       end
     end
   end
