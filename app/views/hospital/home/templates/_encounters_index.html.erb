@@ -36,7 +36,7 @@
 					<el-col :span="8">
 						<small>日期</small>
 						<el-date-picker
-				      v-model="filter.range"
+				      v-model="range"
 				      type="datetimerange"
 				      :picker-options="rangePickerOptions"
 				      range-separator="至"
@@ -219,8 +219,11 @@ window.current_template_obj = {
 			encounter: {},
 			orgname: "",
 			isShowfilters: false, // 高级搜索
+			range: "",
 			filter: {
-				range: "",
+				start_time: "",
+				end_time: "",
+				disease: ""
 			},
 
 			rangePickerOptions: {
@@ -273,6 +276,10 @@ window.current_template_obj = {
 		search: function (newValue, oldValue) {
     	this.getData();
     },
+    range: function(newValue, oldValue) {
+    	this.filter.start_time = newValue[0].pattern("yyyy-MM-dd HH-mm-ss");
+    	this.filter.end_time = newValue[1].pattern("yyyy-MM-dd HH-mm-ss");
+    },
 	},
 	mounted: function() {
 		this.$nextTick(function(){
@@ -298,13 +305,7 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			console.log(_this.filter.range);
-			var filter = {
-				start_time: _this.filter.range[0],
-				end_time: _this.filter.range[1],
-				disease: _this.filter.disease
-			}
-			_this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: filter}).then( function(response) {
+			_this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.encounters = res.data;
