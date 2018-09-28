@@ -53,6 +53,22 @@ class Hospital::Sets::CodesController < ApplicationController
     # end
   end
 
+  # 根据编码系统oid 获取编码系统编码数据
+  # GET
+  # /hospital/sets/codes/get_code_by_system
+  # 接受参数 {system: String}
+  # 返回格式 {flag: Boolean, info: String, data: Array}
+  def get_code_by_system
+    return render json: {flag: false, info: "编码系统system不能为空", data: []} if params[:system].blank?
+    data = ::Dict::Coding.get_code_by_system(params[:system])
+    if data.blank?
+      ret = {flag: false, info: "没有查询到编码信息", data: []}
+    else
+      ret = {flag: true, info: "success", data: data}
+    end
+    render json: ret
+  end
+
 	private
     # 获取当前机构 没有就提示
     # def set_cur_org

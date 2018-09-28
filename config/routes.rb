@@ -132,7 +132,13 @@ Rails.application.routes.draw do
         end
       end
       resources :mtemplates # 医嘱模板管理
-      resources :codes # 编码表
+
+      # 编码表
+      resources :codes do
+        collection do
+          get :get_code_by_system
+        end
+      end 
     end
 
     namespace :dict do
