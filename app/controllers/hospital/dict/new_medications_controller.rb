@@ -43,7 +43,7 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
   # 医生端 药品列表
   # GET
   # hospital/dict/new_medications/list
-  # {search: String, pharmacology_code: String, indications: Array}
+  # {search: String, pharmacology_code: String, indications: Array, kindcode: String, jxtype: String}
   def list
     p "::Dict::MedicationsController index", params
     serialno,ecode,name,common_name,alias_name,py,wb,common_py,common_wb,alias_py,alias_wb = Array.new(11, params[:search]) # 11是等号左边变量的数目
@@ -56,6 +56,15 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
       pharmacology_code = params[:pharmacology_code] # 药理学分类
       @medications = @medications.where(pharmacology_code: params[:pharmacology_code])
     end
+    # 药品分类查询
+    if params[:kindcode].present?
+      @medications = @medications.where(kindcode: params[:kindcode])
+    end
+    # 剂型分类查询
+    if params[:jxtype].present?
+      @medications = @medications.where(jxtype: params[:jxtype])
+    end
+    # 适应症查询
     if params[:indications].present?
       indications = params[:indications].map { |e| "%#{e}%"  } # 适应症
       indications_search_str = indications.map {|e| "indications LIKE ?" }.join(" OR ")
