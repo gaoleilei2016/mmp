@@ -208,6 +208,8 @@ window.current_template_obj = {
           dialogVisible: false,  //是否显示药品字典
           drugsData: [],        //all drugs
           searchDrugsList: "",      //药品查询搜索
+          pharmacology: [],      //药理学分类
+          indications: [],       //药品适应症
         /* 药品模板 --- start */ 
           isShowFavoriteDialog: false, // 显示模板模态框
           favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
@@ -257,9 +259,8 @@ window.current_template_obj = {
     },
   },
   watch: {
-    searchDrugsList: {
-      handler: "getDrugsList",
-      immediate: true 
+    searchDrugsList: function() {
+      this.debounceGetDrugsList()
     }
   },
   computed: {
@@ -277,11 +278,21 @@ window.current_template_obj = {
       this.init();
     })
   },
+   created: function () {
+    // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+    // 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+    // AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+    // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+    // 请参考：https://lodash.com/docs#debounce
+    var _this = this;
+    _this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 200)
+  },
   methods: {
     /* 公共方法  ---- start */ 
       init: function() {
         var _this = this;
         _this.orgname = $("#current_org_name").val();
+        //_this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 500);
         _this.$refs["encname"].focus();
         // Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
        //    var res = response.data;
@@ -318,6 +329,7 @@ window.current_template_obj = {
         }, function  (response) {
           _this.$message.error('获取编码表报错，请联系管理员。');
         })
+        _this.getDrugsList();
       },
       // 聚焦下一个
       focusNext: function (now, next) {
@@ -1282,20 +1294,32 @@ window.current_template_obj = {
     //打开药品字典弹出框
     openDrugModal: function() {
       this.dialogVisible = true;
-      this.getDrugsList();
+      this.getPharmacology();
+    },
+    //获取所有药理学分类编码
+    getPharmacology: function() {
+      var _this = this;
+      // _this.$resource("").get({oid: "2.16.156.1.675425699.1.255", target: "CodeSystem"}).then(function(response) {
+      //     console.log(response);
+      // }, function(response) {
+      //   _this.$message.error("药理学分类暂不可用！");
+      // })
     },
     getDrugsList: function(search) {
       var _this = this;
-      _this.$resource("/hospital/dict/new_medications/list.json").get({search: search}).then(function(response) {
-        console.log(response);
-        if (response.body.flag) {
-          _this.drugsData = response.body.data;
-        } else {
-          _this.$message.warning(response.body.info || "获取药品列表失败，请刷新后重试");
-        }
-      }, function(response) {
-        _this.$message.error("获取药品列表失败，请刷新后重试");
-      })
+      setTimeout(function() {
+        _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList}).then(function(response) {
+          console.log(response);
+          if (response.body.flag) {
+            _this.drugsData = response.body.data;
+          } else {
+            _this.$message.warning(response.body.info || "获取药品列表失败，请刷新后重试");
+          }
+        }, function(response) {
+          _this.$message.error("获取药品列表失败，请刷新后重试");
+        })
+      }, 3000)
+      
     },
     /* 药品字典 --- end*/
 
