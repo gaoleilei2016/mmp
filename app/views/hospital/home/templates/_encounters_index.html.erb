@@ -219,7 +219,7 @@ window.current_template_obj = {
 			encounter: {},
 			orgname: "",
 			isShowfilters: false, // 高级搜索
-			range: "",
+			range: [],
 			filter: {
 				start_time: "",
 				end_time: "",
@@ -277,8 +277,13 @@ window.current_template_obj = {
     	this.getData();
     },
     range: function(newValue, oldValue) {
-    	this.filter.start_time = newValue[0].pattern("yyyy-MM-dd HH-mm-ss");
-    	this.filter.end_time = newValue[1].pattern("yyyy-MM-dd HH-mm-ss");
+    	if (newValue) {
+    		this.filter.start_time = newValue[0].pattern("yyyy-MM-dd HH:mm:ss");
+    		this.filter.end_time = newValue[1].pattern("yyyy-MM-dd HH:mm:ss");
+    	} else {
+    		this.filter.start_time = "";
+    		this.filter.end_time = "";
+    	}
     },
 	},
 	mounted: function() {
