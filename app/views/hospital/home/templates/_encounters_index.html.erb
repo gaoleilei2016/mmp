@@ -298,7 +298,13 @@ window.current_template_obj = {
 		},
 		getData: function () {
 			var _this = this;
-			_this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: _this.filter}).then( function(response) {
+			console.log(_this.filter.range);
+			var filter = {
+				start_time: _this.filter.range[0],
+				end_time: _this.filter.range[1],
+				disease: _this.filter.disease
+			}
+			_this.encountersResource.get({type: _this.activeName, search: _this.search, page: _this.currentPage, per: _this.patPageSize, filter: filter}).then( function(response) {
 				var res = response.data;
   			if(res.flag) {
           _this.encounters = res.data;

@@ -17,7 +17,7 @@
       </el-input>
     </el-col>
     <el-col :span="4">
-      <el-button type="primary" @click="moreSearchFlag = !moreSearchFlag" size="mini">高级搜索<i :class="moreSearchFlag ? 'el-icon-arrow-down': 'el-icon-arrow-right'"></i></el-button>
+      <el-button @click="moreSearchFlag = !moreSearchFlag" size="mini">高级搜索<i :class="moreSearchFlag ? 'fa fa-lg fa-fw fa-angle-double-up': 'fa fa-lg fa-fw fa-angle-double-down'"></i></el-button>
     </el-col>
   </el-row>
   <el-row :span="24" :gutter="20" v-show="moreSearchFlag">
