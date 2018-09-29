@@ -400,6 +400,11 @@ class Ims::Order < ApplicationRecord
             send_data = {current_user:current_user,prescriptions:prescriptions,order:order}
             result = Ims::PreHeader.save_prescription send_data
             return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
+            send_ar =[] 
+            result[:prescription_headers].each do |header|
+              send_ar = header.details.map{|detail| {:medicine_id=>detail.drug_id,:location_id=>org_id,:qty=>(-detail.qty.to_f),:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}}
+            end
+            pre_posting send_ar
             temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
             data = Orders::Order.order_completion(temp)
             data = {ret_code:0}
@@ -451,17 +456,19 @@ class Ims::Order < ApplicationRecord
       begin
         new_header = header.clone.dup
         # new_header.prescription_no = header.prescription_no.to_s+"_T"
+        org_id = current_user.organization_id
+        org_name = current_user.organization.try(:name)
         new_header.ori_id = header.id
         new_header.ori_code = header.prescription_no
         new_header.return_name = current_user.name
         new_header.return_id = current_user.id
-        new_header.return_org_id = current_user.organization_id
-        new_header.return_org_name = current_user.organization.try(:id)
+        new_header.return_org_id = org_id
+        new_header.return_org_name = org_name
         new_header.reason = args[:reason]
         new_header.return_at = Time.new
         new_header.total_amount = -header.total_amount.to_f
         new_header.status = '8'
-        details = []
+        details,send_ar = [],[]
         header.details.each do |detail|
           dup_detail = detail.clone.dup
           dup_detail.qty = -detail.qty.to_f
@@ -471,7 +478,9 @@ class Ims::Order < ApplicationRecord
           dup_detail.status = '8'
           dup_detail.header_id = nil
           details << dup_detail.attributes
+          send_ar << {:medicine_id=>detail.drug_id,:location_id=>org_id,:qty=>detail.qty.to_f,:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}
         end
+        pre_posting send_ar
         return {flag:false,info:'该处方已退过药，不能再次退药。'} if ::Ims::PreHeader.where(ori_id:header.id).count>0
         details_1 = Ims::PreDetail.create!(details)
         new_header.details = details_1
@@ -488,24 +497,32 @@ class Ims::Order < ApplicationRecord
     # （药品ID、药库ID、数量、批号、单价）
     def pre_posting args = {}
       begin
-        medicine_id = args[:medicine_id]
-        location_id = args[:location_id]
-        qty = args[:qty]
-        batch = args[:batch]
-        price = args[:price]
-        stock_id = args[:stock_id]
-        result = Ims::Inv::Stock.find(stock_id) rescue nil
-        if result.blank?
-          sql = "SELECT * FROM ims_inv_stocks s WHERE s.medicine_id=#{medicine_id} and s.location_id = #{location_id} and s.batch=#{batch} and s.price = #{price}"
-          # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
-          res = Ims::Inv::Stock.find_by_sql(sql)
-          stock_id = res[0].try(:id)
-          result = Ims::Inv::Stock.find(id) rescue nil
+        ars = attrs[:data]
+        runsql=ActiveRecord::Base.connection()
+        ars.each do |args|
+          medicine_id = args[:medicine_id]
+          location_id = args[:location_id]
+          qty = args[:qty]
+          batch = args[:batch]
+          price = args[:price]
+          stock_id = args[:stock_id]
+          result = Ims::Inv::Stock.find(stock_id) rescue nil
+          if result.blank?
+            sql = "SELECT * FROM ims_inv_stocks s WHERE s.medicine_id=#{medicine_id} and s.location_id = #{location_id} and s.price = #{price.to_f.round(4)}"
+            sql.concat("and s.batch=#{batch}") if !batch.blank?
+            # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
+            res = Ims::Inv::Stock.find_by_sql(sql)
+            stock_id = res[0].try(:id)
+            result = Ims::Inv::Stock.find(id) rescue nil
+          end
+          if !result.blank?
+            amount = (qty.to_f*price.to_f.round(2))
+            update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{args[:id]}"
+            runsql.update update_sql
+          end 
+          # find_sql = "select * from dis"
         end
-        return {flag:false,info:"未找到可减的库存记录"} if result.blank?
-        amount = (qty.to_f*price.to_f.round(2))
-        sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{args[:id]}"
-        result = self.find_by_sql(sql)
+          return {flag:false,info:"未找到可减的库存记录"} 
       rescue Exception => e
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 过账方法 出错: " + e.backtrace.join("\n")
