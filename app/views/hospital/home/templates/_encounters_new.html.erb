@@ -206,6 +206,8 @@ window.current_template_obj = {
           },
         /* 药品 --- end */ 
           dialogVisible: false,  //是否显示药品字典
+          innerVisible: false,  //是否显示药品说明书
+          innerContent: "",    //药品说明书内容
           drugsData: [],        //all drugs
           searchDrugsList: "",      //药品查询搜索
           currentDrugsListPage: 1,   //药品列表当前页
@@ -1378,6 +1380,11 @@ window.current_template_obj = {
       }, function(response) {
         _this.$message.error("获取药品列表失败，请刷新后重试");
       })
+    },
+    //查看药品说明书
+    showInstruction: function(ins) {
+        this.innerVisible = true;
+        this.innerContent = ins;
     },
     //分页方法
     handleSizeChange: function(val) {

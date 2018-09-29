@@ -3,6 +3,7 @@
   title="药品字典"
   :visible.sync="dialogVisible"
   width="80%"
+  top="5vh"
   >
   <el-row :span="24" :gutter="20" style="margin-bottom: 0.5em;"> 
     <el-col :span="8">
@@ -36,7 +37,7 @@
       </el-col>
       <el-col :span="6">
         <el-form-item prop="jxtype" label="剂型">
-          <el-select v-model="filter.jxtype" placeholder="请选择剂型" popper-class="select__input">
+          <el-select v-model="filter.jxtype" placeholder="请选择剂型" popper-class="select__input" filterable >
             <el-option v-for="item in jxtypes" :key="item.id" :value="item.code" :label="item.display"></el-option>
             <el-option :value="''" label="全部" key="allJxtypes"></el-option>
           </el-select>
@@ -50,26 +51,30 @@
     </el-col>
   </el-row>
   <div>
-    <el-table :data="drugsData" size="mini" align="center" border>
-      <el-table-column prop="kindname" label="药品分类"></el-table-column>
-      <el-table-column prop="pharmacology_code" label="药理分类"></el-table-column>
+    <el-table :data="drugsData" size="mini" border>
+      <el-table-column prop="kindname" label="药品分类" align="center"></el-table-column>
+      <el-table-column prop="pharmacology_code" label="药理分类" align="center"></el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
-      <el-table-column prop="py" label="简拼"></el-table-column>
+      <el-table-column prop="py" label="简拼" align="center"></el-table-column>
       <el-table-column prop="spec" label="规格"></el-table-column>
       <el-table-column prop="formul_name" label="剂型"></el-table-column>
-      <el-table-column prop="unit" label="销售单位"></el-table-column>
+      <el-table-column prop="unit" label="销售单位" align="center"></el-table-column>
       <el-table-column prop="produce_name" label="厂家"></el-table-column>
       <el-table-column prop="usedescribe" label="用法用量描述"></el-table-column>
-      <el-table-column prop="price" label="单价"></el-table-column>
-      <el-table-column prop="licensenum" label="批准文号"></el-table-column>
-      <el-table-column prop="instruction" label="药品说明书"></el-table-column>
+      <el-table-column prop="price" label="单价" align="center"></el-table-column>
+      <el-table-column prop="licensenum" label="批准文号" align="center"></el-table-column>
+      <el-table-column label="药品说明书" align="center">
+        <template slot-scope="scope">
+          <el-button size="mini" @click="showInstruction(scope.row.instruction)">查看</el-button>
+        </template>
+      </el-table-column>
       <el-table-column prop="picture" label="药品图片"></el-table-column>
       <el-table-column label="适应症">
         <template slot-scope="scope">
-          <el-tag v-for="item in scope.row.indications.split('|')" :key="item">{{item}}</el-tag>
+          <span v-for="item in scope.row.indications.split('|')" :key="item">{{item}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="标签">
+      <el-table-column label="标签" align="center">
         <template slot-scope="scope">
           <el-tag type="danger" v-if="scope.row.return_price_flag">返款</el-tag>
         </template>
@@ -85,9 +90,16 @@
       :total="totalDrugCount">
     </el-pagination>
   </div>
-  
+  <!-- 药品说明书显示模态框 -->
+   <el-dialog
+    width="30%"
+    title="药品说明书"
+    :visible.sync="innerVisible"
+    append-to-body>
+    {{innerContent}}
+  </el-dialog>
   <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+    <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
+    <el-button type="primary" @click="dialogVisible = false" size="mini">确 定</el-button>
   </span>
 </el-dialog>
