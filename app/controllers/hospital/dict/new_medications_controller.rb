@@ -62,7 +62,7 @@ class ::Hospital::Dict::NewMedicationsController < ApplicationController
     end
     # 剂型分类查询
     if params[:jxtype].present?
-      @medications = @medications.where(jxtype: params[:jxtype])
+      @medications = @medications.where(formul_code: params[:jxtype])
     end
     # 适应症查询
     if params[:indications].present?
