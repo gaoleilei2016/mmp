@@ -522,8 +522,10 @@ class Ims::Order < ApplicationRecord
           end 
           # find_sql = "select * from dis"
         end
-          return {flag:false,info:"未找到可减的库存记录"} 
+        p "ffffffffffffffffffffff 过账方法 ffffffffff"
+        return {flag:true,info:"OK ! OK ! OK !"} 
       rescue Exception => e
+        p "qqqqqqqqqqqqqqqqqqqqqq 过账方法 qqqqqqqqqqqq"
         print e.message rescue "  e.messag----"
         print "laaaaaaaaaaaaaaaaaaaa 过账方法 出错: " + e.backtrace.join("\n")
         result = {flag:false,:info=>"药店系统出错。"}
