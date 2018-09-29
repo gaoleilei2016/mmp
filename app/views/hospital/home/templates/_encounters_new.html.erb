@@ -1,1647 +1,1769 @@
 <style type="text/css">
 </style>
 <template>
-	<!-- 新建接诊页面 -->
-	<div id="encounters_new_div">
-		<!-- 患者基本信息部分 -->
-		<%= render "hospital/home/render/encounters_info" %>
-		<!-- <div class="card-wrapper"> -->
-			<!-- 主业务区域 -->
-	  	<div class="float-right-btns" style="position: relative;">
-	  		<div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
-	  			<!-- 历史就诊tab -->
-	  			<!-- 药品tab显示模板和生成处方按钮 -->
-	  			<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">
-		  			<el-button size="mini" @click="openFavoriteModal">模板</el-button>
-		  			<el-button size="mini" @click="openCopyModal">引用</el-button>
-		  			<el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
-	  			</div>
-	  			<!-- 处方Tab -->
-	  		</div>
-				
-	  	</div>
-			<el-tabs v-model="activeTab" type="border-card" @tab-click="handleTabClick">
-	      <el-tab-pane label="历史就诊" name="histories">
-	      	<!-- 历史就诊列表 -->
-	      	<%= render "hospital/home/render/encounters_histories" %>
-	      </el-tab-pane>
-	      <el-tab-pane label="诊断" name="diagnoses">
-	      	<!-- 诊断 -->
-	      	<%= render "hospital/home/render/encounters_diagnoses" %>
-	      </el-tab-pane>
-	      <el-tab-pane label="药品" name="orders">
-	      	<!-- 开药之前提示先保存患者基本信息 -->
-	      	<%= render "hospital/home/render/encounters_orders" %>
+  <!-- 新建接诊页面 -->
+  <div id="encounters_new_div">
+    <!-- 患者基本信息部分 -->
+    <%= render "hospital/home/render/encounters_info" %>
+    <!-- <div class="card-wrapper"> -->
+      <!-- 主业务区域 -->
+      <div class="float-right-btns" style="position: relative;">
+        <div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
+          <!-- 历史就诊tab -->
+          <!-- 药品tab显示模板和生成处方按钮 -->
+          <!--<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">-->
+          <div>
+            <el-button size="mini" @click="openDrugModal">药品字典</el-button>
+            <el-button size="mini" @click="openFavoriteModal">模板</el-button>
+            <el-button size="mini" @click="openCopyModal">引用</el-button>
+            <el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
+          </div>
+          <!-- 处方Tab -->
+        </div>
+        
+      </div>
+      <el-tabs v-model="activeTab" type="border-card" @tab-click="handleTabClick">
+        <el-tab-pane label="历史就诊" name="histories">
+          <!-- 历史就诊列表 -->
+          <%= render "hospital/home/render/encounters_histories" %>
+        </el-tab-pane>
+        <el-tab-pane label="诊断" name="diagnoses">
+          <!-- 诊断 -->
+          <%= render "hospital/home/render/encounters_diagnoses" %>
+        </el-tab-pane>
+        <el-tab-pane label="药品" name="orders">
+          <!-- 开药之前提示先保存患者基本信息 -->
+          <%= render "hospital/home/render/encounters_orders" %>
 
-	      </el-tab-pane>
-	      <el-tab-pane label="处方列表" name="prescriptions">
-	      	<%= render "hospital/home/render/encounters_prescriptions" %>
+        </el-tab-pane>
+        <el-tab-pane label="处方列表" name="prescriptions">
+          <%= render "hospital/home/render/encounters_prescriptions" %>
 
-	      </el-tab-pane>
-	    </el-tabs>
-		<!-- </div> -->
-  	<!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
-  	<%= render "hospital/home/render/encounters_new_pres_dialog" %>
-  	<!-- 模板弹出框 -->
-  	<%= render "hospital/home/render/encounters_favorite_dialog" %>
-  	<!-- 引用弹出框 -->
-  	<%= render "hospital/home/render/encounters_copy_dialog" %>
-  	
-	</div>
+        </el-tab-pane>
+      </el-tabs>
+    <!-- </div> -->
+    <!-- 生成处方模态框，确定诊断，没有诊断，就提示填写，选择处方类型 -->
+    <%= render "hospital/home/render/encounters_new_pres_dialog" %>
+    <!-- 模板弹出框 -->
+    <%= render "hospital/home/render/encounters_favorite_dialog" %>
+    <!-- 引用弹出框 -->
+    <%= render "hospital/home/render/encounters_copy_dialog" %>
+    <!-- 药品字典弹出框 -->
+    <%= render "hospital/home/templates/drugs_detail_dialog" %>
+  </div>
 </template>
 <!-- 处方打印模板 -->
 <script type="text/x-template" id="prescription-print-template"></script>
 
 <script type="text/javascript">
 window.current_template_obj = {
-	data: function(){
-		
-		return {
-			/* 基础设置 --- start */ 
-				orgname: "", // 机构名称
-				codeIni: {}, // 编码表
-				rates: [], // 频次编码表
-				routes: [], // 途径编码表
-				prescription_types: [], // 处方类型编码表
-				bloods: [], // 血型编码表
-				nations: [], // 民族编码表
-				marriages: [], // 婚姻编码表
-				occupations: [], // 职业编码表
+  data: function(){
+    
+    return {
+      /* 基础设置 --- start */ 
+        orgname: "", // 机构名称
+        codeIni: {}, // 编码表
+        rates: [], // 频次编码表
+        routes: [], // 途径编码表
+        prescription_types: [], // 处方类型编码表
+        bloods: [], // 血型编码表
+        nations: [], // 民族编码表
+        marriages: [], // 婚姻编码表
+        occupations: [], // 职业编码表
 
-				focusSelect: "", // 目前聚焦的哪个select框，用于筛选，code+简拼+名称
-				ini: {
-					enable_print_pres: true, // 启用打印处方功能
-					print_pres_html: "", // 处方打印内容
-				},
-			/* 基础设置 --- end */ 
-			/* 患者基本信息  ----- start */ 
-				locations: [], // 选择药房
-				activeCollapse: "patientinfo1",
-				// 就诊模型结构
-				encounter: {
-					name: "",  // 姓名
-		      gender: {code: "", display: ""},  // 性别
-		      age: "",  // 年龄
-		      birth_date: "",  // 出生日期
-		      iden: "",  // 身份证号码
-		      phone: "",  // 手机号码
-		      address: "",  // 住址
-		      occupation: {code: "", display: ""},  // 职业
-		      contact_name: "",  // 联系人
-		      nation: {code: "", display: ""},  // 民族
-		      marriage: {code: "", display: ""},  // 婚姻
-		      unit_name: "",  // 工作单位（学校）
-		      diagnoses: [],  // 诊断
-		      allergens: [],  // 过敏
-		      blood: {code: "", display: ""},  // 血型
-		      height: "",  // 身高cm
-		      weight: "",  // 体重kg
-		      drugstore_location: {id: "", display: ""}, // 取药点
-				}, // 
-				encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
-				// encounter就诊信息验证规则
-				rules: {
-					name: [
-			      { required: true, message: '姓名不能为空'},
-			      { min: 1, max: 50, message: '长度在 1 到 50 个字符' }
-			    ],
-					"gender.code": [
-			      { required: true, message: '性别不能为空'},
-			    ],
-			    age: [
-			      { required: true, message: '年龄不能为空'},
-			      { type: 'number', message: '年龄必须为数字值'},
-			      { pattern: /^(?:[1-9]?\d|100)$/, message: '年龄在0-100之间'}
-			    ],
-			    birth_date: [
-			    	{ required: false, message: '出生日期不能为空'},
-			    ],
-			    phone: [
-			    	{ required: true, message: '手机号码不能为空'},
-			    	{ pattern: /^1[34578]\d{9}$/, message: '手机号码不完整'}
-			    ],
-			    iden: [
-			    	{ pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
-			    ],
-			    address: [
-			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
-			    ],
-			    contact_name: [
-			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
-			    	{ required: false, message: '监护人不能为空'},
-			    ],
-			    unit_name: [
-			    	{ min: 1, max: 50, message: '长度在 1 到 50 个字符' },
-			    ],
-				},
-				birthPickerOptions: {
-					disabledDate: function (time) {
-	          return time.getTime() > Date.now();
-	        },
-				},
-				diagnoseInput: "", // 诊断录入框
-				showAllPatInfo: false, // 显示所有的可填数据
-				inputTagValue: "", // 过敏源录入
-				inputTagVisible: false, // 是否显示过敏源录入框
-				isShowEncountersDialog: false, // 显示就诊列表模态框
-				encmodalloading: false, // 模态框loading
-				encounters: [], // 就诊列表
-				searchencstr: "", // 搜索就诊列表
-				loadingidcard: false, // 正在读取身份证信息
-				disabledInput: false, // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
-			/* 患者基本信息  ----- end */ 
+        focusSelect: "", // 目前聚焦的哪个select框，用于筛选，code+简拼+名称
+        ini: {
+          enable_print_pres: true, // 启用打印处方功能
+          print_pres_html: "", // 处方打印内容
+        },
+      /* 基础设置 --- end */ 
+      /* 患者基本信息  ----- start */ 
+        locations: [], // 选择药房
+        activeCollapse: "patientinfo1",
+        // 就诊模型结构
+        encounter: {
+          name: "",  // 姓名
+          gender: {code: "", display: ""},  // 性别
+          age: "",  // 年龄
+          birth_date: "",  // 出生日期
+          iden: "",  // 身份证号码
+          phone: "",  // 手机号码
+          address: "",  // 住址
+          occupation: {code: "", display: ""},  // 职业
+          contact_name: "",  // 联系人
+          nation: {code: "", display: ""},  // 民族
+          marriage: {code: "", display: ""},  // 婚姻
+          unit_name: "",  // 工作单位（学校）
+          diagnoses: [],  // 诊断
+          allergens: [],  // 过敏
+          blood: {code: "", display: ""},  // 血型
+          height: "",  // 身高cm
+          weight: "",  // 体重kg
+          drugstore_location: {id: "", display: ""}, // 取药点
+        }, // 
+        encountersResource: Vue.resource('/hospital/encounters{/id}.json'),
+        // encounter就诊信息验证规则
+        rules: {
+          name: [
+            { required: true, message: '姓名不能为空'},
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' }
+          ],
+          "gender.code": [
+            { required: true, message: '性别不能为空'},
+          ],
+          age: [
+            { required: true, message: '年龄不能为空'},
+            { type: 'number', message: '年龄必须为数字值'},
+            { pattern: /^(?:[1-9]?\d|100)$/, message: '年龄在0-100之间'}
+          ],
+          birth_date: [
+            { required: false, message: '出生日期不能为空'},
+          ],
+          phone: [
+            { required: true, message: '手机号码不能为空'},
+            { pattern: /^1[34578]\d{9}$/, message: '手机号码不完整'}
+          ],
+          iden: [
+            { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '身份证号码格式不正确'}
+          ],
+          address: [
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' },
+          ],
+          contact_name: [
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' },
+            { required: false, message: '监护人不能为空'},
+          ],
+          unit_name: [
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符' },
+          ],
+        },
+        birthPickerOptions: {
+          disabledDate: function (time) {
+            return time.getTime() > Date.now();
+          },
+        },
+        diagnoseInput: "", // 诊断录入框
+        showAllPatInfo: false, // 显示所有的可填数据
+        inputTagValue: "", // 过敏源录入
+        inputTagVisible: false, // 是否显示过敏源录入框
+        isShowEncountersDialog: false, // 显示就诊列表模态框
+        encmodalloading: false, // 模态框loading
+        encounters: [], // 就诊列表
+        searchencstr: "", // 搜索就诊列表
+        loadingidcard: false, // 正在读取身份证信息
+        disabledInput: false, // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+      /* 患者基本信息  ----- end */ 
 
-			/* 主业务  ----- start */ 
-				activeTab: "orders",
-				/* 历史记录 --- start */
-					historiesResource: Vue.resource('/hospital/histories{/id}.json'),
-					histories: [],
-					isShowHisOrdersDialog: false, // 显示药品列表
-					isShowHisPresDialog: false, // 显示处方列表
-					multipleHisOrdersSelection: [], // 已经勾选的医嘱
-				/* 历史记录 --- end */ 
+      /* 主业务  ----- start */ 
+        activeTab: "orders",
+        /* 历史记录 --- start */
+          historiesResource: Vue.resource('/hospital/histories{/id}.json'),
+          histories: [],
+          isShowHisOrdersDialog: false, // 显示药品列表
+          isShowHisPresDialog: false, // 显示处方列表
+          multipleHisOrdersSelection: [], // 已经勾选的医嘱
+        /* 历史记录 --- end */ 
 
-				/* 诊断 --- start */
-					formDiagnoseInput: "", // 诊断tab录入框 
-					diagnosis: {}, // 诊断表单
-					diagnosisStatus: [{value: "A", label: "疑是", type: "primary"}, {value: "E", label: "确诊", type: "success"}],
-					diagnosesResource: Vue.resource('/hospital/diagnoses{/id}.json'),
-					diagnoses: [], // 诊断列表
-					editDiaIndex: -1, // 正在编辑的诊断序号
-				/* 诊断 --- end */
+        /* 诊断 --- start */
+          formDiagnoseInput: "", // 诊断tab录入框 
+          diagnosis: {}, // 诊断表单
+          diagnosisStatus: [{value: "A", label: "疑是", type: "primary"}, {value: "E", label: "确诊", type: "success"}],
+          diagnosesResource: Vue.resource('/hospital/diagnoses{/id}.json'),
+          diagnoses: [], // 诊断列表
+          editDiaIndex: -1, // 正在编辑的诊断序号
+        /* 诊断 --- end */
 
-				/* 药品 --- start */ 
-					ordersResource: Vue.resource('/hospital/orders{/id}.json'),
-					orders: [], // 本次就诊药品列表
-					encorders: [], // 其他用到药品列表的地方
-					order: {
-						single_qty: {value: "", unit: ""},
-						dose: {value: "", unit: ""},
-						course_of_treatment: {value: "", unit: ""},
-					},
-					drugs: [],
-					editIndex: -1, // 正在编辑的医嘱序号
-					multipleOrdersSelection: [], // 已经勾选的医嘱
-					ordersStatus: presStatusOptions,
-					orderRules: {
-						name: [
-				      // { required: true, message: '名称不能为空'},
-				      { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
-				    ],
-				    "single_qty.value": [
-				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次数量在 0.01 到 1000 之间 ' }
-				    ],
-				    "dose.value": [
-				      { pattern: /^0\.([1-9]|\d[1-9])$|^[1-9]\d{0,8}\.\d{0,2}$|^[1-9]\d{0,2}$|^1000$/, message: '单次剂量在 0.01 到 1000 之间 ' }
-				    ],
-				    "course_of_treatment.value": [
-				      { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
-				    ],
-				    total_quantity: [
-				    	{ pattern: /^[1-9]\d{0,2}$|^1000$/, message: '总量在 1 到 1000 之间' }
-				    ],
-				  },
-				/* 药品 --- end */ 
+        /* 药品 --- start */ 
+          ordersResource: Vue.resource('/hospital/orders{/id}.json'),
+          orders: [], // 本次就诊药品列表
+          encorders: [], // 其他用到药品列表的地方
+          order: {
+            single_qty: {value: "", unit: ""},
+            dose: {value: "", unit: ""},
+            course_of_treatment: {value: "", unit: ""},
+          },
+          drugs: [],
+          editIndex: -1, // 正在编辑的医嘱序号
+          multipleOrdersSelection: [], // 已经勾选的医嘱
+          ordersStatus: presStatusOptions,
+          orderRules: {
+            name: [
+              // { required: true, message: '名称不能为空'},
+              { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
+            ],
+            "single_qty.value": [
+              { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次数量在 0.001 到 1000 之间 ' }
+            ],
+            "dose.value": [
+              { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次剂量在 0.001 到 1000 之间 ' }
+            ],
+            "course_of_treatment.value": [
+              { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
+            ],
+            total_quantity: [
+              { pattern: /^[1-9]\d{0,2}$|^1000$/, message: '总量在 1 到 1000 之间' }
+            ],
+          },
+        /* 药品 --- end */ 
+          dialogVisible: false,  //是否显示药品字典
+          drugsData: [],        //all drugs
+          searchDrugsList: "",      //药品查询搜索
+          currentDrugsListPage: 1,   //药品列表当前页
+          pageSizes: [5, 10, 15, 20],         //分页显示条数
+          pageSize: 10,          //当前显示条数
+          totalDrugCount: 0,      //所有药品数量
+          pharmacologies: [],      //药理学分类
+          kindnames: [],           //药品分类
+          jxtypes: [],            //剂型
+          filter: {
+            pharmacology: "", //药理学分类查询
+            kindname: "",     //药品分类查询
+            jxtype: "",       //剂型分类查询
+          },
+          moreSearchFlag: false,   //高级搜索
+        /* 药品模板 --- start */ 
+          isShowFavoriteDialog: false, // 显示模板模态框
+          favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
+          mtemplates: [], // 医嘱模板列表
+          multipleMTempOrdersSelection: [], // 医嘱模板勾选医嘱
+          mtemplate: {}, // 新建医嘱模板对象
+          mtemplatesResource: "", // 医嘱模板访问路径
+          // 药品模板创建规则
+          mtemplateRules: {
+            title: [
+              { required: true, message: '名称不能为空'},
+            ],
+            "sharing_scope.code": [
+              { required: true, message: '共享范围不能为空'},
+            ],
+          },
+        /* 药品模板 --- end */ 
 
-				/* 药品模板 --- start */ 
-					isShowFavoriteDialog: false, // 显示模板模态框
-					favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
-					mtemplates: [], // 医嘱模板列表
-					multipleMTempOrdersSelection: [], // 医嘱模板勾选医嘱
-					mtemplate: {}, // 新建医嘱模板对象
-					mtemplatesResource: "", // 医嘱模板访问路径
-					// 药品模板创建规则
-					mtemplateRules: {
-						title: [
-				      { required: true, message: '名称不能为空'},
-				    ],
-						"sharing_scope.code": [
-				      { required: true, message: '共享范围不能为空'},
-				    ],
-					},
-				/* 药品模板 --- end */ 
+        /* 引用药品 --- start */ 
+          isShowCopyDialog: false, // 显示引用模态框
+          searchCopyEncStr: "", // 搜索要引用医嘱的对象
+          multipleCopyOrdersSelection: [], // 引用医嘱的勾选项
+          copyordersloading: false, // 正在加载某个患者的医嘱
+        /* 引用药品 --- end */ 
 
-				/* 引用药品 --- start */ 
-					isShowCopyDialog: false, // 显示引用模态框
-					searchCopyEncStr: "", // 搜索要引用医嘱的对象
-					multipleCopyOrdersSelection: [], // 引用医嘱的勾选项
-					copyordersloading: false, // 正在加载某个患者的医嘱
-				/* 引用药品 --- end */ 
+        /* 处方 --- start */ 
+          prescriptions: [],
+          prescriptionsResource: Vue.resource('/hospital/prescriptions{/id}.json'),
+          isShowSendPresDialog: false, // 显示新建处方模态框
+          sendOrders: [], // 将要发送生成处方的药品
+          prescriptionRules: {
 
-				/* 处方 --- start */ 
-					prescriptions: [],
-					prescriptionsResource: Vue.resource('/hospital/prescriptions{/id}.json'),
-					isShowSendPresDialog: false, // 显示新建处方模态框
-					sendOrders: [], // 将要发送生成处方的药品
-					prescriptionRules: {
+          }, // 新建处方验证规则
+          prescription: {}, // 处方模型
+          printPresRow: {}, // 打印处方行
+          prescriptionsStatus: presStatusOptions,
+        /* 处方 --- end */ 
 
-					}, // 新建处方验证规则
-					prescription: {}, // 处方模型
-					printPresRow: {}, // 打印处方行
-					prescriptionsStatus: presStatusOptions,
-				/* 处方 --- end */ 
-
-			/* 主业务  ----- end */ 
-		}
-	},
-	components: {
-		// 处方打印组件
-		'prescriptionprint': {
-			props: ['encounter', 'prescription'],
-		  template: "#prescription-print-template",
-		},
-	},
-	watch: {
-	},
-	computed: {
+      /* 主业务  ----- end */ 
+    }
+  },
+  components: {
+    // 处方打印组件
+    'prescriptionprint': {
+      props: ['encounter', 'prescription'],
+      template: "#prescription-print-template",
+    },
+  },
+  watch: {
+    searchDrugsList: function() {
+      this.debounceGetDrugsList()
+    },
+    "filter.pharmacology": function() {
+      this.getDrugsList();
+    },
+    "filter.kindname": function() {
+      this.getDrugsList();
+    },
+    "filter.jxtype": function() {
+      this.getDrugsList();
+    },
+  },
+  computed: {
     bmi: function () {
-    	var weight = parseFloat(this.encounter.weight||0),
-    	    height = parseFloat(this.encounter.height||0)/100,
-    	    bmi = height>0 ? parseFloat(weight/Math.pow(height,2)).toFixed(2) : 0;
+      var weight = parseFloat(this.encounter.weight||0),
+          height = parseFloat(this.encounter.height||0)/100,
+          bmi = height>0 ? parseFloat(weight/Math.pow(height,2)).toFixed(2) : 0;
       return bmi
     }
-	},
-	mounted: function () {
-		// console.log测试用
-		apps.encounters_new = this;
-		this.$nextTick(function(){
-			this.init();
-		})
-	},
-	methods: {
-		/* 公共方法  ---- start */ 
-			init: function() {
-				var _this = this;
-				_this.orgname = $("#current_org_name").val();
-				_this.$refs["encname"].focus();
-				// Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
-			 //    var res = response.data;
-			 //    _this.locations = [];
-			 //    (res.rows||[]).forEach(function (item, index) {
-			 //    	_this.locations.push({id: item.id, display: item.name});
-			 //    })
-			 //  },function() {
-			 //  	_this.$message.error("获取药房失败，请联系管理员。");
-			 //  })
-			  // 获取基础设置内容
-			  Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
-				 	var res = response.data;
-				 	if(res.flag) {
-	        	_this.ini = res.data;
-	        	$("#prescription-print-template").html(_this.ini.print_pres_html)
-	        } else {
-	  				_this.$message.error(res.info);
-	  			}
-				},function() {
-				  _this.$message.error("获取初始值失败，请联系管理员。");
-				})
-			  // 设置的编码
-				Vue.resource('/hospital/sets/codes.json').get().then( function (response) {
-	        var res = response.data
-	        _this.codeIni = res.data;
-	        _this.routes = res.data.routes;
+  },
+  mounted: function () {
+    // console.log测试用
+    apps.encounters_new = this;
+    this.$nextTick(function(){
+      this.init();
+    })
+  },
+   created: function () {
+    // `_.debounce` 是一个通过 Lodash 限制操作频率的函数。
+    // 在这个例子中，我们希望限制访问 yesno.wtf/api 的频率
+    // AJAX 请求直到用户输入完毕才会发出。想要了解更多关于
+    // `_.debounce` 函数 (及其近亲 `_.throttle`) 的知识，
+    // 请参考：https://lodash.com/docs#debounce
+    var _this = this;
+    _this.debounceGetDrugsList = _.debounce(_this.getDrugsList, 500)
+  },
+  methods: {
+    /* 公共方法  ---- start */ 
+      init: function() {
+        var _this = this;
+        _this.orgname = $("#current_org_name").val();
+        _this.$refs["encname"].focus();
+        // Vue.resource('/interfaces/get_pharmacy.json').get().then(function(response) {
+       //    var res = response.data;
+       //    _this.locations = [];
+       //    (res.rows||[]).forEach(function (item, index) {
+       //     _this.locations.push({id: item.id, display: item.name});
+       //    })
+       //  },function() {
+       //   _this.$message.error("获取药房失败，请联系管理员。");
+       //  })
+        // 获取基础设置内容
+        Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.ini = res.data;
+            $("#prescription-print-template").html(_this.ini.print_pres_html)
+          } else {
+            _this.$message.error(res.info);
+          }
+        },function() {
+          _this.$message.error("获取初始值失败，请联系管理员。");
+        })
+        // 设置的编码
+        Vue.resource('/hospital/sets/codes.json').get().then( function (response) {
+          var res = response.data
+          _this.codeIni = res.data;
+          _this.routes = res.data.routes;
           _this.rates = res.data.rates;
           _this.prescription_types = res.data.prescription_types;
           _this.bloods = res.data.bloods;
           _this.nations = res.data.nations;
-					_this.marriages = res.data.marriages;
-					_this.occupations = res.data.occupations;
-	      }, function  (response) {
-	      	_this.$message.error('获取编码表报错，请联系管理员。');
-	      })
-			},
-			// 聚焦下一个
-	  	focusNext: function (now, next) {
-	  		var _this = this;
-	  		var _now = _this.$refs[now],
-	  				_next = _this.$refs[next];
-				if(next=="encgender" && (!_this.encounter.gender || !_this.encounter.gender.code)){
-					_this.encounter.gender = _this.$parent.common_data_genders[0];
-				}
-				if (_now.handleClose) {
-					_now.handleClose();
-				}
-				// 姓名、性别、年龄、手机、诊断，填写之后自动保存 encname|encgender|encage|encphone|encdiagnose
-				if (/encdiagnose/.test(now)) {
-				// if (now.indexOf("enc")>-1) {
-					_this.submitEncounterForm('encounterForm', false);
-				}
+          _this.marriages = res.data.marriages;
+          _this.occupations = res.data.occupations;
+        }, function  (response) {
+          _this.$message.error('获取编码表报错，请联系管理员。');
+        })
+        _this.getDrugsList(); //获取药品列表
+        _this.getPharmacology();//获取所有药理学分类编码
+        _this.getallKindnames();//获取所有药品分类
+        _this.getAllJxtypes();//获取所有剂型分类
+      },
+      // 聚焦下一个
+      focusNext: function (now, next) {
+        var _this = this;
+        var _now = _this.$refs[now],
+            _next = _this.$refs[next];
+        if(next=="encgender" && (!_this.encounter.gender || !_this.encounter.gender.code)){
+          _this.encounter.gender = _this.$parent.common_data_genders[0];
+        }
+        if (_now.handleClose) {
+          _now.handleClose();
+        }
+        // 姓名、性别、年龄、手机、诊断，填写之后自动保存 encname|encgender|encage|encphone|encdiagnose
+        if (/encdiagnose/.test(now)) {
+        // if (now.indexOf("enc")>-1) {
+          _this.submitEncounterForm('encounterForm', false);
+        }
 
-				// el-select需要使用blur方法让下拉列表关闭
-				if (_now.handleBlur) {
-					_now.handleBlur();
-				}
+        // el-select需要使用blur方法让下拉列表关闭
+        if (_now.handleBlur) {
+          _now.handleBlur();
+        }
 
-				if (next.indexOf("save")>-1) {
-					_next.$el.focus();
-				} else if (now=="ordtitle") {
-					if(!_this.order.serialno) {
-	  				_this.$message({
-		          message: '请选择药品。',
-		          type: 'warning'
-		        });
-	  			} else {
-	  				_next.focus();
-	  			}
-				} else {
-					if (next && _next.focus) {
-						_next.focus()
-					} else {
-						_next.$el.focus()
-					}
-				}
+        if (next.indexOf("save")>-1) {
+          _next.$el.focus();
+        } else if (now=="ordtitle") {
+          if(!_this.order.serialno) {
+            _this.$message({
+              message: '请选择药品。',
+              type: 'warning'
+            });
+          } else {
+            _next.focus();
+          }
+        } else {
+          if (next && _next.focus) {
+            _next.focus()
+          } else {
+            _next.$el.focus()
+          }
+        }
 
-	  	},
-	  	// 过滤编码表，名称+code+简拼
-	  	filterCodes: function (val) {
-	  		var _this = this, select = _this.focusSelect; // 为编码名称|ref内容
-	  		var field = select.split("|")[0], ele = select.split("|")[1];
-	  		if (val && field) {
+      },
+      // 过滤编码表，名称+code+简拼
+      filterCodes: function (val) {
+        var _this = this, select = _this.focusSelect; // 为编码名称|ref内容
+        var field = select.split("|")[0], ele = select.split("|")[1];
+        if (val && field) {
           var tempArr = [];
           var val = val.toUpperCase(), search = "";
           (_this.codeIni[field]||[]).forEach(function (item, index) {
-          	search = item.code+item.display+item.jianpin;
-          	if(search.indexOf(val)>-1) {
-          		tempArr.push(item);
-          	}
+            search = item.code+item.display+item.jianpin;
+            if(search.indexOf(val)>-1) {
+              tempArr.push(item);
+            }
           })
           _this[field] = tempArr;
           _this.$refs[ele].hoverIndex = 0;
         } else {
           _this[field] = _this.codeIni[field];
         }
-	  	},
-  	/* 公共方法  ---- end */ 
+      },
+    /* 公共方法  ---- end */ 
 
-  	/* encounter相关操作  ---- start */
-  		// 身份证读卡
-  		getIdCardInfo: function () {
-  			console.log(socket.readyState)
-  			if(socket.readyState==3) { // 身份证读卡服务处于关闭状态
-  				this.$message({
-  					showClose: true,
-  					dangerouslyUseHTMLString: true,
-	          message: '<p>请启动身份证后台读卡服务。</p><br/><p>如您还未安装，点击 <a href="/ID_card_installation_package.rar">ID_card_installation_package</a> 下载安装包。</p>',
-	          type: 'warning',
-	          duration: 0,
-	        });
-  				return false;
-  			}
-  			socket.send('5|INFO');
-  			this.loadingidcard = true; // 显示正在加载身份证数据
-  		},
-  		SetIdCardInfo: function (json) {
-  			console.log("读卡信息为", json);
-  			var _this = this;
-  			var card = json.result;
-  			Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
-  				var res = response.data;
-  				if(res.flag) {
-  					_this.encounter = res.data;
-  					
-		  			_this.encounter.address = card.address; // 地址
-		  			_this.encounter.iden = card.code; // 身份证号
-		  			_this.encounter.name = card.name; // 名字
-		  			_this.encounter.photo = card.photo; // 照片
-		  			_this.encounter.type = "by_iden"; // 身份证方式提交的数据
-		  			_this.getBirthdayFromIdCard(card.code); // 生日、年龄
-		  			_this.loadingidcard = false; // 取消正在加载身份证数据
-		  			var genders = _this.$parent.common_data_genders, nations = _this.nations;
-		  			for(var i=0; i<genders.length; i++) {
-		  				if(genders[i].display == card.gender) {
-		  					_this.encounter.gender = genders[i];
-		  					break;
-		  				}
-		  			}
-		  			for(var i=0; i<nations.length; i++) {
-		  				if(nations[i].display.indexOf(card.folk)>-1) {
-		  					_this.encounter.nation = nations[i];
-		  					break;
-		  				}
-		  			}
-		  			_this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
-		  			_this.activeTab = "orders";
-  					_this.orders = [];
-  					// 读取身份证后，自动聚焦手机输入框
-  					_this.$refs["encphone"].focus();
-  				} else {
-    				_this.$message.error(res.info);
-    			}
-  			}, function(response) {
-      		_this.$message.error("获取就诊模型初始值失败，请联系管理员。");
-      	})
-  			// _this.createEncounterBySomeMethods({row: _this.encounter, type: "by_iden"});
-  		},
-  		focusEncSearchInp: function (flag) {
-  			var $target = $(this.$refs["searchencstr"].$el);
-  			if(flag) {
-  				$target.addClass('addlarge');
-  			} else {
-  				$target.removeClass('addlarge');
-  			}
-  		},
-  		// 搜索就诊
-  		searchEncounters: function (json) {
-  			var _this = this;
-  			_this.encounters = [];
-  			_this.encmodalloading = true;
-				if(json.modal){
-					_this[json.modal] = true;
-				}
-  			_this.encountersResource.get({search: json.search}).then( function(response) {
-  				var res = response.data;
-  				_this.encmodalloading = false;
-  				if(res.flag) {
-  					_this.encounters = res.data;
-  				} else {
-    				_this.$message.error(res.info);
-    			}
-  				if(json.modal){
-						_this.$refs["searchencstr"].focus();
-					}
-  			}, function(response) {
-  				_this.encmodalloading = false;
-      		_this.$message.error("搜索就诊失败，请联系管理员。");
-      	})
-  		},
-  		// 搜索患者
-  		searchPeople: function (json) {
-  			var _this = this;
-  			_this.encounters = [];
-  			_this.searchencstr = "";
-  			_this.encmodalloading = true;
-				if(json.modal){
-					_this[json.modal] = true;
-					_this.encounter = {};
-					_this.encounter.diagnoses = [];
-					_this.encounter.allergens = [];
-				}
-  			Vue.resource('/hospital/people.json').get({search: json.search}).then( function(response) {
-  				var res = response.data;
-  				_this.encmodalloading = false;
-  				if(res.flag) {
-  					_this.encounters = res.data;
-  				} else {
-    				_this.$message.error(res.info);
-    			}
-  				if(json.modal){
-						_this.$refs["searchencstr"].focus();
-					}
-  			}, function(response) {
-  				_this.encmodalloading = false;
-      		_this.$message.error("搜索患者失败，请联系管理员。");
-      	})
-  		},
-  		// 编辑encounter
-  		editEncounter: function (row) {
-  			this.encounter = row;
-  			this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
-  			this.isShowEncountersDialog = false;
-  			// 重新加载页面主业务数据
-  			this.activeTab = "orders";
-  			if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
-					// 提示填写诊断
-	  			this.$refs["encdiagnose"].focus();
-				}
-  			this.getOrders();
-  		},
-  		// 用一些特殊的方式创建encounter，在曾经就诊的基础上创建
-  		createEncounterBySomeMethods: function (json) {
-  			var _this = this, row = json.row;
-  			Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
-  				var res = response.data;
-  				if(res.flag) {
-  					_this.encounter = res.data;
-  					_this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
-		  			_this.encounter.name = row.name;
-		  			_this.encounter.gender = row.gender;
-		  			_this.encounter.age = row.age;
-		  			_this.encounter.phone = row.phone;
-		  			_this.encounter.iden = row.iden;
-		  			_this.encounter.birth_date = row.birth_date;
-		  			_this.encounter.address = row.address;
-		  			_this.encounter.contact_name = row.contact_name;
-		  			_this.encounter.type = json.type;
-		  			if(json.type=="by_person") { // 通过患者创建新的就诊
-		  				_this.encounter.person_id = row.id;
-		  				_this.encounter.diagnoses = [];
-			  			_this.isShowEncountersDialog = false;
-			  		}
-			  		// 提示填写诊断
-			  		_this.$refs["encdiagnose"].focus();
-  					_this.activeTab = "orders";
-  					_this.orders =[];
-  				} else {
-    				_this.$message.error(res.info);
-    			}
-  			}, function(response) {
-      		_this.$message.error("获取就诊模型初始值失败，请联系管理员。");
-      	})
-  		// 	if(json.type=="by_person") { // 通过就诊创建新的就诊
-  		// 		encounter = json.row;
-  		// 	}
-  		// 	btn.removeAttr("disabled").find(".fa").toggle();
-				// _this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
-    //   		_this.handleEncounterReturn(response, btn);
-    //   		// _this.getOrders();
-    //   		if(json.type=="by_person") { // 通过患者创建新的就诊
-	  	// 			_this.isShowEncountersDialog = false;
-	  	// 		}
-    //   	}, function(response) {
-    //   		btn.removeAttr("disabled").find(".fa").toggle();
-    //   		_this.$message.error("创建就诊信息失败，请联系管理员。");
-    //   	})
-  		},
-			// 提交encounter信息
-			submitEncounterForm: function (formName, isBtn) {
-				var _this = this;
-	      _this.$refs[formName].validate( function (valid) {
-	        if (valid) {
-	        	if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
-	        		if(isBtn) {// 按钮提交的时候弹出提示，自动提交的时候，不用提示
-		        		_this.$message({
-				          message: '诊断不能为空。',
-				          type: 'warning'
-				        });
-				        _this.$refs["encdiagnose"].focus();
-	        		}
-	        		return false;
-	        	}
-	          // 判断是否有id，有id的话，就是编辑，没有id为新建
-	          var btn = $(_this.$refs["encsave"].$el);
-	          btn.attr("disabled", "disabled").find(".fa").show();
-	          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter: _this.encounter};
-	          if(!_this.encounter.id) {
-	          	_this.encountersResource.save(json).then( function(response) {
-	          		_this.handleEncounterReturn(response, btn);
-	          	}, function(response) {
-	          		btn.removeAttr("disabled").find(".fa").hide();
-	          		_this.$message.error("创建就诊信息失败，请联系管理员。");
-	          	})
-	          } else {
-	          	_this.encountersResource.update({id: _this.encounter.id}, json).then( function(response) {
-	          		_this.handleEncounterReturn(response, btn);
-	          	}, function(response) {
-	          		btn.removeAttr("disabled").find(".fa").hide();
-	          		_this.$message.error("更新就诊信息失败，请联系管理员。");
-	          	})
-	          }
-	        } else {
-	        	if(isBtn) { // 按钮提交的时候弹出提示，自动提交的时候，不用提示
-		          _this.$message({
-			          message: '请按照规范录入数据。',
-			          type: 'warning'
-			        });
-	        	}
-	          return false;
-	        }
-	      });
-	    },
-	    // encounter保存成功之后的处理
-	    handleEncounterReturn: function (response, btn) {
-	    	btn.removeAttr("disabled").find(".fa").hide();
-	    	var res = response.data;
-	    	if(res.flag) {
-		    	this.encounter = res.data;
-		    	this.$message({
-		        message: "就诊信息保存成功。",
-		        type: 'success'
-		      });
-		      this.getDiffrentData(this.activeTab);
-					if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
-						// 提示填写诊断
-		  			this.$refs["encdiagnose"].focus();
-					} else {
-						// 聚焦医嘱搜索框
-		      	this.$refs["ordtitle"].focus();
-					}
-	    	} else {
-  				this.$message.error(res.info);
-  			}
-	    },
-	    // 重置encounter表单
-	    resetEncounterForm: function (formName) {
-	      // this.$refs[formName].resetFields();
-	      // 重置页面
-	      router.push('/refresh');
-	    },
-	    // 判断年龄，如果小于14要求出生日期、监护人必填
-	    judgeAge: function (val) {
-	    	var _this = this, flag = false;
-	    	if(val < 14) {
-		    	_this.$message({
-		        message: "患者小于14岁，请输入具体的出生日期、监护人姓名。",
-		        type: 'warning'
-		      });
-		      flag = true;
-	    	}
-	    	_this.rules["birth_date"][0]["required"] = flag;
-	    	_this.rules["contact_name"][0]["required"] = flag;
-	    	// 判断是否有出生日期，修改年龄，修改出生年份
-	    	if(_this.encounter.birth_date) {
-		    	var year = ((new Date()).getFullYear() - val);
-		    	var birth = new Date(_this.encounter.birth_date);
-		    	birth.setYear(year);
-		    	_this.encounter.birth_date = birth;
-	    	}
-	    },
-			// 判断性别，根据性别显示图标
-	  	judgeGender: function (gender) {
-	  		if(!gender){ gender = ""; }
-	      var html = '';
-	  		if(gender.indexOf('男')>-1){
-	  			html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
-	  		}else if(gender.indexOf('女')>-1){
-	  			html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
-	  		}else{
-	  			html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
-	  		}
-	  		return html;
-		  },
-		  /* 
-			* 根据出生日期计算年龄
-			* 参数： birthday: 出生日期(YYYY-MM-DD)
-			* 返回： 年龄
-			*/
-		  getDecilAgeByBirthday: function (birthday) {
-		  	try{ 
-					var birth = new Date(birthday).getTime(),
-					    now = new Date().getTime();
-					var age = (now-birth)/1000/60/60/24/365;
-					// age = parseFloat(age).toFixed(2);
-					age = Math.floor(age);
-					this.encounter.age = age;
-			  }catch(e){ 
-			  	this.encounter.age = age;
-	  		} 
-		  },
-		  /* 
-			* 根据身份证号码，运算出出生日期
-			* 参数： idCard: 身份证号码 String
-			* 返回： birthday: 出生日期(YYYY-MM-DD) String
-			*/
-			getBirthdayFromIdCard: function (idCard) {
-			  var birthday = "";
-			  if(idCard != null && idCard != ""){
-			    if(idCard.length == 15){
-			      birthday = "19"+idCard.substr(6,6);
-			    } else if(idCard.length == 18){
-			      birthday = idCard.substr(6,8);
-			    }
-			    birthday = birthday.replace(/(.{4})(.{2})/,"$1-$2-");
-			  }
-			  this.encounter.birth_date = birthday;
-			  this.getDecilAgeByBirthday(birthday);
-			},
-		/* encounter相关操作  ---- end */
+    /* encounter相关操作  ---- start */
+      // 身份证读卡
+      getIdCardInfo: function () {
+        console.log(socket.readyState)
+        if(socket.readyState==3) { // 身份证读卡服务处于关闭状态
+          this.$message({
+            showClose: true,
+            dangerouslyUseHTMLString: true,
+            message: '<p>请启动身份证后台读卡服务。</p><br/><p>如您还未安装，点击 <a href="/ID_card_installation_package.rar">ID_card_installation_package</a> 下载安装包。</p>',
+            type: 'warning',
+            duration: 0,
+          });
+          return false;
+        }
+        socket.send('5|INFO');
+        this.loadingidcard = true; // 显示正在加载身份证数据
+      },
+      SetIdCardInfo: function (json) {
+        console.log("读卡信息为", json);
+        var _this = this;
+        var card = json.result;
+        Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.encounter = res.data;
+            
+            _this.encounter.address = card.address; // 地址
+            _this.encounter.iden = card.code; // 身份证号
+            _this.encounter.name = card.name; // 名字
+            _this.encounter.photo = card.photo; // 照片
+            _this.encounter.type = "by_iden"; // 身份证方式提交的数据
+            _this.getBirthdayFromIdCard(card.code); // 生日、年龄
+            _this.loadingidcard = false; // 取消正在加载身份证数据
+            var genders = _this.$parent.common_data_genders, nations = _this.nations;
+            for(var i=0; i<genders.length; i++) {
+              if(genders[i].display == card.gender) {
+                _this.encounter.gender = genders[i];
+                break;
+              }
+            }
+            for(var i=0; i<nations.length; i++) {
+              if(nations[i].display.indexOf(card.folk)>-1) {
+                _this.encounter.nation = nations[i];
+                break;
+              }
+            }
+            _this.disabledInput = true; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+            _this.activeTab = "orders";
+            _this.orders = [];
+            // 读取身份证后，自动聚焦手机输入框
+            _this.$refs["encphone"].focus();
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function(response) {
+          _this.$message.error("获取就诊模型初始值失败，请联系管理员。");
+        })
+        // _this.createEncounterBySomeMethods({row: _this.encounter, type: "by_iden"});
+      },
+      focusEncSearchInp: function (flag) {
+        var $target = $(this.$refs["searchencstr"].$el);
+        if(flag) {
+          $target.addClass('addlarge');
+        } else {
+          $target.removeClass('addlarge');
+        }
+      },
+      // 搜索就诊
+      searchEncounters: function (json) {
+        var _this = this;
+        _this.encounters = [];
+        _this.encmodalloading = true;
+        if(json.modal){
+          _this[json.modal] = true;
+        }
+        _this.encountersResource.get({search: json.search}).then( function(response) {
+          var res = response.data;
+          _this.encmodalloading = false;
+          if(res.flag) {
+            _this.encounters = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+          if(json.modal){
+            _this.$refs["searchencstr"].focus();
+          }
+        }, function(response) {
+          _this.encmodalloading = false;
+          _this.$message.error("搜索就诊失败，请联系管理员。");
+        })
+      },
+      // 搜索患者
+      searchPeople: function (json) {
+        var _this = this;
+        _this.encounters = [];
+        _this.searchencstr = "";
+        _this.encmodalloading = true;
+        if(json.modal){
+          _this[json.modal] = true;
+          _this.encounter = {};
+          _this.encounter.diagnoses = [];
+          _this.encounter.allergens = [];
+        }
+        Vue.resource('/hospital/people.json').get({search: json.search}).then( function(response) {
+          var res = response.data;
+          _this.encmodalloading = false;
+          if(res.flag) {
+            _this.encounters = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+          if(json.modal){
+            _this.$refs["searchencstr"].focus();
+          }
+        }, function(response) {
+          _this.encmodalloading = false;
+          _this.$message.error("搜索患者失败，请联系管理员。");
+        })
+      },
+      // 编辑encounter
+      editEncounter: function (row) {
+        this.encounter = row;
+        this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+        this.isShowEncountersDialog = false;
+        // 重新加载页面主业务数据
+        this.activeTab = "orders";
+        if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+          // 提示填写诊断
+          this.$refs["encdiagnose"].focus();
+        }
+        this.getOrders();
+      },
+      // 用一些特殊的方式创建encounter，在曾经就诊的基础上创建
+      createEncounterBySomeMethods: function (json) {
+        var _this = this, row = json.row;
+        Vue.resource('/hospital/encounters/new.json').get().then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.encounter = res.data;
+            _this.disabledInput = false; // 读取身份证，不能修改的字段 名字、性别、生日、年龄、地址、身份证号、民族
+            _this.encounter.name = row.name;
+            _this.encounter.gender = row.gender;
+            _this.encounter.age = row.age;
+            _this.encounter.phone = row.phone;
+            _this.encounter.iden = row.iden;
+            _this.encounter.birth_date = row.birth_date;
+            _this.encounter.address = row.address;
+            _this.encounter.contact_name = row.contact_name;
+            _this.encounter.type = json.type;
+            if(json.type=="by_person") { // 通过患者创建新的就诊
+              _this.encounter.person_id = row.id;
+              _this.encounter.diagnoses = [];
+              _this.isShowEncountersDialog = false;
+            }
+            // 提示填写诊断
+            _this.$refs["encdiagnose"].focus();
+            _this.activeTab = "orders";
+            _this.orders =[];
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function(response) {
+          _this.$message.error("获取就诊模型初始值失败，请联系管理员。");
+        })
+      //  if(json.type=="by_person") { // 通过就诊创建新的就诊
+      //    encounter = json.row;
+      //  }
+      //  btn.removeAttr("disabled").find(".fa").toggle();
+        // _this.encountersResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), type: json.type, encounter: encounter}).then( function(response) {
+    //      _this.handleEncounterReturn(response, btn);
+    //      // _this.getOrders();
+    //      if(json.type=="by_person") { // 通过患者创建新的就诊
+      //      _this.isShowEncountersDialog = false;
+      //    }
+    //    }, function(response) {
+    //      btn.removeAttr("disabled").find(".fa").toggle();
+    //      _this.$message.error("创建就诊信息失败，请联系管理员。");
+    //    })
+      },
+      // 提交encounter信息
+      submitEncounterForm: function (formName, isBtn) {
+        var _this = this;
+        _this.$refs[formName].validate( function (valid) {
+          if (valid) {
+            if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
+              if(isBtn) {// 按钮提交的时候弹出提示，自动提交的时候，不用提示
+                _this.$message({
+                  message: '诊断不能为空。',
+                  type: 'warning'
+                });
+                _this.$refs["encdiagnose"].focus();
+              }
+              return false;
+            }
+            // 判断是否有id，有id的话，就是编辑，没有id为新建
+            var btn = $(_this.$refs["encsave"].$el);
+            btn.attr("disabled", "disabled").find(".fa").show();
+            var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter: _this.encounter};
+            if(!_this.encounter.id) {
+              _this.encountersResource.save(json).then( function(response) {
+                _this.handleEncounterReturn(response, btn);
+              }, function(response) {
+                btn.removeAttr("disabled").find(".fa").hide();
+                _this.$message.error("创建就诊信息失败，请联系管理员。");
+              })
+            } else {
+              _this.encountersResource.update({id: _this.encounter.id}, json).then( function(response) {
+                _this.handleEncounterReturn(response, btn);
+              }, function(response) {
+                btn.removeAttr("disabled").find(".fa").hide();
+                _this.$message.error("更新就诊信息失败，请联系管理员。");
+              })
+            }
+          } else {
+            if(isBtn) { // 按钮提交的时候弹出提示，自动提交的时候，不用提示
+              _this.$message({
+                message: '请按照规范录入数据。',
+                type: 'warning'
+              });
+            }
+            return false;
+          }
+        });
+      },
+      // encounter保存成功之后的处理
+      handleEncounterReturn: function (response, btn) {
+        btn.removeAttr("disabled").find(".fa").hide();
+        var res = response.data;
+        if(res.flag) {
+          this.encounter = res.data;
+          this.$message({
+            message: "就诊信息保存成功。",
+            type: 'success'
+          });
+          this.getDiffrentData(this.activeTab);
+          if(!this.encounter.diagnoses || this.encounter.diagnoses.length==0) {
+            // 提示填写诊断
+            this.$refs["encdiagnose"].focus();
+          } else {
+            // 聚焦医嘱搜索框
+            this.$refs["ordtitle"].focus();
+          }
+        } else {
+          this.$message.error(res.info);
+        }
+      },
+      // 重置encounter表单
+      resetEncounterForm: function (formName) {
+        // this.$refs[formName].resetFields();
+        // 重置页面
+        router.push('/refresh');
+      },
+      // 判断年龄，如果小于14要求出生日期、监护人必填
+      judgeAge: function (val) {
+        var _this = this, flag = false;
+        if(val < 14) {
+          _this.$message({
+            message: "患者小于14岁，请输入具体的出生日期、监护人姓名。",
+            type: 'warning'
+          });
+          flag = true;
+        }
+        _this.rules["birth_date"][0]["required"] = flag;
+        _this.rules["contact_name"][0]["required"] = flag;
+        // 判断是否有出生日期，修改年龄，修改出生年份
+        if(_this.encounter.birth_date) {
+          var year = ((new Date()).getFullYear() - val);
+          var birth = new Date(_this.encounter.birth_date);
+          birth.setYear(year);
+          _this.encounter.birth_date = birth;
+        }
+      },
+      // 判断性别，根据性别显示图标
+      judgeGender: function (gender) {
+        if(!gender){ gender = ""; }
+        var html = '';
+        if(gender.indexOf('男')>-1){
+          html = '<i class="text-primary fa fa-lg fa-fw fa-male"></i>';
+        }else if(gender.indexOf('女')>-1){
+          html = '<i class="text-danger fa fa-lg fa-fw fa-female"></i>';
+        }else{
+          html = '<i class="text-mmp-lighter fa fa-lg fa-fw fa-male"></i>'
+        }
+        return html;
+      },
+      /* 
+      * 根据出生日期计算年龄
+      * 参数： birthday: 出生日期(YYYY-MM-DD)
+      * 返回： 年龄
+      */
+      getDecilAgeByBirthday: function (birthday) {
+        try{ 
+          var birth = new Date(birthday).getTime(),
+              now = new Date().getTime();
+          var age = (now-birth)/1000/60/60/24/365;
+          // age = parseFloat(age).toFixed(2);
+          age = Math.floor(age);
+          this.encounter.age = age;
+        }catch(e){ 
+          this.encounter.age = age;
+        } 
+      },
+      /* 
+      * 根据身份证号码，运算出出生日期
+      * 参数： idCard: 身份证号码 String
+      * 返回： birthday: 出生日期(YYYY-MM-DD) String
+      */
+      getBirthdayFromIdCard: function (idCard) {
+        var birthday = "";
+        if(idCard != null && idCard != ""){
+          if(idCard.length == 15){
+            birthday = "19"+idCard.substr(6,6);
+          } else if(idCard.length == 18){
+            birthday = idCard.substr(6,8);
+          }
+          birthday = birthday.replace(/(.{4})(.{2})/,"$1-$2-");
+        }
+        this.encounter.birth_date = birthday;
+        this.getDecilAgeByBirthday(birthday);
+      },
+    /* encounter相关操作  ---- end */
 
-	  /* 诊断操作 ----start */ 
-	  	/* encounter 诊断编辑 ----start */ 
-			  // 查询诊断
-		  	querySearchDiagnoseAsync: function(queryString, cb) {
-					var _this = this;
-					Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
-				    var res = response.data;
-				    if (res.flag) {
-							cb(res.data);
-							// 设置下拉选择的第一项为高亮
-							var el = _this.$refs["encdiagnose"];
-							if(el) {
-								el.highlightedIndex = 0
-							}
-						} else {
-							_this.$message.error(res.info);
-						}
-				  },function() {
-				  	_this.$message.error("获取诊断列表失败，请联系管理员。");
-				  })
-				},
-				// encounter中选择诊断
-				handleSelectDiagnosis: function(item) {
-					if(item.type=="hand") {
-						if(this.diagnoseInput.length>30) {
-							this.$message({
-			          message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
-			          type: 'warning'
-			        });
-							return false;
-						}
-						this.encounter.diagnoses.push({code: "", display: this.diagnoseInput});
-					} else {
-			    	this.encounter.diagnoses.push({code: item.code, display: item.display});
-					}
-					this.diagnoseInput = "";
-			    this.focusNext('encdiagnose', 'encsave');
-				},
-				// form中选择诊断
-				handleFormSelectDiagnosis: function(item) {
-					var _this = this, code = "", display = _this.diagnosis.display;
-					console.log("=============选择诊断",item, display)
-					if(!item.code) {
-						if(display.length>30) {
-							this.$message({
-			          message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
-			          type: 'warning'
-			        });
-							return false;
-						}
-					} else {
-					  code = item.code;
-					  display = item.display;
-					}
-					if(!display) {
-						_this.$message({
-		          message: '诊断不能为空。',
-		          type: 'warning'
-		        });
-		        _this.$refs["diadisplay"].focus();
-		        return false;
-					}
-					_this.diagnosis = {
-						id: _this.diagnosis.id,
-						code: code,
-						display: display,
-						type: _this.$parent.common_data_diagnosis_types[0],
-						status: _this.diagnosisStatus[0].value,
-						note: "",
-						fall_ill_at: new Date(), // 发病日期
-					}
-			    _this.focusNext('diadisplay', 'diatype');
-				},
-				// 获取诊断列表
-				getDiagnoses: function (encounter_id) {
-					var _this = this;
-	    		if(!encounter_id) { encounter_id = _this.encounter.id; }
-	    		if(!encounter_id) {
-	    			_this.diagnoses = [];
-	    			_this.$message({
-			        message: "请先确认患者，才可以查询相关诊断。",
-			        type: 'warning'
-			      });
-	    			return false;
-	    		}
-	    		_this.diagnosesResource.get({encounter_id: encounter_id}).then( function(response) {
-	    			var res = response.data;
-	    			if(res.flag) {
-	    				_this.diagnoses = res.data;
-	    				_this.encounter.diagnoses = res.master;
-	    			} else {
-	    				_this.$message.error(res.info);
-	    			}
-	    		}, function (response) {
-	    			_this.$message.error("获取诊断列表失败，请联系管理员。");
-	    		})
-				},
-				// 保存诊断
-				submitdiagnosisForm: function (formName) {
-					var _this = this;
-					if(!_this.encounter.id) {
-						_this.$message({
-			        message: "请先确认患者，才可以保存诊断。",
-			        type: 'warning'
-			      });
-						return false;
-					}
-		      _this.$refs[formName].validate( function (valid) {
-		        if (valid) {
-		        	if(!_this.diagnosis.display) {
-		        		_this.$message({
-				          message: '诊断不能为空。',
-				          type: 'warning'
-				        });
-				        _this.$refs["diadisplay"].focus();
-		        		return false;
-		        	}
-		          // 判断是否有id，有id的话，就是编辑，没有id为新建
-		          var btn = $(_this.$refs["diasave"].$el);
-		          btn.attr("disabled", "disabled").find(".fa").show();
-		          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), diagnosis: _this.diagnosis, encounter_id: _this.encounter.id};
-		          if(!_this.diagnosis.id) {
-		          	_this.diagnosesResource.save(json).then( function(response) {
-		          		_this.handleDiagReturn({res: response, btn: btn, action: "save"});
-		          	}, function(response) {
-		          		btn.removeAttr("disabled").find(".fa").hide();
-		          		_this.$message.error("创建诊断失败，请联系管理员。");
-		          	})
-		          } else {
-		          	_this.diagnosesResource.update({id: _this.diagnosis.id}, json).then( function(response) {
-		          		_this.handleDiagReturn({res: response, btn: btn, action: "update"});
-		          	}, function(response) {
-		          		btn.removeAttr("disabled").find(".fa").hide();
-		          		_this.$message.error("更新诊断失败，请联系管理员。");
-		          	})
-		          }
-		        } else {
-		          _this.$message({
-			          message: '请按照规范录入数据。',
-			          type: 'warning'
-			        });
-		          return false;
-		        }
-		      });
-		    },
-		    handleDiagReturn: function (json) {
-		    	json.btn.removeAttr("disabled").find(".fa").hide();
-		    	var res = json.res.data;
-		      if(res.flag) {
-			    	if(json.action=="save") {
-			    		this.diagnoses.push(res.data);
-			    	} else {
-			    		this.diagnoses.splice(this.editDiaIndex, 1); // 修改已经编辑的数据
-				      this.diagnoses.splice(this.editDiaIndex, 0, res.data); // 修改已经编辑的数据
-			    	}
-			    	this.encounter.diagnoses = res.master;
-			    	this.$message({
-			        message: "诊断保存成功。",
-			        type: 'success'
-			      });
-			      // 清空诊断表单
-			      this.diagnosis = {};
-		    	} else {
-		    		this.$message.error(res.info);
-		    	}
-		    },
-		    editDiagnoses: function (index, row) {
-		    	this.editDiaIndex = index;
-		    	this.diagnosis = row;
-		    },
-		    deleteDiagnoses: function (index, row) {
-		    	var _this = this, $target = $(event.target);
-		    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-		    	_this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id}).then( function(response) {
-	      		var res = response.data;
-	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
-	      		if(res.flag) {
-	      			_this.$message({
-			          message: "删除诊断成功",
-			          type: 'success'
-			        });
-			        _this.diagnoses.splice(index, 1);
-			        _this.encounter.diagnoses = res.master;
-	      		}else{
-	      			_this.$message.error(res.info);
-	      		}
-	      	}, function(response) {
-	      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
-	      		_this.$message.error("删除诊断失败，请联系管理员。");
-	      	})
-		    },
-		    sortDiagnoses: function (index, sort) {
-		    	var _this = this;
-					var tempOption = _this.diagnoses[index + sort];  
-					_this.$http.post('/hospital/diagnoses/sort', {encounter_id: _this.encounter.id, tag_id: _this.diagnoses[index].id, exchange_id: tempOption.id, sort: sort, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-	          var res = response.data;
-	          if(res.flag) {
-	      			Vue.set(_this.diagnoses, index + sort, _this.diagnoses[index]);  
-							Vue.set(_this.diagnoses, index, tempOption); 
-							_this.encounter.diagnoses = res.master;
-	      		} else {
-							_this.$message.error(res.info);
-	      		}
-	        }, function() {
-	          _this.$message.error("后台出错，调整顺序失败。请联系管理员");
-	        });
-		    },
-			/* encounter 诊断编辑 ----end */ 
+    /* 诊断操作 ----start */ 
+      /* encounter 诊断编辑 ----start */ 
+        // 查询诊断
+        querySearchDiagnoseAsync: function(queryString, cb) {
+          var _this = this;
+          Vue.resource('/dict/diseases.json').get({search: queryString}).then(function(response) {
+            var res = response.data;
+            if (res.flag) {
+              cb(res.data);
+              // 设置下拉选择的第一项为高亮
+              var el = _this.$refs["encdiagnose"];
+              if(el) {
+                el.highlightedIndex = 0
+              }
+            } else {
+              _this.$message.error(res.info);
+            }
+          },function() {
+            _this.$message.error("获取诊断列表失败，请联系管理员。");
+          })
+        },
+        // encounter中选择诊断
+        handleSelectDiagnosis: function(item) {
+          if(item.type=="hand") {
+            if(this.diagnoseInput.length>30) {
+              this.$message({
+                message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
+                type: 'warning'
+              });
+              return false;
+            }
+            this.encounter.diagnoses.push({code: "", display: this.diagnoseInput});
+          } else {
+            this.encounter.diagnoses.push({code: item.code, display: item.display});
+          }
+          this.diagnoseInput = "";
+          this.focusNext('encdiagnose', 'encsave');
+        },
+        // form中选择诊断
+        handleFormSelectDiagnosis: function(item) {
+          var _this = this, code = "", display = _this.diagnosis.display;
+          console.log("=============选择诊断",item, display)
+          if(!item.code) {
+            if(display.length>30) {
+              this.$message({
+                message: '诊断名过长，请从疾病编码中选择正确的诊断名。',
+                type: 'warning'
+              });
+              return false;
+            }
+          } else {
+            code = item.code;
+            display = item.display;
+          }
+          if(!display) {
+            _this.$message({
+              message: '诊断不能为空。',
+              type: 'warning'
+            });
+            _this.$refs["diadisplay"].focus();
+            return false;
+          }
+          _this.diagnosis = {
+            id: _this.diagnosis.id,
+            code: code,
+            display: display,
+            type: _this.$parent.common_data_diagnosis_types[0],
+            status: _this.diagnosisStatus[0].value,
+            note: "",
+            fall_ill_at: new Date(), // 发病日期
+          }
+          _this.focusNext('diadisplay', 'diatype');
+        },
+        // 获取诊断列表
+        getDiagnoses: function (encounter_id) {
+          var _this = this;
+          if(!encounter_id) { encounter_id = _this.encounter.id; }
+          if(!encounter_id) {
+            _this.diagnoses = [];
+            _this.$message({
+              message: "请先确认患者，才可以查询相关诊断。",
+              type: 'warning'
+            });
+            return false;
+          }
+          _this.diagnosesResource.get({encounter_id: encounter_id}).then( function(response) {
+            var res = response.data;
+            if(res.flag) {
+              _this.diagnoses = res.data;
+              _this.encounter.diagnoses = res.master;
+            } else {
+              _this.$message.error(res.info);
+            }
+          }, function (response) {
+            _this.$message.error("获取诊断列表失败，请联系管理员。");
+          })
+        },
+        // 保存诊断
+        submitdiagnosisForm: function (formName) {
+          var _this = this;
+          if(!_this.encounter.id) {
+            _this.$message({
+              message: "请先确认患者，才可以保存诊断。",
+              type: 'warning'
+            });
+            return false;
+          }
+          _this.$refs[formName].validate( function (valid) {
+            if (valid) {
+              if(!_this.diagnosis.display) {
+                _this.$message({
+                  message: '诊断不能为空。',
+                  type: 'warning'
+                });
+                _this.$refs["diadisplay"].focus();
+                return false;
+              }
+              // 判断是否有id，有id的话，就是编辑，没有id为新建
+              var btn = $(_this.$refs["diasave"].$el);
+              btn.attr("disabled", "disabled").find(".fa").show();
+              var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), diagnosis: _this.diagnosis, encounter_id: _this.encounter.id};
+              if(!_this.diagnosis.id) {
+                _this.diagnosesResource.save(json).then( function(response) {
+                  _this.handleDiagReturn({res: response, btn: btn, action: "save"});
+                }, function(response) {
+                  btn.removeAttr("disabled").find(".fa").hide();
+                  _this.$message.error("创建诊断失败，请联系管理员。");
+                })
+              } else {
+                _this.diagnosesResource.update({id: _this.diagnosis.id}, json).then( function(response) {
+                  _this.handleDiagReturn({res: response, btn: btn, action: "update"});
+                }, function(response) {
+                  btn.removeAttr("disabled").find(".fa").hide();
+                  _this.$message.error("更新诊断失败，请联系管理员。");
+                })
+              }
+            } else {
+              _this.$message({
+                message: '请按照规范录入数据。',
+                type: 'warning'
+              });
+              return false;
+            }
+          });
+        },
+        handleDiagReturn: function (json) {
+          json.btn.removeAttr("disabled").find(".fa").hide();
+          var res = json.res.data;
+          if(res.flag) {
+            if(json.action=="save") {
+              this.diagnoses.push(res.data);
+            } else {
+              this.diagnoses.splice(this.editDiaIndex, 1); // 修改已经编辑的数据
+              this.diagnoses.splice(this.editDiaIndex, 0, res.data); // 修改已经编辑的数据
+            }
+            this.encounter.diagnoses = res.master;
+            this.$message({
+              message: "诊断保存成功。",
+              type: 'success'
+            });
+            // 清空诊断表单
+            this.diagnosis = {};
+          } else {
+            this.$message.error(res.info);
+          }
+        },
+        editDiagnoses: function (index, row) {
+          this.editDiaIndex = index;
+          this.diagnosis = row;
+        },
+        deleteDiagnoses: function (index, row) {
+          var _this = this, $target = $(event.target);
+          $target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
+          _this.diagnosesResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id}).then( function(response) {
+            var res = response.data;
+            $target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+            if(res.flag) {
+              _this.$message({
+                message: "删除诊断成功",
+                type: 'success'
+              });
+              _this.diagnoses.splice(index, 1);
+              _this.encounter.diagnoses = res.master;
+            }else{
+              _this.$message.error(res.info);
+            }
+          }, function(response) {
+            $target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+            _this.$message.error("删除诊断失败，请联系管理员。");
+          })
+        },
+        sortDiagnoses: function (index, sort) {
+          var _this = this;
+          var tempOption = _this.diagnoses[index + sort];  
+          _this.$http.post('/hospital/diagnoses/sort', {encounter_id: _this.encounter.id, tag_id: _this.diagnoses[index].id, exchange_id: tempOption.id, sort: sort, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+            var res = response.data;
+            if(res.flag) {
+              Vue.set(_this.diagnoses, index + sort, _this.diagnoses[index]);  
+              Vue.set(_this.diagnoses, index, tempOption); 
+              _this.encounter.diagnoses = res.master;
+            } else {
+              _this.$message.error(res.info);
+            }
+          }, function() {
+            _this.$message.error("后台出错，调整顺序失败。请联系管理员");
+          });
+        },
+      /* encounter 诊断编辑 ----end */ 
 
-			/* 诊断Tab 列表 ----start */ 
+      /* 诊断Tab 列表 ----start */ 
 
-			/* 诊断Tab 列表 ----end */ 
+      /* 诊断Tab 列表 ----end */ 
 
-  	/* 诊断操作  ----end */
+    /* 诊断操作  ----end */
 
-  	/* 过敏信息操作  --- start */ 
-	  	handleCloseTag: function (tag) {
-	      this.encounter.allergens.splice(this.encounter.allergens.indexOf(tag), 1);
-	    },
-	    showTagInput: function () {
-	      this.inputTagVisible = true;
-	      this.$nextTick(function() {
-	        this.$refs.saveTagInput.$refs.input.focus();
-	      });
-	    },
-	    handleTagInputConfirm: function () {
-	      var inputTagValue = this.inputTagValue;
-	      if(inputTagValue.length>20) {
-	      	this.$message({
-	          message: "过敏信息太长",
-	          type: 'warning'
-	        });
-	      }
-	      if (inputTagValue) {
-	        this.encounter.allergens.push(inputTagValue);
-	      }
-	      this.inputTagVisible = false;
-	      this.inputTagValue = '';
-	    },
+    /* 过敏信息操作  --- start */ 
+      handleCloseTag: function (tag) {
+        this.encounter.allergens.splice(this.encounter.allergens.indexOf(tag), 1);
+      },
+      showTagInput: function () {
+        this.inputTagVisible = true;
+        this.$nextTick(function() {
+          this.$refs.saveTagInput.$refs.input.focus();
+        });
+      },
+      handleTagInputConfirm: function () {
+        var inputTagValue = this.inputTagValue;
+        if(inputTagValue.length>20) {
+          this.$message({
+            message: "过敏信息太长",
+            type: 'warning'
+          });
+        }
+        if (inputTagValue) {
+          this.encounter.allergens.push(inputTagValue);
+        }
+        this.inputTagVisible = false;
+        this.inputTagValue = '';
+      },
     /* 过敏信息操作  --- end */ 
 
     // 切换主业务区域tab
     handleTabClick: function (tab, event) {
-    	var name = tab.name || this.activeTab;
-    	this.getDiffrentData(name);
+      var name = tab.name || this.activeTab;
+      this.getDiffrentData(name);
     },
     getDiffrentData: function (name) {
-    	if(name=="orders") {
-    		this.getOrders();
-    	}
-    	if(name=="prescriptions") {
-    		this.getPrescriptions();
-    	}
-    	if(name=="histories") {
-    		this.getHistories();
-    	}
-    	if(name=="diagnoses") {
-    		this.getDiagnoses();
-    	}
+      if(name=="orders") {
+        this.getOrders();
+      }
+      if(name=="prescriptions") {
+        this.getPrescriptions();
+      }
+      if(name=="histories") {
+        this.getHistories();
+      }
+      if(name=="diagnoses") {
+        this.getDiagnoses();
+      }
     },
 
     /* 药品操作 --- start */
-    	// 患者的药品列表
-    	getOrders: function (encounter_id) {
-    		var _this = this;
-    		if(!encounter_id) { encounter_id = _this.encounter.id; }
-    		if(!encounter_id) {
-    			_this.orders = [];
-    			_this.$message({
-		        message: "请先确认患者，才可以查询相关药品。",
-		        type: 'warning'
-		      });
-    			return false;
-    		}
-    		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
-    			var res = response.data;
-    			if(res.flag) {
-    				_this.orders = res.data;
-    				// 默认勾选新建医嘱
-		      	_this.defaultCheckNewOrder();
-    			} else {
-    				_this.$message.error(res.info);
-    			}
-    		}, function (response) {
-    			_this.$message.error("获取药品列表失败，请联系管理员。");
-    		})
-    	},
-    	// 其他使用药品列表的地方，引用某次就诊的药品
-    	getEncOrders: function (encounter_id) {
-    		var _this = this;
-    		_this.encorders = [];
-    		_this.copyordersloading = true;
-    		_this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
-    			var res = response.data;
-    			_this.copyordersloading = false;
-    			if(res.flag) {
-    				_this.encorders = res.data;
-    			} else {
-    				_this.$message.error(res.info);
-    			}
-    		}, function (response) {
-    			_this.copyordersloading = false;
-    			_this.$message.error("获取药品列表失败，请联系管理员。");
-    		})
-    	},
-    	// 搜索药品，查询药品
-    	searchDrugs: function (queryString, cb) {
-    		var _this = this;
-    		if(!queryString) {
-    			cb([]);
-    			return false;
-    		}
-    		Vue.resource('/dict/medications.json').get({search: queryString}).then(function(response) {
-			    var res = response.data;
-			    if (res.flag) {
-			    	var drugs = res.data;
-						cb(drugs);
-						// 设置下拉选择的第一项为高亮
-						var el = _this.$refs["ordtitle"];
-						if(el) {
-							el.highlightedIndex = 0;
-						}
-					} else {
-    				_this.$message.error(res.info);
-    			}
-			  },function() {
-			  	_this.$message.error("获取选择药品列表失败，请联系管理员。");
-			  })
-    	},
-    	// 选择某个药品
-    	selectDrug: function (item) {
-    		var _this = this, drug = item;
-    		if(!_this.encounter.id) {
-    			_this.$message({
-	          message: '请先保存就诊信息。',
-	          type: 'warning'
-	        });
-    			return false;
-    		}
-    		if(!drug.measure_val || parseFloat(drug.measure_val)==0) {
-    			_this.$message({
-	          message: '药品没有设置最小单位，请联系管理员。',
-	          type: 'warning'
-	        });
-    			return false;
-    		}
-    		_this.order = {
-    			serialno: drug.serialno, // drug药品序列号
-    			title: drug.name, // drug药品序列号
-    			name: drug.name,
-    			specification: drug.spec, // 规格
-    			unit: drug.unit, // 单位
-    			price: drug.price, // 价格
-    			dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
-    			single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
-    			route: _this.routes[0],// 频次
-    			frequency: _this.rates[0],// 频次
-    			course_of_treatment: {value: "", unit: "天"},  // 疗程
-    			total_quantity: 1, // 总量
-    			formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
-    			measure_val: drug.measure_val,  // 最小单位的值
-    			encounter_id: _this.encounter.id, // 就诊模型id
-    			mul: drug.mul||1, // 倍率
-    			storage: drug.storage, //库存数组 从大大小排列
-    		}
-    		_this.focusNext('ordtitle', 'ordsingleqty');
-    	},
-    	// 单次数量、单次剂量、频次、疗程改变，计算总量
-	  	calculateQuantity: function (field) {
-	  		var _this = this;
-	  		// 药品将检测单次数量、单次剂量的改变
-	  		var minUnit = _this.order.measure_val;
-	  		if(minUnit) {
-	  			if (field=="dose") {
-	  				_this.order.single_qty.value = parseFloat((parseFloat(_this.order[field].value) / parseFloat(minUnit)).toFixed(2));
-	  			}
-	  			if (field=="single_qty") {
-	  				_this.order.dose.value = parseFloat((parseFloat(_this.order[field].value) * parseFloat(minUnit)).toFixed(2));
-	  			}
-	  			var rate = ratesHash[_this.order.frequency&&_this.order.frequency.code||"QD"];
-	  			var singleQty = parseFloat(_this.order.single_qty&&_this.order.single_qty.value||1),
-	  					frequency = parseFloat(rate.frequency||1),
-	  					period = parseFloat(rate.period||1),
-	  					days = parseFloat(_this.order.course_of_treatment&&_this.order.course_of_treatment.value||1),
-	  					mul = parseFloat(_this.order.mul||1);
-	  			
-	  		  // single_qty: 单次数量的值
-					// frequency: 一个频次周期内的次数
-					// period: 一个频次周期有几天
-					// course_of_treatment_value: 天数
-					// mul: 销售单位和单次数量单位(基本单位)的倍率
-	  			// sinqle_qty_value.ceil * frequency / period * course_of_treatment_value / mul
-	  			_this.order.total_quantity = Math.ceil(Math.ceil(singleQty)*frequency/period*days/mul);
-	  		}
-	  	},
-	  	// 保存药品
-	    submitOrderForm: function (formName) {
-				var _this = this;
-	      _this.$refs[formName].validate( function (valid) {
-	        if (valid) {
-	        	if(!_this.order.serialno || !_this.order.title) {
-	        		_this.$message({
-			          message: '请选择药品。',
-			          type: 'warning'
-			        });
-			        _this.$refs["ordtitle"].focus();
-			        return false;
-	        	}
-	        	if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
-	        		_this.$message({
-			          message: '请填写药品的单次数量。',
-			          type: 'warning'
-			        });
-			        _this.$refs["ordsingleqty"].focus();
-			        return false;
-	        	}
-	        	if(!(_this.order.dose&&_this.order.dose.value)) {
-	        		_this.$message({
-			          message: '请填写药品的单次剂量。',
-			          type: 'warning'
-			        });
-			        _this.$refs["orddose"].focus();
-			        return false;
-	        	}
-	        	if(!_this.order.total_quantity) {
-	        		_this.$message({
-			          message: '请填写药品的总量。',
-			          type: 'warning'
-			        });
-			        _this.$refs["ordtotalquantity"].focus();
-			        return false;
-	        	}
-	        	//判断总量和库存的关系
-	        	//storage 是每个合作药店的最大库存量数组 按从大到小排列的
-	        	console.log(_this.order.storage);
-	        	console.log(_this.order.total_quantity)
-	        	console.log((_this.order.storage[0]||0) >= _this.order.total_quantity)
-	        	if( (_this.order.storage[0]||0) < _this.order.total_quantity ) {
-	        		_this.$message({
-			          message: '该药品最大库存为: ' + (_this.order.storage[0]||0) +_this.order.unit+'。请重新填写总量或者采用替代药品',
-			          type: 'warning'
-			        });
-			        _this.$refs["ordtotalquantity"].focus();
-			        return false;
-	        	}
-	          // 判断是否有id，有id的话，就是编辑，没有id为新建
-	          var btn = $(_this.$refs["saveorder"].$el);
-	          btn.attr("disabled", "disabled").find(".fa").show();
-	          var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order};
-	          if(!_this.order.id) {
-	          	_this.ordersResource.save(json).then( function(response) {
-	          		_this.handleOrderReturn({res: response, btn: btn, action: "save"});
-	          	}, function(response) {
-	          		btn.removeAttr("disabled").find(".fa").hide();
-	          		_this.$message.error("创建药品失败，请联系管理员。");
-	          	})
-	          } else {
-	          	_this.ordersResource.update({id: _this.order.id}, json).then( function(response) {
-	          		_this.handleOrderReturn({res: response, btn: btn, action: "update"});
-	          	}, function(response) {
-	          		btn.removeAttr("disabled").find(".fa").hide();
-	          		_this.$message.error("更新药品失败，请联系管理员。");
-	          	})
-	          }
-	        } else {
-	          _this.$message({
-		          message: '请按照规范录入数据。',
-		          type: 'warning'
-		        });
-	          return false;
-	        }
-	      });
-	    },
-	    // 医嘱保存成功之后的处理
-	    handleOrderReturn: function (json) {
-	    	this.order = {
-	    		single_qty: {value: "", unit: ""},
-					dose: {value: "", unit: ""},
-					course_of_treatment: {value: "", unit: ""},
-	    	};
-	    	json.btn.removeAttr("disabled").find(".fa").hide();
-	    	var res = json.res.data;
-	    	if(res.flag) {
-		    	if(json.action=="save") {
-		    		this.orders.push(res.data);
-		    	} else {
-		    		this.orders.splice(this.editIndex, 1); // 修改已经编辑的数据
-			      this.orders.splice(this.editIndex, 0, res.data); // 修改已经编辑的数据
-		    	}
-		    	this.$message({
-		        message: "药品保存成功。",
-		        type: 'success'
-		      });
-		      // 默认勾选新建医嘱
-		      this.defaultCheckNewOrder();
-		      // 聚焦医嘱搜索框
-		      this.$nextTick(function(){
-		      	this.$refs["ordtitle"].focus();
-					})
-	    	} else {
-	    		this.$message.error(res.info);
-	    	}
-	    },
-	    // 默认勾选新建状态的医嘱
-	    defaultCheckNewOrder: function () {
-	    	var _this = this;
-	    	_this.$nextTick(function(){
-		    	(_this.orders||[]).forEach(function (item, index) {
-		    		if(item.status=="0") {
-		    			_this.$refs["ordersTable"].toggleRowSelection(item, true);
-		    		} else {
-		    			_this.$refs["ordersTable"].clearSelection();
-		    		}
-		    	})
-				})
-	    },
-	    // 编辑药品
-	    editOrder: function (index, row) {
-	    	this.editIndex = index;
-	    	this.order = row;
-	    	this.order.name = row.title;
-	    	var _this = this;
-	    	Vue.resource('/dict/medications/'+row.serialno+'.json').get().then(function(response) {
-			    var res = response.data;
-			    if (res.flag) {
-			    	_this.order.mul = res.data.mul; // 用于运算总量
-			    	_this.order.measure_val = res.data.measure_val; // 用于运算总量
-			    	_this.order.storage = res.data.storage; //用于判断库存量是否满足
-					} else {
-    				_this.$message.error(res.info);
-    			}
-			  },function() {
-			  	_this.$message.error("获取药品详情失败，请联系管理员。");
-			  })
-	    },
-	    // 删除医嘱
-	    deleteOrder: function (index, row) {
-	    	var _this = this, $target = $(event.target);
-	    	// current_app.loading = true;
-	    	$target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
-	    	_this.ordersResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-      		var res = response.data;
-      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
-      		if(res.flag) {
-      			_this.$message({
-		          message: res.info,
-		          type: 'warning'
-		        });
-		        _this.orders.splice(index, 1);
-		        // 默认勾选新建医嘱
-		      	_this.defaultCheckNewOrder();
-      		}else{
-      			_this.$message.error(res.info);
-      		}
-      	}, function(response) {
-      		$target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
-      		_this.$message.error("删除药品失败，请联系管理员。");
-      	})
-	    },
-	    // 勾选医嘱
-	    handleOrdersSelectionChange: function (val) {
+      // 患者的药品列表
+      getOrders: function (encounter_id) {
+        var _this = this;
+        if(!encounter_id) { encounter_id = _this.encounter.id; }
+        if(!encounter_id) {
+          _this.orders = [];
+          _this.$message({
+            message: "请先确认患者，才可以查询相关药品。",
+            type: 'warning'
+          });
+          return false;
+        }
+        _this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.orders = res.data;
+            // 默认勾选新建医嘱
+            _this.defaultCheckNewOrder();
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function (response) {
+          _this.$message.error("获取药品列表失败，请联系管理员。");
+        })
+      },
+      // 其他使用药品列表的地方，引用某次就诊的药品
+      getEncOrders: function (encounter_id) {
+        var _this = this;
+        _this.encorders = [];
+        _this.copyordersloading = true;
+        _this.ordersResource.get({encounter_id: encounter_id}).then( function(response) {
+          var res = response.data;
+          _this.copyordersloading = false;
+          if(res.flag) {
+            _this.encorders = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function (response) {
+          _this.copyordersloading = false;
+          _this.$message.error("获取药品列表失败，请联系管理员。");
+        })
+      },
+      // 搜索药品，查询药品
+      searchDrugs: function (queryString, cb) {
+        var _this = this;
+        if(!queryString) {
+          cb([]);
+          return false;
+        }
+        Vue.resource('/hospital/dict/new_medications.json').get({search: queryString}).then(function(response) {
+          var res = response.data;
+          if (res.flag) {
+            var drugs = res.data;
+            cb(drugs);
+            // 设置下拉选择的第一项为高亮
+            var el = _this.$refs["ordtitle"];
+            if(el) {
+              el.highlightedIndex = 0;
+            }
+          } else {
+            _this.$message.error(res.info);
+          }
+        },function() {
+          _this.$message.error("获取选择药品列表失败，请联系管理员。");
+        })
+      },
+      // 选择某个药品
+      selectDrug: function (item) {
+        var _this = this, drug = item;
+        if(!_this.encounter.id) {
+          _this.$message({
+            message: '请先保存就诊信息。',
+            type: 'warning'
+          });
+          return false;
+        }
+        if(!drug.measure_val || parseFloat(drug.measure_val)==0) {
+          _this.$message({
+            message: '药品没有设置最小单位，请联系管理员。',
+            type: 'warning'
+          });
+          return false;
+        }
+        _this.order = {
+          serialno: drug.serialno, // drug药品序列号
+          title: drug.name, // drug药品序列号
+          name: drug.name,
+          specification: drug.spec, // 规格
+          unit: drug.unit, // 单位
+          price: drug.price, // 价格
+          dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
+          single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
+          route: _this.routes[0],// 频次
+          frequency: _this.rates[0],// 频次
+          course_of_treatment: {value: "", unit: "天"},  // 疗程
+          total_quantity: 1, // 总量
+          formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
+          measure_val: drug.measure_val,  // 最小单位的值
+          encounter_id: _this.encounter.id, // 就诊模型id
+          mul: drug.mul||1, // 倍率
+          storage: drug.storage, //库存数组 从大大小排列
+        }
+        _this.focusNext('ordtitle', 'ordsingleqty');
+      },
+      // 单次数量、单次剂量、频次、疗程改变，计算总量
+      calculateQuantity: function (field) {
+        var _this = this;
+        // 药品将检测单次数量、单次剂量的改变
+        var minUnit = _this.order.measure_val;
+        if(minUnit) {
+          if (field=="dose") {
+            _this.order.single_qty.value = parseFloat((parseFloat(_this.order[field].value) / parseFloat(minUnit)).toFixed(2));
+          }
+          if (field=="single_qty") {
+            _this.order.dose.value = parseFloat((parseFloat(_this.order[field].value) * parseFloat(minUnit)).toFixed(2));
+          }
+          var rate = ratesHash[_this.order.frequency&&_this.order.frequency.code||"QD"];
+          var singleQty = parseFloat(_this.order.single_qty&&_this.order.single_qty.value||1),
+              frequency = parseFloat(rate.frequency||1),
+              period = parseFloat(rate.period||1),
+              days = parseFloat(_this.order.course_of_treatment&&_this.order.course_of_treatment.value||1),
+              mul = parseFloat(_this.order.mul||1);
+          
+          // single_qty: 单次数量的值
+          // frequency: 一个频次周期内的次数
+          // period: 一个频次周期有几天
+          // course_of_treatment_value: 天数
+          // mul: 销售单位和单次数量单位(基本单位)的倍率
+          // sinqle_qty_value.ceil * frequency / period * course_of_treatment_value / mul
+          _this.order.total_quantity = Math.ceil(Math.ceil(singleQty)*frequency/period*days/mul);
+        }
+      },
+      // 保存药品
+      submitOrderForm: function (formName) {
+        var _this = this;
+        _this.$refs[formName].validate( function (valid) {
+          if (valid) {
+            if(!_this.order.serialno || !_this.order.title) {
+              _this.$message({
+                message: '请选择药品。',
+                type: 'warning'
+              });
+              _this.$refs["ordtitle"].focus();
+              return false;
+            }
+            if(!(_this.order.single_qty&&_this.order.single_qty.value)) {
+              _this.$message({
+                message: '请填写药品的单次数量。',
+                type: 'warning'
+              });
+              _this.$refs["ordsingleqty"].focus();
+              return false;
+            }
+            if(!(_this.order.dose&&_this.order.dose.value)) {
+              _this.$message({
+                message: '请填写药品的单次剂量。',
+                type: 'warning'
+              });
+              _this.$refs["orddose"].focus();
+              return false;
+            }
+            if(!_this.order.total_quantity) {
+              _this.$message({
+                message: '请填写药品的总量。',
+                type: 'warning'
+              });
+              _this.$refs["ordtotalquantity"].focus();
+              return false;
+            }
+            //判断总量和库存的关系
+            //storage 是每个合作药店的最大库存量数组 按从大到小排列的
+            console.log(_this.order.storage);
+            console.log(_this.order.total_quantity)
+            console.log((_this.order.storage[0]||0) >= _this.order.total_quantity)
+            if( (_this.order.storage[0]||0) < _this.order.total_quantity ) {
+              _this.$message({
+                message: '该药品最大库存为: ' + (_this.order.storage[0]||0) +_this.order.unit+'。请重新填写总量或者采用替代药品',
+                type: 'warning'
+              });
+              _this.$refs["ordtotalquantity"].focus();
+              return false;
+            }
+            // 判断是否有id，有id的话，就是编辑，没有id为新建
+            var btn = $(_this.$refs["saveorder"].$el);
+            btn.attr("disabled", "disabled").find(".fa").show();
+            var json = {authenticity_token: $('[name="csrf-token"]').attr('content'), order: _this.order};
+            if(!_this.order.id) {
+              _this.ordersResource.save(json).then( function(response) {
+                _this.handleOrderReturn({res: response, btn: btn, action: "save"});
+              }, function(response) {
+                btn.removeAttr("disabled").find(".fa").hide();
+                _this.$message.error("创建药品失败，请联系管理员。");
+              })
+            } else {
+              _this.ordersResource.update({id: _this.order.id}, json).then( function(response) {
+                _this.handleOrderReturn({res: response, btn: btn, action: "update"});
+              }, function(response) {
+                btn.removeAttr("disabled").find(".fa").hide();
+                _this.$message.error("更新药品失败，请联系管理员。");
+              })
+            }
+          } else {
+            _this.$message({
+              message: '请按照规范录入数据。',
+              type: 'warning'
+            });
+            return false;
+          }
+        });
+      },
+      // 医嘱保存成功之后的处理
+      handleOrderReturn: function (json) {
+        this.order = {
+          single_qty: {value: "", unit: ""},
+          dose: {value: "", unit: ""},
+          course_of_treatment: {value: "", unit: ""},
+        };
+        json.btn.removeAttr("disabled").find(".fa").hide();
+        var res = json.res.data;
+        if(res.flag) {
+          if(json.action=="save") {
+            this.orders.push(res.data);
+          } else {
+            this.orders.splice(this.editIndex, 1); // 修改已经编辑的数据
+            this.orders.splice(this.editIndex, 0, res.data); // 修改已经编辑的数据
+          }
+          this.$message({
+            message: "药品保存成功。",
+            type: 'success'
+          });
+          // 默认勾选新建医嘱
+          this.defaultCheckNewOrder();
+          // 聚焦医嘱搜索框
+          this.$nextTick(function(){
+            this.$refs["ordtitle"].focus();
+          })
+        } else {
+          this.$message.error(res.info);
+        }
+      },
+      // 默认勾选新建状态的医嘱
+      defaultCheckNewOrder: function () {
+        var _this = this;
+        _this.$nextTick(function(){
+          (_this.orders||[]).forEach(function (item, index) {
+            if(item.status=="0") {
+              _this.$refs["ordersTable"].toggleRowSelection(item, true);
+            } else {
+              _this.$refs["ordersTable"].clearSelection();
+            }
+          })
+        })
+      },
+      // 编辑药品
+      editOrder: function (index, row) {
+        this.editIndex = index;
+        this.order = row;
+        this.order.name = row.title;
+        var _this = this;
+        Vue.resource('/hospital/dict/new_medications/'+row.serialno+'.json').get().then(function(response) {
+          var res = response.data;
+          if (res.flag) {
+            _this.order.mul = res.data.mul; // 用于运算总量
+            _this.order.measure_val = res.data.measure_val; // 用于运算总量
+            _this.order.storage = res.data.storage; //用于判断库存量是否满足
+          } else {
+            _this.$message.error(res.info);
+          }
+        },function() {
+          _this.$message.error("获取药品详情失败，请联系管理员。");
+        })
+      },
+      // 删除医嘱
+      deleteOrder: function (index, row) {
+        var _this = this, $target = $(event.target);
+        // current_app.loading = true;
+        $target.attr("disabled", "disabled").addClass("fa-spinner").addClass("fa-spin").removeClass("fa-trash-o");
+        _this.ordersResource.delete({id: row.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          var res = response.data;
+          $target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+          if(res.flag) {
+            _this.$message({
+              message: res.info,
+              type: 'warning'
+            });
+            _this.orders.splice(index, 1);
+            // 默认勾选新建医嘱
+            _this.defaultCheckNewOrder();
+          }else{
+            _this.$message.error(res.info);
+          }
+        }, function(response) {
+          $target.removeAttr("disabled").removeClass("fa-spinner").removeClass("fa-spin").addClass("fa-trash-o");
+          _this.$message.error("删除药品失败，请联系管理员。");
+        })
+      },
+      // 勾选医嘱
+      handleOrdersSelectionChange: function (val) {
         this.multipleOrdersSelection = val;
       },
       // 已经发送的医嘱（待交费、完成）和作废的医嘱显示非激活状态灰色{row, rowIndex}
       judgeOrderRow: function (obj) {
-      	var row = obj.row;
-      	if(row.status=='0'){
-      		return "";
-      	} else {
-      		return "inactive-row";
-      	}
+        var row = obj.row;
+        if(row.status=='0'){
+          return "";
+        } else {
+          return "inactive-row";
+        }
       },
     /* 药品操作 --- end */
+
+    /* 药品字典 --- start */
+    //打开药品字典弹出框
+    openDrugModal: function() {
+      this.dialogVisible = true;
+    },
+    encodeBase64ToImgUrl: function(urlData) {
+      var bytes = window.atob(urlData.split(',')[1]);
+      var ab = new ArrayBuffer(bytes.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < bytes.length; i++) {
+        ia[i] = bytes.charCodeAt(i);
+      }
+      var blob =  new Blob([ab], { type: 'image/png' });
+      return URL.createObjectURL(blob);
+    },
+    //获取所有剂型分类
+    getAllJxtypes: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.13610.1.364.8.50.2"}).then(function(response) {
+          if (response.flag) {
+            _this.jxtypes = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("剂型分类暂不可用！");
+      })
+    },
+    //获取所有药品分类
+    getallKindnames: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.256"}).then(function(response) {
+          if (response.flag) {
+            _this.kindnames = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("药品分类暂不可用！");
+      })
+    },
+    //获取所有药理学分类编码
+    getPharmacology: function() {
+      var _this = this;
+      _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.255"}).then(function(response) {
+          if (response.flag) {
+            _this.pharmacologies = response.body.data;
+          } else {
+            //_this.$message.warning(response.body.info);
+          }
+      }, function(response) {
+        _this.$message.error("药理学分类暂不可用！");
+      })
+    },
+    //获取药品列表
+    getDrugsList: function() {
+      var _this = this;
+      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, kindname: _this.filter.kindname, jxtype: _this.filter.jxtype}).then(function(response) {
+        if (response.body.flag) {
+          _this.drugsData = response.body.data;
+          _this.totalDrugCount = response.body.count;
+        } else {
+          _this.$message.warning(response.body.info || "获取药品列表失败，请刷新后重试");
+        }
+      }, function(response) {
+        _this.$message.error("获取药品列表失败，请刷新后重试");
+      })
+    },
+    //分页方法
+    handleSizeChange: function(val) {
+      this.pageSize = val;
+      this.getDrugsList();
+    },
+    handleCurrentChange: function(val) {
+      this.currentDrugsListPage = val;
+      this.getDrugsList();
+    },
+    /* 药品字典 --- end*/
 
     /* 药品模板 --- start */
       // 打开模板弹出框，使用模板，创建模板
       openFavoriteModal: function () {
-      	this.isShowFavoriteDialog = true;
-      	this.mtemplate = {
-      		title: "", // 模板名称
-      		sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
-      		disease: {code: "", display: ""}, // 病种
-      		note: "", // 备注
-      	}
-      	this.mtemplatesResource = Vue.resource('/hospital/sets/mtemplates{/id}.json');
-      	this.favoriteActiveName = "use"; // 打开模态框，默认显示使用模板tab
-      	this.getMtemplates();
+        this.isShowFavoriteDialog = true;
+        this.mtemplate = {
+          title: "", // 模板名称
+          sharing_scope: this.$parent.common_data_sharing_scopes[0], // 共享范围
+          disease: {code: "", display: ""}, // 病种
+          note: "", // 备注
+        }
+        this.mtemplatesResource = Vue.resource('/hospital/sets/mtemplates{/id}.json');
+        this.favoriteActiveName = "use"; // 打开模态框，默认显示使用模板tab
+        this.getMtemplates();
       },
       // 药品模板tab改变
       handleMTemplateTabClick: function (tab, event) {
-      	var _this = this;
-	    	if(tab.name=="use") {
-	    		
-	    	}
-	    	if(tab.name=="create") {
-	    		// 点击到创建模板的时候，将所有待选医嘱全部勾选起来
-	      	_this.$nextTick(function(){
-			    	(_this.orders||[]).forEach(function (item, index) {
-			    		_this.$refs["mtemplateOrdersTable"].toggleRowSelection(item, true);
-			    	})
-					})
-	    	}
-	    	
-	    },
+        var _this = this;
+        if(tab.name=="use") {
+          
+        }
+        if(tab.name=="create") {
+          // 点击到创建模板的时候，将所有待选医嘱全部勾选起来
+          _this.$nextTick(function(){
+            (_this.orders||[]).forEach(function (item, index) {
+              _this.$refs["mtemplateOrdersTable"].toggleRowSelection(item, true);
+            })
+          })
+        }
+        
+      },
       // 获取药品模板
       getMtemplates: function () {
-      	var _this = this;
-      	_this.mtemplatesResource.get({type: "available"}).then( function(response) {
-    			var res = response.data;
-    			if(res.flag) {
-    				_this.mtemplates = res.data;
-    			} else {
-    				_this.$message.error(res.info);
-    			}
-    		}, function (response) {
-    			_this.$message.error("获取药品模板列表失败，请联系管理员。");
-    		})
+        var _this = this;
+        _this.mtemplatesResource.get({type: "available"}).then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.mtemplates = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function (response) {
+          _this.$message.error("获取药品模板列表失败，请联系管理员。");
+        })
       },
       // 提交药品模板的方法
       submitMtemplateForm: function (formName) {
-      	var _this = this;
-      	_this.$refs[formName].validate( function (valid) {
-	        if (valid) {
-	        	if(!_this.multipleMTempOrdersSelection || _this.multipleMTempOrdersSelection.length==0) {
-	        		_this.$message({
-			          message: "必须选择医嘱。",
-			          type: 'warning'
-			        });
-	        		return false;
-	        	}
-	        	var ids = [];
-	        	(_this.multipleMTempOrdersSelection||[]).forEach(function (item, index) {
-	        		ids.push(item.id);
-	        	})
-	        	_this.mtemplate["order_ids"] = ids;
-	        	var btn = $(event.target);
-	        	btn.attr("disabled", "disabled").find(".fa").show();
-	        	_this.mtemplatesResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate}).then( function(response) {
-		      		btn.removeAttr("disabled").find(".fa").hide();
-		      		var res = response.data;
-		      		if(res.flag) {
-		      			_this.$message({
-				          message: "生成医嘱模板成功，请在模板列表中查看。",
-				          type: 'success'
-				        });
-				        if(!_this.mtemplates) {
-				        	_this.mtemplates = [];
-				        }
-		      			// 将创建的模板添加到使用模板列表
-		      			_this.mtemplates.push(res.data);
-		      			// 关闭模态框
-		      			_this.isShowFavoriteDialog = false;
-		      		} else {
-		      			_this.$message.error(res.info);
-		      		}
-		      	}, function(response) {
-		      		btn.removeAttr("disabled").find(".fa").hide();
-		      		_this.$message.error("创建医嘱模板失败，请联系管理员。");
-		      	})
-					} else {
-	          _this.$message({
-		          message: '请按照规范录入数据。',
-		          type: 'warning'
-		        });
-	          return false;
-	        }
-	      })
+        var _this = this;
+        _this.$refs[formName].validate( function (valid) {
+          if (valid) {
+            if(!_this.multipleMTempOrdersSelection || _this.multipleMTempOrdersSelection.length==0) {
+              _this.$message({
+                message: "必须选择医嘱。",
+                type: 'warning'
+              });
+              return false;
+            }
+            var ids = [];
+            (_this.multipleMTempOrdersSelection||[]).forEach(function (item, index) {
+              ids.push(item.id);
+            })
+            _this.mtemplate["order_ids"] = ids;
+            var btn = $(event.target);
+            btn.attr("disabled", "disabled").find(".fa").show();
+            _this.mtemplatesResource.save({authenticity_token: $('[name="csrf-token"]').attr('content'), mtemplate: _this.mtemplate}).then( function(response) {
+              btn.removeAttr("disabled").find(".fa").hide();
+              var res = response.data;
+              if(res.flag) {
+                _this.$message({
+                  message: "生成医嘱模板成功，请在模板列表中查看。",
+                  type: 'success'
+                });
+                if(!_this.mtemplates) {
+                  _this.mtemplates = [];
+                }
+                // 将创建的模板添加到使用模板列表
+                _this.mtemplates.push(res.data);
+                // 关闭模态框
+                _this.isShowFavoriteDialog = false;
+              } else {
+                _this.$message.error(res.info);
+              }
+            }, function(response) {
+              btn.removeAttr("disabled").find(".fa").hide();
+              _this.$message.error("创建医嘱模板失败，请联系管理员。");
+            })
+          } else {
+            _this.$message({
+              message: '请按照规范录入数据。',
+              type: 'warning'
+            });
+            return false;
+          }
+        })
       },
       // 医嘱模板勾选医嘱
       handleMTempOrdersSelChange: function (val) {
-      	this.multipleMTempOrdersSelection = val;
+        this.multipleMTempOrdersSelection = val;
       },
       // 选择疾病
       handleSelectMTempDisease: function (item) {
-      	this.mtemplate.disease = {code: item.code, display: item.display};
+        this.mtemplate.disease = {code: item.code, display: item.display};
       },
     /* 药品模板 --- end */
 
     /* 引用药品 --- start */
       // 打开引用医嘱
       openCopyModal: function () {
-      	this.isShowCopyDialog = true;
-      	this.getEncOrders(this.encounter.id);
+        this.isShowCopyDialog = true;
+        this.getEncOrders(this.encounter.id);
       },
       // 引用勾选医嘱
       handleCopyOrdersSelChange: function (val) {
-      	this.multipleCopyOrdersSelection = val;
+        this.multipleCopyOrdersSelection = val;
       },
 
     /* 引用药品 --- end */
 
     /* 处方操作 --- start */
-    	// 获取处方列表
-    	getPrescriptions: function (encounter_id) {
-    		var _this = this;
-    		if(!encounter_id) { encounter_id = _this.encounter.id; }
-    		if(!encounter_id) {
-    			_this.prescriptions = [];
-    			_this.$message({
-		        message: "请先确认患者，才可以获取相关处方。",
-		        type: 'warning'
-		      });
-    			return false;
-    		}
-    		Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
-    			var res = response.data;
-    			if(res.flag) {
-    				_this.prescriptions = res.data;
-    			} else {
-    				_this.$message.error(res.info);
-    			}
-    		}, function (response) {
-    			_this.$message.error("获取处方列表失败，请联系管理员。");
-    		})
-    	},
-    	// 根据勾选的医嘱生成处方
-    	generatePrescription: function () {
-    		var _this = this, orders = this.sendOrders, ids = [], diagnoses = [];
-    		(_this.prescription.diagnoses||[]).forEach(function (item, index) {
-    			(_this.encounter.diagnoses||[]).forEach(function (dia, ind) {
-	    			if(item==dia.display) {
-	    				diagnoses.push(dia);
-	    			}
-	    		})
-    		})
-    		if(diagnoses.length==0) {
-    			_this.$message({
-		        message: "请选择诊断。",
-		        type: 'warning'
-		      });
-		      return false;
-    		}
-    		(orders||[]).forEach(function(item, index){
-    			if(item.status=="0") {
-    				ids.push(item.id);
-    			}
-    		})
-    		_this.prescription.diagnoses = diagnoses;
-    		_this.prescription.ids = ids;
-    		var btn = $(event.target)
-    				json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id, prescription: _this.prescription};
-    		btn.attr("disabled", "disabled").find(".fa").show();
-    		_this.prescriptionsResource.save(json).then( function(response) {
-      		var res = response.data;
-      		btn.removeAttr("disabled").find(".fa").hide();
-      		if(res.flag) {
-      			_this.isShowSendPresDialog = false;
-      			_this.$message({
-		          message: "生成处方成功，请在处方列表中查看。",
-		          type: 'success'
-		        });
-		        _this.getOrders();
-      		} else {
-						_this.$message.error(res.info);
-      		}
-      	}, function(response) {
-      		btn.removeAttr("disabled").find(".fa").hide();
-      		_this.$message.error("生成处方失败，请联系管理员。");
-      	})
-    	},
-    	// 打开处方发送框
-    	openPrescriptionModal: function () {
-    		var _this = this;
-    		if(!_this.encounter.id) {
-    			_this.$message({
-	          message: "请先确定患者，保存患者信息之后再生成处方。",
-	          type: 'warning'
-	        });
-	        return false;
-    		}
-    		// 
-    		if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
-    			_this.$message({
-	          message: "请先下诊断，再生成处方。",
-	          type: 'warning'
-	        });
-	        return false;
-    		}
-    		// 判断是否有药品
-    		var orders = _this.multipleOrdersSelection;
-    		_this.sendOrders = [];
-    		(orders||[]).forEach(function(item, index){
-    			if(item.status=="0") {
-    				_this.sendOrders.push(item);
-    			}
-    		})
-    		if(_this.sendOrders.length==0) {
-    			_this.$message({
-	          message: "请选择还未生成处方的药品进行操作。",
-	          type: 'warning'
-	        });
-    			return false;
-    		}
-    		// 将诊断处理为checkbox能够显示，形式[诊断名]数组
-    		var diagnoses = [];
-    		(_this.encounter.diagnoses||[]).forEach(function (item, index){
-    			diagnoses.push(item.display);
-    		})
-    		_this.prescription = {
-    			type: _this.prescription_types[0], // 类型
-    			diagnoses: diagnoses, // 诊断
-    			specialmark: false, // 特殊处方标记
-    			ids: [], // 药品ids
-    		}
-    		_this.isShowSendPresDialog = true;
-    	},
-    	// 改变要发送的药品的顺序
-    	sortSeOrderList: function (index, sort) {
-    		var _this = this;
-				var tempOption = _this.sendOrders[index + sort];  
-				Vue.set(_this.sendOrders, index + sort, _this.sendOrders[index]);  
-				Vue.set(_this.sendOrders, index, tempOption); 
-    	},
-    	// 引用处方
-			copyPrescription: function (index, row) {
-				var _this = this,
-						btn = $(event.target);
-				_this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【引用】这些药品到本次就诊？', '引用', {
+      // 获取处方列表
+      getPrescriptions: function (encounter_id) {
+        var _this = this;
+        if(!encounter_id) { encounter_id = _this.encounter.id; }
+        if(!encounter_id) {
+          _this.prescriptions = [];
+          _this.$message({
+            message: "请先确认患者，才可以获取相关处方。",
+            type: 'warning'
+          });
+          return false;
+        }
+        Vue.resource("/hospital/encounters/"+encounter_id+"/all_prescriptions").get({encounter_id: encounter_id}).then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.prescriptions = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function (response) {
+          _this.$message.error("获取处方列表失败，请联系管理员。");
+        })
+      },
+      // 根据勾选的医嘱生成处方
+      generatePrescription: function () {
+        var _this = this, orders = this.sendOrders, ids = [], diagnoses = [];
+        (_this.prescription.diagnoses||[]).forEach(function (item, index) {
+          (_this.encounter.diagnoses||[]).forEach(function (dia, ind) {
+            if(item==dia.display) {
+              diagnoses.push(dia);
+            }
+          })
+        })
+        if(diagnoses.length==0) {
+          _this.$message({
+            message: "请选择诊断。",
+            type: 'warning'
+          });
+          return false;
+        }
+        (orders||[]).forEach(function(item, index){
+          if(item.status=="0") {
+            ids.push(item.id);
+          }
+        })
+        _this.prescription.diagnoses = diagnoses;
+        _this.prescription.ids = ids;
+        var btn = $(event.target)
+            json = {authenticity_token: $('[name="csrf-token"]').attr('content'), encounter_id: _this.encounter.id, prescription: _this.prescription};
+        btn.attr("disabled", "disabled").find(".fa").show();
+        _this.prescriptionsResource.save(json).then( function(response) {
+          var res = response.data;
+          btn.removeAttr("disabled").find(".fa").hide();
+          if(res.flag) {
+            _this.isShowSendPresDialog = false;
+            _this.$message({
+              message: "生成处方成功，请在处方列表中查看。",
+              type: 'success'
+            });
+            _this.getOrders();
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function(response) {
+          btn.removeAttr("disabled").find(".fa").hide();
+          _this.$message.error("生成处方失败，请联系管理员。");
+        })
+      },
+      // 打开处方发送框
+      openPrescriptionModal: function () {
+        var _this = this;
+        if(!_this.encounter.id) {
+          _this.$message({
+            message: "请先确定患者，保存患者信息之后再生成处方。",
+            type: 'warning'
+          });
+          return false;
+        }
+        // 
+        if(!_this.encounter.diagnoses || _this.encounter.diagnoses.length==0) {
+          _this.$message({
+            message: "请先下诊断，再生成处方。",
+            type: 'warning'
+          });
+          return false;
+        }
+        // 判断是否有药品
+        var orders = _this.multipleOrdersSelection;
+        _this.sendOrders = [];
+        (orders||[]).forEach(function(item, index){
+          if(item.status=="0") {
+            _this.sendOrders.push(item);
+          }
+        })
+        if(_this.sendOrders.length==0) {
+          _this.$message({
+            message: "请选择还未生成处方的药品进行操作。",
+            type: 'warning'
+          });
+          return false;
+        }
+        // 将诊断处理为checkbox能够显示，形式[诊断名]数组
+        var diagnoses = [];
+        (_this.encounter.diagnoses||[]).forEach(function (item, index){
+          diagnoses.push(item.display);
+        })
+        _this.prescription = {
+          type: _this.prescription_types[0], // 类型
+          diagnoses: diagnoses, // 诊断
+          specialmark: false, // 特殊处方标记
+          ids: [], // 药品ids
+        }
+        _this.isShowSendPresDialog = true;
+      },
+      // 改变要发送的药品的顺序
+      sortSeOrderList: function (index, sort) {
+        var _this = this;
+        var tempOption = _this.sendOrders[index + sort];  
+        Vue.set(_this.sendOrders, index + sort, _this.sendOrders[index]);  
+        Vue.set(_this.sendOrders, index, tempOption); 
+      },
+      // 引用处方
+      copyPrescription: function (index, row) {
+        var _this = this,
+            btn = $(event.target);
+        _this.$confirm('此处方共有 '+((row.orders||[]).length)+' 个药品，是否确定【引用】这些药品到本次就诊？', '引用', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then( function () {
-        	_this.quoteOrders(row.orders);
-					
-	      }).catch( function () {
-        	// 取消作废
+          _this.quoteOrders(row.orders);
+          
+        }).catch( function () {
+          // 取消作废
         });
-			},
-			// 作废处方
-			deletePrescription: function (index, row) {
-				var _this = this,
-						btn = $(event.target);
-				_this.$confirm('是否确定【作废】此处方？', '作废', {
+      },
+      // 作废处方
+      deletePrescription: function (index, row) {
+        var _this = this,
+            btn = $(event.target);
+        _this.$confirm('是否确定【作废】此处方？', '作废', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then( function () {
-					btn.attr("disabled", "disabled").find(".fa").show();
-					_this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-	      		var res = response.data;
-	      		btn.removeAttr("disabled").find(".fa").hide();
-	      		if(res.flag) {
-	      			_this.$message({
-			          message: res.info,
-			          type: 'success'
-			        });
-			        row.status = res.data.status;
-	      		} else {
-							_this.$message.error(res.info);
-	      		}
-	      	}, function(response) {
-	      		btn.removeAttr("disabled").find(".fa").hide();
-	      		_this.$message.error("生成处方失败，请联系管理员。");
-	      	})
-	      }).catch( function () {
-        	// 取消作废
+          btn.attr("disabled", "disabled").find(".fa").show();
+          _this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+            var res = response.data;
+            btn.removeAttr("disabled").find(".fa").hide();
+            if(res.flag) {
+              _this.$message({
+                message: res.info,
+                type: 'success'
+              });
+              row.status = res.data.status;
+            } else {
+              _this.$message.error(res.info);
+            }
+          }, function(response) {
+            btn.removeAttr("disabled").find(".fa").hide();
+            _this.$message.error("生成处方失败，请联系管理员。");
+          })
+        }).catch( function () {
+          // 取消作废
         });
-			},
-			// 打印处方
-			printPrescription: function (index, row) {
-				this.printPresRow = row;
-				this.$nextTick(function(){
-					$(".print-prescription-wrapper>div").print_area();
-				})
-			},
+      },
+      // 打印处方
+      printPrescription: function (index, row) {
+        this.printPresRow = row;
+        this.$nextTick(function(){
+          $(".print-prescription-wrapper>div").print_area();
+        })
+      },
     /* 处方操作 --- end */
 
     /* 就诊记录 --- start */
-    	getHistories: function () {
-    		var _this = this;
-    		if(!_this.encounter.id) {
-    			_this.histories = [];
-    			_this.$message({
-		        message: "请先确认患者，才可以查询相关历史记录。",
-		        type: 'warning'
-		      });
-    			return false;
-    		}
-    		_this.historiesResource.get({encounter_id: _this.encounter.id}).then( function(response) {
-    			var res = response.data;
-    			if(res.flag) {
-    				_this.histories = res.data;
-    			} else {
-    				_this.$message.error(res.info);
-    			}
-    		}, function (response) {
-    			_this.$message.error("获取历史就诊列表失败，请联系管理员。");
-    		})
-    	},
-    	// 显示处方列表模态框
-    	openHisOrdersDialog: function (row) {
-    		this.isShowHisOrdersDialog = true;
-    		this.getEncOrders(row.id);
-    	},
-    	// 显示处方列表模态框
-			openHisPresDialog: function (row) {
-				this.isShowHisPresDialog = true;
-    		this.getPrescriptions(row.id);
-			},
-			// 勾选要引用的医嘱
-			handleHisOrdersSelChange: function (val) {
-				console.log(val)
+      getHistories: function () {
+        var _this = this;
+        if(!_this.encounter.id) {
+          _this.histories = [];
+          _this.$message({
+            message: "请先确认患者，才可以查询相关历史记录。",
+            type: 'warning'
+          });
+          return false;
+        }
+        _this.historiesResource.get({encounter_id: _this.encounter.id}).then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.histories = res.data;
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function (response) {
+          _this.$message.error("获取历史就诊列表失败，请联系管理员。");
+        })
+      },
+      // 显示处方列表模态框
+      openHisOrdersDialog: function (row) {
+        this.isShowHisOrdersDialog = true;
+        this.getEncOrders(row.id);
+      },
+      // 显示处方列表模态框
+      openHisPresDialog: function (row) {
+        this.isShowHisPresDialog = true;
+        this.getPrescriptions(row.id);
+      },
+      // 勾选要引用的医嘱
+      handleHisOrdersSelChange: function (val) {
+        console.log(val)
         this.multipleHisOrdersSelection = val;
       },
-			// 引用医嘱
-			quoteOrders: function (orders, flag) {
-				var _this = this;
-				console.log("引用医嘱",orders)
-				if(!orders || orders.length==0) {
-					_this.$message({
-		        message: "请先选择要引用的医嘱。",
-		        type: 'warning'
-		      });
-		      return false;
-				}
-				var ids = [], btn = event&&event.target ? $(event.target) : "";
-				orders.forEach(function(item, index) {
-					ids.push(item.id);
-				})
-				if (btn) { btn.attr("disabled", "disabled").find(".fa").show(); }
-				_this.$http.post('/hospital/encounters/quote_orders', {ids: ids, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+      // 引用医嘱
+      quoteOrders: function (orders, flag) {
+        var _this = this;
+        console.log("引用医嘱",orders)
+        if(!orders || orders.length==0) {
+          _this.$message({
+            message: "请先选择要引用的医嘱。",
+            type: 'warning'
+          });
+          return false;
+        }
+        var ids = [], btn = event&&event.target ? $(event.target) : "";
+        orders.forEach(function(item, index) {
+          ids.push(item.id);
+        })
+        if (btn) { btn.attr("disabled", "disabled").find(".fa").show(); }
+        _this.$http.post('/hospital/encounters/quote_orders', {ids: ids, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
           if (btn) { btn.removeAttr("disabled").find(".fa").hide();}
           var res = response.data;
           if(res.flag) {
-      			_this.$message({
-		          message: "引用成功，请在药品列表中查看。",
-		          type: 'success'
-		        });
-		        // 重新加载药品列表
-		        _this.getOrders(_this.encounter.id);
-      		} else {
-						_this.$message.error(res.info);
-      		}
-      		if(/modal|batch/.test(flag)) {
-      			_this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
-      			_this.isShowHisPresDialog = false; // 关闭引用处方弹出框
-      		}
+            _this.$message({
+              message: "引用成功，请在药品列表中查看。",
+              type: 'success'
+            });
+            // 重新加载药品列表
+            _this.getOrders(_this.encounter.id);
+          } else {
+            _this.$message.error(res.info);
+          }
+          if(/modal|batch/.test(flag)) {
+            _this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
+            _this.isShowHisPresDialog = false; // 关闭引用处方弹出框
+          }
         }, function() {
           if (btn) { btn.removeAttr("disabled").find(".fa").hide(); }
           _this.$message.error("后台出错，引用医嘱失败。请联系管理员");
           if(/modal|batch/.test(flag)) {
-      			_this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
-      			_this.isShowHisPresDialog = false; // 关闭引用处方弹出框
-      		}
+            _this.isShowHisOrdersDialog = false; // 关闭引用医嘱弹出框
+            _this.isShowHisPresDialog = false; // 关闭引用处方弹出框
+          }
         });
-			},
+      },
     /* 就诊记录 --- end */
-	}
+  }
 }
 </script>

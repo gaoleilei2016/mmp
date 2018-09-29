@@ -13,7 +13,8 @@ $brand-warning: #f0ad4e;
 // $brand-danger:  #d9534f;
 // $brand-primary:  $--mmp-theme-bg-deep;
 $brand-danger:  #F44868;
-
+$--mmp-theme-bg: rgb(211, 233, 251);//深色
+$--mmp-second-bg: rgb(158, 195, 226);//浅色
 $bg-purple-dark: #99a9bf;
 $bg-purple: #d3dce6;
 $bg-purple-light: #e5e9f2;
@@ -309,6 +310,18 @@ $card-border-radius: 2px;
 
 }
 
+
+.el-autocomplete-suggestion {
+	li {
+		&.highlighted {
+			background-color: $--mmp-second-bg;
+		}
+		&:hover:not(.highlighted)  {
+			background-color: $--mmp-theme-bg;
+		}
+	}
+} 
+
 // 页面上显示的处方
 .prescription-wrapper {
 	p {
@@ -323,26 +336,33 @@ $card-border-radius: 2px;
 
 // 药品下拉框
 .order-autocomplete {
-	width: 600px !important;
+	width: 50% !important;
 	.drug-field {
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
 		display: inline-block;
 		&.name {
-			width: 250px;
+			width: 35%;
 		}
 		&.spec {
-			width: 80px;
+			width: 10%;
 		}
+		/*
 		&.formul {
-			width: 50px;
-		}
+			width: 20%;
+			text-align:center;
+		}*/
 		&.price {
-			width: 70px;
+			width: 10%;
+			text-align:center;
+		}
+		&.storage {
+			width: 10%;
+			text-align:center;
 		}
 		&.produce {
-			width: 100px;
+			width: 30%;
 		}
 	}
 
@@ -420,7 +440,7 @@ $card-border-radius: 2px;
 
 /* 定义页面公共样式 -- start */ 
 #encounters_new_div {
-	.el-input__inner {
+	.el-input__inner:not(.search__input, .select__input)  {
 		border: none;
 		border-radius: 0;
 		border-bottom-style: solid;

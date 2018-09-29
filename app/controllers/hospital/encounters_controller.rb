@@ -4,15 +4,37 @@ class Hospital::EncountersController < ApplicationController
   before_action :set_cur_org
   before_action :set_cur_dep
 	before_action :set_encounter, only: [:show, :edit, :update, :destroy, :all_prescriptions]
+
+  # 根据登录人筛选 就诊数据
 	# GET
   # /hospital/encounters
+  # {type: String, search: String, filter:{start_time: Time, end_time: Time, disease: String}} Time格式 "YYYY-mm-dd HH:MM:SS"
 	def index
     p "Hospital::EncountersController index", params
     search = params[:search].to_s
-		@encounters = ::Hospital::Encounter.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").order(created_at: :desc).page(params[:page]||1).per(params[:per]||25).map { |e| e.to_web_front  }
+    @encounters = ::Hospital::Encounter.where(author_id: current_user.id)
+		@encounters = @encounters.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%")
+    if params[:filter].present?
+      return render json: {flag: false, info: "查询过滤参数格式错误 不能查询"} unless params[:filter].respond_to?(:to_hash)
+      start_time, end_time = params[:filter][:start_time].to_s, params[:filter][:end_time].to_s
+      p start_time,end_time
+      if start_time.present? && end_time.present?
+        if start_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/ && end_time =~ /^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}$/
+          @encounters = @encounters.where("hospital_encounters.created_at between ? and ?", "#{start_time}", "#{end_time}")
+        else
+          return render json: {flag: false, info: "查询时间参数格式错误 不能查询 请使用 YYYY-mm-dd HH:MM:SS格式"}
+        end
+      end
+      # 如果病种参数存在 就关联查询诊断数据
+      if params[:filter][:disease].present?
+        @encounters = @encounters.joins(:diagnoses).where("hospital_diagnoses.display LIKE ?", "%#{params[:filter][:disease]}%")
+      end
+    end
+    cur_author_patients_count =  @encounters.count
+    @encounters = @encounters.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25).map { |e| e.to_web_front  }
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: {flag: true, info:"", data: @encounters} }
+      format.json { render json: {flag: true, info:"", data: @encounters, count: cur_author_patients_count} }
     end
 	end
   
@@ -66,9 +88,9 @@ class Hospital::EncountersController < ApplicationController
   # /hospital/encounters/quote_orders
   def quote_orders
     p " quote_orders",params
-    flag = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
-    info = flag ? "引用成功" : "复制出错 有药品以停用" 
-    render json: {flag: flag, info: info}
+    ret = ::Hospital::Order.copy_orders(params[:ids], params[:encounter_id], current_user)
+    info = ret[:flag] ? "引用成功" : ("引用失败: " + ret[:info]) 
+    render json: {flag: ret[:flag], info: info}
   end
 
 

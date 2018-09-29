@@ -36,7 +36,7 @@
 					<el-col :span="8">
 						<small>日期</small>
 						<el-date-picker
-				      v-model="filter.range"
+				      v-model="range"
 				      type="datetimerange"
 				      :picker-options="rangePickerOptions"
 				      range-separator="至"
@@ -219,8 +219,11 @@ window.current_template_obj = {
 			encounter: {},
 			orgname: "",
 			isShowfilters: false, // 高级搜索
+			range: [],
 			filter: {
-				range: "",
+				start_time: "",
+				end_time: "",
+				disease: ""
 			},
 
 			rangePickerOptions: {
@@ -272,6 +275,15 @@ window.current_template_obj = {
 	watch: {
 		search: function (newValue, oldValue) {
     	this.getData();
+    },
+    range: function(newValue, oldValue) {
+    	if (newValue) {
+    		this.filter.start_time = newValue[0].pattern("yyyy-MM-dd HH:mm:ss");
+    		this.filter.end_time = newValue[1].pattern("yyyy-MM-dd HH:mm:ss");
+    	} else {
+    		this.filter.start_time = "";
+    		this.filter.end_time = "";
+    	}
     },
 	},
 	mounted: function() {

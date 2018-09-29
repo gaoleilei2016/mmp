@@ -47,7 +47,8 @@ class Person < ApplicationRecord
 			},
 			height: self.height,
 			weight: self.weight,
-			person_id: self.id
+			person_id: self.id,
+			encounters_count: self.encounters.count
 		}
 		return ret
 	end
