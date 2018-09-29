@@ -1,4 +1,4 @@
-# class ::Dict::NewMedication < ApplicationRecord
+class ::Dict::NewMedication < ApplicationRecord
 # 	# belongs_to :order, class_name: '::Orders::Order', foreign_key: 'encounter_id'
 	
 #   # 注意  直接从表里面取出来的字段类型 有些需要转换   转换Time String  Fixnum
@@ -49,4 +49,4 @@
 #         ::Dict::NewMedication.where("medicine_id" => medicine_id).first
 #       end
 #     end
-# end
+end
