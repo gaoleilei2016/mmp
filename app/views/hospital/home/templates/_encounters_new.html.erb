@@ -217,10 +217,9 @@ window.current_template_obj = {
           jxtypes: [],            //剂型
           filter: {
             pharmacology: "", //药理学分类查询
-            kindname: "",     //药品分类查询
+            kindcode: "",     //药品分类查询
             jxtype: "",       //剂型分类查询
           },
-          moreSearchFlag: false,   //高级搜索
         /* 药品模板 --- start */ 
           isShowFavoriteDialog: false, // 显示模板模态框
           favoriteActiveName: "", // 医嘱模板默认聚焦使用模板
@@ -276,7 +275,7 @@ window.current_template_obj = {
     "filter.pharmacology": function() {
       this.getDrugsList();
     },
-    "filter.kindname": function() {
+    "filter.kindcode": function() {
       this.getDrugsList();
     },
     "filter.jxtype": function() {
@@ -1331,7 +1330,7 @@ window.current_template_obj = {
     getAllJxtypes: function() {
       var _this = this;
       _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.13610.1.364.8.50.2"}).then(function(response) {
-          if (response.flag) {
+          if (response.body.flag) {
             _this.jxtypes = response.body.data;
           } else {
             //_this.$message.warning(response.body.info);
@@ -1344,7 +1343,7 @@ window.current_template_obj = {
     getallKindnames: function() {
       var _this = this;
       _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.256"}).then(function(response) {
-          if (response.flag) {
+          if (response.body.flag) {
             _this.kindnames = response.body.data;
           } else {
             //_this.$message.warning(response.body.info);
@@ -1357,7 +1356,7 @@ window.current_template_obj = {
     getPharmacology: function() {
       var _this = this;
       _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.255"}).then(function(response) {
-          if (response.flag) {
+          if (response.body.flag) {
             _this.pharmacologies = response.body.data;
           } else {
             //_this.$message.warning(response.body.info);
@@ -1369,7 +1368,7 @@ window.current_template_obj = {
     //获取药品列表
     getDrugsList: function() {
       var _this = this;
-      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, kindname: _this.filter.kindname, jxtype: _this.filter.jxtype}).then(function(response) {
+      _this.$resource("/hospital/dict/new_medications/list.json").get({search: _this.searchDrugsList, per: _this.pageSize, page: _this.currentDrugsListPage, pharmacology_code: _this.filter.pharmacology, kindcode: _this.filter.kindcode, jxtype: _this.filter.jxtype}).then(function(response) {
         if (response.body.flag) {
           _this.drugsData = response.body.data;
           _this.totalDrugCount = response.body.count;
