@@ -37,6 +37,7 @@ class ApplicationController < ActionController::Base
 		else
 			raise "未处理的 controller_path : #{params[:path]} => ApplicationController#templates"
 		end
+		p "=----=-==-=-----",dir_name,params[:template_name]
 		render "#{dir_name}/_#{params[:template_name]}.html.erb",layout:false
 	end
 

@@ -155,8 +155,10 @@ class Ims::OrdersController < ApplicationController
 
   # 订单发药
   def dispensing_order
-    data = Ims::Order.dispensing_order params.merge(current_user:current_user)
-    render json:data.to_json
+    ::ActiveRecord::Base.transaction  do
+      data = Ims::Order.dispensing_order params.merge(current_user:current_user)
+      render json:data.to_json
+    end
   end
 
   
