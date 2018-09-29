@@ -14,12 +14,15 @@
 				>
 					<i class="el-icon-circle-close-outline el-input__icon" slot="suffix" @click="order={}"></i>
 					<template slot-scope="props">
-						<span class="drug-field name">{{ props.item.name }}({{ props.item.spec }})</span>
-						<span class="drug-field spec"><el-tag type="danger" v-if="props.item.return_price_flag"></el-tag></span>
-						<span class="drug-field formul">{{ props.item.formul_name }}</span>
-						<span class="drug-field price">{{ props.item.price }}元/{{ props.item.unit }}</span>
-						<span class="drug-field storage"><b>{{ props.item.storage[0] }} {{props.item.unit}}</b></span>
-						<span class="drug-field produce">{{ props.item.produce_name }}</span>
+						<div :style="props.item.storage[0] == 0 ? 'background-color: gray;color:white;':''">
+							<span class="drug-field name">{{ props.item.name }}({{ props.item.spec }})</span>
+							<span class="drug-field formul">{{ props.item.formul_name }}</span>
+							<span class="drug-field price">{{ props.item.price }}元/{{ props.item.unit }}</span>
+							<span class="drug-field storage"><b>{{ props.item.storage[0] }} {{props.item.unit}}</b></span>
+							<span class="drug-field produce">{{ props.item.produce_name }}</span>
+							<span class="drug-field spec"><el-tag type="danger" v-if="props.item.return_price_flag">返款</el-tag></span>
+						</div>
+						
 					</template>
 				</el-autocomplete>
 		  </el-form-item>
