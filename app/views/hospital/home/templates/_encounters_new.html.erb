@@ -187,22 +187,22 @@ window.current_template_obj = {
           multipleOrdersSelection: [], // 已经勾选的医嘱
           ordersStatus: presStatusOptions,
           orderRules: {
-            name: [
-              // { required: true, message: '名称不能为空'},
-              { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
-            ],
-            "single_qty.value": [
-              { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次数量在 0.001 到 1000 之间 ' }
-            ],
-            "dose.value": [
-              { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次剂量在 0.001 到 1000 之间 ' }
-            ],
-            "course_of_treatment.value": [
-              { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
-            ],
-            total_quantity: [
-              { pattern: /^[1-9]\d{0,2}$|^1000$/, message: '总量在 1 到 1000 之间' }
-            ],
+            // name: [
+            //   // { required: true, message: '名称不能为空'},
+            //   { min: 1, max: 80, message: '长度在 1 到 80 个字符' }
+            // ],
+            // "single_qty.value": [
+            //   { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次数量在 0.001 到 1000 之间 ' }
+            // ],
+            // "dose.value": [
+            //   { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,2}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|1000.000/, message: '单次剂量在 0.001 到 1000 之间 ' }
+            // ],
+            // "course_of_treatment.value": [
+            //   { pattern: /^[1-9]$|^[1-8][0-9]$|90$/, message: '疗程剂量在 1 到 90 之间' }
+            // ],
+            // total_quantity: [
+            //   { pattern: /^[1-9]\d{0,2}$|^1000$/, message: '总量在 1 到 1000 之间' }
+            // ],
           },
         /* 药品 --- end */ 
           dialogVisible: false,  //是否显示药品字典
