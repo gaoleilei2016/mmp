@@ -1078,6 +1078,13 @@ window.current_template_obj = {
           });
           return false;
         }
+        if (drug.storage[0] == 0) {
+          _this.$message({
+            message: '药品('+ drug.name +')没有库存，请选择其他药品',
+            type: 'warning'
+          });
+          return false;
+        };
         if(!drug.measure_val || parseFloat(drug.measure_val)==0) {
           _this.$message({
             message: '药品没有设置最小单位，请联系管理员。',

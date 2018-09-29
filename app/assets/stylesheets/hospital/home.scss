@@ -440,7 +440,7 @@ $card-border-radius: 2px;
 
 /* 定义页面公共样式 -- start */ 
 #encounters_new_div {
-	.el-input__inner:not(.search__input, .select__input)  {
+	.el-input__inner:not(.search__input) {
 		border: none;
 		border-radius: 0;
 		border-bottom-style: solid;
