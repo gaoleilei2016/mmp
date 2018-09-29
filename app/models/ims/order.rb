@@ -402,7 +402,7 @@ class Ims::Order < ApplicationRecord
             return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
             send_ar =[] 
             result[:prescription_headers].each do |header|
-              send_ar = header.details.map{|detail| {:medicine_id=>detail.drug_id,:location_id=>org_id,:qty=>(-detail.qty.to_f),:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}}
+              send_ar = header.details.map{|detail| {:medicine_id=>detail.drug_id,:location_id=>current_user.organization_id,:qty=>(-detail.qty.to_f),:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}}
             end
             pre_posting send_ar
             temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
@@ -495,11 +495,10 @@ class Ims::Order < ApplicationRecord
 
     # 过账方法(发药减少库存、退药增加库存)
     # （药品ID、药库ID、数量、批号、单价）
-    def pre_posting args = {}
+    def pre_posting  attrs = []
       begin
-        ars = attrs[:data]
         runsql=ActiveRecord::Base.connection()
-        ars.each do |args|
+        attrs.each do |args|
           medicine_id = args[:medicine_id]
           location_id = args[:location_id]
           qty = args[:qty]
