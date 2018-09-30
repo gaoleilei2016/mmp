@@ -23,12 +23,12 @@
 		    <el-form-item
 		    label="分类名称">
 		      <!-- <el-input v-model="form_data.kindname"></el-input> -->
-					<el-select v-model="form_data.kindname" placeholder="请选择" @change="change_kindname">
+					<el-select v-model="form_data.kindcode" filterable placeholder="请选择" @change="change_kindname">
 				    <el-option
 				      v-for="item in kindname_options"
-				      :key="item.value"
-				      :label="item.label"
-				      :value="item.value">
+				      :key="item.code"
+				      :label="item.name"
+				      :value="item.code">
 				    </el-option>
 				  </el-select>
 		    </el-form-item>
@@ -113,7 +113,7 @@
 		    <el-form-item
 		    label="剂型名称">
 		      <!-- <el-input v-model="form_data.formul_name"></el-input> -->
-					<el-select v-model="form_data.formul_name" placeholder="请选择" @change="change_formul_name">
+					<el-select v-model="form_data.formul_code" filterable placeholder="请选择" @change="change_formul_name">
 				    <el-option
 				      v-for="item in formul_name_options"
 				      :key="item.code"
@@ -199,7 +199,7 @@
 	    <el-form-item
 	    label="药理学分类编码">
 	      <!-- <el-input v-model="form_data.pharmacology_code"></el-input> -->
-				<el-select v-model="form_data.pharmacology_code" placeholder="请选择" @change="change_pharmacology_code">
+				<el-select v-model="form_data.pharmacology_code" filterable placeholder="请选择" @change="change_pharmacology_code">
 				    <el-option
 				      v-for="item in pharmacology_code_options"
 				      :key="item.code"
