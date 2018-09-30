@@ -4,12 +4,19 @@
       <label v-bind:for="pre.id">
         <input type="checkbox" v-bind:value="pre.id" v-bind:id="pre.id">
         <!-- <el-checkbox label=""> -->
-        <span style="display:none;" class="pre_id">{{pre.id}}</span>
-        <span class="padding"><b>{{pre.name}}</b></span>
-        <span class="padding"><b>{{pre.sex}}</b></span>
-        <span class="padding"><b>{{pre.age}}岁</b></span>
-        <span class="padding"><b><span style="color:rgb(195, 192, 192);">地址：</span>{{pre.address}}</b></span>
-        <span class="padding"><b><span style="color:rgb(195, 192, 192);">身份证号：</span>{{pre.iden}}</b></span>
+        <!-- <div> -->
+          <span style="display:none;" class="pre_id">{{pre.id}}</span>
+          <span class="padding"><b>{{pre.name}}</b></span>
+          <span class="padding"><b>{{pre.sex}}</b></span>
+          <span class="padding"><b>{{pre.age}}岁</b></span>
+        <!-- </div> -->
+        <div>
+          <span class="padding"><b><span style="color:rgb(195, 192, 192);">身份证号：</span>{{pre.iden}}</b></span>
+          <span class="padding"><b><span style="color:rgb(195, 192, 192);">电话号码：</span>{{pre.phone}}</b></span>
+        </div>
+        <div>
+          <span class="padding"><b><span style="color:rgb(195, 192, 192);">地址：</span>{{pre.address}}</b></span>
+        </div>
       </el-checkbox>
       </label>
 	  </div>

@@ -293,7 +293,7 @@ class Ims::Order < ApplicationRecord
     # => args = {org_id:org_id,org_name:org_name,prescription_ids:prescription_ids,status:status,user_id:user_id,user_name:user_name}
     def operat_order_by_prescription args = {}
       begin
-        p "------operat_order_by_prescription----------",args
+        p "------operat_order_by_prescription----------"
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],user_name:args[:user_name],user_id:args[:user_id],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2',current_user:args[:current_user]}
         ::ActiveRecord::Base.transaction  do
@@ -306,9 +306,8 @@ class Ims::Order < ApplicationRecord
             return {flag:false,:info=>"处方收费处理失败。",result:result} unless result[:ret_code]=="0"
             order = result[:order]
             att = {id:order.id,drug_user:args[:user_name],drug_user_id:args[:user_id],current_user:args[:current_user],status:'5'}
-            order_com = Orders::Order.order_completion att
             pre_data = dispensing_order att
-            return pre_data[:flag] ? {flag:true,info:"处方发药成功！",order_com:order_com} : {flag:false,info:"处方发药失败。",order_com:order_com,pre_data:pre_data}
+            return pre_data[:flag] ? {flag:true,info:"处方发药成功！"} : {flag:false,info:"处方发药失败。",pre_data:pre_data}
           else
             return {flag:false,:info=>"处方暂不做处理。"}
           end
@@ -343,7 +342,7 @@ class Ims::Order < ApplicationRecord
         end
       rescue ActiveRecord::StaleObjectError => e
         print e.message rescue "  e.messag----"
-        print "=== dispensing_order ============ 退药乐观锁 出错: " + e.backtrace.join("\n")
+        print "=== return_drug ============ 退药乐观锁 出错: " + e.backtrace.join("\n")
         {flag:false,info:'该单退药中，不用重复退药。'}
       rescue Exception => e
         print e.message rescue "  e.messag----"
@@ -496,6 +495,7 @@ class Ims::Order < ApplicationRecord
     # 过账方法(发药减少库存、退药增加库存)
     # （药品ID、药库ID、数量、批号、单价）
     def pre_posting  attrs = []
+      p " -=-=-=-=--=--- pre_posting ----进入-过账方法----"
       begin
         runsql=ActiveRecord::Base.connection()
         attrs.each do |args|
@@ -515,13 +515,16 @@ class Ims::Order < ApplicationRecord
             result = Ims::Inv::Stock.find(stock_id) rescue nil
           end
           if !result.blank?
+            p "========= 有库存更新 =========#{medicine_id} "
             amount = (qty.to_f*price.to_f.round(2))
             update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{stock_id}"
             runsql.update update_sql
+          else
+            p "========= 找不到库存记录 =========#{medicine_id} "
           end 
           # find_sql = "select * from dis"
         end
-        p "ffffffffffffffffffffff 过账方法 ffffffffff"
+        p "ffffffffffffffffffffff 过账方法 end 结束 ffffffffff"
         {flag:true,info:"OK ! OK ! OK !"} 
       rescue Exception => e
         p "qqqqqqqqqqqqqqqqqqqqqq 过账方法 qqqqqqqqqqqq"
