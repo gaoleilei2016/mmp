@@ -147,20 +147,20 @@ class Ims::OrdersController < ApplicationController
     p current_user
     drug_user = current_user.try(:name)
     drug_user_id = current_user.try(:id)
-    ::ActiveRecord::Base.transaction  do
+    # ::ActiveRecord::Base.transaction  do
       temp = {id:params[:id],drug_user:drug_user,drug_user_id:drug_user_id,current_user:current_user,status:"2"}
       data = Orders::Order.order_completion(temp)
       re_data = data[:ret_code].to_i==0 ? {flag:true,info:'收费成功！'} : {flag:false,info:data[:info]}
       render json:re_data.to_json
-    end
+    # end
   end
 
   # 订单发药
   def dispensing_order
-    ::ActiveRecord::Base.transaction  do
+    # ::ActiveRecord::Base.transaction  do
       data = Ims::Order.dispensing_order params.merge(current_user:current_user)
       render json:data.to_json
-    end
+    # end
   end
 
   
@@ -195,31 +195,31 @@ class Ims::OrdersController < ApplicationController
   # 平台处方收费或收费并发药操作
   # => 页面需传 prescription_ids(array) , status(string) ['2':收费,'5':收费并发药]
   def operat_order_by_prescription
-    ::ActiveRecord::Base.transaction  do
+    # ::ActiveRecord::Base.transaction  do
       args= {org_id:current_user.organization_id,org_name:current_user.organization.name,user_id:current_user.id,user_name:current_user.name,current_user:current_user}
       @data = Ims::Order.operat_order_by_prescription params.merge(args)
       render json:@data.to_json
-    end
+    # end
   end
 
   # 退药(目前只能线下退药)
   # => 页面需传 订单 id(string) 
   def return_drug
-    ::ActiveRecord::Base.transaction  do
+    # ::ActiveRecord::Base.transaction  do
       args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
       @data = Ims::Order.return_drug params.merge(args)
       render json:@data.to_json
-    end
+    # end
   end
 
   #退费
   def return_amount
     p "++++++++++++       return_amount       ++++++++++++"
-    ::ActiveRecord::Base.transaction  do
+    # ::ActiveRecord::Base.transaction  do
       args= {user_id:current_user.id,user_name:current_user.name,org_id:current_user.organization_id,current_user:current_user,reason:params[:reason]}
       @data = Ims::Order.return_amount params.merge(args)
       render json:@data.to_json   
-    end 
+    # end 
   end
   # 下载错误处方返回
   # => 页面需传 订单 id(string) 
