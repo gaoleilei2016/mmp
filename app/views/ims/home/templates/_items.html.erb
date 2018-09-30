@@ -101,7 +101,7 @@ window.current_template_obj = {
       search: "", // 搜索内容
       tableData:[],
       tableColumns:[],
-      
+
       kindname_options:[],//分类名称
       formul_name_options:[],//剂型名称
       pharmacology_code_options:[],//药理学分类编码
@@ -276,9 +276,15 @@ window.current_template_obj = {
       $("#img_file_input").click()
       console.log("img")
     },
-    change_kindname:function(val){ this.form_data.kindcode = val.code  },
-    change_formul_name:function(val){  this.form_data.formul_code = val.code    },
-    change_pharmacology_code:function(val){  this.form_data.pharmacology_code = val.code    },
+    change_kindname:function(val){ 
+      // this.form_data.kindcode = val.code  
+    },
+    change_formul_name:function(val){  
+      // this.form_data.formul_code = val.code    
+    },
+    change_pharmacology_code:function(val){  
+      // this.form_data.pharmacology_code = val.code    
+    },
 	},
 	mounted:function(){
     _this = this;
