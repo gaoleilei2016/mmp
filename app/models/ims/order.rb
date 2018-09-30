@@ -508,10 +508,12 @@ class Ims::Order < ApplicationRecord
           result = Ims::Inv::Stock.find(stock_id) rescue nil
           if result.blank?
             sql = "SELECT * FROM ims_inv_stocks s WHERE s.medicine_id=#{medicine_id} and s.location_id = #{location_id} and s.price = #{price.to_f.round(4)}"
-            sql.concat("and s.batch=#{batch}") if !batch.blank?
+            sql.concat(" and s.batch=#{batch}") if !batch.blank?
             # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
+            p sql
             res = Ims::Inv::Stock.find_by_sql(sql)
             stock_id = res[0].try(:id)
+            p stock_id
             result = Ims::Inv::Stock.find(stock_id) rescue nil
           end
           if !result.blank?
@@ -522,7 +524,6 @@ class Ims::Order < ApplicationRecord
           else
             p "========= 找不到库存记录 =========#{medicine_id} "
           end 
-          # find_sql = "select * from dis"
         end
         p "ffffffffffffffffffffff 过账方法 end 结束 ffffffffff"
         {flag:true,info:"OK ! OK ! OK !"} 

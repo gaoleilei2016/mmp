@@ -323,7 +323,6 @@ class Orders::Order < ApplicationRecord
 				begin
 					::Orders::Order.transaction do 
 					##通过处方拿到订单生成数据
-					p "-=================fdsfsdf-===========",attrs[:prescription_ids]
 						presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
 						return {ret_code:'-1',info:'空的处方明细。'}if presc[:details].blank?
 						# Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
