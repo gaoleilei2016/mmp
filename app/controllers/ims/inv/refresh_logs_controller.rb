@@ -4,6 +4,7 @@ class Ims::Inv::RefreshLogsController < ApplicationController
   # GET /ims/inv/refresh_logs
   # GET /ims/inv/refresh_logs.json
   def index
+    p '12312312'
     @ims_inv_refresh_logs = Ims::Inv::RefreshLog.all
   end
 
@@ -59,6 +60,13 @@ class Ims::Inv::RefreshLogsController < ApplicationController
       format.html { redirect_to ims_inv_refresh_logs_url, notice: 'Refresh log was successfully destroyed.' }
       format.json { head :no_content }
     end
+  end
+
+  def get_log
+    logs = Ims::Inv::RefreshLog.get_log(params[:startDate].to_s, params[:endDate].to_s).order({created_at: 'desc'})
+    dataSize = logs.size
+    logs = logs.page(params[:page].to_i).per(params[:per].to_i)
+    render json: { items: logs, dataLength: dataSize }
   end
 
   private

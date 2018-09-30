@@ -250,6 +250,12 @@ Rails.application.routes.draw do
           post :upload_file                           # 库存表上传
         end
       end
+
+      resources :refresh_logs do
+        collection do
+          post :get_log                               # 查詢日誌
+        end
+      end
     end
 
     resources :interfaces do
