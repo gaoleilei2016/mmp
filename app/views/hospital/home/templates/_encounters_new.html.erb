@@ -1072,6 +1072,7 @@ window.current_template_obj = {
       },
       // 选择某个药品
       selectDrug: function (item) {
+        console.log(item);
         var _this = this, drug = item;
         if(!_this.encounter.id) {
           _this.$message({
@@ -1327,6 +1328,30 @@ window.current_template_obj = {
     openDrugModal: function() {
       this.dialogVisible = true;
     },
+    //药品列表选择药品
+    selectOneDrug: function(row, event) {
+      var _this = this, drug = row;
+      _this.order = {
+        serialno: drug.serialno, // drug药品序列号
+        title: drug.name, // drug药品序列号
+        name: drug.name,
+        specification: drug.spec, // 规格
+        unit: drug.unit, // 单位
+        price: drug.price, // 价格
+        dose: {value: drug.measure_val, unit: drug.measure_unit}, // 单次剂量
+        single_qty: {value: 1, unit: drug.base_unit}, // 单次数量
+        route: _this.routes[0],// 频次
+        frequency: _this.rates[0],// 频次
+        course_of_treatment: {value: "", unit: "天"},  // 疗程
+        total_quantity: 1, // 总量
+        formul: {code: drug.formul_code, display: drug.formul_name}, // 剂型
+        measure_val: drug.measure_val,  // 最小单位的值
+        encounter_id: _this.encounter.id, // 就诊模型id
+        mul: drug.mul||1, // 倍率
+        storage: drug.storage, //库存数组 从大大小排列
+      }
+      _this.dialogVisible = false;
+    },
     // 显示大图
     showImg: function(urlData) {
       var _this = this;
@@ -1378,6 +1403,7 @@ window.current_template_obj = {
       _this.$resource("/hospital/sets/codes/get_code_by_system.json").get({system: "2.16.156.1.675425699.1.255"}).then(function(response) {
           if (response.body.flag) {
             _this.pharmacologies = response.body.data;
+            console.log(_this.pharmacologies)
           } else {
             //_this.$message.warning(response.body.info);
           }

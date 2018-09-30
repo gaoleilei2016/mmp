@@ -51,9 +51,13 @@
     </el-col>
   </el-row>
   <div>
-    <el-table :data="drugsData" size="mini" border>
+    <el-table :data="drugsData" size="mini" border @row-dblclick="selectOneDrug">
       <el-table-column prop="kindname" label="药品分类" align="center"></el-table-column>
-      <el-table-column prop="pharmacology_code" label="药理分类" align="center"></el-table-column>
+      <el-table-column label="药理分类" align="center">
+        <template slot-scope="scope">
+          <span v-for="item in pharmacologies" v-if="item.code == scope.row.pharmacology_code" :key="item.id">{{item.display}}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="name" label="名称"></el-table-column>
       <el-table-column prop="py" label="简拼" align="center"></el-table-column>
       <el-table-column prop="spec" label="规格"></el-table-column>
