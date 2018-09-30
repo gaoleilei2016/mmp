@@ -42,20 +42,18 @@
         prop="price"
         label="单价"
         style="">
+        <template slot-scope="scope">
+          <span style="display: inline-block; width: 70px;">{{ scope.row.price | | formatMoney(2)}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         prop="amount"
         label="金额"
         style="">
-      </el-table-column>
-      <!-- <el-table-column
-        prop="amount"
-        label="金额"
-        style="">
         <template slot-scope="scope">
-          <span style="display: inline-block; width: 70px;">{{ scope.row.amount }}</span>
+          <span style="display: inline-block; width: 70px;">{{ scope.row.amount | | formatMoney(2)}}</span>
         </template>
-      </el-table-column> -->
+      </el-table-column>
     </el-table>
 
   </div>

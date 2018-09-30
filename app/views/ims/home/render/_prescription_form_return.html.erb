@@ -37,14 +37,14 @@
 				<div class="" style="font-family:拉丁文;font-size:30px;text-align:left;">R:</div>
 				<div class="item_list" v-for="(line,index) in pre.details">
 					<div class="el-row" style="margin-left:1px;"> 
-						<div class="el-col-2" style="width:22%;">{{line.name}}</div>
+						<div class="el-col-2" style="width:20%;">{{line.name}}</div>
 						<div class="el-col-2" style="width:18%;">{{line.specifications}}</div>
-						<div class="el-col-2" style="width:8%;">{{line.quantity}}{{line.unit}}</div>
+						<div class="el-col-2" style="width:5%;">{{line.dose}}</div>
 						<div class="el-col-2" style="width:10%;">{{line.route}}</div>
-						<div class="el-col-2" style="width:17%;">{{line.frequency}}</div>
-						<div class="el-col-2" style="width:10%;">{{line.dose}}</div>
-						<div class="el-col-2" style="width:15%;">{{format_price(line.net_amt)}}</div>
-						<!-- <div class="el-col-2 text-center" style="width:30%;">{{line.firm}}</div> -->
+						<div class="el-col-2" style="width:9%;">{{line.frequency}}</div>
+						<div class="el-col-2" style="width:8%;text-align:right;">{{line.quantity}}{{line.unit}}</div>
+						<div class="el-col-2" style="width:15%; text-align:right;">{{format_price(line.price)}}</div>
+						<div class="el-col-2" style="width:15%; text-align:right;">{{format_price(line.net_amt)}}</div>
 					</div>
 			  </div>
 			  <div class="el-row" style="text-align:center;position:relative;margin-left:1px;">（以下为空白）</div>
