@@ -24,6 +24,14 @@ headers:
     style_css: 'order'
     icon: 'fa-tags'
     sequence: '20'
+
+  - code: 'IMS.A26'
+    caption: '药品管理'
+    path: '#/items'
+    style_css: 'items'
+    icon: 'fa-tags'
+    sequence: '22'
+    
   - code: 'IMS.A24'
     caption: '报表'
     icon: 'fa-tasks'

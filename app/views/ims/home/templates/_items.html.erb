@@ -1,0 +1,343 @@
+<style type="text/css">
+  #ims_order_main .el-tabs{
+    height: calc(100% - 55px);
+  }
+  #ims_order_main .el-tabs{
+    height: calc(100% - 55px);
+  }
+  #ims_order_main .el-tabs .el-tabs__content{
+    height: calc(100% - 40px);
+  }
+  #ims_order_main .el-tabs .el-tabs__content>div:not(.el-tab-pane){
+    height: 100%;
+  }
+  #ims_order_main .el-tabs .el-tabs__content .el-table{
+    height: calc(100% - 72px)!important;
+    overflow-y: auto;
+  }  
+  
+form.el-form .el-col{
+  margin-bottom: 12px;
+}
+</style>
+<template>
+	<div id="ims_order_main">
+    <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin: 18px;">
+      <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
+      <div style="">
+        <el-row :gutter="20" style="margin-bottom: 10px;">
+          <el-col :span="8">
+            <el-input
+              placeholder="搜索药品名称 / 简拼"
+              prefix-icon="el-icon-search"
+              size="mini"
+              v-model="search"
+              @keyup.enter.native="getData">
+              <i
+                class="el-icon-circle-close-outline el-input__icon"
+                slot="suffix"
+                v-on:click="search=''">
+              </i>
+            </el-input>
+          </el-col>
+          <el-col :span="6" style="line-height: 30px;">&nbsp;
+            <span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
+          </el-col>
+          <el-col :span="10" style="text-align: right;">
+            <el-button @click="new_item" type="primary" size="small">新增</el-button>
+          </el-col>
+        </el-row>
+        <el-table
+            :data="tableData"
+            size="small"
+            style="width: 100%"
+            :height="tableHeight"
+            >
+            <template v-for="column in tableColumns">
+                <el-table-column
+                    :label="column.label"
+                    :prop="column.prop">
+                </el-table-column>
+            </template>
+            <el-table-column
+                fixed="right"
+                label="操作"
+                width="150">
+                <template scope="scope">
+                    <el-button type="text" v-if="scope.row.status =='N'">启用</el-button>
+                    <el-button type="text" v-else style="color:red;">停用</el-button>
+
+                    <el-button type="text" @click="onBtnDetailClick(scope.row)">编辑</el-button>
+                    <el-button type="text">删除</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 分页标记 -->
+        <el-pagination
+          background
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[10, 25, 50, 100, 200]"
+          :page-size="pageSize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="dataCount">
+        </el-pagination>
+      </div>
+    </el-tabs>
+
+    <%= render "ims/home/templates/item_form"%>
+	</div>
+</template>
+<script type="text/javascript">
+window.current_template_obj = {
+  data:function(){
+    var options = [{code: "0", display: "药品列表"}];
+    return {
+      activeName: options[0].code,
+      isCollapse: true,
+      cardTabsOptions: options,
+      multipleSelection: [],
+      search: "", // 搜索内容
+      tableData:[],
+      tableColumns:[],
+      kindname_options:[],//分类名称
+      formul_name_options:[],//剂型名称
+      pharmacology_code_options:[],//药理学分类编码
+
+      tableHeight: 550, // 表格高度
+      // 分页相关
+      currentPage: 1, // 当前页
+      pageSize: 25, // 默认一页显示25条
+      dataCount: 1, // 总数据条数
+
+      //对话框
+      dialogTableVisible: false,
+      dialogFormVisible: false,
+      form_label_position:"right",
+      form_data:{
+        serialno:"",
+        ecode:"",
+        picture:"",
+      },
+      rules: {
+        serialno:[],//序号
+        ecode:[],//易用码
+        effect_code:[],//药品功效编码
+        name:[],//通用名称
+        common_name:[],//商品名称
+        alias_name:[],//首选别名
+        py:[],//通用名拼音码
+        wb:[],//通用名五笔码
+        common_py:[],//商品名拼音码
+        common_wb:[],//商品名五笔码
+        alias_py:[],//别名拼音码
+        alias_wb:[],//别名五笔码
+        spec:[],//规格
+        formul_code:[],//剂型代码
+        formul_name:[],//剂型名称
+        usedescribe:[],//用法用量描述
+        measure_unit:[],//最小计量单位
+        measure_val:[],//最小计量值
+        base_unit:[],//基本单位
+        purch_unit:[],//采购单位
+        unit:[],//销售单位
+        mul:[],//销售/基本单位的倍率
+        purch_mul:[],//采购/基本单位的倍率
+        purch_price:[],//采购价格
+        price:[],//销售价格
+        kindcode:[],//药品分类
+        kindname:[],//分类名称
+        licensenum:[],//批准文号
+        bar_code:[],//条形码
+        produce_code:[],//厂家编码
+        produce_name:[],//厂家名称
+        instruction:[],//说明书
+        bxkind:[],//报销类型
+        picture:[],//药品图片
+        status:[],//状态
+        created_at:[],//建立时间
+        updated_at:[],//最后修改时间
+        coperator:[],//建立人
+        uoperator:[],//最后修改人员
+        pt_code:[],//平台编码
+        return_price_flag:[],//返款标记
+        pharmacology_code:[],//药理学分类编码 编码系统: 2.16.156.1.675425699.1.255
+        indications:[],//适应症 数据格式用|分割 例如：感冒|头疼|发烧 编码系统: 2.16.156.1.675425699.1.256
+      },
+      formLabelWidth: '120px'
+		}
+	},
+	methods:{
+    init:function(){
+      // $(document).find("#prescription_menu").find(".el-menu-item:first").addClass("is-active")
+      // $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
+      _this = this
+      // axios.get('/ims/items/get_items', {
+      //   params: {
+      //     get_items: true
+      //   }
+      // })
+      // .then(function (response) {
+      //   console.log(response);
+      //   _this.tableColumns = response.data.title
+      //   _this.tableData = response.data.lines
+      // })
+      // .catch(function (response) {
+      //   console.log(response);
+      // });
+
+      Vue.resource("/ims/items/get_items",{items:true}).get().then(function(response) {
+        var res = response.data;
+        if(res.flag) {
+          _this.tableColumns = res.data.title
+          _this.tableData = res.data.lines
+          _this.dataCount = res.count;
+        }
+      },function() {
+        _this.$message.error("获取初始值失败，请联系管理员。");
+      })    
+    },
+    getData:function(){
+      var _this = this;
+      Vue.resource("/ims/items/get_items",{search: _this.search, page: _this.currentPage, per: _this.pageSize}).get().then( function(response) {
+        var res = response.data;
+        if(res.flag) {
+          _this.tableData = res.data.lines;
+          _this.dataCount = res.count;
+        }else{
+          _this.$message.error(res.info);
+        }
+      },function(response) {
+        _this.$message.error("后台出错，获取患者列表失败。");
+      })
+    },
+    handleOpen:function(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose:function(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    //点击编辑按钮
+    onBtnDetailClick:function(row){
+      console.log(row)
+      this.dialogFormVisible = true
+      _this = this
+      // Vue.resource("/ims/items/get_items",{serialno:row.serialno}).get().then(function(response) {
+      //   var res = response.data;
+      //   if(res.flag) {
+      //     // _this.tableColumns = res.data.title
+          _this.form_data = row
+      //   }
+      // },function() {
+      //   _this.$message.error("获取药品数据失败，请联系管理员。");
+      // }) 
+    },
+    // 勾选改变
+    handleSelectionChange: function (val) {
+      // this.multipleSelection = val;
+      console.log(val)
+    },
+    handleTabClick:function(){},
+    // 每页条数改变
+    handleSizeChange: function (val) {
+      this.pageSize = val;
+      this.getData();
+    },
+    // 页码改变
+    handleCurrentChange: function (val) {
+      this.currentPage = val;
+      this.getData();
+    },
+    //新增药品
+    new_item:function(){
+      _this = this
+      _this.form_data = { serialno:"", ecode:"", picture:"",}
+      _this.dialogFormVisible = true
+    },
+    //编辑药品保存
+    item_form_save:function(){
+      _this = this
+      _this.$http.post('/ims/items/save_item', {item:_this.form_data, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+        var res = response.data;
+        if(res.flag) {
+          _this.$message.success("保存成功！");
+          _this.dialogFormVisible = false
+        } else {
+          _this.$message.error(res.info);
+        }
+      }, function() {
+        _this.$message.error("后台出错，保存失败");
+      });
+    },
+    //
+    change_image:function(){
+      $("#img_file_input").click()
+      console.log("img")
+    },
+    change_kindname:function(val){ this.form_data.kindcode = val.code  },
+    change_formul_name:function(val){  this.form_data.formul_code = val.code    },
+    change_pharmacology_code:function(val){  this.form_data.pharmacology_code = val.code    },
+	},
+	mounted:function(){
+    _this = this;
+		this.$nextTick(function(){
+			this.init();
+		})
+
+    $(document).on("change", "input[type='file']",function(){
+      _this_jqy = $("input[type='file']")
+      var file = _this_jqy[0].files[0];
+      if (file) {
+
+        var formdata = new FormData();
+        formdata.append("file",file)
+        formdata.append("authenticity_token","<%= form_authenticity_token%>")
+        $.ajax({
+          type:"post",
+          url:"/interfaces/stringify_base64_img",
+          data:formdata,
+          contentType: false,
+          processData: false,
+          success:function(data){
+            if (data) {
+              _this.form_data.picture = data.base64_img
+              console.log(_this.form_data)
+            }
+          },
+          error:function(data){
+            alert("上传错误")
+          }
+        })
+      };
+    }) 
+
+    _this.$http.get("/interfaces/get_dicts?oid=2.16.156.1.675425699.1.256").then( function(response) {
+        data = response.data
+        _this.kindname_options = data.rows
+      }, function() {
+        _this.$message.error("后台出错，oid获取失败");
+      });
+
+    _this.$http.get("/interfaces/get_dicts?oid=2.16.156.1.13610.1.364.8.50.2").then( function(response) {
+        data = response.data
+        _this.formul_name_options = data.rows
+      }, function() {
+        _this.$message.error("后台出错，oid获取失败");
+      });
+
+    //
+    _this.$http.get("/interfaces/get_dicts?oid=2.16.156.1.675425699.1.255").then( function(response) {
+        data = response.data
+        _this.pharmacology_code_options = data.rows
+      }, function() {
+        _this.$message.error("后台出错，oid获取失败");
+      });
+
+	},
+}
+
+$(function(){
+ 
+})
+</script>
