@@ -293,7 +293,7 @@ class Ims::Order < ApplicationRecord
     # => args = {org_id:org_id,org_name:org_name,prescription_ids:prescription_ids,status:status,user_id:user_id,user_name:user_name}
     def operat_order_by_prescription args = {}
       begin
-        p "----------------",args
+        p "------operat_order_by_prescription----------",args
         return {flag:false,:info=>"药店机构为空。"} if args[:org_id].blank?
         attrs = {pharmacy_id:args[:org_id],pharmacy_name:args[:org_name],user_name:args[:user_name],user_id:args[:user_id],prescription_ids:args[:prescription_ids],payment_type:"2",status:'2',current_user:args[:current_user]}
         ::ActiveRecord::Base.transaction  do
@@ -402,7 +402,7 @@ class Ims::Order < ApplicationRecord
             return {flag:false,info:"发药失败: #{result[:info]}"} unless result[:flag]
             send_ar =[] 
             result[:prescription_headers].each do |header|
-              send_ar = header.details.map{|detail| {:medicine_id=>detail.drug_id,:location_id=>org_id,:qty=>(-detail.qty.to_f),:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}}
+              send_ar = header.details.map{|detail| {:medicine_id=>detail.drug_id,:location_id=>current_user.organization_id,:qty=>(-detail.qty.to_f),:batch=>nil,:price=>detail.price.to_f,:stock_id=>nil}}
             end
             pre_posting send_ar
             temp = {id:args[:id],drug_user:current_user.name,drug_user_id:current_user.id,current_user:current_user,status:"5"}
@@ -495,11 +495,10 @@ class Ims::Order < ApplicationRecord
 
     # 过账方法(发药减少库存、退药增加库存)
     # （药品ID、药库ID、数量、批号、单价）
-    def pre_posting args = {}
+    def pre_posting  attrs = []
       begin
-        ars = attrs[:data]
         runsql=ActiveRecord::Base.connection()
-        ars.each do |args|
+        attrs.each do |args|
           medicine_id = args[:medicine_id]
           location_id = args[:location_id]
           qty = args[:qty]
@@ -513,17 +512,17 @@ class Ims::Order < ApplicationRecord
             # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
             res = Ims::Inv::Stock.find_by_sql(sql)
             stock_id = res[0].try(:id)
-            result = Ims::Inv::Stock.find(id) rescue nil
+            result = Ims::Inv::Stock.find(stock_id) rescue nil
           end
           if !result.blank?
             amount = (qty.to_f*price.to_f.round(2))
-            update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{args[:id]}"
+            update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{stock_id}"
             runsql.update update_sql
           end 
           # find_sql = "select * from dis"
         end
         p "ffffffffffffffffffffff 过账方法 ffffffffff"
-        return {flag:true,info:"OK ! OK ! OK !"} 
+        {flag:true,info:"OK ! OK ! OK !"} 
       rescue Exception => e
         p "qqqqqqqqqqqqqqqqqqqqqq 过账方法 qqqqqqqqqqqq"
         print e.message rescue "  e.messag----"

@@ -14,42 +14,48 @@
 	</div>
   
   <div class="detail_panel_scroll">
-    <el-table
+     <el-table
       :data="info.details"
       border
-      style="width: 100%">
+      style="width:100%">
       <el-table-column
         prop="name"
         label="药品名称"
-        width="180">
+        min-width="200">
       </el-table-column>
       <el-table-column
         prop="specifications"
         label="规格"
-        width="100">
+        min-width="100">
       </el-table-column>
       <el-table-column
         prop="firm"
         label="厂家"
-        width="100">
+        min-width="200">
       </el-table-column>
       <el-table-column
         prop="quantity"
-        label="数量">
+        align="right"
+        label="数量"
+        min-width="50">
       </el-table-column>
       <el-table-column
         prop="price"
-        label="单价">
+        align="right"
+        label="单价"
+        min-width="80">
         <template slot-scope="scope">
           <div align="right">{{scope.row.price | formatMoney(2)}}</div>
         </template>      
       </el-table-column>
       <el-table-column
         prop="net_amt"
-        label="金额">
+        label="金额"
+        align="right"
+        min-width="100">
         <template slot-scope="scope">
           <div align="right">{{scope.row.net_amt | formatMoney(2)}}</div>
-        </template>      
+        </template>
       </el-table-column>
     </el-table>
 

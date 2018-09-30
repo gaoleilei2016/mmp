@@ -229,7 +229,8 @@ window.current_template_obj = {
               specification:data1.specification,
               qty:data1.total_quantity,
               unit:data1.unit,
-              price:data1.price,
+              price:Number(data1.price),
+              amount:Number(data1.amount),
             }]
           })
           if (ori_data.length>1) {
@@ -245,7 +246,7 @@ window.current_template_obj = {
                     specification:for_data.specification,
                     qty:for_data.single_qty_value,
                     unit:for_data.single_qty_unit,                    
-                    price:for_data.price,                    
+                    price:Number(for_data.price),                    
                   })
                   break inter;
                 }else{
@@ -270,7 +271,8 @@ window.current_template_obj = {
                         specification:for_data.specification,
                         qty:for_data.single_qty_value,
                         unit:for_data.single_qty_unit,
-                        price:for_data.price,
+                        price:Number(for_data.price),
+                        amount:Number(for_data.amount),
                       }]
                     })
                   };
@@ -286,7 +288,7 @@ window.current_template_obj = {
               amount = 0.0;
               if(item.lines){
                 item.lines.map(function(line){
-                  amount += Number(line.price)
+                  amount += Number(line.amount)
                 })
               }
               if (temp2.length<=0) {

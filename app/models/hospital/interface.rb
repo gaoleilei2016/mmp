@@ -96,6 +96,7 @@ module ::Hospital::Interface
   # 处方转账单  处方id是同一个就诊的处方id
   def self.prescription_to_order2(prescription_ids)
     ret = {details: {}}
+    p "-----fferwwwwwwwwwwww-------------",prescription_ids
     prescription_ids.each_with_index do |prescription_id, index|
       cur_prescription = ::Hospital::Prescription.find(prescription_id)
       cur_orders = cur_prescription.orders
