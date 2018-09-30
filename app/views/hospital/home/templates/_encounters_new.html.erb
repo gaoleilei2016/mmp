@@ -11,12 +11,12 @@
         <div style="position: absolute; top: 6px; right: 10px; z-index: 999;">
           <!-- 历史就诊tab -->
           <!-- 药品tab显示模板和生成处方按钮 -->
-          <!--<div v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">-->
-          <div>
+
+          <div >
             <el-button size="mini" @click="openDrugModal">药品字典</el-button>
-            <el-button size="mini" @click="openFavoriteModal">模板</el-button>
-            <el-button size="mini" @click="openCopyModal">引用</el-button>
-            <el-button size="mini" type="danger" @click="openPrescriptionModal" plain>生成处方</el-button>
+            <el-button size="mini" @click="openFavoriteModal" v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses && encounter.diagnoses.length>0)">模板</el-button>
+            <el-button size="mini" @click="openCopyModal" v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">引用</el-button>
+            <el-button size="mini" type="danger" @click="openPrescriptionModal" plain v-if="activeTab=='orders' && encounter.id && (encounter.diagnoses&&encounter.diagnoses.length>0)">生成处方</el-button>
           </div>
           <!-- 处方Tab -->
         </div>
@@ -1331,6 +1331,14 @@ window.current_template_obj = {
     //药品列表选择药品
     selectOneDrug: function(row, event) {
       var _this = this, drug = row;
+      if (!_this.encounter.id) {
+         _this.$message({
+            message: '请先保存就诊信息。',
+            type: 'warning'
+          });
+         _this.dialogVisible = false;
+          return false;
+      };
       _this.order = {
         serialno: drug.serialno, // drug药品序列号
         title: drug.name, // drug药品序列号
