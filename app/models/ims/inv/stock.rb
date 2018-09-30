@@ -53,25 +53,34 @@ class Ims::Inv::Stock < ApplicationRecord
 				runsql=ActiveRecord::Base.connection()
 			    save_ar.each{ |aa|
 				# ----------更新---------
+				# begin
 				# 导入信息提示
 				    select_pt={pt_code:aa["pt_code"],org_id:org_id}
-				    selct_ims_sql = "select id,quantity from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
+				    selct_ims_sql = "select * from ims_inv_stocks where pt_code=#{aa["pt_code"]} and org_id=#{org_id}"
 				    selct_ims=self.find_by_sql selct_ims_sql
 				    puts "-查询#{selct_ims}-----"
 				    if(selct_ims.count!=0)
-				    	puts "----更新----"
+				    	puts "----更新-------------"
 				    	# 查询更新前数量
 				    	update_befor_num=selct_ims[0].quantity
 				    	amount = (aa['quantity'].to_f*aa["price"].to_f).round(2)
-				      	update_sql="update ims_inv_stocks set quantity=#{aa['quantity']},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
+				      	update_sql="update ims_inv_stocks set price=#{aa['price']},quantity=#{aa['quantity']},amount=#{amount} where id=#{selct_ims[0].id} and org_id=#{org_id}"
 				      	puts "------#{update_sql}--------"
 				      	runsql.update update_sql
 				      	# 更新日志
-				      	data_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:selct_ims[0].id,refresh_after_num:aa['quantity'],refresh_befor_num:update_befor_num,status:0}
+				      	puts "------更新日志开始----#{selct_ims}-------------"
+				      	sql="select  * from dictmedicine where serialno='#{selct_ims[0].medicine_id}' "
+				      	puts sql
+				      	puts "---"
+				    	medicine_one=runsql.select_one sql
+				    	medicine_name=medicine_one["name"]
+				    	data_log={ peson:args[:user_name],person_code:args[:user_id],org_id:org_id,medicine_id:medicine_one["serialno"],
+				    		refresh_after_num:aa["quantity"],refresh_befor_num: update_befor_num,status:1,medicine_name:medicine_name,price:aa['price'].to_f.round(4)}
 				      	update_num+=1
 				      	Ims::Inv::RefreshLog.create(data_log)
+				      	puts "------更新日志结束-----------------"
 				    else
-				    	puts "--------插入------"
+				    	puts "--------插入--- 韦琼金---"
 				    	sql = "select * from dictmedicine where pt_code=#{aa['pt_code']} "
 				    	ret = self.find_by_sql sql
 				    	drug = JSON.parse(ret[0].to_json) rescue nil
@@ -97,12 +106,21 @@ class Ims::Inv::Stock < ApplicationRecord
 				    	}
 				    	puts "---------进去"
 				    	self.create(create_data)
-				    	data_in_log={ peson:location_name,person_code:location_id,org_id:org_id,medicine_id:drug["serialno"],
-				    		refresh_after_num:aa["quantity"],refresh_befor_num: nil,status:1}
+				    	# 药品 medicine=Ims::Inv::Stock.where(:medicine_id=>drug["serialno"]).last
+				    	puts "------插入日志开始-----------------"
+				    	 sql="select  name from dictmedicine where serialno='#{drug['serialno']}' "
+				    	medicine_one=runsql.select_one sql
+				    	medicine_name=medicine_one["name"]
+				    	data_in_log={ peson:args[:user_name],person_code:args[:user_id],org_id:org_id,medicine_id:drug["serialno"],
+				    		refresh_after_num:aa["quantity"],refresh_befor_num: nil,status:1,medicine_name:medicine_name,price:aa['price'].to_f.round(4)}
 				    		insert_num+=1;
 				      	Ims::Inv::RefreshLog.create(data_in_log)
+				      	puts "------插入日志开始-----------------"
 				    	# return {flag:true,info:""} if self.create(create_data)
 				    end
+				# rescue Exception => e
+					
+				# end
 			    }
 			    info="库存导入完成！新增药品:#{insert_num}条,修改药品：#{update_num}条、\n"
 			    if(no_exist_ar.size != 0)
@@ -112,6 +130,7 @@ class Ims::Inv::Stock < ApplicationRecord
 			    	}
 			    	info=info[0,info.size-2]
 			    end
+
 			    return {flag:true,info:info}
 			rescue Exception => e
 				print e.message rescue "  e.messag----"

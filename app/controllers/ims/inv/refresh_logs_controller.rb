@@ -63,6 +63,7 @@ class Ims::Inv::RefreshLogsController < ApplicationController
   end
 
   def get_log
+    puts "---#{params}--------------"
     logs = Ims::Inv::RefreshLog.get_log(params[:startDate].to_s, params[:endDate].to_s).order({created_at: 'desc'})
     dataSize = logs.size
     logs = logs.page(params[:page].to_i).per(params[:per].to_i)
@@ -77,6 +78,6 @@ class Ims::Inv::RefreshLogsController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def ims_inv_refresh_log_params
-      params.require(:ims_inv_refresh_log).permit(:peson, :person_code, :org_id, :medicine_id, :refresh_befor_num, :refresh_after_num, :update_PCIP,:status)
+      params.require(:ims_inv_refresh_log).permit(:price,:medine,:peson, :person_code, :org_id, :medicine_id, :refresh_befor_num, :refresh_after_num, :update_PCIP,:status)
     end
 end
