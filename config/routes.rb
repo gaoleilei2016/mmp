@@ -180,7 +180,11 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :patients
+    resources :patients do 
+      collection do
+        get :get_encounters_by_person_id
+      end
+    end
     resources :people
   end
   ########### hospital ##########
