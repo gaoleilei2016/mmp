@@ -207,6 +207,8 @@ window.current_template_obj = {
         /* 药品 --- end */ 
           dialogVisible: false,  //是否显示药品字典
           innerVisible: false,  //是否显示药品说明书
+          imgVisible: false,    //图片显示
+          imgSrc: "",          //当前图片路径
           innerContent: "",    //药品说明书内容
           drugsData: [],        //all drugs
           searchDrugsList: "",      //药品查询搜索
@@ -1325,7 +1327,16 @@ window.current_template_obj = {
     openDrugModal: function() {
       this.dialogVisible = true;
     },
+    // 显示大图
+    showImg: function(urlData) {
+      var _this = this;
+      _this.imgVisible = true;
+      _this.imgSrc = _this.encodeBase64ToImgUrl(urlData);
+    },
     encodeBase64ToImgUrl: function(urlData) {
+      if (!urlData) {
+        return false;
+      };
       var bytes = window.atob(urlData.split(',')[1]);
       var ab = new ArrayBuffer(bytes.length);
       var ia = new Uint8Array(ab);
