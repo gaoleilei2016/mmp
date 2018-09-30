@@ -29,7 +29,7 @@
       </el-col>
       <el-col :span="6">
         <el-form-item prop="pharmacology" label="药理分类">
-          <el-select v-model="filter.pharmacology" placeholder="请选择药理分类" popper-class="select__input">
+          <el-select v-model="filter.pharmacology" placeholder="请选择药理分类" popper-class="select__input" filterable>
             <el-option v-for="item in pharmacologies" :key="item.id" :value="item.code" :label="item.display"></el-option>
             <el-option :value="''" label="全部" key="allPharmacology"></el-option>
           </el-select>
