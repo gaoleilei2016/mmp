@@ -84,7 +84,10 @@ class Ims::Inv::StocksController < ApplicationController
 
   
   def exports
-    
+    location_id = current_user.organization_id 
+    location_name = Admin::Organization.find(location_id).try(:name)
+    ret = Ims::Inv::Stock.exports params.merge({org_id:current_user.organization_id,location_id:location_id,location_name:location_name,user_name:current_user.name,user_id:current_user.id})
+    render json:ret.to_json
   end
 
   # post 库存导入保存
