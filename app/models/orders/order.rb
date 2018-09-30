@@ -396,7 +396,11 @@ class Orders::Order < ApplicationRecord
 							info:'您有新的订单！', #订单金额
 						}
 						p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
-						::NoticeChannel.publish(data) rescue nil
+						begin
+							Timeout.timeout(1){::NoticeChannel.publish(data)} 
+						rescue Exception => e
+							p '消息发送超过1S,已跳过。'
+						end
 						p data
 						p "++++++++++++++++++++++++++++++"
 					end
