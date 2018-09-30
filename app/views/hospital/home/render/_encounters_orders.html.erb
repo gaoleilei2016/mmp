@@ -20,9 +20,8 @@
 							<span class="drug-field price">{{ props.item.price }}元/{{ props.item.unit }}</span>
 							<span class="drug-field storage"><b>{{ props.item.storage[0] }} {{props.item.unit}}</b></span>
 							<span class="drug-field produce">{{ props.item.produce_name }}</span>
-							<span class="drug-field spec"><el-tag type="danger" v-if="props.item.return_price_flag">返款</el-tag></span>
+							<span class="drug-field spec"><span class="span-pink" v-if="props.item.return_price_flag"></span></span>
 						</div>
-						
 					</template>
 				</el-autocomplete>
 		  </el-form-item>

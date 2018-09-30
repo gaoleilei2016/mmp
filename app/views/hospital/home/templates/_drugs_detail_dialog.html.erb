@@ -76,7 +76,7 @@
       </el-table-column>
       <el-table-column label="标签" align="center">
         <template slot-scope="scope">
-          <el-tag type="danger" v-if="scope.row.return_price_flag">返款</el-tag>
+          <span class="span-pink" v-if="scope.row.return_price_flag"></span>
         </template>
       </el-table-column>
     </el-table>
