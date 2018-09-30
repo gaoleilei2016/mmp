@@ -6,6 +6,7 @@ defaults: &defaults
   app_id: 2018060860345111
   url: https://openapi.alipay.com/gateway.do
   api_name: alipay.trade.wap.pay
+  app_pay_name: alipay.trade.app.pay
   refund_api: alipay.trade.refund
   format: JSON
   charset: utf-8

@@ -37,6 +37,13 @@ class User < ApplicationRecord
 		con = get_config ii
 		con.update_attributes(flag:flag)
 	end
+	def self.server_ips att=nil
+		att = att.try(:to_sym) if att
+		ips_f = (YAML.load_file(File.join(Rails.root, "/config/setup/ip.yml")) rescue nil)
+		return ips_f unless att
+		return "未找到config/setup/ip.yml文件或该文件未配置#{att}_ip" unless ips_f&&ips_f.deep_symbolize_keys![att].present?
+		ips_f[att]
+	end
 
 	#健康小站=========================
 	def health_paid?
