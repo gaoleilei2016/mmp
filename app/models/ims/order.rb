@@ -524,7 +524,6 @@ class Ims::Order < ApplicationRecord
           else
             p "========= 找不到库存记录 =========#{medicine_id} "
           end 
-          # find_sql = "select * from dis"
         end
         p "ffffffffffffffffffffff 过账方法 end 结束 ffffffffff"
         {flag:true,info:"OK ! OK ! OK !"} 
