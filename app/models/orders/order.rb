@@ -304,7 +304,6 @@ class Orders::Order < ApplicationRecord
 				begin
 					::Orders::Order.transaction do 
 					##通过处方拿到订单生成数据
-					p "-=================fdsfsdf-===========",attrs[:prescription_ids]
 						presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
 						# Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
 						order = self.create(
