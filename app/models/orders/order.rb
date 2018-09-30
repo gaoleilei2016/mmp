@@ -374,7 +374,7 @@ class Orders::Order < ApplicationRecord
 							info:'您有新的订单！', #订单金额
 						}
 						p "++++++++++++++++++++::NoticeChannel.publish(data)++++++++"
-						# ::NoticeChannel.publish(data) rescue nil
+						::NoticeChannel.publish(data) rescue nil
 						p data
 						p "++++++++++++++++++++++++++++++"
 					end

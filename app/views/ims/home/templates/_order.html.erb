@@ -222,7 +222,7 @@ window.current_template_obj = {
             iden:data1.iden,
             phone:data1.phone,
             cfstatus:data1.cfstatus,
-            amt:data1.price,
+            amt:data1.amount,
             created_at:data1.created_at,
             lines:[{
               name:data1.title,
@@ -265,13 +265,13 @@ window.current_template_obj = {
                       iden:for_data.iden,
                       phone:for_data.phone,
                       cfstatus:for_data.cfstatus,
-                      amt:for_data.price,
+                      amt:for_data.amount,
                       created_at:for_data.created_at,
                       lines:[{
                         name:for_data.title,
                         specification:for_data.specification,
-                        qty:for_data.single_qty_value,
-                        unit:for_data.single_qty_unit,
+                        qty:for_data.total_quantity,
+                        unit:for_data.unit,
                         price:Number(for_data.price),
                         amount:Number(for_data.amount),
                       }]
