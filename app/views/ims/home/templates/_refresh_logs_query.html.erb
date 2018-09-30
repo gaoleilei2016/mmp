@@ -1,0 +1,162 @@
+<style type="text/css">
+	.el-header {
+    background-color: #B3C0D1;
+    color: #333;
+    line-height: 60px;
+  }
+  .el-main {
+    background-color: #E9EEF3;
+	height: 700px;
+  }
+  
+  body .el-container {
+    margin-top: 30px;
+  }
+  .block .el-date-editor .el-range-separator {
+  	box-sizing: content-box;
+  }
+</style>
+<template>
+	<el-container>
+	  	<el-header>
+			<el-row :gutter="20">
+				<el-col :span="6">
+			  		<div class="block">
+					    <el-date-picker
+					      v-model="queryDate"
+					      type="daterange"
+					      align="right"
+					      unlink-panels
+					      range-separator="至"
+					      start-placeholder="开始日期"
+					      end-placeholder="结束日期"
+					      :picker-options="pickerOptions2">
+					    </el-date-picker>
+				  	</div>
+				</el-col>
+				<el-col :span="4">
+		  			<el-button type="primary" plain @click="query">搜索</el-button>
+				</el-col>
+			</el-row>
+	  	</el-header>
+	  	<el-main>
+			<el-table
+			    :data="tableData"
+			    style="width: 100%"
+			    height="660"
+			    border>
+			    <el-table-column
+			      type="index"
+			      width="50">
+			    </el-table-column>
+			    <el-table-column
+			      property="peson"
+			      label="上传人"
+			      min-width="120">
+			    </el-table-column>
+			    <el-table-column
+			      property="medicine_id"
+			      label="药品名称"
+			      min-width="120">
+			    </el-table-column>
+			    <el-table-column
+			      property="address"
+			      label="药品价格"
+			      min-width="120">
+			    </el-table-column>
+			    <el-table-column
+			      property="refresh_befor_num"
+			      label="上传前数量"
+			      min-width="120">
+			    </el-table-column>
+			    <el-table-column
+			      property="refresh_after_num"
+			      label="上传后数量"
+			      min-width="120">
+			    </el-table-column>
+			  </el-table>
+	  	</el-main>
+	  	<el-footer>
+	  		<div style="background: #e4e4e4;">
+			    <el-pagination
+			    	background
+				      @current-change="handleCurrentChange"
+				      :current-page="currentPage"
+				      :page-sizes="[15]"
+				      :page-size="pageSize"
+				      layout="total, sizes, prev, pager, next, jumper"
+				      :total="pageCount">
+			    </el-pagination>
+	  		</div>
+	  	</el-footer>
+	</el-container>
+</template>
+
+<script type="text/javascript">
+	window.current_template_obj = {
+		data: function() {
+	      return {
+		        pickerOptions2: {
+		          shortcuts: [{
+		            text: '最近一周',
+		            onClick(picker) {
+		              const end = new Date();
+		              const start = new Date();
+		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+		              picker.$emit('pick', [start, end]);
+		            }
+		          }, {
+		            text: '最近一个月',
+		            onClick(picker) {
+		              const end = new Date();
+		              const start = new Date();
+		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+		              picker.$emit('pick', [start, end]);
+		            }
+		          }, {
+		            text: '最近三个月',
+		            onClick(picker) {
+		              const end = new Date();
+		              const start = new Date();
+		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+		              picker.$emit('pick', [start, end]);
+		            }
+		          }]
+		        },
+		        queryDate: '',
+		        tableData: [],
+		      	currentPage: 1, // 当前页数
+		      	pageCount: 0, // 总数量
+		      	pageSize: 15, // 每页显示的数量
+	      	};
+	    },
+	    methods: {
+	    	getToken() {
+	    		return document.querySelector("meta[name=csrf-token]").content;
+	    	},
+	    	query () {
+	    		var date = this.queryDate || [];
+	    		$.post("/ims/inv/refresh_logs/get_log", {
+	    			authenticity_token: this.getToken(),
+	    			startDate: date[0] || "",
+	    			endDate: date[1] || "",
+	    			per: this.pageSize || 15,
+	    			page: this.currentPage || 1
+	    		}).then(datas => {
+	    			this.tableData = datas.items;
+	    			this.pageCount = datas.dataLength;
+	    			console.log(datas);
+	    		});
+	    	},
+		      handleCurrentChange(val) {
+		      	this.currentPage = val;
+		      	this.$nextTick(function() {
+			      	this.query();
+		      	});
+		        console.log(`当前页: ${val}`);
+		      }
+
+	    }
+  	};
+
+</script>

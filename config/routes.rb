@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
   root to:"customer/portal#index"
   mount ActionCable.server => "/cable"
-  
+  mount Ims::Inv::Interface => 'wqj'
   get "/application/menus",to:"application#menus"
   get "/application/templates",to:"application#templates"
   resources :interfaces do
@@ -262,6 +262,12 @@ Rails.application.routes.draw do
           get :search_stocks                          # 库存查询
           get :exports                                # 库存导入保存
           post :upload_file                           # 库存表上传
+        end
+      end
+
+      resources :refresh_logs do
+        collection do
+          post :get_log                               # 查詢日誌
         end
       end
     end

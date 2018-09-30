@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  use_org_id: MyString
+  c_id: 1
+  use_name: MyString
+
+two:
+  use_org_id: MyString
+  c_id: 1
+  use_name: MyString

@@ -18,34 +18,6 @@
             </el-col>
           </el-col>
         </el-row>
-
-         <!--  <el-table
-            :data="tableData"
-            border
-            size="mini"
-            style="width: 100%; height:calc(100% - 78px);">
->>>>>>> 83df50244d8584511d18c3d275a5a49f8adbe58c
-            <el-table-column
-              prop="name"
-              label="姓名"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="age"
-              label="性别"
-              width="180">
-            </el-table-column>
-            <el-table-column
-              prop="address"
-              label="地址">
-            </el-table-column>
-<<<<<<< HEAD
-          </el-table>
-        </el-col>
-        
-      </el-row>
-=======
-          </el-table> -->
     </el-col>
   </div>
 </template>
@@ -124,13 +96,19 @@ window.current_template_obj = {
       }
       else
       {
-        _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name}}).then( function(response) {
-        console.log(response)
-        _this.$message.success("保存成功。");
-        $("#file_input").val("")
-        $("#file_name").val("")
-        _this.tableData = response.data.data
-        }, function() {
+        _this.$http.get('/ims/inv/stocks/exports', {params:{'file_name':$("#file_source")[0].files[0].name,'aa':"1241241"}}).then( function(response) {
+        // console.log(response.body.info)
+        if(response.body.flag==false){
+           _this.$message.error(response.body.info);
+         }else{
+          _this.$message.success(response.body.info);
+          $("#file_input").val("")
+          $("#file_name").val("")
+          _this.tableData = response.data.data
+         }
+
+        }, function(data) {
+          // alert(data)
           _this.$message.error("保存失败！");
         });
       };

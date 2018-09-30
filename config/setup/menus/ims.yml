@@ -76,4 +76,10 @@ headers:
         style_css: 'inv_stocks_search_exports'
         icon: 'fa-bar-chart'
         sequence: '1'
+      - code: 'IMS.B12'
+        caption: '日志查詢'
+        path: '#/inv/refresh_logs/query_logs'
+        style_css: 'refresh_logs_query'
+        icon: 'fa-bar-chart'
+        sequence: '1'
       

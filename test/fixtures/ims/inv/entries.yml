@@ -1,0 +1,63 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  org_id: 1
+  medicine_id: 1
+  name: MyString
+  spec: MyString
+  formul_name: MyString
+  entry_type: MyString
+  pt_code: MyString
+  code: MyString
+  unit: MyString
+  price: 1.5
+  mul: MyString
+  batch: MyString
+  location_id: MyString
+  location_name: MyString
+  quantity: 1.5
+  amount: 1.5
+  source_id: MyString
+  source_name: MyString
+  document_id: MyString
+  document_code: MyString
+  document_line_id: MyString
+  note: MyString
+  operater: MyString
+  operater_id: MyString
+  operat_at: 2018-09-11 16:59:53
+  patient_name: MyString
+  posting_on: 2018-09-11 16:59:53
+  created_at: 2018-09-11 16:59:53
+  updated_at: 2018-09-11 16:59:53
+
+two:
+  org_id: 1
+  medicine_id: 1
+  name: MyString
+  spec: MyString
+  formul_name: MyString
+  entry_type: MyString
+  pt_code: MyString
+  code: MyString
+  unit: MyString
+  price: 1.5
+  mul: MyString
+  batch: MyString
+  location_id: MyString
+  location_name: MyString
+  quantity: 1.5
+  amount: 1.5
+  source_id: MyString
+  source_name: MyString
+  document_id: MyString
+  document_code: MyString
+  document_line_id: MyString
+  note: MyString
+  operater: MyString
+  operater_id: MyString
+  operat_at: 2018-09-11 16:59:53
+  patient_name: MyString
+  posting_on: 2018-09-11 16:59:53
+  created_at: 2018-09-11 16:59:53
+  updated_at: 2018-09-11 16:59:53

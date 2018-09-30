@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  ii_root: MyString
+  returned_at: 1
+  payment_Expired: 1
+  unpaid_expired: 1
+
+two:
+  ii_root: MyString
+  returned_at: 1
+  payment_Expired: 1
+  unpaid_expired: 1

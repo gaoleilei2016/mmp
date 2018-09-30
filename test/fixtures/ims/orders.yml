@@ -1,0 +1,39 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  source_org_ii: MyString
+  source_org_name: MyString
+  target_org_ii: MyString
+  target_org_name: MyString
+  patient_order_id: MyString
+  order_code: MyString
+  patient_name: MyString
+  repeat_number: 
+  total_amount: 1.5
+  search_name: MyString
+  note: MyString
+  operater: MyString
+  operat_at: 2018-06-11 20:35:06
+  ori_id: MyString
+  ori_code: MyString
+  created_at: 2018-06-11 20:35:06
+  updated_at: 2018-06-11 20:35:06
+
+two:
+  source_org_ii: MyString
+  source_org_name: MyString
+  target_org_ii: MyString
+  target_org_name: MyString
+  patient_order_id: MyString
+  order_code: MyString
+  patient_name: MyString
+  repeat_number: 
+  total_amount: 1.5
+  search_name: MyString
+  note: MyString
+  operater: MyString
+  operat_at: 2018-06-11 20:35:06
+  ori_id: MyString
+  ori_code: MyString
+  created_at: 2018-06-11 20:35:06
+  updated_at: 2018-06-11 20:35:06

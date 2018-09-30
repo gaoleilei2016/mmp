@@ -41,7 +41,6 @@ namespace :deploy do
  
   desc 'Restart puma'
   task :restart do
-    # run "cp /home/tenmind/app/mmp/conf/rabbitmq.yml /home/tenmind/app/mmp/current/config/rabbitmq.yml
     #      && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
     #      && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
     run "cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb 

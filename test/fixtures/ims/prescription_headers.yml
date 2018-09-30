@@ -1,0 +1,89 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  prescription_no: MyString
+  note: MyString
+  type_code: MyString
+  type_name: MyString
+  confidentiality_code: MyString
+  confidentiality_name: MyString
+  name: MyString
+  gender_code: MyString
+  gender_name: MyString
+  age: MyString
+  birth_date: 2018-06-20 21:38:49
+  iden: MyString
+  occupation_code: MyString
+  occupation_name: MyString
+  phone: MyString
+  address: MyString
+  org_id: MyString
+  org_display: MyString
+  patient_no: MyString
+  author_id: MyString
+  author_display: MyString
+  encounter_loc_id: MyString
+  encounter_loc_display: MyString
+  total_amount: 1.5
+  orders: MyString
+  delivery_id: MyString
+  delivery_name: MyString
+  delivery_at: 2018-06-20 21:38:49
+  return_id: MyString
+  return_name: MyString
+  return_at: 2018-06-20 21:38:49
+  drug_store_id: MyString
+  drug_store_name: MyString
+  effective_start: 2018-06-20 21:38:49
+  effective_end: 2018-06-20 21:38:49
+  diagnoses: MyString
+  specialmark: MyString
+  status: MyString
+  bill_id: MyString
+  bill_at: 2018-06-20 21:38:49
+  hospital_prescription_at: 2018-06-20 21:38:49
+  hospital_prescription_id: 1
+
+two:
+  prescription_no: MyString
+  note: MyString
+  type_code: MyString
+  type_name: MyString
+  confidentiality_code: MyString
+  confidentiality_name: MyString
+  name: MyString
+  gender_code: MyString
+  gender_name: MyString
+  age: MyString
+  birth_date: 2018-06-20 21:38:49
+  iden: MyString
+  occupation_code: MyString
+  occupation_name: MyString
+  phone: MyString
+  address: MyString
+  org_id: MyString
+  org_display: MyString
+  patient_no: MyString
+  author_id: MyString
+  author_display: MyString
+  encounter_loc_id: MyString
+  encounter_loc_display: MyString
+  total_amount: 1.5
+  orders: MyString
+  delivery_id: MyString
+  delivery_name: MyString
+  delivery_at: 2018-06-20 21:38:49
+  return_id: MyString
+  return_name: MyString
+  return_at: 2018-06-20 21:38:49
+  drug_store_id: MyString
+  drug_store_name: MyString
+  effective_start: 2018-06-20 21:38:49
+  effective_end: 2018-06-20 21:38:49
+  diagnoses: MyString
+  specialmark: MyString
+  status: MyString
+  bill_id: MyString
+  bill_at: 2018-06-20 21:38:49
+  hospital_prescription_at: 2018-06-20 21:38:49
+  hospital_prescription_id: 1
