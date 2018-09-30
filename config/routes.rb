@@ -232,6 +232,14 @@ Rails.application.routes.draw do
       end
     end
 
+    # 药品管理
+    resources :items do
+      collection do
+        get :get_items
+        post :save_item
+      end
+    end
+    
     # 统计
     resources :reports do
       collection do
