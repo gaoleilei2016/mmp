@@ -77,7 +77,7 @@ headers:
         icon: 'fa-bar-chart'
         sequence: '1'
       - code: 'IMS.B12'
-        caption: '日志查詢'
+        caption: '日志查询'
         path: '#/inv/refresh_logs/query_logs'
         style_css: 'refresh_logs_query'
         icon: 'fa-bar-chart'
