@@ -24,10 +24,9 @@
 			  		<div class="block">
 					    <el-date-picker
 					      v-model="startDate"
-					      type="date"
+					      type="datetime"
 					      align="right"
-					      placeholder="开始日期"
-					      :picker-options="pickerOptions1">
+					      placeholder="开始日期">
 					    </el-date-picker>
 					</div>
 				</el-col>
@@ -35,10 +34,9 @@
 					<div class="block">
 					    <el-date-picker
 					      v-model="endDate"
-					      type="date"
+					      type="datetime"
 					      align="right"
-					      placeholder="结束日期"
-					      :picker-options="pickerOptions1">
+					      placeholder="结束日期">
 					    </el-date-picker>
 					</div>
 			  	</el-col>
@@ -85,7 +83,8 @@
 			    <el-table-column
 			      property="created_at"
 			      label="操作时间"
-			      min-width="120">
+			      min-width="120"
+			      :formatter="formatCreatedAtTime">
 			    </el-table-column>
 			  </el-table>
 	  	</el-main>
@@ -109,33 +108,6 @@
 	window.current_template_obj = {
 		data: function() {
 	      return {
-		        pickerOptions1: {
-		          shortcuts: [{
-		            text: '最近一周',
-		            onClick(picker) {
-		              const end = new Date();
-		              const start = new Date();
-		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-		              picker.$emit('pick', [start, end]);
-		            }
-		          }, {
-		            text: '最近一个月',
-		            onClick(picker) {
-		              const end = new Date();
-		              const start = new Date();
-		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-		              picker.$emit('pick', [start, end]);
-		            }
-		          }, {
-		            text: '最近三个月',
-		            onClick(picker) {
-		              const end = new Date();
-		              const start = new Date();
-		              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-		              picker.$emit('pick', [start, end]);
-		            }
-		          }]
-		        },
 		        startDate: "",
 		        endDate: "",
 		        tableData: [],
@@ -168,13 +140,16 @@
 		    		});
 	    		});
 	    	},
-		      handleCurrentChange(val) {
-		      	this.currentPage = val;
-		      	this.$nextTick(function() {
-			      	this.query();
-		      	});
-		        console.log(`当前页: ${val}`);
-		      }
+			handleCurrentChange(val) {
+				this.currentPage = val;
+				this.$nextTick(function() {
+			  	this.query();
+				});
+				console.log(`当前页: ${val}`);
+			},
+			formatCreatedAtTime (row) {
+				return row.created_at && row.created_at.replace(/T/, " ").slice(0, 19) || "";
+			}
 
 	    }
   	};
