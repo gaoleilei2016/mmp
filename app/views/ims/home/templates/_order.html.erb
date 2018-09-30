@@ -222,7 +222,7 @@ window.current_template_obj = {
             iden:data1.iden,
             phone:data1.phone,
             cfstatus:data1.cfstatus,
-            amt:data1.amount,
+            amt:Number(data1.amount),
             created_at:data1.created_at,
             lines:[{
               name:data1.title,
@@ -241,6 +241,7 @@ window.current_template_obj = {
               inter:
               for(j=0;j<temp.length;j++){
                 if (temp[j].id == for_data.cfid) {
+                  temp[j].amt+=Number(for_data.amount)
                   temp[j].lines.push({
                     name:for_data.title,
                     specification:for_data.specification,
@@ -265,7 +266,7 @@ window.current_template_obj = {
                       iden:for_data.iden,
                       phone:for_data.phone,
                       cfstatus:for_data.cfstatus,
-                      amt:for_data.amount,
+                      amt:Number(for_data.amount),
                       created_at:for_data.created_at,
                       lines:[{
                         name:for_data.title,
