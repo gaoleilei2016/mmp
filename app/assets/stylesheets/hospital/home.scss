@@ -19,6 +19,9 @@ $bg-purple-dark: #99a9bf;
 $bg-purple: #d3dce6;
 $bg-purple-light: #e5e9f2;
 
+/*返款色块颜色*/
+$return-flag-color: rgba(255, 129, 152, 0.88);
+
 //页面模块默认圆角力度
 $card-border-radius: 2px; 
 
@@ -49,6 +52,15 @@ $card-border-radius: 2px;
 }
 .text-danger {
 	color: $brand-danger;
+}
+
+.span-pink {
+	display:inline-block;
+	width: 20px;
+	height:25px;
+	line-height: 25px;
+	background-color: $return-flag-color;
+	vertical-align: middle;
 }
 
 
@@ -336,7 +348,7 @@ $card-border-radius: 2px;
 
 // 药品下拉框
 .order-autocomplete {
-	width: 50% !important;
+	width: 80% !important;
 	.drug-field {
 		overflow: hidden;
 		white-space: nowrap;
@@ -440,7 +452,7 @@ $card-border-radius: 2px;
 
 /* 定义页面公共样式 -- start */ 
 #encounters_new_div {
-	.el-input__inner:not(.search__input, .select__input)  {
+	.el-input__inner:not(.search__input) {
 		border: none;
 		border-radius: 0;
 		border-bottom-style: solid;
