@@ -51,8 +51,14 @@ class Hospital::OrdersController < ApplicationController
         format.html { redirect_to @order, notice: 'order was successfully created.' }
         format.json { render json: {flag: true, info:"success", data: @order.to_web_front} }
       else
-        format.html { render action: "new" }
-        format.json { render json: {flag: false , info: "#{@order.errors.messages.values.flatten.join(" ")}"} }
+        if params[:type] == "template"
+          @order.save(valide: false)
+          format.html { redirect_to @order, notice: 'order was successfully created.' }
+          format.json { render json: {flag: true, info:"success", data: @order.to_web_front} }
+        else
+          format.html { render action: "new" }
+          format.json { render json: {flag: false , info: "#{@order.errors.messages.values.flatten.join(" ")}"} }
+        end
       end
     end
 	end
