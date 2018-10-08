@@ -1,4 +1,4 @@
-<el-dialog title="编辑药品" :visible.sync="dialogFormVisible" :close-on-click-modal="false"  width="80%" height="80%" center> 
+<el-dialog :title="model_title" :visible.sync="dialogFormVisible" :close-on-click-modal="false"  width="80%" height="80%" center> 
 <!-- :close-on-press-escape="false" -->
 	<el-form :label-position="form_label_position" label-width="120px" :model="form_data" :rules="rules" size="small" >
 
@@ -21,6 +21,20 @@
 
 		  <el-col :span="12">
 		    <el-form-item
+		    label="商品名称">
+		      <el-input v-model="form_data.common_name"></el-input>
+		    </el-form-item>
+		  </el-col>
+
+		  <el-col :span="12">
+		    <el-form-item
+		    label="通用名称">
+		      <el-input v-model="form_data.name"></el-input>
+		    </el-form-item>
+		  </el-col>
+
+		  <el-col :span="12">
+		    <el-form-item
 		    label="分类名称">
 		      <!-- <el-input v-model="form_data.kindname"></el-input> -->
 					<el-select v-model="form_data.kindcode" filterable placeholder="请选择" @change="change_kindname">
@@ -34,82 +48,29 @@
 		    </el-form-item>
 		  </el-col>
 
-		  <el-col :span="12">
-		    <el-form-item
-		    label="通用名称">
-		      <el-input v-model="form_data.name"></el-input>
-		    </el-form-item>
-		  </el-col>
+	  <el-col :span="12">
+	    <el-form-item
+	    label="厂家名称">
+	      <el-input v-model="form_data.produce_name"></el-input>
+	    </el-form-item>
+	  </el-col>
 
 		  <el-col :span="12">
 		    <el-form-item
-		    label="商品名称">
-		      <el-input v-model="form_data.common_name"></el-input>
-		    </el-form-item>
-		  </el-col>
-
-		  <el-col :span="12">
-		    <el-form-item
-		    label="通用名拼音码">
-		      <el-input v-model="form_data.py" :disabled="true"></el-input>
-		    </el-form-item>
-		  </el-col>
-  	  <el-col :span="12">
-		    <el-form-item
-		    label="商品名拼音码">
-		      <el-input v-model="form_data.common_py" :disabled="true"></el-input>
+		    label="药品标签">
+		      <!-- <el-input v-model="form_data.return_price_flag"></el-input> -->
+					<el-select v-model="form_data.return_price_flag" filterable placeholder="请选择">
+					    <el-option
+					      v-for="item in return_price_flag_options"
+					      :key="item.code"
+					      :label="item.code"
+					      :value="item.code">
+					    </el-option>
+					  </el-select>
 		    </el-form-item>
 		  </el-col>
 
 		  <el-col :span="12">
-		    <el-form-item
-		    label="通用名五笔码">
-		      <el-input v-model="form_data.wb" :disabled="true"></el-input>
-		    </el-form-item>
-		  </el-col>
-
-		  <el-col :span="12">
-		    <el-form-item
-		    label="商品名五笔码">
-		      <el-input v-model="form_data.common_wb" :disabled="true"></el-input>
-		    </el-form-item>
-		  </el-col>
-		</el-col>
-
-		</el-row>
-		
-
-	<hr/>
-		<el-row>
-
-		  <el-col :span="8">
-		    <el-form-item
-		    label="最小计量值">
-		      <el-input v-model="form_data.measure_val"></el-input>
-		    </el-form-item>
-		  </el-col>
-		  <el-col :span="8">
-		    <el-form-item
-		    label="最小计量单位">
-		      <el-input v-model="form_data.measure_unit"></el-input>
-		    </el-form-item>
-		  </el-col>
-		  <el-col :span="8">
-		    <el-form-item
-		    label="基本单位">
-		      <el-input v-model="form_data.base_unit"></el-input>
-		    </el-form-item>
-		  </el-col>
-
-
-		  <el-col :span="8">
-		    <el-form-item
-		    label="规格">
-		      <el-input v-model="form_data.spec"></el-input>
-		    </el-form-item>
-		  </el-col>
-
-		  <el-col :span="8">
 		    <el-form-item
 		    label="剂型名称">
 		      <!-- <el-input v-model="form_data.formul_name"></el-input> -->
@@ -125,6 +86,51 @@
 				  </el-select>
 		    </el-form-item>
 		  </el-col>
+
+		  <el-col :span="12">
+		    <el-form-item
+		    label="状态">
+		    	<el-tag type="success"  v-if="form_data.status == 'A'">活动</el-tag>
+		    	<el-tag type="danger"  v-if="form_data.status == 'S'">已停用</el-tag>
+		    	<el-tag type="info"  v-if="form_data.status != 'A' && form_data.status != 'S'">未知</el-tag>
+		      <!-- <el-input v-model="form_data.status"></el-input> -->
+		    </el-form-item>
+		  </el-col>
+		</el-col>
+
+		</el-row>
+
+	<hr/>
+		<el-row>
+
+		  <el-col :span="8">
+		    <el-form-item
+		    label="最小计量单位">
+		      <el-input v-model="form_data.measure_unit"></el-input>
+		    </el-form-item>
+		  </el-col>
+		  <el-col :span="8">
+		    <el-form-item
+		    label="最小计量值">
+		      <el-input v-model="form_data.measure_val"></el-input>
+		    </el-form-item>
+		  </el-col>
+		  <el-col :span="8">
+		    <el-form-item
+		    label="规格">
+		      <el-input v-model="form_data.spec"></el-input>
+		    </el-form-item>
+		  </el-col>
+
+
+		  <el-col :span="8">
+		    <el-form-item
+		    label="基本单位">
+		      <el-input v-model="form_data.base_unit"></el-input>
+		    </el-form-item>
+		  </el-col>
+
+
 		  <el-col :span="8">
 		    <el-form-item
 		    label="销售单位">
@@ -132,6 +138,12 @@
 		    </el-form-item>
 		  </el-col>
 
+		  <el-col :span="8">
+		    <el-form-item
+		    label="销售/基本单位的倍率">
+		      <el-input v-model="form_data.mul"></el-input>
+		    </el-form-item>
+		  </el-col>
 
 		  <el-col :span="8">
 		    <el-form-item
@@ -139,12 +151,7 @@
 		      <el-input v-model="form_data.usedescribe"></el-input>
 		    </el-form-item>
 		  </el-col>
-		  <el-col :span="8">
-		    <el-form-item
-		    label="销售/基本单位的倍率">
-		      <el-input v-model="form_data.mul"></el-input>
-		    </el-form-item>
-		  </el-col>
+
 
 
 		  <el-col :span="8">
@@ -154,6 +161,21 @@
 		    </el-form-item>
 		  </el-col>
 
+		  <el-col :span="8">
+		    <el-form-item
+		    label="药理学分类编码">
+		      <!-- <el-input v-model="form_data.pharmacology_code"></el-input> -->
+					<el-select v-model="form_data.pharmacology_code" filterable placeholder="请选择" @change="change_pharmacology_code">
+					    <el-option
+					      v-for="item in pharmacology_code_options"
+					      :key="item.code"
+					      :label="item.name"
+					      :value="item.code">
+					    </el-option>
+					  </el-select>
+		    </el-form-item>
+		  </el-col>
+	  
 		</el-row>
 	<hr/>
 
@@ -168,20 +190,18 @@
 
 	  <el-col :span="8">
 	    <el-form-item
-	    label="厂家名称">
-	      <el-input v-model="form_data.produce_name"></el-input>
+	    label="商品名五笔码">
+	      <el-input v-model="form_data.common_wb" :disabled="true"></el-input>
 	    </el-form-item>
 	  </el-col>
 
 	  <el-col :span="8">
 	    <el-form-item
-	    label="状态">
-	    	<el-tag type="success"  v-if="form_data.status == 'A'">活动</el-tag>
-	    	<el-tag type="danger"  v-if="form_data.status == 'S'">已停用</el-tag>
-	    	<el-tag type="info"  v-if="form_data.status != 'A' && form_data.status != 'S'">未知</el-tag>
-	      <!-- <el-input v-model="form_data.status"></el-input> -->
+	    label="通用名五笔码">
+	      <el-input v-model="form_data.wb" :disabled="true"></el-input>
 	    </el-form-item>
 	  </el-col>
+
 	  <el-col :span="8">
 	    <el-form-item
 	    label="药品编码">
@@ -191,24 +211,18 @@
 
 	  <el-col :span="8">
 	    <el-form-item
-	    label="返款标记">
-	      <el-input v-model="form_data.return_price_flag"></el-input>
+	    label="商品名拼音码">
+	      <el-input v-model="form_data.common_py" :disabled="true"></el-input>
 	    </el-form-item>
 	  </el-col>
-	  <el-col :span="8">
-	    <el-form-item
-	    label="药理学分类编码">
-	      <!-- <el-input v-model="form_data.pharmacology_code"></el-input> -->
-				<el-select v-model="form_data.pharmacology_code" filterable placeholder="请选择" @change="change_pharmacology_code">
-				    <el-option
-				      v-for="item in pharmacology_code_options"
-				      :key="item.code"
-				      :label="item.name"
-				      :value="item.code">
-				    </el-option>
-				  </el-select>
-	    </el-form-item>
-	  </el-col>
+
+		  <el-col :span="8">
+		    <el-form-item
+		    label="通用名拼音码">
+		      <el-input v-model="form_data.py" :disabled="true"></el-input>
+		    </el-form-item>
+		  </el-col>
+
 	  <el-col :span="24">
 	    <el-form-item
 	    label="适应症">

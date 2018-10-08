@@ -64,11 +64,12 @@ form.el-form .el-col{
                 label="操作"
                 width="150">
                 <template scope="scope">
-                    <el-button type="text" v-if="scope.row.status =='N'">启用</el-button>
-                    <el-button type="text" v-else style="color:red;">停用</el-button>
+                    <el-button type="text" v-if="scope.row.status =='N'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
+                    <el-button type="text" v-if="scope.row.status =='S'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
+                    <el-button type="text" v-else style="color:#d84e4e;" @click="onBtnStatusClick(scope.row)">停用</el-button>
 
                     <el-button type="text" @click="onBtnDetailClick(scope.row)">编辑</el-button>
-                    <el-button type="text">删除</el-button>
+                    <el-button type="text" style="color:#d84e4e;" @click="delete_line(scope.row)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -101,10 +102,13 @@ window.current_template_obj = {
       search: "", // 搜索内容
       tableData:[],
       tableColumns:[],
+      model_title:"编辑药品",
 
       kindname_options:[],//分类名称
       formul_name_options:[],//剂型名称
       pharmacology_code_options:[],//药理学分类编码
+
+      return_price_flag_options:[{code:0,name:"无返款"},{code:1,name:"有返款"}],//药品标签
 
       tableHeight: 550, // 表格高度
       // 分页相关
@@ -222,6 +226,7 @@ window.current_template_obj = {
     //点击编辑按钮
     onBtnDetailClick:function(row){
       console.log(row)
+      _this.model_title = "编辑药品"
       this.dialogFormVisible = true
       _this = this
       // Vue.resource("/ims/items/get_items",{serialno:row.serialno}).get().then(function(response) {
@@ -253,7 +258,8 @@ window.current_template_obj = {
     //新增药品
     new_item:function(){
       _this = this
-      _this.form_data = { serialno:"", ecode:"", picture:"",}
+      _this.model_title = "新建药品"
+      _this.form_data = { serialno:"", ecode:"", picture:"",status:"N"}
       _this.dialogFormVisible = true
     },
     //编辑药品保存
@@ -284,6 +290,50 @@ window.current_template_obj = {
     },
     change_pharmacology_code:function(val){  
       // this.form_data.pharmacology_code = val.code    
+    },
+    onBtnStatusClick:function(row){
+      _this = this
+      _this.$http.post("/ims/items/change_status",{line:row,authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+        data = response.data
+        if (data.flag) {
+          _this.$message.success("修改成功！");
+          row.status = data.status
+        }else{
+          _this.$message.error(data.info||"后台出错，请重试！");
+        }
+      }, function() {
+        _this.$message.error("后台出错，请重试！");
+      });
+    },
+    delete_line:function(row){
+      _this = this
+      // this.$http.post("/ims/items/delete_item").then( function(response) {
+      //   data = response.data
+      //   _this.kindname_options = data.rows
+      // }, function() {
+      //   _this.$message.error("后台出错");
+      // });
+
+      this.$confirm('永久删除该药品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(function(){
+        _this.$http.post("/ims/items/delete_item",{line:row,authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          data = response.data
+          if (data.flag) {
+            _this.$message.success("删除成功！");
+            _this.getData();
+          }else{
+            _this.$message.error(data.info||"后台出错，请重试！");
+          }
+        }, function() {
+          _this.$message.error("后台出错，请重试！");
+        });
+      }).catch(function(){
+        _this.$message.warning("已取消删除");
+      });
+
     },
 	},
 	mounted:function(){
