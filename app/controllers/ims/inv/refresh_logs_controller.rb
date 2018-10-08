@@ -63,11 +63,8 @@ class Ims::Inv::RefreshLogsController < ApplicationController
   end
 
   def get_log
-    puts "---#{params}--------------"
-    logs = Ims::Inv::RefreshLog.get_log(params[:startDate].to_s, params[:endDate].to_s).order({created_at: 'desc'})
-    dataSize = logs.size
-    logs = logs.page(params[:page].to_i).per(params[:per].to_i)
-    render json: { items: logs, dataLength: dataSize }
+   org_id=current_user.organization_id
+    logs = Ims::Inv::RefreshLog.get_log(org_id,params[:startDate].to_s, params[:endDate].to_s).order({created_at: 'desc'})
   end
 
   private
