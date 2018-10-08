@@ -520,8 +520,7 @@ class Ims::Order < ApplicationRecord
             update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{stock_id}"
             runsql.update update_sql
           else
-            p (sql rescue "=====没有sql =="),stock_id
-            p "========= 找不到库存记录 =========#{medicine_id} "
+            p "========= 找不到库存记录 =========#{medicine_id} ====#{stock_id}--"
           end 
         end
         p "ffffffffffffffffffffff 过账方法 end 结束 ffffffffff"
