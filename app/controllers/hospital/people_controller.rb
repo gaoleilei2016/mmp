@@ -18,7 +18,7 @@ class Hospital::PeopleController < ApplicationController
     count  = @people.count # 满足查询条件的人
     @people = @people.order(updated_at: :desc).page(page).per(per)
     people_ids = @people.map { |e| e.id  }
-    # 根据设置 查询当天  某几天的数据
+    # 根据前端设置 查询当天或者某几天的数据
     search_time_limit = Time.now.end_of_day - @cur_ini.encounter_search_time.to_i.day
     encounters_group_by_person_id = ::Hospital::Encounter.where( "person_id" => people_ids, "author_id"=> current_user.id).where("created_at >= ? ",search_time_limit).group_by {|e| e.person_id.to_s}
     people_info = @people.map do |_person|
