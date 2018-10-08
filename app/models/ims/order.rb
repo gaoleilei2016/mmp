@@ -510,10 +510,8 @@ class Ims::Order < ApplicationRecord
             sql = "SELECT * FROM ims_inv_stocks s WHERE s.medicine_id=#{medicine_id} and s.location_id = #{location_id} and s.price = #{price.to_f.round(4)}"
             sql.concat(" and s.batch=#{batch}") if !batch.blank?
             # sql.concat(" and source_org_id=#{args[:source_org_id]}") unless args[:source_org_id].blank?
-            p sql
             res = Ims::Inv::Stock.find_by_sql(sql)
             stock_id = res[0].try(:id)
-            p stock_id
             result = Ims::Inv::Stock.find(stock_id) rescue nil
           end
           if !result.blank?
@@ -522,6 +520,7 @@ class Ims::Order < ApplicationRecord
             update_sql = "update ims_inv_stocks set quantity = quantity+#{qty.to_f},amount=amount+#{amount} where id = #{stock_id}"
             runsql.update update_sql
           else
+            p (sql rescue "=====没有sql =="),stock_id
             p "========= 找不到库存记录 =========#{medicine_id} "
           end 
         end
