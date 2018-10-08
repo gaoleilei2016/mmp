@@ -236,6 +236,9 @@ Rails.application.routes.draw do
     resources :items do
       collection do
         get :get_items
+        get :juzi_to_jp_wb #句子转简拼  五笔
+        post :change_status
+        post :delete_item
         post :save_item
       end
     end

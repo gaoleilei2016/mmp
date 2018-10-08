@@ -113,6 +113,16 @@ class Ims::ItemsController < ApplicationController
 		end
 	end
 
+	def juzi_to_jp_wb
+		p params
+		juzi = params[:str]
+		runsql=ActiveRecord::Base.connection()
+		sql_jp = "SELECT jianpin('#{juzi}')"
+		jianpin = runsql.execute sql_jp
+		wubi = ""
+
+		render json:{wubi:wubi,jianpin:jianpin}
+	end
 	private
 		def status_machine status
 			case status
