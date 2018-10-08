@@ -29,7 +29,7 @@
             style="width: 100%; height:calc(100% - 78px);">
             <el-table-column
               label=""
-              min-width="20">
+              min-width="30">
               <template slot-scope="scope">
                 {{ scope.$index + 1 }}
               </template>
@@ -38,7 +38,7 @@
               sortable
               prop="name"
               label="名称"
-              min-width="180">
+              min-width="160">
               <template slot-scope="scope">
                 {{ scope.row.name}}
               </template>
@@ -49,6 +49,14 @@
               min-width="80">
               <template slot-scope="scope">
                 {{ scope.row.spec }}
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="spec"
+              label="厂家"
+              min-width="130">
+              <template slot-scope="scope">
+                {{ scope.row.produce_name }}
               </template>
             </el-table-column>
             <el-table-column
