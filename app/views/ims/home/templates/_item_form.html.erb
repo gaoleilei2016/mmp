@@ -8,7 +8,7 @@
 					<img id="item_image" v-bind:src="form_data.picture ? form_data.picture : img_init "  width="180px" height="180px" @click="change_image" style="position: absolute;    left: 62px;    top: -4px;">
 					<!-- <input type="file" style="display: none;" id="img_file_input" accept="image/gif, image/jpeg" /> -->
 					<input type="file" style="display: none;" id="img_file_input" accept="image/*"/>
-					<span style="position: absolute;    left: 37px;    bottom: -4px;    color: burlywood;    font-size: 12px;">图片尺寸800*800，图片大小不超过60KB</span>
+					<span v-if="!form_data.picture" style="position: absolute;left:37px; bottom:-4px; color: burlywood; font-size: 12px;">图片尺寸800*800，图片大小不超过60KB</span>
 				</el-col>
 			</el-col>
 		
