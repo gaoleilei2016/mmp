@@ -171,11 +171,11 @@
           <i class="el-icon-caret-bottom el-icon--right"></i>
         </span>
         <el-dropdown-menu slot="dropdown" class="_h_right_menus">
-          <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item>
+          <!-- <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-user fa-fw"></i>个人中心</a></el-dropdown-item> -->
           <% if current_user.organization&&current_user.organization.type_code=='1' %>
             <el-dropdown-item><a onclick="docCommMet.openDepDialog()"><i class="fa fa-exchange fa-fw"></i>切换科室</a></el-dropdown-item>
           <% end  %>
-          <el-dropdown-item><a disabled href="javascript:;"><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
+          <el-dropdown-item><a @click="goto_reset_password_temp"><i class="fa fa-key fa-fw"></i>修改密码</a></el-dropdown-item>
           <el-dropdown-item><a href="/users/sign_out"><i class="fa fa-power-off fa-fw"></i>退出</a></el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -195,6 +195,11 @@
   </nav>
 </div>
 <script type="text/javascript">
+
+  $(document).on('click','.el-message',function(){
+    $(this).hide(300);
+  })
+
   const header_vue = new Vue({
     el:"#_h_menus_div",
     data:{
@@ -241,7 +246,14 @@
           case "#/home":
             break;
           case "#/organizations/daoru":
-            this.dynamic_add_router_and_tab({path:'#/organizations/daoru',caption:'项目导入',target:'organizations_daoru'});
+            this.dynamic_add_router_and_tab({
+              path:'#/organizations/daoru',
+              caption:'项目导入',
+              target:'organizations_daoru',
+            });
+            break;
+          case "#/personnel/reset_password":
+            this.goto_reset_password_temp();
             break;
           default:
             // router.push('/')
@@ -253,18 +265,28 @@
             })
         }
       },
+      goto_reset_password_temp:function(){
+        this.dynamic_add_router_and_tab({
+          path:'#/personnel/reset_password',
+          caption:'修改密码',
+          target:'personnel_reset_password',
+          template_path: "admin/home",
+        })
+      },
       // ajax 动态加载 router 并且增加 tab
       // window.apps.header_and_footer.dynamic_add_router_and_tab({
       //   path:'#/project/daoru',
       //   caption:'项目导入',     // tab 的显示标题
       //   target:'project_daoru', // 后台 html.erb 的文件名
-      //   add_tab_flag:留空时默认增加标签
+      //   add_tab_flag:留空时默认增加标签,
+      //   template_path: admin/home | hospital/home | ims/home
       // })
       dynamic_add_router_and_tab:function(obj) {
         var path = obj.path;
         var caption = obj.caption;
         var target = obj.target;
         var add_tab_flag = obj.add_tab_flag;
+        var template_path = obj.template_path;
 
         window.location = path;
         if (add_tab_flag!=false) {
@@ -278,7 +300,7 @@
           if (rnames.indexOf(target)<0) {
             current_app.loading = true;
             $.ajax({
-              url:'/application/templates?template_name='+target+'&path=<%= controller_path %>',
+              url:'/application/templates?template_name='+target+'&path='+(template_path||'<%= controller_path %>'),
               success:function(html) {
                 window.current_template_obj = null;
                 var tmp = $('<div><div>');

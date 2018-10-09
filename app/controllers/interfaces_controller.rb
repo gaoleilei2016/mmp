@@ -3,6 +3,14 @@ class InterfacesController < ApplicationController
 	before_action :ajax_access
 	layout false
 
+	def reset_passwords
+		if current_user.valid_password?(params[:old_password])
+			current_user.update_attributes(password:params[:password])
+			render json:{flag:true,info:"修改成功"}
+		else
+			raise "密码错误"
+		end
+	end
 	#############################
 	############ zyz ############
 	# 上传 file 图片 转换成 base64
