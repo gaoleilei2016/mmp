@@ -1467,7 +1467,7 @@ window.current_template_obj = {
       useTemplate: function(template_id){
         var _this = this;
         console.log(template_id, _this.encounter.id);
-        _this.$resource("/hospital/sets/mtemplates/quote_template").save({template_id: template_id, encounter_id: _this.encounter.id}).then(function(response) {
+        _this.$resource("/hospital/sets/mtemplates/quote_template").save({template_id: template_id, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then(function(response) {
           if (response.body.flag) {
             _this.$message.success("模板引用成功");
           } else {

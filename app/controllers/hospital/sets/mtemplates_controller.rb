@@ -118,7 +118,7 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
     return render json: {flag: false, info: "引用失败：没有就诊id"} if params[:encounter_id].blank?
     return render json: {flag: false, info: "引用失败：没有模板id"} if params[:template_id].blank?
     order_ids = ::Hospital::Order.select(:id).where(mtemplate_id: params[:template_id]).map { |e| e.id  }
-    ret = ::Hospital::Order.copy_orders(order_ids, @encounter.id, current_user)
+    ret = ::Hospital::Order.copy_orders(order_ids, params[:encounter_id], current_user)
     info = ret[:flag] ? "引用成功" : ("引用失败: " + ret[:info]) 
     render json: {flag: ret[:flag], info: info}
   end
