@@ -1464,17 +1464,19 @@ window.current_template_obj = {
         this.getMtemplates();
       },
       //药品模板的使用方法
-      useTemplate: function(orders){
-        var _this = this, ids = [];
-        if (orders.length == 0) {
-          _this.isShowFavoriteDialog = false;
-          return false;
-        };
-        orders.forEach(function(i) {
-          if (i.id) {
-            ids.push(i.id)
-          };
+      useTemplate: function(template_id){
+        var _this = this;
+        console.log(template_id, _this.encounter.id);
+        _this.$resource("/hospital/sets/mtemplates/quote_template").save({template_id: template_id, encounter_id: _this.encounter.id}).then(function(response) {
+          if (response.body.flag) {
+            _this.$message.success("模板引用成功");
+          } else {
+            _this.$message.warning("模板引用失败, 请刷新后重试");
+          }
+        }, function(response){
+          _this.$message.error("引用失败，请联系管理员");
         })
+        _this.isShowFavoriteDialog = false;
       },
       // 药品模板tab改变
       handleMTemplateTabClick: function (tab, event) {
