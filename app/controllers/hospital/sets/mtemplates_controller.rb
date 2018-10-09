@@ -109,6 +109,20 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
     end
   end
 
+  # 接诊时 引用事先创建好的模板
+  # POST
+  # /hospital/sets/mtemplates/quote_template
+  # {encounter_id: Hospital::Encounter#id, template_id: ::Hospital::Sets::Mtemplate#id}
+  def quote_template
+    p " quote_template",params
+    return render json: {flag: false, info: "引用失败：没有就诊id"} if params[:encounter_id].blank?
+    return render json: {flag: false, info: "引用失败：没有模板id"} if params[:template_id].blank?
+    order_ids = ::Hospital::Order.select(:id).where(mtemplate_id: params[:template_id]).map { |e| e.id  }
+    ret = ::Hospital::Order.copy_orders(order_ids, @encounter.id, current_user)
+    info = ret[:flag] ? "引用成功" : ("引用失败: " + ret[:info]) 
+    render json: {flag: ret[:flag], info: info}
+  end
+
   private
     # 获取当前机构 没有就提示
     def set_cur_org
@@ -151,8 +165,8 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
         disease_display: args[:disease][:display],
         author_id: current_user.id,
         author_display: current_user.name,
-        location_id: 1,
-        location_display: "酱油科"
+        location_id: @cur_dep.id,
+        location_display: @cur_dep.name
       }
       ret = {
         mtemplate: mtemplate_info,
@@ -173,8 +187,8 @@ class ::Hospital::Sets::MtemplatesController < ApplicationController
         disease_display: args[:disease][:display],
         author_id: current_user.id,
         author_display: current_user.name,
-        location_id: 1,
-        location_display: "酱油科"
+        location_id: @cur_dep.id,
+        location_display: @cur_dep.name
       }
       ret = {
         mtemplate: mtemplate_info,

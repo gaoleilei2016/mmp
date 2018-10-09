@@ -131,7 +131,12 @@ Rails.application.routes.draw do
           post :set_cur_department
         end
       end
-      resources :mtemplates # 医嘱模板管理
+      # 医嘱模板管理
+      resources :mtemplates do 
+        collection do
+          post :quote_template
+        end
+      end
 
       # 编码表
       resources :codes do

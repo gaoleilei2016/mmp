@@ -26,7 +26,7 @@ class Hospital::Order < ApplicationRecord
   def initialize args = {}
     super args
     self.status = 0
-    self.type_type = 'instance'
+    # self.type_type = 'instance'
   end
 
 
@@ -149,7 +149,7 @@ class Hospital::Order < ApplicationRecord
       end
     end
 
-    def copy_orders(order_ids, encounter_id, cur_user)
+    def copy_orders(order_ids, encounter_id, cur_user, selects: {type_type: "instance"})
       cur_encounter = ::Hospital::Encounter.find(encounter_id)
       cur_orders = ::Hospital::Order.find(order_ids)
       errors = []
@@ -180,7 +180,7 @@ class Hospital::Order < ApplicationRecord
               encounter_id: encounter_id,
               author_id: cur_user.id,
               prescription_id: nil,
-              type_type: _order.type_type
+              type_type: (selects[:type_type] || _order.type_type)
           }
           new_order_args.merge!(medication_info)
           new_order = ::Hospital::Order.create!(new_order_args)
