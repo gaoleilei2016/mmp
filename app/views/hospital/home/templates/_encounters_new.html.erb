@@ -774,7 +774,16 @@ window.current_template_obj = {
             }
             this.encounter.diagnoses.push({code: "", display: this.diagnoseInput});
           } else {
-            this.encounter.diagnoses.push({code: item.code, display: item.display});
+            var arrs = [];
+            arrs = this.encounter.diagnoses.filter(function(i) {
+              return i.code === item.code
+            })
+            if (arrs.length == 0) {
+              this.encounter.diagnoses.push({code: item.code, display: item.display});
+            } else {
+              this.$message.warning("诊断不可重复");
+            }
+            
           }
           this.diagnoseInput = "";
           this.focusNext('encdiagnose', 'encsave');
