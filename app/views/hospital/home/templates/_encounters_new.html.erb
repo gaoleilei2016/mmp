@@ -1736,7 +1736,7 @@ window.current_template_obj = {
           type: 'warning'
         }).then( function () {
           btn.attr("disabled", "disabled").find(".fa").show();
-          _this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          _this.prescriptionsResource.delete({id: row.id, encounter_id: _this.encounter.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
             var res = response.data;
             btn.removeAttr("disabled").find(".fa").hide();
             if(res.flag) {
