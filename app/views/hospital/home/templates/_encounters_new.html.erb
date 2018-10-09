@@ -783,7 +783,6 @@ window.current_template_obj = {
             } else {
               this.$message.warning("诊断不可重复");
             }
-            
           }
           this.diagnoseInput = "";
           this.focusNext('encdiagnose', 'encsave');
@@ -1479,6 +1478,7 @@ window.current_template_obj = {
         _this.$resource("/hospital/sets/mtemplates/quote_template").save({template_id: template_id, encounter_id: _this.encounter.id, authenticity_token: $('[name="csrf-token"]').attr('content')}).then(function(response) {
           if (response.body.flag) {
             _this.$message.success("模板引用成功");
+            _this.getOrders();
           } else {
             _this.$message.warning("模板引用失败, 请刷新后重试");
           }
@@ -1737,7 +1737,7 @@ window.current_template_obj = {
           type: 'warning'
         }).then( function () {
           btn.attr("disabled", "disabled").find(".fa").show();
-          _this.prescriptionsResource.delete({id: row.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          _this.prescriptionsResource.delete({id: row.id, encounter_id: _this.encounter.id}, {authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
             var res = response.data;
             btn.removeAttr("disabled").find(".fa").hide();
             if(res.flag) {
