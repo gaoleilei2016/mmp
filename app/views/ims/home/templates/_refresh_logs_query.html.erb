@@ -145,7 +145,7 @@
 				this.$nextTick(function() {
 			  	this.query();
 				});
-				console.log(`当前页: ${val}`);
+				console.log('当前页: ${val}');
 			},
 			formatCreatedAtTime (row) {
 				return row.created_at && row.created_at.replace(/T/, " ").slice(0, 19) || "";
