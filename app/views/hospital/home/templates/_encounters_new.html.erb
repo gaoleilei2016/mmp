@@ -1463,6 +1463,19 @@ window.current_template_obj = {
         this.favoriteActiveName = "use"; // 打开模态框，默认显示使用模板tab
         this.getMtemplates();
       },
+      //药品模板的使用方法
+      useTemplate: function(orders){
+        var _this = this, ids = [];
+        if (orders.length == 0) {
+          _this.isShowFavoriteDialog = false;
+          return false;
+        };
+        orders.forEach(function(i) {
+          if (i.id) {
+            ids.push(i.id)
+          };
+        })
+      },
       // 药品模板tab改变
       handleMTemplateTabClick: function (tab, event) {
         var _this = this;
