@@ -64,11 +64,12 @@ form.el-form .el-col{
                 label="操作"
                 width="150">
                 <template scope="scope">
-                    <el-button type="text" v-if="scope.row.status =='N'">启用</el-button>
-                    <el-button type="text" v-else style="color:red;">停用</el-button>
+                    <el-button type="text" v-if="scope.row.status =='N'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
+                    <el-button type="text" v-if="scope.row.status =='S'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
+                    <el-button type="text" v-else style="color:#d84e4e;" @click="onBtnStatusClick(scope.row)">停用</el-button>
 
                     <el-button type="text" @click="onBtnDetailClick(scope.row)">编辑</el-button>
-                    <el-button type="text">删除</el-button>
+                    <el-button type="text" style="color:#d84e4e;" @click="delete_line(scope.row)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -101,10 +102,13 @@ window.current_template_obj = {
       search: "", // 搜索内容
       tableData:[],
       tableColumns:[],
+      model_title:"编辑药品",
 
       kindname_options:[],//分类名称
       formul_name_options:[],//剂型名称
       pharmacology_code_options:[],//药理学分类编码
+
+      return_price_flag_options:[{code:0,name:"无返款"},{code:1,name:"有返款"}],//药品标签
 
       tableHeight: 550, // 表格高度
       // 分页相关
@@ -166,7 +170,8 @@ window.current_template_obj = {
         pharmacology_code:[],//药理学分类编码 编码系统: 2.16.156.1.675425699.1.255
         indications:[],//适应症 数据格式用|分割 例如：感冒|头疼|发烧 编码系统: 2.16.156.1.675425699.1.256
       },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      img_init:"data:image/jpeg;base64,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",
 		}
 	},
 	methods:{
@@ -213,6 +218,28 @@ window.current_template_obj = {
         _this.$message.error("后台出错，获取患者列表失败。");
       })
     },
+    getJpWb:function(name){
+      console.log(this.form_data[name])
+      name_str = this.form_data[name]
+      _this = this
+      // _this.$http.get('/ims/items/juzi_to_jp_wb', {str:name}).then( function(response) {
+      Vue.resource("/ims/items/juzi_to_jp_wb",{str:name_str}).get().then( function(response) {
+        var res = response.data;
+        if (name=="common_name") {
+          _this.form_data.common_py = res.jianpin.join(',')
+          _this.form_data.common_wb = res.wubi
+          console.log("common_name")
+        }else if(name=="name"){
+          _this.form_data.py = res.jianpin.join(',')
+          _this.form_data.wb = res.wubi
+          console.log("name")
+        }else{
+          // "do nothing"
+        }
+      }, function() {
+        _this.$message.error("后台出错，保存失败");
+      });
+    },
     handleOpen:function(key, keyPath) {
       console.log(key, keyPath);
     },
@@ -222,6 +249,7 @@ window.current_template_obj = {
     //点击编辑按钮
     onBtnDetailClick:function(row){
       console.log(row)
+      _this.model_title = "编辑药品"
       this.dialogFormVisible = true
       _this = this
       // Vue.resource("/ims/items/get_items",{serialno:row.serialno}).get().then(function(response) {
@@ -253,7 +281,8 @@ window.current_template_obj = {
     //新增药品
     new_item:function(){
       _this = this
-      _this.form_data = { serialno:"", ecode:"", picture:"",}
+      _this.model_title = "新建药品"
+      _this.form_data = { serialno:"", ecode:"", picture:"",status:"N"}
       _this.dialogFormVisible = true
     },
     //编辑药品保存
@@ -284,6 +313,43 @@ window.current_template_obj = {
     },
     change_pharmacology_code:function(val){  
       // this.form_data.pharmacology_code = val.code    
+    },
+    onBtnStatusClick:function(row){
+      _this = this
+      _this.$http.post("/ims/items/change_status",{line:row,authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+        data = response.data
+        if (data.flag) {
+          _this.$message.success("修改成功！");
+          row.status = data.status
+        }else{
+          _this.$message.error(data.info||"后台出错，请重试！");
+        }
+      }, function() {
+        _this.$message.error("后台出错，请重试！");
+      });
+    },
+    delete_line:function(row){
+      _this = this
+      _this.$confirm('永久删除该药品, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(function(){
+        _this.$http.post("/ims/items/delete_item",{line:row,authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          data = response.data
+          if (data.flag) {
+            _this.$message.success("删除成功！");
+            _this.getData();
+          }else{
+            _this.$message.error(data.info||"后台出错，请重试！");
+          }
+        }, function() {
+          _this.$message.error("后台出错，请重试！");
+        });
+      }).catch(function(){
+        _this.$message.warning("已取消删除");
+      });
+
     },
 	},
 	mounted:function(){

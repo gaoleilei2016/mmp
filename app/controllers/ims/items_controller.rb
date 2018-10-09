@@ -9,6 +9,7 @@ class Ims::ItemsController < ApplicationController
     # cur_author_patients_count =  Dict::Medication.count
     p cur_author_patients_count =  mode.count
 		items = {
+				#表格显示的内容
 				title:[
           { label: '药品编码', prop: 'pt_code', width:"60"},
           { label: '易用码', prop: 'ecode', width:"60"},
@@ -43,7 +44,6 @@ class Ims::ItemsController < ApplicationController
 			end
 			str = str.chop
 			sql_update = "UPDATE dictmedicine SET #{str} WHERE serialno=#{serialno}"
-			p sql_update
 			rest = runsql.update sql_update
 			if rest
 				render json:{flag:true,info:"更新成功"}
@@ -69,8 +69,69 @@ class Ims::ItemsController < ApplicationController
 		end
 
 		rescue Exception => e
-			print "laaaaaaaaaaaaaaaaaaaa 过账方法 出错: " + e.backtrace.join("\n")
+			print "laaaaaaaaaaaaaaaaaaaa 保存 出错: " + e.backtrace.join("\n")
 			render json:{flag:false,info:"#{e.backtrace.join("\n")}"}
 		end		
 	end
+
+	def change_status
+		p params
+
+		serialno = params[:line][:serialno]
+		status = status_machine(params[:line][:status])
+		if serialno
+			
+			runsql=ActiveRecord::Base.connection()
+			sql_update = "UPDATE dictmedicine SET status='#{status}' WHERE serialno=#{serialno}"
+			rest = runsql.update sql_update
+			p "+++++++++++++++  #{rest}  ++++++++++++++++++++"
+			if rest
+				render json:{flag:true,info:"药品更改成功",status:status}
+			else
+				render json:{flag:false,info:"药品更改失败"}
+			end
+		else
+			render json:{flag:false,info:"没有药品ID，不能更改药品"}
+		end
+	end
+
+	def delete_item
+		serialno = params[:line][:serialno]
+		status = status_machine(params[:line][:status])
+		if serialno
+			runsql=ActiveRecord::Base.connection()
+			sql_delete = "DELETE FROM dictmedicine WHERE serialno=#{serialno}"
+			rest = runsql.delete sql_delete
+			p "+++++++++++++++  #{rest}  ++++++++++++++++++++"
+			if rest
+				render json:{flag:true,info:"药品删除成功",status:status}
+			else
+				render json:{flag:false,info:"药品删除失败"}
+			end
+		else
+			render json:{flag:false,info:"没有药品ID，不能删除药品"}
+		end
+	end
+
+	def juzi_to_jp_wb
+		p params
+		juzi = params[:str]
+		runsql=ActiveRecord::Base.connection()
+		sql_jp = "SELECT jianpin('#{juzi}')"
+		jianpin = runsql.execute sql_jp
+		wubi = ""
+
+		render json:{wubi:wubi,jianpin:jianpin}
+	end
+	private
+		def status_machine status
+			case status
+			when "A" # 可用的药品
+				"S"
+			when "S" # 停用的药品
+				"A"
+			else
+				"A"
+			end
+		end
 end
