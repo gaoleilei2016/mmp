@@ -12,6 +12,7 @@ Rails.application.routes.draw do
   get "/application/templates",to:"application#templates"
   resources :interfaces do
     collection do
+      put :reset_passwords
       post :stringify_base64_img
       get :gzh
       get :get_prescriptions_by_phone
