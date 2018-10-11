@@ -14,7 +14,8 @@
   #ims_order_main .el-tabs .el-tabs__content .el-table{
     height: calc(100% - 72px)!important;
     overflow-y: auto;
-  }  
+  }
+  .el-message.el-message--error {max-height: 500px;overflow: auto;}
   
 form.el-form .el-col{
   margin-bottom: 12px;
@@ -94,6 +95,16 @@ form.el-form .el-col{
 window.current_template_obj = {
   data:function(){
     var options = [{code: "0", display: "药品列表"}];
+      var validatePass = (rule, value, callback) => {
+        if (value === '') {
+          callback(new Error('请输入密码'));
+        } else {
+          if (this.ruleForm2.checkPass !== '') {
+            this.$refs.ruleForm2.validateField('checkPass');
+          }
+          callback();
+        }
+      };
     return {
       activeName: options[0].code,
       isCollapse: true,
@@ -121,15 +132,73 @@ window.current_template_obj = {
       dialogFormVisible: false,
       form_label_position:"right",
       form_data:{
+        pt_code:"",
+        name:"",
+        kindcode:"",
+        spec:"",
+        produce_name:"",
+        formul_code:"",
         serialno:"",
         ecode:"",
         picture:"",
       },
       rules: {
+        pt_code:[
+          { required: true, message: '药品编码不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//平台编码/药品编码
+        name:[
+          { required: true, message: '通用名称不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//通用名称
+        kindcode:[
+          { required: true, message: '药品分类不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//药品分类
+        spec:[
+          { required: true, message: '规格不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//规格
+        produce_name:[
+          { required: true, message: '厂家不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//厂家名称
+        formul_code:[
+          { required: true, message: '剂型不能为空'},
+          { min: 1, max: 25, message: '长度在 1 到 25 个字符' }
+        ],//剂型代码
+        formul_name:[],//剂型名称
+        measure_unit:[
+          { required: true, message: '最小计量单位不能为空'},
+          { min: 1, max: 3, message: '长度在 1 到 3 个字符' }
+        ],//最小计量单位
+        measure_val:[
+          { required: true, message: '最小计量值不能为空'},
+          { type: 'number', message: '最小计量值必须为数字值'},
+          // { pattern: /^0\.([0-9]|\d[0-2])[1-9]$|^[1-9]\d{0,3}\.\d{0,3}$|^[1-9]\d{0,2}$|^0\.[1-9]$|999999.9999/, message: '值在 0.0001 到 1000000000 之间 ' }
+        ],//最小计量值
+        base_unit:[
+          { required: true, message: '基本单位不能为空'},
+          { min: 1, max: 3, message: '长度在 1 到 3 个字符' }
+        ],//基本单位
+        unit:[
+          { required: true, message: '销售单位不能为空'},
+          { min: 1, max: 3, message: '长度在 1 到 3 个字符' }
+        ],//销售单位
+        mul:[
+          { required: true, message: '倍率不能为空'},
+          { type: 'number', message: '倍率必须为数字值'},
+          // { pattern: /^(?:[1-9]?\d|100)$/, message: '倍率在1-99999999.99之间'}
+        ],//销售/基本单位的倍率
+        price:[
+          { required: true, message: '销售价格不能为空'},
+          { type: 'number', message: '销售价格必须为数字值'},
+          // { pattern: /^(?:[1-9]?\d|100)$/, message: '销售价格在1-99999999.99之间'}
+        ],//销售价格
+        
         serialno:[],//序号
         ecode:[],//易用码
         effect_code:[],//药品功效编码
-        name:[],//通用名称
         common_name:[],//商品名称
         alias_name:[],//首选别名
         py:[],//通用名拼音码
@@ -138,25 +207,14 @@ window.current_template_obj = {
         common_wb:[],//商品名五笔码
         alias_py:[],//别名拼音码
         alias_wb:[],//别名五笔码
-        spec:[],//规格
-        formul_code:[],//剂型代码
-        formul_name:[],//剂型名称
         usedescribe:[],//用法用量描述
-        measure_unit:[],//最小计量单位
-        measure_val:[],//最小计量值
-        base_unit:[],//基本单位
         purch_unit:[],//采购单位
-        unit:[],//销售单位
-        mul:[],//销售/基本单位的倍率
         purch_mul:[],//采购/基本单位的倍率
         purch_price:[],//采购价格
-        price:[],//销售价格
-        kindcode:[],//药品分类
         kindname:[],//分类名称
         licensenum:[],//批准文号
         bar_code:[],//条形码
         produce_code:[],//厂家编码
-        produce_name:[],//厂家名称
         instruction:[],//说明书
         bxkind:[],//报销类型
         picture:[],//药品图片
@@ -165,7 +223,6 @@ window.current_template_obj = {
         updated_at:[],//最后修改时间
         coperator:[],//建立人
         uoperator:[],//最后修改人员
-        pt_code:[],//平台编码
         return_price_flag:[],//返款标记
         pharmacology_code:[],//药理学分类编码 编码系统: 2.16.156.1.675425699.1.255
         indications:[],//适应症 数据格式用|分割 例如：感冒|头疼|发烧 编码系统: 2.16.156.1.675425699.1.256
@@ -288,17 +345,25 @@ window.current_template_obj = {
     //编辑药品保存
     item_form_save:function(){
       _this = this
-      _this.$http.post('/ims/items/save_item', {item:_this.form_data, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
-        var res = response.data;
-        if(res.flag) {
-          _this.$message.success("保存成功！");
-          _this.dialogFormVisible = false
-        } else {
-          _this.$message.error(res.info);
+      console.log(_this.$refs['itemForm'])
+      _this.$refs['itemForm'].validate( function (valid) {
+        if (valid) {
+
+        _this.$http.post('/ims/items/save_item', {item:_this.form_data, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
+          var res = response.data;
+          if(res.flag) {
+            _this.$message.success("保存成功！");
+            _this.dialogFormVisible = false
+          } else {
+            _this.$message.error(res.info);
+          }
+        }, function() {
+          _this.$message.error("后台出错，保存失败");
+        });
+        }else{
+          _this.$message.warning("请按照规范录入数据！");
         }
-      }, function() {
-        _this.$message.error("后台出错，保存失败");
-      });
+      })
     },
     //
     change_image:function(){
@@ -408,6 +473,11 @@ window.current_template_obj = {
       });
 
 	},
+  watch:{
+    dialogFormVisible: function(val,oldVla) {
+      this.$refs["itemForm"].resetFields();
+    }
+  }
 }
 
 $(function(){
