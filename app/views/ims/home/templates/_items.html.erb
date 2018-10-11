@@ -475,7 +475,7 @@ window.current_template_obj = {
 	},
   watch:{
     dialogFormVisible: function(val,oldVla) {
-      this.$refs["itemForm"].resetFields();
+      if (!val)this.$refs["itemForm"].resetFields();
     }
   }
 }
