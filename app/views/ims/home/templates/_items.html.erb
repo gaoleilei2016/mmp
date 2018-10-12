@@ -70,7 +70,7 @@ form.el-form .el-col{
                     <el-button type="text" v-else style="color:#d84e4e;" @click="onBtnStatusClick(scope.row)">停用</el-button>
 
                     <el-button type="text" @click="onBtnDetailClick(scope.row)">编辑</el-button>
-                    <el-button type="text" style="color:#d84e4e;" @click="delete_line(scope.row)">删除</el-button>
+                    <!-- <el-button type="text" style="color:#d84e4e;" @click="delete_line(scope.row)">删除</el-button> -->
                 </template>
             </el-table-column>
         </el-table>
@@ -266,7 +266,6 @@ window.current_template_obj = {
         if (name=="common_name") {
           _this.form_data.common_py = res.jianpin.join(',')
           _this.form_data.common_wb = res.wubi
-          console.log("common_name")
         }else if(name=="name"){
           _this.form_data.py = res.jianpin.join(',')
           _this.form_data.wb = res.wubi
@@ -326,13 +325,13 @@ window.current_template_obj = {
     //编辑药品保存
     item_form_save:function(){
       _this = this
-      console.log(_this.$refs['itemForm'])
       _this.$refs['itemForm'].validate( function (valid) {
         if (valid) {
         _this.$http.post('/ims/items/save_item', {item:_this.form_data, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
           var res = response.data;
           if(res.flag) {
             _this.$message.success("保存成功！");
+            _this.getData();
             _this.dialogFormVisible = false
           } else {
             _this.$message.error(res.info);
