@@ -22,7 +22,7 @@ development:
   <<: *default
   password: Tenmind@207
   host: 192.168.2.207
-  database: mmp_lgl
+  database: mmp_test207
   # database: zyz
 
 # Warning: The database defined as "test" will be erased and

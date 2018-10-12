@@ -233,39 +233,21 @@ window.current_template_obj = {
 	},
 	methods:{
     init:function(){
-      // $(document).find("#prescription_menu").find(".el-menu-item:first").addClass("is-active")
-      // $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
       _this = this
-      // axios.get('/ims/items/get_items', {
-      //   params: {
-      //     get_items: true
-      //   }
-      // })
-      // .then(function (response) {
-      //   console.log(response);
-      //   _this.tableColumns = response.data.title
-      //   _this.tableData = response.data.lines
-      // })
-      // .catch(function (response) {
-      //   console.log(response);
-      // });
-
-      Vue.resource("/ims/items/get_items",{items:true}).get().then(function(response) {
-        var res = response.data;
-        if(res.flag) {
-          _this.tableColumns = res.data.title
-          _this.tableData = res.data.lines
-          _this.dataCount = res.count;
-        }
-      },function() {
-        _this.$message.error("获取初始值失败，请联系管理员。");
-      })    
+      this.getData();
     },
     getData:function(){
       var _this = this;
       Vue.resource("/ims/items/get_items",{search: _this.search, page: _this.currentPage, per: _this.pageSize}).get().then( function(response) {
         var res = response.data;
         if(res.flag) {
+          lines = res.data.lines;
+          $.each(lines,function(k,v){
+            lines[k]['measure_val'] = parseFloat(v['measure_val'])||0
+            lines[k]['mul'] = parseFloat(v['mul'])||1
+            lines[k]['price'] = parseFloat(v['price'])||0
+          })
+          _this.tableColumns = res.data.title
           _this.tableData = res.data.lines;
           _this.dataCount = res.count;
         }else{
