@@ -66,7 +66,7 @@ form.el-form .el-col{
                 width="150">
                 <template scope="scope">
                     <el-button type="text" v-if="scope.row.status =='N'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
-                    <el-button type="text" v-if="scope.row.status =='S'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
+                    <el-button type="text" v-else-if="scope.row.status =='S'" style="color:#e6a23c;" @click="onBtnStatusClick(scope.row)">启用</el-button>
                     <el-button type="text" v-else style="color:#d84e4e;" @click="onBtnStatusClick(scope.row)">停用</el-button>
 
                     <el-button type="text" @click="onBtnDetailClick(scope.row)">编辑</el-button>
