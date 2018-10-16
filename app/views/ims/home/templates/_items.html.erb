@@ -1,9 +1,6 @@
 <style type="text/css">
   #ims_order_main .el-tabs{
-    height: calc(100% - 55px);
-  }
-  #ims_order_main .el-tabs{
-    height: calc(100% - 55px);
+    height: calc(100% - 36px);
   }
   #ims_order_main .el-tabs .el-tabs__content{
     height: calc(100% - 40px);
@@ -26,12 +23,12 @@ form.el-form .el-col{
     <el-tabs v-model="activeName" type="border-card" @tab-click="handleTabClick" style="margin: 18px;">
       <el-tab-pane v-for="tab in cardTabsOptions" :label="tab.display" :name="tab.code"></el-tab-pane>
       <div style="">
-        <el-row :gutter="20" style="margin-bottom: 10px;">
+        <el-row :gutter="20" style="margin-bottom: 10px; margin-left:0;margin-right:0;">
           <el-col :span="8">
             <el-input
               placeholder="搜索药品名称 / 简拼"
               prefix-icon="el-icon-search"
-              size="mini"
+              size="small"
               v-model="search"
               @keyup.enter.native="getData">
               <i
@@ -41,8 +38,8 @@ form.el-form .el-col{
               </i>
             </el-input>
           </el-col>
-          <el-col :span="6">&nbsp;
-            <el-select v-model="sort_method" size="mini" placeholder="请选择" @change="sort_change">
+          <el-col :span="6">
+            <el-select v-model="sort_method" size="small" placeholder="选择排序方式" @change="sort_change" style="width:135px;">
               <el-option
                 v-for="method in sort_methods"
                 :key="method.value"
@@ -250,13 +247,14 @@ window.current_template_obj = {
 	},
 	methods:{
     init:function(){
-      _this = this
+      this.sort_method = localStorage.getItem("sort_method")
       this.getData();
     },
     sort_change:function(){
-      method = this.sort_method
-      console.log(method)
-      console.log("asdgasd")
+      // method = this.sort_method
+      // console.log(method)
+      // console.log("asdgasd")
+      localStorage.setItem("sort_method",this.sort_method)
       this.getData()
     },
     getData:function(){
