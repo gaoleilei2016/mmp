@@ -41,8 +41,16 @@ form.el-form .el-col{
               </i>
             </el-input>
           </el-col>
-          <el-col :span="6" style="line-height: 30px;">&nbsp;
-            <span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span>
+          <el-col :span="6">&nbsp;
+            <el-select v-model="sort_method" size="mini" placeholder="请选择" @change="sort_change">
+              <el-option
+                v-for="method in sort_methods"
+                :key="method.value"
+                :label="method.label"
+                :value="method.value">
+              </el-option>
+            </el-select>
+            <!-- <span v-if="multipleSelection.length>0">已选择 {{ multipleSelection.length }} 个</span> -->
           </el-col>
           <el-col :span="10" style="text-align: right;">
             <el-button @click="new_item" type="primary" size="small">新增</el-button>
@@ -53,6 +61,7 @@ form.el-form .el-col{
             size="small"
             style="width: 100%"
             :height="tableHeight"
+            :default-sort = "{prop: 'pt_code', order: 'descending'}"
             >
             <template v-for="column in tableColumns">
                 <el-table-column
@@ -114,7 +123,15 @@ window.current_template_obj = {
       tableData:[],
       tableColumns:[],
       model_title:"编辑药品",
-
+      sort_method:"",
+      sort_methods:[
+        {label:"创建时间-升序",value:"created_at:desc"},
+        {label:"创建时间-降序",value:"created_at:asc"},
+        {label:"药品编码-升序",value:"pt_code:desc"},
+        {label:"药品编码-降序",value:"pt_code:asc"},
+        {label:"通用名称-升序",value:"name:desc"},
+        {label:"通用名称-降序",value:"name:asc"},
+      ],
       kindname_options:[],//分类名称
       formul_name_options:[],//剂型名称
       pharmacology_code_options:[],//药理学分类编码
@@ -236,9 +253,15 @@ window.current_template_obj = {
       _this = this
       this.getData();
     },
+    sort_change:function(){
+      method = this.sort_method
+      console.log(method)
+      console.log("asdgasd")
+      this.getData()
+    },
     getData:function(){
       var _this = this;
-      Vue.resource("/ims/items/get_items",{search: _this.search, page: _this.currentPage, per: _this.pageSize}).get().then( function(response) {
+      Vue.resource("/ims/items/get_items",{sort:this.sort_method,search: _this.search, page: _this.currentPage, per: _this.pageSize}).get().then( function(response) {
         var res = response.data;
         if(res.flag) {
           lines = res.data.lines;
@@ -325,8 +348,8 @@ window.current_template_obj = {
     //编辑药品保存
     item_form_save:function(){
       _this = this
-      _this.$refs['itemForm'].validate( function (valid) {
-        if (valid) {
+      // _this.$refs['itemForm'].validate( function (valid) {
+        // if (valid) {
         _this.$http.post('/ims/items/save_item', {item:_this.form_data, authenticity_token: $('[name="csrf-token"]').attr('content')}).then( function(response) {
           var res = response.data;
           if(res.flag) {
@@ -339,10 +362,10 @@ window.current_template_obj = {
         }, function() {
           _this.$message.error("后台出错，保存失败");
         });
-        }else{
-          _this.$message.warning("请按照规范录入数据！");
-        }
-      })
+        // }else{
+        //   _this.$message.warning("请按照规范录入数据！");
+        // }
+      // })
     },
     //
     change_image:function(){

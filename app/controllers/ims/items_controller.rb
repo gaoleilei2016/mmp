@@ -4,8 +4,15 @@ class Ims::ItemsController < ApplicationController
 
 	def get_items
     search = params[:search].to_s
+    sort = params[:sort].split(":") rescue []
     mode = Dict::Medication.where("ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR common_py LIKE ? OR common_wb LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%")
-		lines = mode.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25)#.map { |e| e.to_web_front  }
+    if sort.length == 2
+    	k = sort[0].to_sym
+    	v = sort[1].to_sym
+			lines = mode.order(k=>v).page(params[:page]||1).per(params[:per]||25)#.map { |e| e.to_web_front  }
+    else
+			lines = mode.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25)#.map { |e| e.to_web_front  }
+    end
     # cur_author_patients_count =  Dict::Medication.count
     p cur_author_patients_count =  mode.count
 		items = {
