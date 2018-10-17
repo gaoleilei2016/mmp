@@ -257,6 +257,7 @@ window.current_template_obj = {
             lines[k]['measure_val'] = parseFloat(v['measure_val'])||0
             lines[k]['mul'] = parseFloat(v['mul'])||1
             lines[k]['price'] = parseFloat(v['price'])||0
+            lines[k]['return_price_flag'] = (v['return_price_flag']=="false" ? 0 : 1)
           })
           _this.tableColumns = res.data.title
           _this.tableData = res.data.lines;
