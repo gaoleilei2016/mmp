@@ -101,16 +101,6 @@ form.el-form .el-col{
 window.current_template_obj = {
   data:function(){
     var options = [{code: "0", display: "药品列表"}];
-      var validatePass = (rule, value, callback) => {
-        if (value === '') {
-          callback(new Error('请输入密码'));
-        } else {
-          if (this.ruleForm2.checkPass !== '') {
-            this.$refs.ruleForm2.validateField('checkPass');
-          }
-          callback();
-        }
-      };
     return {
       activeName: options[0].code,
       isCollapse: true,
