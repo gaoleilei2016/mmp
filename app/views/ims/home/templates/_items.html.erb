@@ -473,7 +473,7 @@ window.current_template_obj = {
 	},
   watch:{
     dialogFormVisible: function(val,oldVla) {
-      if (!val)this.$refs["itemForm"].resetFields();
+      if (val)this.$refs["itemForm"].resetFields();
     }
   }
 }
