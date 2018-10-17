@@ -1,0 +1,63 @@
+<!-- 打印处方的内容 -->
+<div class="prescription-wrapper" style="margin-top: 0.5cm; margin-left: 0.5cm; margin-right: 0.5cm; position: relative; font-size: 12pt !important; font-family: '宋体', 'SimSun';">
+  <span style="position: absolute; left: 10px; top: 10px; border: 1px solid #333; padding: 3px 7px; border-radius: 15px;" v-if="pre.specialmark">特</span>
+	<span style="position: absolute; right: 10px; top: 10px; border: 1px solid #333; padding: 7px;" v-if="pre.type">{{pre.pre_type}}</span>
+  <h2 style="text-align: center; margin-top: 0; margin-bottom: 10px;">
+    {{pre.source_org_name}}<br/>处方笺
+  </h2>
+  <p>
+  	<span style="display: inline-block; width: 50%; float: left;">处方号：{{pre.order_code}}</span>
+  	<span style="display: inline-block; width: 50%; text-align: right;">{{pre.created_at | formatDate}}</span>
+  </p>
+  <hr style="margin: 5px 0; border: none; border-bottom: 1px solid #666;"/>
+  <p>
+  	<span style="display: inline-block; width: 50%; float: left;">姓名：{{pre.patient_name}}&#12288;&#12288;性别：{{pre.patient_sex}}&#12288;&#12288;年龄：{{pre.patient_age}}</span>
+  	<span style="display: inline-block; width: 25%; float: left;">科室：{{pre.encounter_loc}}</span>
+  	<span style="display: inline-block; width: 25%;">手机号：{{pre.patient_phone}}</span>
+  </p>
+  <p>
+  	<span style="display: inline-block; width: 50%; float: left;">身份证号：{{pre.patient_iden}}</span>
+  	<span style="display: inline-block; width: 50%;">住址：{{pre.address}}</span>
+  </p>
+  <p>
+  	<span style="display: inline-block; width: 50%; float: left;">诊断：<span v-for="" :key="index" size="mini" type="info">{{pre.diagnoses}} </span></span>
+  	<span style="display: inline-block; width: 50%;">备注：{{pre.note}}</span>
+  </p>
+  <hr style="margin: 5px 0; border: none; border-bottom: 1px solid #666;"/>
+  <div style="min-height: 200px;">
+	  <table style="min-width: 100%; margin: 0;">
+	    <tr>
+	    	<th width="15px"><span style="font-size: 150%;">℞</span></th>
+        <th style="text-align: left;">药品名称</th>
+	    	<th style="text-align: left;">规格</th>
+	    	<th style="text-align: left;">单次剂量</th>
+	    	<th style="text-align: left;">途径</th>
+	    	<th style="text-align: left;">频次</th>
+	    	<th style="text-align: right;">数量</th>
+        <th style="text-align: right;">单价</th>
+	    	<th style="text-align: right;">金额</th>
+	    	<th style="text-align: left; padding-left: 5px;">备注</th>
+	    </tr>
+	    <tr v-for="(order, index) in (pre.details||[])" :key="index">
+	    	<td></td>
+        <td style="text-align: left;">{{order.name}}</td>
+	    	<td style="text-align: left;">{{order.specifications}}</td>
+	    	<td style="text-align: left;"><span v-if="order.dose">{{order.dose}}</span></td>
+	    	<td style="text-align: left;"><span v-if="order.route">{{order.route}}</span></td>
+	    	<td style="text-align: left;"><span v-if="order.frequency">{{order.frequency}}</span></td>
+	    	<td style="text-align: right;">{{order.quantity}}{{order.unit}}</td>
+        <td style="text-align: right;">{{order.price | formatMoney(2)}}</td>
+	    	<td style="text-align: right;">{{order.net_amt | formatMoney(2)}}</td>
+	    	<td style="text-align: left; padding-left: 5px;">{{order.note}}</td>
+	    </tr>
+	  </table>
+	  <center>（以下为空白）</center>
+  </div>
+  <hr style="margin: 5px 0; border: none; border-bottom: 1px solid #666;"/>
+  <p>
+  	<span style="display: inline-block; width: 25%; float: left;">审核、配方：{{pre.auditor}}</span>
+  	<span style="display: inline-block; width: 25%; float: left;">核对、发药：{{pre.delivery}}</span>
+  	<span style="display: inline-block; width: 25%; float: left; text-align: center;">总计：&#12288;{{pre.amt | formatMoney(2)}}元</span>
+  	<span style="display: inline-block; width: 25%; text-align: right;">医师：{{pre.doctor}}</span>
+  </p>
+</div>

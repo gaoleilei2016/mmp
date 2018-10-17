@@ -11,7 +11,7 @@
 			 	</div>					
 			</div>
 
-			<div style="line-height:17px; border-bottom:1px solid #ddd;">
+			<div style="line-height:17px; border-bottom:1px solid #ddd;margin-top: 5px;">
 			 	<div class="el-row">
 					<div class="el-col el-col-8 text-left patient_name">姓名:<span style="font-weight:bold;">{{pre.patient_name}}</span></div>
 					<div class="el-col el-col-6 text-left patient_gender_name">性别:<span style="font-weight:bold;">{{pre.patient_sex}}</span></div>
@@ -53,10 +53,22 @@
 	</div>
 
 	<div class="prescription_footer">
-		<div class="el-row" style="margin:0;">
+		<div class="el-row" style="margin:0;margin-top: 5px;">
 			<div class="el-col-12">医生: <span>{{pre.doctor}}</span></div>
 			<div class="el-col-12 total_amount" style="float:right;text-align:right;">金额: <span>{{format_price(pre.amt)}}</span></div>
 		</div>
+		<div class="btns" style="text-align:right; min-height:30px;" v-if="pre&&pre.order_code">
+          <span>
+            <button type="button" class="el-button el-button--primary el-button--mini" v-on:click="printPrescription_return()">打印</button>
+          </span>
+        </div>
+	</div>
+
+	<!-- 用于处方打印的隐藏框 -->
+	<div class="print-prescription-wrapper" id = "print_prescription_return" style="display: none;" v-if="pre&&pre.order_code">
+		<!-- <prescriptionprint :prescription="printPresRow"></prescriptionprint> -->
+		<!-- 打印处方的内容 -->
+		<%= render "ims/home/render/print_prescription"%>
 	</div>
 
 </div>

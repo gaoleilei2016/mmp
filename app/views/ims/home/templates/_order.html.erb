@@ -49,6 +49,10 @@
     </audio>
 	</div>
 </template>
+
+<!-- 处方打印模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
 <script type="text/javascript">
 document.onkeydown = function(){
   if(window.event.keyCode == 114){
@@ -183,6 +187,43 @@ window.current_template_obj = {
       }catch(e){
         _this._data.order_lists = []
       }
+    },
+    // 打印处方
+    printPrescription: function () {
+      var obj = document.getElementById('print_prescription')
+      var docStr = obj.innerHTML;
+      // var newWindow=window.open("打印窗口","_parent");
+      // newWindow.document.write(docStr);
+      // newWindow.document.close();
+      // newWindow.print();
+      // newWindow.close();
+      // 自定义打印方法
+      var window_printer;
+      $('iframe#window_printer_iframe_prescription').remove();
+      $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
+      window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
+      window_printer.document.open();
+      window_printer.document.writeln('<html><head>');
+      window_printer.document.writeln('</head><body></body></html>');
+      window_printer.document.close();
+      $(window_printer.document).find('body').html( docStr );
+      window_printer.print();
+    },
+    // 打印处方
+    printPrescription_return: function () {
+      var obj = document.getElementById('print_prescription_return')
+      var docStr = obj.innerHTML;
+      // 自定义打印方法
+      var window_printer;
+      $('iframe#window_printer_iframe_prescription').remove();
+      $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
+      window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
+      window_printer.document.open();
+      window_printer.document.writeln('<html><head>');
+      window_printer.document.writeln('</head><body></body></html>');
+      window_printer.document.close();
+      $(window_printer.document).find('body').html( docStr );
+      window_printer.print();
     },
     out_order_search_fun:function(e){
       var _this = this
