@@ -449,7 +449,7 @@ window.current_template_obj = {
         _canvas.toBlob(function(blob) {
           console.log(blob.size);
           
-          if(blob.size > 800*800){
+          if(blob.size > 65000){
             _this.zip_image(base64, bili, callback);
           }else{
             // callback(blob, base64);
@@ -472,7 +472,6 @@ window.current_template_obj = {
       var file = _this_jqy[0].files[0];
       if (file) {
         var base;
-        console.log("js 压缩方法开始"+base)
         _this.imageDeal(_this_jqy[0],base)
 
         // var formdata = new FormData();
@@ -526,8 +525,4 @@ window.current_template_obj = {
     }
   }
 }
-
-$(function(){
- 
-})
 </script>
