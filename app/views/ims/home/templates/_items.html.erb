@@ -413,6 +413,52 @@ window.current_template_obj = {
         newobj[attr] = obj[attr];
       }
       return newobj;
+    },
+    imageDeal:function(ele, returnBase64){
+      _this = this
+      //获取file，转成base64
+      var file = ele.files[0]; //取传入的第一个文件
+      if(undefined == file) { //如果未找到文件，结束函数，跳出
+        return;
+      }
+      console.log("fileSize" + file.size);
+      console.log(file.type);
+     
+      var r = new FileReader();
+      r.readAsDataURL(file);
+      r.onload = function(e) {
+        var base64 = e.target.result;
+        var bili = 1.5;
+        console.log("压缩前：" + base64.length);
+        _this.zip_image(base64, bili, returnBase64);
+      }
+    },
+    zip_image:function(base64, bili, callback){
+      console.log("执行缩放程序,bili=" + bili);
+      //处理缩放，转格式
+      var _img = new Image();
+      _img.src = base64;
+      _img.onload = function() {
+        var _canvas = document.createElement("canvas");
+        var w = this.width / bili;
+        var h = this.height / bili;
+        _canvas.setAttribute("width", w);
+        _canvas.setAttribute("height", h);
+        _canvas.getContext("2d").drawImage(this, 0, 0, w, h);
+        var base64 = _canvas.toDataURL("image/jpeg");
+        _canvas.toBlob(function(blob) {
+          console.log(blob.size);
+          
+          if(blob.size > 800*800){
+            _this.zip_image(base64, bili, callback);
+          }else{
+            // callback(blob, base64);
+            console.log("压缩完毕")
+            console.log(blob, base64)
+            _this.form_data.picture = base64
+          }
+        }, "image/jpeg");
+      }
     }
 	},
 	mounted:function(){
@@ -425,26 +471,29 @@ window.current_template_obj = {
       _this_jqy = $("input[type='file']")
       var file = _this_jqy[0].files[0];
       if (file) {
+        var base;
+        console.log("js 压缩方法开始"+base)
+        _this.imageDeal(_this_jqy[0],base)
 
-        var formdata = new FormData();
-        formdata.append("file",file)
-        formdata.append("authenticity_token","<%= form_authenticity_token%>")
-        $.ajax({
-          type:"post",
-          url:"/interfaces/stringify_base64_img",
-          data:formdata,
-          contentType: false,
-          processData: false,
-          success:function(data){
-            if (data) {
-              _this.form_data.picture = data.base64_img
-              console.log(_this.form_data)
-            }
-          },
-          error:function(data){
-            alert("上传错误")
-          }
-        })
+        // var formdata = new FormData();
+        // formdata.append("file",file)
+        // formdata.append("authenticity_token","<%= form_authenticity_token%>")
+        // $.ajax({
+        //   type:"post",
+        //   url:"/interfaces/stringify_base64_img",
+        //   data:formdata,
+        //   contentType: false,
+        //   processData: false,
+        //   success:function(data){
+        //     if (data) {
+        //       _this.form_data.picture = data.base64_img
+        //       console.log(_this.form_data)
+        //     }
+        //   },
+        //   error:function(data){
+        //     alert("上传错误")
+        //   }
+        // })
       };
     }) 
 
@@ -473,7 +522,7 @@ window.current_template_obj = {
 	},
   watch:{
     dialogFormVisible: function(val,oldVla) {
-      if (!val)this.$refs["itemForm"].resetFields();
+      if (val&&this.$refs["itemForm"]) this.$refs["itemForm"].resetFields();
     }
   }
 }

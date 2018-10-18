@@ -5,7 +5,7 @@ class Ims::ItemsController < ApplicationController
 	def get_items
     search = params[:search].to_s
     sort = params[:sort].split(":") rescue []
-    mode = Dict::Medication.where("ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR common_py LIKE ? OR common_wb LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%")
+    mode = Dict::Medication.where("ecode LIKE ? OR name LIKE ? OR common_name LIKE ? OR common_py LIKE ? OR py LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%", "%#{search}%")
     if sort.length == 2
     	k = sort[0].to_sym
     	v = sort[1].to_sym
