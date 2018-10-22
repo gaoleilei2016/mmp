@@ -499,6 +499,7 @@ window.current_template_obj = {
       };
     }) 
     $(document).on("input", "textarea",function(){
+      $('textarea').css({height:"auto"})
       $('textarea').css({height:$('textarea')[0].scrollHeight+2+'px'})
     }) 
 
@@ -533,7 +534,7 @@ window.current_template_obj = {
       if (val&&this.$refs["itemForm"]){
         this.$refs["itemForm"].resetFields();
       }
-      setTimeout("$('textarea').css({height:'30px'});$('textarea').css({height:$('textarea')[0].scrollHeight+2+'px'})",100)
+      setTimeout("$('textarea').css({height:'auto'});$('textarea').css({height:$('textarea')[0].scrollHeight+2+'px'})",100)
     }
   }
 }
