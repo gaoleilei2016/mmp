@@ -69,6 +69,7 @@ class Ims::Inv::Stock < ApplicationRecord
 				      	runsql.update update_sql
 				      	# 更新日志
 				      	puts "------更新日志开始----#{selct_ims}-------------"
+				      	begin
 				      	sql="select  * from dictmedicine where serialno='#{selct_ims[0].medicine_id}' "
 				      	puts sql
 				      	puts "---"
@@ -78,6 +79,9 @@ class Ims::Inv::Stock < ApplicationRecord
 				    		refresh_after_num:aa["quantity"],refresh_befor_num: update_befor_num,status:1,medicine_name:medicine_name,price:aa['price'].to_f.round(4)}
 				      	update_num+=1
 				      	Ims::Inv::RefreshLog.create(data_log)
+				      	rescue Exception => e
+				      		
+				      	end
 				      	puts "------更新日志结束-----------------"
 				    else
 				    	puts "--------插入--- 韦琼金---"
