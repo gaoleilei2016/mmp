@@ -368,7 +368,7 @@ window.current_template_obj = {
       this.form_data.kindname = obj.name
     },
     change_formul_name:function(val){  
-      this.form_data.formul_code = val.code    
+      // this.form_data.formul_code = val.code    
     },
     change_pharmacology_code:function(val){  
       // this.form_data.pharmacology_code = val.code    
@@ -503,7 +503,7 @@ window.current_template_obj = {
     _this.$http.get("/interfaces/get_dicts?oid=2.16.156.1.675425699.1.256").then( function(response) {
         data = response.data
         _this.kindname_options = data.rows
-        _this.kindname_options = [{id: null, name: "西药", code: "A"},{id: null, name: "中成药", code: "B"},{id: null, name: "中草药", code: "C"},{id: null, name: "生物制品", code: "S"}]
+        // _this.kindname_options = [{id: null, name: "西药", code: "A"},{id: null, name: "中成药", code: "B"},{id: null, name: "中草药", code: "C"},{id: null, name: "生物制品", code: "S"}]
       }, function() {
         _this.$message.error("后台出错，oid获取失败");
       });
