@@ -496,7 +496,9 @@ window.current_template_obj = {
         //     alert("上传错误")
         //   }
         // })
-      };
+      }else{
+        _this.form_data.picture = ""
+      }
     }) 
     $(document).on("input", "textarea",function(){
       $('textarea').css({height:"auto"})
