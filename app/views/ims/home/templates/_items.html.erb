@@ -498,6 +498,10 @@ window.current_template_obj = {
         // })
       };
     }) 
+    $(document).on("input", "textarea",function(){
+      $('textarea').css({height:"auto"})
+      $('textarea').css({height:$('textarea')[0].scrollHeight+2+'px'})
+    }) 
 
     //分类名称
     _this.$http.get("/interfaces/get_dicts?oid=2.16.156.1.675425699.1.256").then( function(response) {
@@ -527,7 +531,10 @@ window.current_template_obj = {
 	},
   watch:{
     dialogFormVisible: function(val,oldVla) {
-      if (val&&this.$refs["itemForm"]) this.$refs["itemForm"].resetFields();
+      if (val&&this.$refs["itemForm"]){
+        this.$refs["itemForm"].resetFields();
+      }
+      setTimeout("$('textarea').css({height:'auto'});$('textarea').css({height:$('textarea')[0].scrollHeight+2+'px'})",100)
     }
   }
 }
