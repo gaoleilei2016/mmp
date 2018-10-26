@@ -3,7 +3,7 @@
 class Hospital::PatientsController < ApplicationController
 	before_action :set_cur_org
 
-
+  # 需要改写方法防止sql注入攻击
   # 根据医生 医生所在机构 查询接诊过的就诊列表
 	# GET
   # /hospital/patients
@@ -12,12 +12,11 @@ class Hospital::PatientsController < ApplicationController
     p "Hospital::PatientsController index", params 
     search = params[:search].to_s
     sql_str =<<SQLSTR
-select pp.* from people pp where pp.id=ANY(select he.person_id  from hospital_encounters he where he.author_id=#{current_user.id} and (he.iden like '%#{search}%' or he.phone like '%#{search}%' or he.name like '%#{search}%') group by he.person_id)
+select pp.id from people pp where pp.id=ANY(select he.person_id  from hospital_encounters he where he.author_id=#{current_user.id} and (he.iden like '%#{search}%' or he.phone like '%#{search}%' or he.name like '%#{search}%') group by he.person_id)
 SQLSTR
-    @people = ::Person.find_by_sql(sql_str)
-    people_count =  @people.count
-    @people = ::Person.order(updated_at: :desc).page(params[:page]||1).per(params[:per]||25)
-    # people_ids = @people.map { |e| e.id  }
+    people_ids = ::Person.find_by_sql(sql_str).map { |e| e.id  }
+    people_count =  people_ids.count
+    @people = ::Person.where(id: people_ids).order(updated_at: :desc).page(params[:page]||1).per(params[:per]||25)
     # encounters_group_by_person_id = ::Hospital::Encounter.where(hospital_oid: @cur_org.id, "author_id"=> current_user.id).where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").group_by {|e| e.person_id.to_s}
     # encounters_group_by_person_id = ::Hospital::Encounter.where("author_id"=> current_user.id).where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").group_by {|e| e.person_id.to_s}
 
