@@ -9,16 +9,21 @@ class Hospital::PatientsController < ApplicationController
   # /hospital/patients
   # {search: String}
 	def index
-    p "Hospital::PatientsController index", params
+    p "Hospital::PatientsController index", params 
     search = params[:search].to_s
-    @people = ::Person.where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%")
+    sql_str =<<SQLSTR
+select pp.* from people pp where pp.id=ANY(select he.person_id  from hospital_encounters he where he.author_id=#{current_user.id} and (he.iden like '%#{search}%' or he.phone like '%#{search}%' or he.name like '%#{search}%') group by he.person_id)
+SQLSTR
+    @people = ::Person.find_by_sql(sql_str)
     people_count =  @people.count
-    @people = @people.order(created_at: :desc).page(params[:page]||1).per(params[:per]||25)
-    people_ids = @people.map { |e| e.id  }
-    encounters_group_by_person_id = ::Hospital::Encounter.where( "person_id" => people_ids, "author_id"=> current_user.id).group_by {|e| e.person_id.to_s}
+    @people = ::Person.order(updated_at: :desc).page(params[:page]||1).per(params[:per]||25)
+    # people_ids = @people.map { |e| e.id  }
+    # encounters_group_by_person_id = ::Hospital::Encounter.where(hospital_oid: @cur_org.id, "author_id"=> current_user.id).where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").group_by {|e| e.person_id.to_s}
+    # encounters_group_by_person_id = ::Hospital::Encounter.where("author_id"=> current_user.id).where("iden LIKE ? OR phone LIKE ? OR name LIKE ?", "%#{search}%", "%#{search}%", "%#{search}%").group_by {|e| e.person_id.to_s}
+
     people_info = @people.map do |_person|
       _person_info = _person.to_web_front
-      _person_info[:encounters_count] = (encounters_group_by_person_id[_person.id.to_s]||[]).count
+      _person_info[:encounters_count] = _person.encounters.count
       # _person_info[:encounter_data] = (encounters_group_by_person_id[_person.id.to_s]||[]).map { |_encounter| _encounter.to_web_front  }
       _person_info
     end
