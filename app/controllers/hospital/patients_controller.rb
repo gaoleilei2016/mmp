@@ -23,7 +23,7 @@ SQLSTR
     people_info = @people.map do |_person|
       _person_info = _person.to_web_front
       # _person_info[:encounters_count] = _person.encounters.count
-      _person_info[:encounters_count] = ::History::Encounter.where(hospital_oid: @cur_org.id, "author_id"=> current_user.id, person_id: _person.id).count
+      _person_info[:encounters_count] = ::Hospital::Encounter.where(hospital_oid: @cur_org.id, "author_id"=> current_user.id, person_id: _person.id).count
       # _person_info[:encounter_data] = (encounters_group_by_person_id[_person.id.to_s]||[]).map { |_encounter| _encounter.to_web_front  }
       _person_info
     end
