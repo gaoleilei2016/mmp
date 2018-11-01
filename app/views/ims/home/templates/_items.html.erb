@@ -30,7 +30,7 @@ form.el-form .el-col{
               prefix-icon="el-icon-search"
               size="small"
               v-model="search"
-              @keyup.enter.native="getData">
+              @keyup.enter.native="search_items">
               <i
                 class="el-icon-circle-close-outline el-input__icon"
                 slot="suffix"
@@ -245,6 +245,10 @@ window.current_template_obj = {
       // console.log(method)
       // console.log("asdgasd")
       localStorage.setItem("sort_method",this.sort_method)
+      this.getData()
+    },
+    search_items:function(){
+      this.currentPage = 1
       this.getData()
     },
     getData:function(){
@@ -496,7 +500,9 @@ window.current_template_obj = {
         //     alert("上传错误")
         //   }
         // })
-      };
+      }else{
+        _this.form_data.picture = ""
+      }
     }) 
     $(document).on("input", "textarea",function(){
       $('textarea').css({height:"auto"})
