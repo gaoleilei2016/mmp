@@ -58,11 +58,64 @@
     width: 50%;
     transform-origin: 0 0;
   }
+.page-header > h3 > small {
+    margin-top: 8px;
+    display: block;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    width: 100%;
+    font-weight: normal;
+    line-height: 1;
+}  
 </style>
 <template id="home_div">
   
 </template>
+
+<!-- 处方打印模板 -->
+<script type="text/x-template" id="prescription-print-template"></script>
+
 <script type="text/javascript">
+        // 获取基础设置内容
+        Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+          var res = response.data;
+          if(res.flag) {
+            $("#prescription-print-template").html(res.data.print_pres_html)
+          } else {
+            current_app.$message.error(res.info);
+          }
+        },function() {
+          current_app.$message.error("获取初始值失败，请联系管理员。");
+        })
+// function get_print_temp(){
+//   Vue.resource("/hospital/sets/inis/cur_org_ini.json").get().then(function(response) {
+//     var res = response.data;
+//     if(res.flag) {
+//       obj = $("<div></div>").append(res.data.print_pres_html)
+//       console.log(res.data.print_pres_html)
+//       return res.data.print_pres_html
+//     }
+//   },function() {
+//     current_app.$message.error("获取初始值失败，请联系管理员。");
+//     return ""
+//   })
+// }
+// str = get_print_temp()
+// console.log(str)
+
+// Vue.component('prescriptionprint', {
+//   data: function () {
+//     return {
+//       count: 0
+//     }
+//   },
+//   props: ['prescription'],
+//   template: str
+// })
+
+
 const home = Vue.extend({
   template: '#home_div',
   mounted:function(){
@@ -80,5 +133,25 @@ const home = Vue.extend({
   activated:function(){
     window.apps.header_and_footer.header_selected_tab = '#/home';
   }
+})
+$(function(){
+  // 自定义打印方法
+  var window_printer;
+  $('iframe#window_printer_iframe').remove();
+  $('body').append('<iframe style="display: none;" id="window_printer_iframe"></iframe>');
+  window_printer = document.getElementById("window_printer_iframe").contentWindow;
+  window_printer.document.open();
+  window_printer.document.writeln('<html><head>');
+  window_printer.document.writeln('</head><body></body></html>');
+  window_printer.document.close();
+
+  $.fn.print_area = function() {
+    $this = $(this);
+    console.log(this)
+    
+    var str = $this[0].outerHTML;
+    $(window_printer.document).find('body').html( str );
+    window_printer.print();
+  };
 })
 </script>

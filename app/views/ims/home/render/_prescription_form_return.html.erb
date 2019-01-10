@@ -59,16 +59,10 @@
 		</div>
 		<div class="btns" style="text-align:right; min-height:30px;" v-if="pre&&pre.order_code">
           <span>
-            <button type="button" class="el-button el-button--primary el-button--mini" v-on:click="printPrescription_return()">打印</button>
+            <!-- <button type="button" class="el-button el-button--primary el-button--mini" v-on:click="printPrescription_return()">打印</button> -->
+            <button type="button" class="el-button el-button--primary el-button--mini" v-on:click="printPrescription(pre)">打印</button>
           </span>
         </div>
-	</div>
-
-	<!-- 用于处方打印的隐藏框 -->
-	<div class="print-prescription-wrapper" id = "print_prescription_return" style="display: none;" v-if="pre&&pre.order_code">
-		<!-- <prescriptionprint :prescription="printPresRow"></prescriptionprint> -->
-		<!-- 打印处方的内容 -->
-		<%= render "ims/home/render/print_prescription"%>
 	</div>
 
 </div>

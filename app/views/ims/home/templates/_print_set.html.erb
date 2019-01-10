@@ -21,10 +21,6 @@
 				<div class="page-header">
 					<h4>处方单&#12288;<small>处方单相关设置</small></h4>
 				</div>
-				<el-form-item label="启用打印处方功能" prop="enable_print_pres">
-				  <el-radio v-model="ini.enable_print_pres" :label="true">是</el-radio>
-	  			<el-radio v-model="ini.enable_print_pres" :label="false">否</el-radio>
-			  </el-form-item>
 				<el-form-item label="处方打印内容" prop="print_pres_html">
 				  <el-tabs v-model="activeName1" type="card" class="ace-edit-wrapper">
 				    <el-tab-pane label="页面" name="print_pres_html1">

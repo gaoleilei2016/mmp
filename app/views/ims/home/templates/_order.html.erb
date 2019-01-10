@@ -47,11 +47,13 @@
     <audio id="yuyin" style="display:none;">
       <source src="/assets/ims/newbill.mp3">
     </audio>
-	</div>
-</template>
 
-<!-- 处方打印模板 -->
-<script type="text/x-template" id="prescription-print-template"></script>
+    <div class="print-prescription-wrapper" style="display: none;">
+      <prescriptionprint :prescription="print_prescription"></prescriptionprint>
+    </div>
+  </div>
+
+</template>
 
 <script type="text/javascript">
 document.onkeydown = function(){
@@ -82,6 +84,10 @@ window.current_template_obj = {
       out_list_panel:"1",
       order_lists:[],
       detail:[{pres:[{type:"处方"}]}],
+      ini: {
+        enable_print_pres: true, // 启用打印处方功能
+        print_pres_html: "", // 处方打印内容
+      },
 
       return_reason_visible:false,
       return_reason_form:{
@@ -114,12 +120,27 @@ window.current_template_obj = {
           { required: true, message: '请选择语音'},
         ]
       },
+      print_prescription:true,
 		}
 	},
+  components: {
+    // 处方打印组件
+    'prescriptionprint': {
+      props: ['prescription'],
+      template: "#prescription-print-template",
+    },
+  },
+  mounted:function(){
+    // this.$nextTick(function(){
+      this.init();
+    // })
+  },
 	methods:{
     init:function(){
+      let _this = this
       $(document).find("#prescription_menu").find(".el-menu-item:first").addClass("is-active")
       $(document).find("div.function_panel.out_order").find(".prescription_list_panel .is-active").click();
+      // 获取基础设置内容
     },
     change:function(){
       var _this = this
@@ -189,42 +210,49 @@ window.current_template_obj = {
       }
     },
     // 打印处方
-    printPrescription: function () {
-      var obj = document.getElementById('print_prescription')
-      var docStr = obj.innerHTML;
-      // var newWindow=window.open("打印窗口","_parent");
-      // newWindow.document.write(docStr);
-      // newWindow.document.close();
-      // newWindow.print();
-      // newWindow.close();
-      // 自定义打印方法
-      var window_printer;
-      $('iframe#window_printer_iframe_prescription').remove();
-      $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
-      window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
-      window_printer.document.open();
-      window_printer.document.writeln('<html><head>');
-      window_printer.document.writeln('</head><body></body></html>');
-      window_printer.document.close();
-      $(window_printer.document).find('body').html( docStr );
-      window_printer.print();
+    printPrescription: function (item) {
+      this.print_prescription = item;
+      this.$nextTick(function(){
+        $(".print-prescription-wrapper>div").print_area();
+      })
     },
     // 打印处方
-    printPrescription_return: function () {
-      var obj = document.getElementById('print_prescription_return')
-      var docStr = obj.innerHTML;
-      // 自定义打印方法
-      var window_printer;
-      $('iframe#window_printer_iframe_prescription').remove();
-      $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
-      window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
-      window_printer.document.open();
-      window_printer.document.writeln('<html><head>');
-      window_printer.document.writeln('</head><body></body></html>');
-      window_printer.document.close();
-      $(window_printer.document).find('body').html( docStr );
-      window_printer.print();
-    },
+    // printPrescription: function () {
+    //   var obj = document.getElementById('print_prescription')
+    //   var docStr = obj.innerHTML;
+    //   // var newWindow=window.open("打印窗口","_parent");
+    //   // newWindow.document.write(docStr);
+    //   // newWindow.document.close();
+    //   // newWindow.print();
+    //   // newWindow.close();
+    //   // 自定义打印方法
+    //   var window_printer;
+    //   $('iframe#window_printer_iframe_prescription').remove();
+    //   $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
+    //   window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
+    //   window_printer.document.open();
+    //   window_printer.document.writeln('<html><head>');
+    //   window_printer.document.writeln('</head><body></body></html>');
+    //   window_printer.document.close();
+    //   $(window_printer.document).find('body').html( docStr );
+    //   window_printer.print();
+    // },
+    // 打印处方
+    // printPrescription_return: function () {
+    //   var obj = document.getElementById('print_prescription_return')
+    //   var docStr = obj.innerHTML;
+    //   // 自定义打印方法
+    //   var window_printer;
+    //   $('iframe#window_printer_iframe_prescription').remove();
+    //   $('body').append('<iframe style="display: none;" id="window_printer_iframe_prescription"></iframe>');
+    //   window_printer = document.getElementById("window_printer_iframe_prescription").contentWindow;
+    //   window_printer.document.open();
+    //   window_printer.document.writeln('<html><head>');
+    //   window_printer.document.writeln('</head><body></body></html>');
+    //   window_printer.document.close();
+    //   $(window_printer.document).find('body').html( docStr );
+    //   window_printer.print();
+    // },
     out_order_search_fun:function(e){
       var _this = this
       setTimeout(function(){
@@ -924,11 +952,6 @@ window.current_template_obj = {
           _this.$message({message:'设置失败，请重试！',type:'error'});
         })      
     },
-	},
-	mounted:function(){
-		this.$nextTick(function(){
-			this.init();
-		})	
 	},
 }
 </script>
