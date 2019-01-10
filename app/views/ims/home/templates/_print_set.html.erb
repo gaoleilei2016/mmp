@@ -20,9 +20,9 @@ text-align: center;
 	<div id="sets_inis_div">
 		<div class="page-header">
 			<i class="fa fa-cog fa-4x fa-fw" ></i>
-			<h3 style="display:inline-block;">初始设置<small>初始值设置</small></h3>
+			<h3 style="display:inline-block;">处方打印设置<small>处方打印模板设置</small></h3>
 		</div>
-		<el-form :model="ini" size="mini" :rules="rules" ref="ini" label-width="300px" style="width: 80%; margin: 0 auto;">
+		<el-form :model="ini" size="mini" :rules="rules" ref="ini" label-width="120px" style="margin:3em;">
 			<div class="card-wrapper">
 				<el-form-item label="处方打印内容" prop="print_pres_html">
 				  <el-tabs v-model="activeName1" type="card" class="ace-edit-wrapper">
@@ -46,14 +46,6 @@ text-align: center;
 				    </el-option>
 				  </el-select>
 			  </el-form-item>
-				<div class="page-header">
-					<h4>就诊&#12288;<small>就诊信息相关设置</small></h4>
-				</div>
-				<el-form-item label="就诊查询有效时间" prop="encounter_search_time">
-				  <el-input type="number" v-model="ini.encounter_search_time">
-				    <template slot="append">天</template>
-				  </el-input>
-				</el-form-item>
 			</div>
 
 		  <hr style="border-top: 1px solid #eeeeee;"/>
