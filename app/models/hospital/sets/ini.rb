@@ -7,6 +7,10 @@ class ::Hospital::Sets::Ini < ApplicationRecord
 	belongs_to :uoperator, class_name: '::User', foreign_key: 'uoperator_id'
 
 	def to_web_front
+		p self
+		p self.uoperator_id
+		p self.uoperator
+		p "============================="
 		ret = {
 			id: self.id,
 			enable_print_pres: self.enable_print_pres,
@@ -30,6 +34,7 @@ class ::Hospital::Sets::Ini < ApplicationRecord
 	class<<self
 		# 调用这个方法的人一定要有机构
 		def get_org_ini(cur_user)
+			p cur_user.organization.id
 			cur_org = cur_user.organization
 			cur_ini = ::Hospital::Sets::Ini.where(org_id: cur_org.id).first
 			cur_ini = ::Hospital::Sets::Ini.create(org_id: cur_org.id, uoperator_id: cur_user.id) if cur_ini.nil?

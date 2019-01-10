@@ -43,7 +43,8 @@ namespace :deploy do
   task :restart do
     #      && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
     #      && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
-    run "cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb 
+    run "cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb
+         && cp /home/tenmind/app/mmp/conf/database.yml /home/tenmind/app/mmp/current/config/database.yml 
          && cd /home/tenmind/app/mmp/current && rvm use 2.3.3 && bundle install --local && bundle exec pumactl --state /home/tenmind/app/mmp/shared/sockets/puma.state restart"
          # && cd /app/mmp_puma/current && bundle exec rake assets:precompile
   end
@@ -54,6 +55,7 @@ namespace :deploy do
     #      && cp /home/tenmind/app/mmp/conf/mongoid.yml /home/tenmind/app/mmp/current/config/mongoid.yml
     #      && cp /home/tenmind/app/mmp/conf/ip.yml /home/tenmind/app/mmp/current/config/setup/ip.yml
     run "cp /home/tenmind/app/mmp/conf/puma.rb /home/tenmind/app/mmp/current/config/puma.rb 
+         && cp /home/tenmind/app/mmp/conf/database.yml /home/tenmind/app/mmp/current/config/database.yml
          && cd /home/tenmind/app/mmp/current && rvm use 2.3.3 && bundle install --local && bundle exec puma -C /home/tenmind/app/mmp/current/config/puma.rb"
   end
 
