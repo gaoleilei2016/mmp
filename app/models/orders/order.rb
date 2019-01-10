@@ -323,7 +323,6 @@ class Orders::Order < ApplicationRecord
 				begin
 					::Orders::Order.transaction do 
 					##通过处方拿到订单生成数据
-					p "-=================fdsfsdf-===========",attrs[:prescription_ids]
 						presc = ::Hospital::Interface.prescription_to_order2(attrs[:prescription_ids])
 						return {ret_code:'-1',info:'空的处方明细。'}if presc[:details].blank?
 						# Orders::Order.where("prescription_id in (?)",attrs[:prescription_ids].join(',')).count
@@ -535,17 +534,17 @@ class Orders::Order < ApplicationRecord
 						 	#订单发药
 							if ["5"].include?attrs[:status].to_s
 								#发药标志改为1（已发药）
-								order.update_attributes(:is_send_medical=>1)
-							 	args2 = {
-									# 发药人
-									delivery: {
-										id: attrs[:current_user].id,
-										display: attrs[:current_user].name
-									},
-									# 发药时间
-									delivery_at: order.created_at.to_s(:db)
-								}
-								order.prescriptions{|x|x.send_drug(args2, attrs[:current_user])}
+								# order.update_attributes(:is_send_medical=>1)
+							 # 	args2 = {
+								# 	# 发药人
+								# 	delivery: {
+								# 		id: attrs[:current_user].id,
+								# 		display: attrs[:current_user].name
+								# 	},
+								# 	# 发药时间
+								# 	delivery_at: order.created_at.to_s(:db)
+								# }
+								# order.prescriptions{|x|x.send_drug(args2, attrs[:current_user])}
 							end
 							p "order_completion订单更新状态拉:#{attrs[:status]},#{order.id.to_s}"
 							order.update_attributes(drug_user:attrs[:drug_user],

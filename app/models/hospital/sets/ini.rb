@@ -7,6 +7,9 @@ class ::Hospital::Sets::Ini < ApplicationRecord
 	belongs_to :uoperator, class_name: '::User', foreign_key: 'uoperator_id'
 
 	def to_web_front
+		p self.uoperator_id
+		p self.uoperator
+		p "============================="
 		ret = {
 			id: self.id,
 			enable_print_pres: self.enable_print_pres,

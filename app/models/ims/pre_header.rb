@@ -23,8 +23,11 @@ class Ims::PreHeader < ApplicationRecord
 		# 处方数据组合
 		def prescription_data prescription= {},current_user,order
 			begin
-				details = (prescription[:orders]||[]).map{|detail| 
-					{
+				details,total_amount = [],0
+				(prescription[:orders]||[]).each do |detail| 
+					amount = (detail[:price].to_f*detail[:total_quantity].to_f).round(2)
+					total_amount +=amount
+					details << {
 						:drug_id=> detail[:serialno],
 						:title=> detail[:title],
 						:specification=> detail[:specification],
@@ -40,12 +43,12 @@ class Ims::PreHeader < ApplicationRecord
 						:course_of_treatment_unit=> detail[:course_of_treatment][:unit],
 						:formul_code=> detail[:formul][:code],
 						:formul_display=> detail[:formul][:display],
-						:qty=> detail[:total_quantity],
-						:send_qty=> detail[:total_quantity],
+						:qty=> detail[:total_quantity].to_f,
+						:send_qty=> detail[:total_quantity].to_f,
 						:return_qty=> 0,
 						:unit=> detail[:unit],
-						:price=> (detail[:price].to_f/detail[:total_quantity].to_f).round(4),
-						:amount=> detail[:price],
+						:price=> detail[:price].to_f.round(4),
+						:amount=> amount,
 						:note=> detail[:note],
 						:status=> '4',
 						:order_type=> detail[:order_type],
@@ -61,7 +64,7 @@ class Ims::PreHeader < ApplicationRecord
 						:type_type=> detail[:type_type],
 						:ori_detail_id=> detail[:id],
 					}
-				}
+				end
 				return {} if details.blank?
 				details_1 = Ims::PreDetail.create(details)
 				header = {
@@ -88,7 +91,7 @@ class Ims::PreHeader < ApplicationRecord
 					:author_name=>prescription[:author][:display] ,
 					:encounter_loc_id=>prescription[:encounter_loc][:id] ,
 					:encounter_loc_name=>prescription[:encounter_loc][:display] ,
-					:total_amount=>prescription[:price] ,
+					:total_amount=>total_amount ,
 					:delivery_id=>current_user.try(:id) ,
 					:delivery_name=>current_user.try(:name) ,
 					:delivery_org_id=>current_user.try(:organization_id) ,
