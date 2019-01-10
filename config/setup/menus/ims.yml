@@ -93,11 +93,11 @@ headers:
   - code: 'IMS.A26'
     caption: '设置'
     icon: 'fa-cogs'
-    sequence: '21'
+    sequence: '23'
     childs:
       - code: 'IMS.B261'
         caption: '库存表导入'
         path: '#/inv/stocks/exports'
         style_css: 'inv_stocks_exports'
         icon: 'fa-cog'
-        sequence: '1'
+        sequence: '261'
