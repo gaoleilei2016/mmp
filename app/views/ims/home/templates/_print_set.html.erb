@@ -13,14 +13,11 @@
 <template>
 	<div id="sets_inis_div">
 		<div class="page-header">
-			<i class="fa fa-cog fa-4x fa-fw"></i>
+			<i class="fa fa-cog fa-4x fa-fw" style="float:left;"></i>
 			<h3>初始设置<small>初始值设置</small></h3>
 		</div>
 		<el-form :model="ini" size="mini" :rules="rules" ref="ini" label-width="300px" style="width: 80%; margin: 0 auto;">
 			<div class="card-wrapper">
-				<div class="page-header">
-					<h4>处方单&#12288;<small>处方单相关设置</small></h4>
-				</div>
 				<el-form-item label="处方打印内容" prop="print_pres_html">
 				  <el-tabs v-model="activeName1" type="card" class="ace-edit-wrapper">
 				    <el-tab-pane label="页面" name="print_pres_html1">
