@@ -1,1 +1,4 @@
 <%= stylesheet_link_tag "/assets/ims/home" %>
+	<input type="hidden" id="current_user_loc_id" value="<%= current_user.cur_loc_id %>">
+	<input type="hidden" id="current_user_is_admin" value="<%= current_user.is_admin? %>">
+	<input type="hidden" id="current_org_name" value="<%= current_user.organization.name rescue '' %>">
