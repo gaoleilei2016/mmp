@@ -96,8 +96,8 @@ headers:
     sequence: '23'
     childs:
       - code: 'IMS.B261'
-        caption: '库存表导入'
-        path: '#/inv/stocks/exports'
-        style_css: 'inv_stocks_exports'
+        caption: '打印设置'
+        path: '#/print_set'
+        style_css: 'print_set'
         icon: 'fa-cog'
         sequence: '261'
