@@ -330,7 +330,7 @@ class InterfacesController < ApplicationController
 			elsif params[:hot].present?
 				# 客户获取大家热点药房
 				#orgs = ::Admin::Organization.where(:type_code=>'2').order("search_count desc").page(1).per(5)
-				orgs = ::Admin::Organization.find_by_sql("select  *  from admin_organizations og where  og.id IN(SELECT c.pharmacy_id FROM hospital_prescriptions a,  hospital_encounters b,admin_hospital_pharmacys c where  a.encounter_id=b.id and a.organization_id=c.hospital_id and  b.phone='#{params[:login]}') and og.type_code='2'")
+				orgs = ::Admin::Organization.find_by_sql("select  *  from admin_organizations og where  og.id IN(SELECT c.pharmacy_id FROM hospital_prescriptions a,  hospital_encounters b,admin_hospital_pharmacys c where  a.encounter_id=b.id and a.organization_id=c.hospital_id and  b.phone='#{current_user.login}') and og.type_code='2'")
 			elsif params[:history].present?
 				# 客户获取历史记录药房
 				his = ::Customer::PharmacyHistory.where(user_id:current_user.id).order("use_count desc").page(1).per(5)
@@ -339,7 +339,7 @@ class InterfacesController < ApplicationController
 			else
 				# 客户搜索药房
 				#orgs = ::Admin::Organization.where(:type_code=>'2').where("id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%'").order("created_at desc").page(params[:page]).per(params[:per])
-				orgs = ::Admin::Organization.find_by_sql("select  *  from admin_organizations og where  og.id IN(SELECT c.pharmacy_id FROM hospital_prescriptions a,  hospital_encounters b,admin_hospital_pharmacys c where  a.encounter_id=b.id and a.organization_id=c.hospital_id and  b.phone='15285117060') and og.type_code='2' and (id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%')")
+				orgs = ::Admin::Organization.find_by_sql("select  *  from admin_organizations og where  og.id IN(SELECT c.pharmacy_id FROM hospital_prescriptions a,  hospital_encounters b,admin_hospital_pharmacys c where  a.encounter_id=b.id and a.organization_id=c.hospital_id and  b.phone='#{current_user.login}') and og.type_code='2' and (id like '%#{params[:search]}%' OR name like '%#{params[:search]}%' OR jianpin like '%#{params[:search]}%' OR addr like '%#{params[:search]}%')")
 			end
 			res = []
 			orgs.each{|o|
@@ -358,11 +358,11 @@ class InterfacesController < ApplicationController
 				# 药房搜索按距离排序
 				res.sort_by!{|x| x["num"]}
 			end
-			if params[:history].present?||params[:near].present?
+			#if params[:history].present?||params[:near].present?
 				render json:{rows:res,total:orgs.count,flag:true}
-			else
-				render json:{rows:res,total:orgs.total_count,flag:true}
-			end
+			#else
+				#render json:{rows:res,total:orgs.total_count,flag:true}
+			#end
 		end
 	end
 	def get_yanzhengma
